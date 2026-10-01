@@ -106,6 +106,34 @@ Bản đầu chỉ có tiếng Việt, nhưng code phải sẵn sàng để thê
 10. **Font:** font chính phải có đủ chữ Việt lẫn Latin cơ bản. Cấu hình sẵn chỗ gắn font dự phòng (`fallbacks`) trong Theme để sau này thêm ngôn ngữ khác.
 11. Giữ file CSV gọn: mỗi dòng một key, sắp xếp theo nhóm, ghi chú bằng dòng bắt đầu bằng `#` nếu Godot hỗ trợ (không hỗ trợ thì tạo file `i18n/README.md` mô tả các nhóm key).
 
+### 3.2 Kiến trúc đa chế độ (chừa chỗ ngay từ bây giờ)
+
+Sau MVP, game sẽ có **2 chế độ** dùng chung một lõi:
+- **Normal (Bộ Lạc)**: kiểu RTS/colony. Điều khiển từng thổ dân, giao việc, xây dựng, có nhiệm vụ, có thể thua.
+- **God (Thần Linh)**: kiểu sandbox, giống WorldBox. Không điều khiển trực tiếp, chỉ dùng phép thần, tự tạo và thả nhân vật, không có nhiệm vụ, không thua.
+
+MVP **chỉ làm chế độ Normal**, nhưng code phải chia đúng 3 tầng để sau này cắm chế độ God vào mà không phải viết lại:
+
+```
+UI / HUD            → mỗi chế độ một scene riêng (NormalHUD; sau này GodHUD)
+Player Controller   → diễn giải lệnh từ InputRouter (NormalController; sau này GodController)
+Simulation Core     → world, villager, AI, nhu cầu, tài nguyên, công trình, kẻ thù, ngày đêm, lưu game
+                      KHÔNG biết đang ở chế độ nào
+```
+
+**Quy tắc bắt buộc:**
+1. **Code của core không gọi thẳng vào UI.** Muốn báo gì thì phát signal qua `EventBus`.
+2. **Mọi hành động của người chơi đi qua một API chung của core** (gợi ý: autoload `Commands` hoặc class `WorldAPI`), ví dụ `assign_job(villager_id, target)`, `place_building(type, cell)`, `spawn_villager(data, cell)`, `apply_effect(effect_id, cell)`. UI và controller không sửa thẳng dữ liệu của thổ dân.
+3. **Cùng một lệnh từ `InputRouter`, mỗi controller hiểu một kiểu.** Ví dụ chạm vào cây: `NormalController` giao việc chặt cây, sau này `GodController` thả phép đang chọn vào chỗ đó.
+4. **Luật chơi đọc từ `GameModeConfig`** (một `Resource`), không viết cứng `if` rải rác. Ít nhất có các cờ: `allow_direct_commands`, `goals_enabled`, `raids_auto`, `can_lose`, `god_powers_enabled`, `god_powers_unlimited`, `character_creator_enabled`. MVP chỉ có một file `normal_mode.tres`.
+5. **Màn hình bắt đầu nạp chế độ** bằng cách chọn `GameModeConfig`, rồi nạp controller và HUD tương ứng. MVP chỉ có nút Normal, nhưng luồng nạp phải đi qua cơ chế này.
+
+**Dữ liệu nhân vật tách riêng (`VillagerData`):**
+- Một `Resource` chứa toàn bộ thông tin để tạo một thổ dân: `appearance` (ID từng mảnh như `hair_03`, `face_02`, cùng màu da, màu áo), `display_name`, `gender`, `traits`, `best_job`, `age_stage`.
+- Ngoại hình lưu bằng **ID mảnh**, không lưu đường dẫn ảnh, để thay art thật vẫn hiển thị đúng.
+- Hàm sinh ngẫu nhiên chỉ **tạo ra một `VillagerData`**. Core chỉ có một cách tạo thổ dân: `spawn_villager(data, cell)`. Sau này trình tạo nhân vật của God mode cũng chỉ việc tạo ra một `VillagerData` rồi gọi cùng hàm đó.
+- Lưu game lưu `VillagerData` cộng trạng thái hiện tại (nhu cầu, vị trí, việc đang làm).
+
 ---
 
 ## 4. Cấu trúc project
@@ -119,7 +147,13 @@ res://
 │  ├─ event_bus.gd       # signal toàn cục (villager_born, raid_started, resource_changed…)
 │  ├─ input_router.gd    # gom chuột + cảm ứng thành lệnh chung (xem mục 8)
 │  ├─ loc.gd             # đa ngôn ngữ (xem mục 3.1)
+│  ├─ commands.gd        # API chung của core cho mọi hành động người chơi (xem mục 3.2)
 │  └─ save_system.gd
+├─ modes/
+│  ├─ game_mode_config.gd   # Resource: các cờ luật chơi (xem mục 3.2)
+│  ├─ normal_mode.tres      # cấu hình chế độ Normal (MVP chỉ có file này)
+│  └─ controllers/
+│     └─ normal_controller.gd   # diễn giải lệnh InputRouter → Commands (sau này thêm god_controller.gd)
 ├─ data/
 │  ├─ balance.gd         # MỌI con số cân bằng game nằm ở đây, dễ chỉnh
 │  ├─ buildings.gd       # định nghĩa công trình (chi phí, kích thước, chức năng)
@@ -132,6 +166,7 @@ res://
 │  ├─ resource_node.tscn # cây, đá, bụi quả, chỗ câu cá
 │  └─ animal.tscn        # thú để săn
 ├─ villager/
+│  ├─ villager_data.gd   # Resource: ngoại hình (ID mảnh), tên, giới tính, tính cách… (xem mục 3.2)
 │  ├─ villager.tscn/.gd  # dữ liệu + máy trạng thái
 │  ├─ villager_rig.tscn/.gd   # bộ khung cutout + animation theo code
 │  └─ villager_brain.gd  # chọn việc (utility AI đơn giản)
@@ -140,11 +175,13 @@ res://
 ├─ enemies/
 │  └─ cannibal.tscn/.gd
 ├─ ui/
-│  ├─ hud.tscn           # thanh tài nguyên, ngày, nút tốc độ
-│  ├─ build_menu.tscn
-│  ├─ villager_panel.tscn
-│  ├─ toast.tscn         # thông báo nổi ("Bé Tí chào đời!")
-│  └─ goals_panel.tscn
+│  ├─ common/            # dùng chung mọi chế độ
+│  │  ├─ toast.tscn      # thông báo nổi ("Bé Tí chào đời!")
+│  │  └─ villager_panel.tscn
+│  └─ normal/            # HUD riêng của chế độ Normal (sau này thêm ui/god/)
+│     ├─ hud.tscn        # thanh tài nguyên, ngày, nút tốc độ
+│     ├─ build_menu.tscn
+│     └─ goals_panel.tscn
 ├─ fx/                   # bụi, tim, sao, số bay "+3 gỗ"
 ├─ assets/
 │  ├─ placeholder/       # SVG tạm do Claude vẽ
@@ -383,8 +420,20 @@ Mỗi đợt kết thúc bằng một bản **chơi được**, và có tiêu ch
 - Chạm vào thổ dân → bảng thông tin (chân dung, tên, tính cách, thanh nhu cầu, việc đang làm).
 - **Xong khi:** ngồi xem 5 phút thấy làng "sống", mỗi người một kiểu, không ai chết đói khi còn quả.
 
+### Đợt 1.5 — Tái cấu trúc theo kiến trúc đa chế độ
+> Đợt chèn thêm vì Đợt 0–1 được làm trước khi có mục 3.2. **Chỉ tái cấu trúc, không thêm tính năng, hành vi game phải giữ nguyên.**
+- **Bước 1 — Rà soát:** đọc toàn bộ code hiện tại, đối chiếu với mục 3.2, liệt kê các chỗ vi phạm (core gọi thẳng UI, UI sửa thẳng dữ liệu villager, luật chơi viết cứng, ngoại hình lưu bằng đường dẫn ảnh…) kèm kế hoạch sửa. **Dừng lại cho mình duyệt.**
+- **Bước 2 — Sửa** theo kế hoạch đã duyệt:
+  - Tạo `VillagerData`, chuyển hàm random sang tạo `VillagerData`, có `spawn_villager(data, cell)`.
+  - Tạo `GameModeConfig` + `normal_mode.tres`; màn hình (hoặc scene) khởi động nạp chế độ qua cơ chế này.
+  - Tạo autoload `Commands` làm API chung; tách `NormalController` khỏi code xử lý input hiện có.
+  - Chuyển HUD và bảng thông tin vào `ui/normal/` và `ui/common/`.
+  - Cập nhật save/load nếu cấu trúc dữ liệu đổi.
+- Chạy kiểm tra headless, cập nhật `DEVLOG.md` (mục "Đợt 1.5").
+- **Xong khi:** bấm F5 game chạy **y như cuối Đợt 1** (thổ dân đi lại, hái quả, ăn, ngủ, bảng thông tin), không có lỗi trong Output, và code tuân thủ đủ 5 quy tắc của mục 3.2.
+
 ### Đợt 2 — Lao động & tài nguyên
-- Giao việc bằng chạm (chọn người rồi chạm mục tiêu) và bằng **kéo-thả** thổ dân vào mục tiêu.
+- Giao việc bằng chạm (chọn người rồi chạm mục tiêu) và bằng **kéo-thả** thổ dân vào mục tiêu. Toàn bộ logic diễn giải nằm trong `NormalController`, việc giao việc thực sự đi qua `Commands.assign_job()` (mục 3.2).
 - Các việc: chặt cây, đập đá, hái quả, săn thú, câu cá, khuân về kho, nấu ở lửa trại.
 - Icon việc trên đầu, đường chấm chấm tới mục tiêu, số bay "+3 gỗ", HUD tài nguyên.
 - Bị ngắt quãng thì nhớ việc và tự quay lại. Hiện bong bóng giải thích.
@@ -446,3 +495,23 @@ Mỗi đợt kết thúc bằng một bản **chơi được**, và có tiêu ch
 Bệnh tật và pháp sư, hổ răng kiếm, phòng tập và hệ thống chỉ số chi tiết, bẫy lưới, khám phá vùng mới, chiến dịch nhiều màn, mùa đông, quan hệ bạn bè và thù ghét, trang trí làng, bản Android, tiếng Anh đầy đủ, nhạc nền riêng.
 
 Kiến trúc nên **chừa chỗ** cho các tính năng này (dữ liệu tách riêng, công trình cấu hình bằng data, sự kiện qua `EventBus`), nhưng không viết trước.
+
+### Sau MVP: Chế độ Thần Linh (God mode)
+
+Chưa làm, chỉ ghi lại để định hướng. Kiến trúc ở mục 3.2 là để chuẩn bị cho phần này.
+
+- **Phép thần trong chế độ Normal** (làm trước, có thanh năng lượng hồi dần):
+  - Mưa: bụi quả mọc lại ngay.
+  - Thả đùi gà từ trên trời xuống.
+  - Sét đánh cannibal: ngất kiểu hài, không chết.
+  - Mũi tên tình yêu: bắn vào hai thổ dân là họ thành đôi.
+  - Cù lét: thổ dân lăn ra cười, tăng Vui.
+- **Chế độ Thần Linh riêng**:
+  - `god_mode.tres`, `GodController`, `ui/god/`.
+  - Không giao việc trực tiếp, không nhiệm vụ, không thua.
+  - Phép thần không giới hạn, có thêm các phép như tự thả cannibal hay thú hoang vào map.
+- **Trình tạo nhân vật**:
+  - Chọn tóc, mặt, áo, màu da, phụ kiện bằng nút ◀ ▶; đặt tên, chọn giới tính và tính cách; có nút 🎲 ngẫu nhiên.
+  - Xem trước nhân vật đang nhún nhảy (dùng lại `villager_rig`), rồi thả xuống map qua `spawn_villager()`.
+  - Mở rộng sau: bảng màu tự do, lưu mẫu nhân vật, tạo sẵn gia đình.
+  - Muốn trình tạo nhân vật vui thì cần **nhiều mảnh art** (khoảng 8–10 kiểu tóc, 6 mặt, 6 áo…).
