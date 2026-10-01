@@ -1,7 +1,7 @@
 class_name ResourceNode
 extends Node2D
 ## Một nguồn tài nguyên trên map: cây, đá, bụi quả, chỗ câu cá.
-## Đợt 0 mới có hình và số lượt còn lại; việc khai thác thêm ở Đợt 2.
+## Bụi quả hái được và tự mọc lại (Đợt 1); chặt cây, đập đá, câu cá thêm ở Đợt 2.
 
 ## Gốc node nằm hơi thấp hơn tâm ô, để thổ dân đứng ô phía dưới được vẽ đè lên trên.
 const FOOT_OFFSET: Vector2 = Vector2(0, 8)
@@ -10,6 +10,7 @@ var kind: StringName = &""
 var cell: Vector2i = Vector2i.ZERO
 var variant: int = 0
 var uses_left: int = 0
+var _regrow_left: float = 0.0
 
 @onready var _sprite: Sprite2D = $Sprite
 
@@ -26,6 +27,7 @@ func setup(object_kind: StringName, object_cell: Vector2i, object_variant: int) 
 
 
 func _ready() -> void:
+	set_process(false)
 	_refresh_visual()
 	if kind == MapData.KIND_FISH_SPOT:
 		add_child(FishSpotFx.new())
@@ -42,6 +44,30 @@ func set_wind(wind: Wind) -> void:
 
 func is_depleted() -> bool:
 	return uses_left <= 0
+
+
+## Bụi còn quả để hái không.
+func has_berries() -> bool:
+	return kind == MapData.KIND_BUSH and not is_depleted()
+
+
+## Hái hết quả trên bụi, trả về số quả hái được. Bụi mọc lại sau một thời gian.
+func take_berries() -> int:
+	if not has_berries():
+		return 0
+	uses_left = 0
+	_regrow_left = Balance.BUSH_REGROW_SECONDS
+	_refresh_visual()
+	set_process(true)
+	return Balance.BUSH_BERRIES_PER_PICK
+
+
+func _process(delta: float) -> void:
+	_regrow_left -= delta
+	if _regrow_left <= 0.0:
+		uses_left = _initial_uses()
+		_refresh_visual()
+		set_process(false)
 
 
 func _refresh_visual() -> void:

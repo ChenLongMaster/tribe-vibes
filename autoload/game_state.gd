@@ -13,6 +13,7 @@ var day: int = 1
 ## 0 = tạm dừng, 1..Balance.MAX_GAME_SPEED = nhân tốc độ.
 var speed: int = 1
 var _resources: Dictionary[StringName, int] = {}
+var _next_villager_id: int = 1
 
 
 func new_game(chosen_difficulty: Difficulty = Difficulty.EASY) -> void:
@@ -20,6 +21,7 @@ func new_game(chosen_difficulty: Difficulty = Difficulty.EASY) -> void:
 	difficulty = chosen_difficulty
 	day = 1
 	_resources.clear()
+	_next_villager_id = 1
 	set_speed(1)
 
 
@@ -50,3 +52,10 @@ func _pick_seed() -> int:
 	if Balance.DEBUG_FIXED_SEED >= 0:
 		return Balance.DEBUG_FIXED_SEED
 	return randi()
+
+
+## Mã số riêng cho mỗi thổ dân (để lưu game và liên kết cặp đôi sau này).
+func next_villager_id() -> int:
+	var id: int = _next_villager_id
+	_next_villager_id += 1
+	return id

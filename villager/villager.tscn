@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://villager/villager.gd" id="1_villager"]
+[ext_resource type="PackedScene" path="res://villager/villager_rig.tscn" id="2_rig"]
+[ext_resource type="Script" path="res://villager/overhead.gd" id="3_overhead"]
+
+[node name="Villager" type="Node2D"]
+script = ExtResource("1_villager")
+
+[node name="SelectionRing" type="Sprite2D" parent="."]
+
+[node name="Rig" parent="." instance=ExtResource("2_rig")]
+
+[node name="Overhead" type="Node2D" parent="."]
+position = Vector2(0, -78)
+script = ExtResource("3_overhead")

@@ -59,3 +59,70 @@ const PICK_SECONDS: float = 3.0
 
 # --- Thời gian ---
 const MAX_GAME_SPEED: int = 3
+const DAY_LENGTH_SECONDS: float = 240.0 # một ngày trong game = 4 phút thật
+
+# --- Thổ dân: dân số ban đầu ---
+const START_VILLAGERS: int = 6 # nửa nam nửa nữ
+const INTRO_INTERVAL: float = 1.3 # giây giữa hai người chui ra khỏi hang
+const SECOND_TRAIT_CHANCE: float = 0.5
+const BEST_JOB_BONUS: float = 1.25 # làm việc giỏi nhất nhanh hơn 25%
+
+# --- Thổ dân: di chuyển & suy nghĩ ---
+const WALK_SPEED: float = 90.0 # px/giây
+const FLEE_SPEED_MULT: float = 1.3
+const THINK_INTERVAL_MIN: float = 0.3 # giây
+const THINK_INTERVAL_MAX: float = 0.6
+const LANE_JITTER: float = 10.0 # px lệch khỏi tâm ô để nhiều người không đi chồng lên nhau
+
+# --- Thổ dân: nhu cầu (0..100) ---
+const HUNGER_DECAY: float = 100.0 / (1.5 * DAY_LENGTH_SECONDS) # no → đói trong 1.5 ngày
+const ENERGY_DECAY_IDLE: float = 100.0 / (2.5 * DAY_LENGTH_SECONDS)
+const ENERGY_DECAY_WORK: float = 100.0 / DAY_LENGTH_SECONDS # làm liên tục thì hết sức trong 1 ngày
+const ENERGY_RESTORE_SLEEP: float = 2.5 # mỗi giây khi ngủ
+const ENERGY_RESTORE_SIT: float = 0.4
+const FUN_DECAY: float = 0.12
+const FUN_DECAY_UNCOMFORTABLE: float = 0.15 # thêm khi đói hoặc mệt
+const HUNGER_URGENT: float = 20.0 # dưới mức này bỏ mọi thứ đi ăn
+const HUNGER_SNACK: float = 60.0 # dưới mức này rảnh là đi ăn vặt
+const HUNGER_WAKE: float = 10.0 # đang ngủ mà đói tới mức này thì dậy đi ăn
+const ENERGY_URGENT: float = 15.0 # dưới mức này đi ngủ
+const ENERGY_TIRED: float = 40.0 # dưới mức này rảnh thì hay ngồi nghỉ
+const ENERGY_WAKE: float = 95.0
+const UNCOMFORTABLE_LEVEL: float = 30.0
+const HEALTH_STARVE_LOSS: float = 0.3 # mỗi giây khi No = 0
+const HEALTH_REGEN: float = 0.2 # mỗi giây khi không đói
+const MOOD_WEIGHT_HUNGER: float = 0.35
+const MOOD_WEIGHT_ENERGY: float = 0.25
+const MOOD_WEIGHT_FUN: float = 0.4
+const MOOD_HAPPY: float = 65.0 # trên mức này mặt cười
+const MOOD_SAD: float = 35.0 # dưới mức này mặt mếu
+const START_HUNGER_MIN: float = 55.0
+const START_HUNGER_MAX: float = 90.0
+const START_ENERGY_MIN: float = 45.0
+const START_ENERGY_MAX: float = 100.0
+const START_FUN_MIN: float = 50.0
+const START_FUN_MAX: float = 80.0
+
+# --- Ăn uống ---
+const BERRY_HUNGER: float = 20.0 # một quả mọng hồi bao nhiêu No
+const BUSH_REGROW_SECONDS: float = DAY_LENGTH_SECONDS # bụi ra quả lại sau 1 ngày
+const EAT_SECONDS: float = 2.0
+const FUN_EAT: float = 6.0
+
+# --- Hoạt cảnh rảnh rỗi ---
+const IDLE_MIN_SECONDS: float = 3.0
+const IDLE_MAX_SECONDS: float = 10.0
+const CHAT_RANGE_CELLS: float = 8.0
+const FUN_CHAT: float = 3.0 # mỗi giây đang tán gẫu
+const FUN_SIT: float = 1.5 # mỗi giây ngồi phơi nắng
+const FUN_FLOWER: float = 10.0
+const FUN_GIVE_FLOWER: float = 12.0 # cho cả người tặng lẫn người nhận
+const FUN_SCRATCH: float = 5.0
+const FLOWER_RANGE_CELLS: float = 7.0
+const WANDER_RANGE_CELLS: int = 5
+const VILLAGE_ROAM_RADIUS: float = 10.0 # đi xa hơn thì dạo lại về phía làng
+const SLEEP_SPOT_MIN_RING: float = 1.5 # ô quanh lửa trại để ngủ ngoài trời
+const SLEEP_SPOT_MAX_RING: float = 4.5
+
+# --- Gỡ lỗi ---
+const WATCHDOG_SECONDS: float = 40.0 # một việc kéo dài hơn thế (trừ ngủ) là đáng ngờ

@@ -68,6 +68,15 @@ func find_path(from_cell: Vector2i, to_cell: Vector2i) -> PackedVector2Array:
 	return astar.get_point_path(from_cell, to_cell, true)
 
 
+## Có đường đi trọn vẹn từ ô này tới ô kia không (không tính đường "tới gần nhất").
+func has_path(from_cell: Vector2i, to_cell: Vector2i) -> bool:
+	if from_cell == to_cell:
+		return not is_blocked(to_cell)
+	if is_blocked(to_cell) or not in_bounds(from_cell):
+		return false
+	return not astar.get_id_path(from_cell, to_cell, false).is_empty()
+
+
 ## Loang từ `start`: trả về mảng 1 byte mỗi ô, 1 = đi tới được (đi 4 hướng).
 func flood_fill(start: Vector2i) -> PackedByteArray:
 	var reached: PackedByteArray = PackedByteArray()

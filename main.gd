@@ -1,5 +1,6 @@
 extends Node
-## Điểm vào game: tạo ván mới, dựng thế giới, giữ tiêu đề cửa sổ theo ngôn ngữ.
+## Điểm vào game: tạo ván mới, dựng thế giới, cho bộ lạc chui ra khỏi hang, giữ tiêu đề
+## cửa sổ theo ngôn ngữ.
 
 @onready var _world: World = $World
 
@@ -9,6 +10,7 @@ func _ready() -> void:
 	_update_window_title()
 	GameState.new_game()
 	_world.build(GameState.world_seed)
+	_world.start_intro()
 
 
 func _unhandled_input(event: InputEvent) -> void:

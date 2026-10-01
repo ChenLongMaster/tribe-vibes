@@ -89,11 +89,50 @@ Ví dụ `water_03` = hai ô trên là nước (bờ nằm ngang ở giữa hìn
 |---|---|---|---|---|
 | `fx/ember` | 16×16 | 2–5 (ngẫu nhiên) | (0.5, 0.5) | Một đốm tàn lửa tròn. Code tô màu từ vàng sang đỏ rồi mờ dần, nên vẽ màu sáng. |
 
+### Thổ dân (`villager/`) — Đợt 1
+
+Thổ dân ghép từ nhiều mảnh, code tự xoay/nảy để hoạt họa (không cần vẽ từng frame).
+Cả nhân vật cao ~72 px trên màn hình, đầu chiếm ~45% (chibi). **Mọi mảnh vẽ nhìn nghiêng 3/4 quay sang PHẢI** — code tự lật khi đi sang trái.
+
+**Bốn lớp đầu** (đầu, mặt, tóc, phụ kiện) vẽ trên **cùng một khung 80×80**, chồng khít lên nhau, neo chung ở **cổ** `(0.5, 0.9)` — tức điểm (40, 72) trong ảnh. Vẽ đầu tròn khoảng tâm (40, 40), bán kính ~29.
+
+| Key | Cỡ file (2×) | Hiển thị | Neo | Tô màu bằng code? | Ghi chú |
+|---|---|---|---|---|---|
+| `villager/head_01` … `03` | 80×80 | 40×40 | (0.5, 0.9) cổ | **Có — màu da** | Đầu + tai phía sau. Vẽ trắng/xám rất nhạt, viền nâu. |
+| `villager/face_happy` | 80×80 | 40×40 | (0.5, 0.9) | Không | Mắt, miệng, má hồng. Mắt nằm khoảng (40, 42) và (58, 42). |
+| `villager/face_sad` · `face_blink` · `face_sleep` · `face_surprised` | 80×80 | 40×40 | (0.5, 0.9) | Không | Buồn · chớp mắt (cũng dùng khi gãi, dụi mắt) · ngủ · ngạc nhiên/ngáp. |
+| `villager/hair_01` … `05` | 80×80 | 40×40 | (0.5, 0.9) | **Có — màu tóc** | 01 tóc dựng, 02 búi, 03 tóc dài, 04 đuôi ngựa, 05 chỏm tóc. Vẽ trắng/xám nhạt. |
+| `villager/accessory_01` … `03` | 80×80 | 40×40 | (0.5, 0.9) | Không | 01 xương cài tóc, 02 lông chim, 03 bông hoa. |
+| `villager/body_01` … `03` | 56×48 | 28×24 | (0.5, 1.0) mép dưới vạt áo | **Có — màu áo lông** | Áo lông từ cổ xuống hông. Đốm/hoạ tiết vẽ xám đậm hơn nền một chút. |
+| `villager/arm` | 16×32 | 8×16 | (0.5, 0.1) vai | **Có — màu da** | Tay buông thẳng xuống, bàn tay tròn ở dưới. Code xoay quanh vai. |
+| `villager/leg` | 22×30 | 11×15 | (0.36, 0.1) hông | **Có — màu da** | Chân thẳng, bàn chân hướng sang phải. Code xoay quanh hông. |
+| `villager/shadow` | 64×20 | 32×10 | (0.5, 0.5) | Không | Bóng dưới chân. |
+
+Vị trí các khớp (hông, vai, cổ) nằm ở đầu `villager/villager_rig.gd` — nếu art thật tỉ lệ khác thì chỉnh ở đó. Bảng màu da/áo/tóc ở `villager/villager_palette.gd`.
+
+### Icon & hiệu ứng nhỏ — Đợt 1
+
+| Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
+|---|---|---|---|---|
+| `icons/hunger` | 48×48 | 24×24 | tâm | Đùi thịt — bong bóng "Đói quá!". |
+| `icons/sleepy` | 48×48 | 24×24 | tâm | Hai chữ Z — bong bóng "Buồn ngủ...". |
+| `icons/happy` | 48×48 | 24×24 | tâm | Nốt nhạc — vui. |
+| `icons/love` | 48×48 | 24×24 | tâm | Trái tim. |
+| `icons/scared` | 48×48 | 24×24 | tâm | Dấu chấm than (Đợt 5). |
+| `icons/berry` | 48×48 | 24×24 | tâm | Quả mọng — icon "đang đi ăn" trên đầu, và quả cầm trên tay khi ăn. |
+| `icons/star` | 48×48 | 24×24 | tâm | Ngôi sao cạnh "việc giỏi nhất". |
+| `icons/close` | 48×48 | 24×24 (nút 44×44) | tâm | Nút ✕ đóng bảng. |
+| `icons/mood_happy` · `mood_ok` · `mood_sad` | 48×48 | 26×26 | tâm | Mặt tâm trạng trong bảng thông tin. |
+| `fx/zzz` | 32×32 | 8–18 | tâm | Một chữ Z bay lên khi ngủ. |
+| `fx/heart` | 32×32 | 16×16 | tâm | Tim bay lên khi tặng hoa. |
+| `ui/selection_ring` | 96×40 | 48×20 | tâm | Vòng vàng dưới chân thổ dân đang được chọn. |
+
+Bong bóng thoại là khung vẽ bằng code (không phải hình), chữ luôn là `Label`.
+
 ## Sẽ thêm ở các đợt sau
 
 Danh sách sẽ được bổ sung vào bảng trên khi làm tới (tên dự kiến theo `MVP_PROMPT.md` mục 7):
 
-- **Đợt 1 — thổ dân:** `villager/head_01..03`, `villager/face_happy|sad|blink|sleep|surprised`, `villager/hair_01..05`, `villager/body_01..03`, `villager/arm`, `villager/leg`, `villager/accessory_01..03`; icon cảm xúc (đói, buồn ngủ, vui, yêu, sợ) và icon việc.
 - **Đợt 2:** thú (lợn rừng, hươu), icon tài nguyên, đồ khuân trên đầu.
 - **Đợt 3:** lều, bếp, kho, kho vũ khí, sân nhảy — mỗi cái 3 trạng thái: móng, hoàn thành, hư hại; icon nút tốc độ.
 - **Đợt 5:** cannibal (mặt nạ xương, sơn chiến) và biến thể màu, chùy.

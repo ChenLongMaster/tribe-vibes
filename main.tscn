@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://world/world.tscn" id="2_world"]
 [ext_resource type="PackedScene" path="res://ui/debug_overlay.tscn" id="3_debug"]
+[ext_resource type="PackedScene" path="res://ui/villager_panel.tscn" id="4_panel"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -10,5 +11,8 @@ script = ExtResource("1_main")
 [node name="World" parent="." instance=ExtResource("2_world")]
 
 [node name="UI" type="CanvasLayer" parent="."]
+process_mode = 3
 
 [node name="DebugOverlay" parent="UI" instance=ExtResource("3_debug")]
+
+[node name="VillagerPanel" parent="UI" instance=ExtResource("4_panel")]

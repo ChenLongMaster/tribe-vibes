@@ -1,10 +1,14 @@
 class_name World
 extends Node2D
-## Dựng thế giới từ MapData: nền cỏ, nước, mảng đất, trang trí, vật thể, công trình.
-## Giữ `grid` (WorldGrid) làm nguồn sự thật về ô cho các hệ thống khác.
+## Dựng thế giới từ MapData: nền cỏ, nước, mảng đất, trang trí, vật thể, công trình,
+## thổ dân. Giữ `grid` (WorldGrid) làm nguồn sự thật về ô, `reservations` để đặt chỗ,
+## `finder` để thổ dân hỏi "tìm chỗ".
 
+## Ô "không có" — trả về khi không tìm được chỗ nào.
+const INVALID_CELL: Vector2i = Vector2i(-1, -1)
 const RESOURCE_NODE_SCENE: PackedScene = preload("res://world/resource_node.tscn")
 const BUILDING_SCENE: PackedScene = preload("res://buildings/building.tscn")
+const VILLAGER_SCENE: PackedScene = preload("res://villager/villager.tscn")
 const GROUND_KEY_FORMAT: String = "ground/grass_%02d"
 const DIRT_PATCH_KEY_FORMAT: String = "ground/dirt_patch_%02d"
 const GRASS_PATCH_KEY_FORMAT: String = "ground/grass_patch_%02d"
@@ -13,6 +17,10 @@ const TUFT_KEY_FORMAT: String = "env/grass_tuft_%02d"
 
 var grid: WorldGrid
 var map_data: MapData
+var reservations: Reservations = Reservations.new()
+var finder: WorldFinder
+var villagers: Array[Villager] = []
+var resource_nodes: Array[ResourceNode] = []
 
 @onready var _ground: TileMapLayer = $Ground
 @onready var _patches: Node2D = $Patches
@@ -22,11 +30,13 @@ var map_data: MapData
 @onready var _entities: Node2D = $Entities
 @onready var _camera: CameraController = $Camera
 @onready var _wind: Wind = $Wind
+@onready var _spawner: VillagerSpawner = $VillagerSpawner
 
 
 func build(seed_value: int) -> void:
 	map_data = MapGenerator.new().generate(seed_value)
 	grid = map_data.make_grid()
+	finder = WorldFinder.new(self)
 	_build_ground()
 	_water.build(map_data)
 	_water.material = _wind.water_material()
@@ -50,6 +60,33 @@ func get_wind() -> Wind:
 
 func get_water_life() -> WaterLife:
 	return _water_life
+
+
+## Hoạt cảnh mở đầu: cả bộ lạc lần lượt chui ra khỏi hang.
+func start_intro() -> void:
+	_spawner.start_intro(self)
+
+
+func spawn_villager(data: VillagerData, spawn_position: Vector2) -> Villager:
+	var villager: Villager = VILLAGER_SCENE.instantiate()
+	villager.setup(data, self, spawn_position)
+	_entities.add_child(villager)
+	villagers.append(villager)
+	EventBus.villager_spawned.emit(villager)
+	return villager
+
+
+func cell_of(villager: Villager) -> Vector2i:
+	return WorldGrid.world_to_cell(villager.position)
+
+
+## Thổ dân dưới điểm chạm; nhiều người chồng nhau thì lấy người đứng trước (y lớn nhất).
+func pick_villager(world_point: Vector2) -> Villager:
+	var best: Villager = null
+	for villager: Villager in villagers:
+		if villager.hit_test(world_point) and (best == null or villager.position.y > best.position.y):
+			best = villager
+	return best
 
 
 func _build_ground() -> void:
@@ -92,6 +129,7 @@ func _spawn_objects() -> void:
 		node.setup(entry["kind"], entry["cell"], entry["variant"])
 		_entities.add_child(node)
 		node.set_wind(_wind)
+		resource_nodes.append(node)
 
 
 func _add_sprite(parent: Node2D, key: String, pos: Vector2) -> Sprite2D:
