@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://fx/campfire_embers.gd" id="1_embers"]
+
+[node name="CampfireEmbers" type="CPUParticles2D"]
+script = ExtResource("1_embers")

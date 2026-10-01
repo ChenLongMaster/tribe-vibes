@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <g transform="rotate(0 64 64)">
+    <path d="M64 0 C64 35.35 35.35 64 0 64" fill="none" stroke="#E8D5A8" stroke-width="24"/>
+    <path d="M64 128 C64 92.65 92.65 64 128 64" fill="none" stroke="#E8D5A8" stroke-width="24"/>
+    <path d="M0 0 H64 C64 35.35 35.35 64 0 64 Z M128 128 H64 C64 92.65 92.65 64 128 64 Z" fill="#81D4FA"/>
+    <path d="M0 0 H56 C56 30.93 30.93 56 0 56 Z M128 128 H72 C72 97.07 97.07 72 128 72 Z" fill="#4FC3F7"/>
+    <path d="M64 0 C64 35.35 35.35 64 0 64" fill="none" stroke="#4E342E" stroke-width="5" stroke-opacity="0.8"/>
+    <path d="M64 128 C64 92.65 92.65 64 128 64" fill="none" stroke="#4E342E" stroke-width="5" stroke-opacity="0.8"/>
+  </g>
+</svg>

@@ -1,0 +1,15 @@
+keys,vi,en
+# --- Chung ---,,
+GAME_TITLE,Bộ Lạc Chill,Tribe Vibes
+UI_LANGUAGE_NAME,Tiếng Việt,English
+UI_INPUT_MOUSE,chuột,
+UI_INPUT_TOUCH,cảm ứng,
+UI_DEBUG_FONT_TEST,"Thổ dân đói bụng quá! Ừ, ở đây ấm áp.",
+UI_DEBUG_LANGUAGE,"Ngôn ngữ: {language} (bấm F9 để đổi)",
+UI_DEBUG_SEED,Seed bản đồ: {seed},
+UI_DEBUG_INPUT_MODE,Đang điều khiển bằng: {mode},
+UI_DEBUG_CONTROLS_HINT,"Kéo để di chuyển bản đồ, lăn chuột hoặc chụm hai ngón để phóng to/thu nhỏ. Phím WASD cũng được.",
+BUILDING_CAVE_NAME,Hang đá,
+BUILDING_CAMPFIRE_NAME,Lửa trại,
+RES_WOOD_COUNT_ONE,{n} gỗ,
+RES_WOOD_COUNT_OTHER,{n} gỗ,

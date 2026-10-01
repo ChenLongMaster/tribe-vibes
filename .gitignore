@@ -1,0 +1,9 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Bản build xuất ra (Web, Windows…)
+/build/
+
+# Ghi đè setting tạm thời khi kiểm tra cảnh báo (xem tools/strict_warnings.cfg)
+override.cfg
