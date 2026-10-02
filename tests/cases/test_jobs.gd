@@ -14,19 +14,31 @@ const IDLE_TOLERANCE_CELLS: float = 1.5
 
 
 func test_job_defs_complete() -> void:
-	for skill: StringName in JobDefs.DEFS:
-		var def: Dictionary = JobDefs.get_def(skill)
-		for key_name: String in ["activity_key", "none_bubble"]:
-			var key: String = def[key_name]
-			check(Loc.t(key) != key, "Thiếu chữ '%s' cho việc %s" % [key, skill])
-		var tool_key: String = def["tool"]
-		check(tool_key.is_empty() or ArtLibrary.has_texture(tool_key), "Thiếu hình đồ nghề %s" % skill)
+	for job_id: StringName in JobDefs.DEFS:
+		var def: Dictionary = JobDefs.get_def(job_id)
+		var key: String = def["activity_key"]
+		check(Loc.t(key) != key, "Thiếu chữ '%s' cho việc %s" % [key, job_id])
+		check(SkillDefs.DEFS.has(JobDefs.skill_of(job_id)), "Việc %s phải gắn một kỹ năng" % job_id)
+		var held: String = JobDefs.held_art(job_id)
+		check(held.is_empty() or ArtLibrary.has_texture(held), "Thiếu hình đồ cầm tay %s" % job_id)
+		check(ArtLibrary.has_texture(JobDefs.icon(job_id)), "Thiếu icon việc %s" % job_id)
+		if def.has("item"):
+			check(ResourceDefs.ITEMS.has(def["item"]), "Việc %s ra món lạ" % job_id)
+	for item: StringName in ResourceDefs.ITEMS:
+		check(ArtLibrary.has_texture(ResourceDefs.item_carry_art(item)), "Thiếu hình khuân %s" % item)
+		check(ArtLibrary.has_texture(ResourceDefs.item_eat_art(item)), "Thiếu hình ăn %s" % item)
+		var noun: String = ResourceDefs.item_noun_key(item)
+		check(Loc.t(noun) != noun, "Thiếu tên món %s" % item)
+	for tool: StringName in ToolDefs.ORDER:
+		check(ArtLibrary.has_texture(ToolDefs.icon(tool)), "Thiếu hình đồ nghề %s" % tool)
 	for resource_id: StringName in ResourceDefs.ORDER:
 		check(ArtLibrary.has_texture(ResourceDefs.icon(resource_id)), "Thiếu icon tài nguyên %s" % resource_id)
 		check(Loc.t(ResourceDefs.name_key(resource_id)) != ResourceDefs.name_key(resource_id), "Thiếu tên %s" % resource_id)
 		check(Loc.t(ResourceDefs.noun_key(resource_id)) != ResourceDefs.noun_key(resource_id), "Thiếu tên viết thường %s" % resource_id)
 		check(not Loc.plural(ResourceDefs.count_key(resource_id), 3).contains("RES_"), "Thiếu số nhiều %s" % resource_id)
 	for key: String in ["animals/boar", "animals/deer", "icons/angry", "fx/dust", "ui/target_ring", "ui/move_marker",
+			"props/sign", "ui/thought_bubble", "icons/cross", "icons/question", "icons/dots",
+			"env/twigs", "env/pebbles", "env/cliff", "icons/res_meal",
 			"ui/speed_pause", "ui/speed_1", "ui/speed_2", "ui/speed_3"]:
 		check(ArtLibrary.has_texture(key), "Thiếu hình %s" % key)
 
@@ -60,6 +72,7 @@ func test_skill_xp_and_favorite() -> void:
 func test_three_choppers_two_miners() -> void:
 	var world: World = await _make_world(42)
 	var villagers: Array[Villager] = _spawn(world, 6)
+	Commands.debug_give_tools(3)
 	var tree: ResourceNode = _nearest(world, MapData.KIND_TREE)
 	var rock: ResourceNode = _nearest(world, MapData.KIND_ROCK)
 	for i: int in 3:
@@ -71,6 +84,8 @@ func test_three_choppers_two_miners() -> void:
 	Villager.watchdog_alerts = 0
 
 	var samples: Array[Vector2i] = []
+	var quits: Array[String] = []
+	var last_jobs: Dictionary[int, String] = {}
 	var strayed: Array[String] = []
 	var kinds: Dictionary[StringName, bool] = {}
 	var next_sample: float = SAMPLE_SECONDS
@@ -82,9 +97,14 @@ func test_three_choppers_two_miners() -> void:
 		if elapsed >= next_sample:
 			next_sample += SAMPLE_SECONDS
 			samples.append(Vector2i(GameState.get_amount(ResourceDefs.WOOD), GameState.get_amount(ResourceDefs.STONE)))
-		for villager: Villager in villagers:
+		for i: int in villagers.size():
+			var villager: Villager = villagers[i]
 			if villager.task != null:
 				kinds[villager.task.kind] = true
+			if villager.job != null:
+				last_jobs[i] = "%s, cầm %s, %d lần không tới được" % [villager.job.job_id, villager.tool, villager.job._failures]
+			elif i < 5 and not quits.any(func(entry: String) -> bool: return entry.begins_with(villager.data.display_name)):
+				quits.append("%s ở giây %.0f — việc %s" % [villager.data.display_name, elapsed, last_jobs.get(i, "?")])
 		if idler.task != null and IDLE_KINDS.has(idler.task.kind):
 			var away: float = Vector2(world.cell_of(idler) - idler.anchor_cell).length()
 			if away > Balance.IDLE_RADIUS_CELLS + IDLE_TOLERANCE_CELLS and strayed.size() < 3:
@@ -100,7 +120,7 @@ func test_three_choppers_two_miners() -> void:
 	check_eq(Villager.watchdog_alerts, 0, "Watchdog báo có người đứng đơ")
 	for i: int in 5:
 		var villager: Villager = villagers[i]
-		check(villager.job != null, "%s bỏ việc giữa chừng" % villager.data.display_name)
+		check(villager.job != null, "%s bỏ việc giữa chừng (%s)" % [villager.data.display_name, ", ".join(quits)])
 		var skill: StringName = SkillDefs.CHOP if i < 3 else SkillDefs.MINE
 		var learned: bool = villager.status.skill_xp.get(skill, 0.0) > 0.0 or villager.status.skill_levels.has(skill)
 		check(learned, "%s làm việc phải có kinh nghiệm" % villager.data.display_name)
@@ -114,6 +134,7 @@ func test_job_resumes_after_eating() -> void:
 	var world: World = await _make_world(7)
 	var worker: Villager = _spawn(world, 1)[0]
 	_fill_needs(worker)
+	Commands.debug_give_tools(1)
 	Commands.assign_job(worker.id, _nearest(world, MapData.KIND_TREE))
 	var job: Job = worker.job
 	var state: Dictionary = {"made_hungry": false, "ate": false, "resumed": false}
@@ -142,15 +163,13 @@ func test_job_stops_when_nothing_left() -> void:
 	for node: ResourceNode in world.resource_nodes:
 		if node.kind == MapData.KIND_BUSH and node != bush:
 			node.take_berries()
-	var bubbles: Array[String] = []
-	worker.speech_requested.connect(func(key: String, _args: Dictionary, _icon: String, _seconds: float) -> void:
-		bubbles.append(key))
-	var berries_before: int = GameState.get_amount(ResourceDefs.BERRY)
+	var berries_before: int = GameState.item_amount(ResourceDefs.FOOD, ResourceDefs.ITEM_BERRIES)
 	Commands.assign_job(worker.id, bush)
 	await _simulate(90.0, func(_elapsed: float) -> bool: return worker.job == null)
 	check(worker.job == null, "Hết bụi quả thì thôi việc")
-	check(bubbles.has("BUBBLE_NO_BERRIES"), "Thôi việc phải nói 'Hết quả rồi!' — nghe được: %s" % str(bubbles))
-	check(GameState.get_amount(ResourceDefs.BERRY) > berries_before, "Quả hái được phải vào kho")
+	await host.get_tree().process_frame
+	check(worker.rig.has_sign(), "Thôi việc vì hết quả thì phải giơ biển (quả gạch chéo)")
+	check(GameState.item_amount(ResourceDefs.FOOD, ResourceDefs.ITEM_BERRIES) > berries_before, "Quả hái được vào kho thức ăn (nhớ là quả)")
 	check_eq(worker.anchor_cell, world.cell_of(worker), "Dừng việc thì đứng chờ tại chỗ")
 	await _free_world(world)
 
@@ -162,6 +181,7 @@ func test_strike_and_resume() -> void:
 	var toasts: Array[String] = []
 	var on_event: Callable = func(key: String, _args: Dictionary, _icon: String) -> void: toasts.append(key)
 	EventBus.village_event.connect(on_event)
+	Commands.debug_give_tools(1)
 	Commands.assign_job(worker.id, _nearest(world, MapData.KIND_ROCK))
 	var job: Job = worker.job
 	# Đặt giải trí = 0 đúng lúc đang làm (đang đi thì giải trí còn hồi chút ít).
@@ -177,8 +197,9 @@ func test_strike_and_resume() -> void:
 	await _simulate(10.0)
 	check(not (worker.task is TaskWork), "Đang đình công thì từ chối làm việc")
 	worker.status.fun = Balance.STRIKE_RESUME_FUN + 5.0
-	await _simulate(10.0, func(_elapsed: float) -> bool: return worker.task is TaskWork)
+	await _simulate(30.0, func(_elapsed: float) -> bool: return worker.task is TaskWork)
 	check(not worker.on_strike, "Giải trí hồi đủ thì hết đình công")
+	check_eq(worker.tool, ToolDefs.AXE, "Đổi cuốc lấy rìu để chặt cây")
 	check(worker.task is TaskWork, "Hết giận thì tự làm lại việc")
 	check(worker.job != null and worker.job != job and worker.job.skill == SkillDefs.CHOP, "Làm việc được giao gần nhất")
 	check(toasts.has("TOAST_STRIKE_END"), "Có thông báo hết đình công")
@@ -193,21 +214,26 @@ func test_hunt_then_cook() -> void:
 	var cook: Villager = villagers[1]
 	_fill_needs(hunter)
 	_fill_needs(cook)
-	var meat_before: int = GameState.get_amount(ResourceDefs.RAW_MEAT)
-	var meals_before: int = GameState.get_amount(ResourceDefs.COOKED_MEAL)
+	Commands.debug_give_tools(1)
+	var campfire: Building = _campfire(world)
+	var meals_before: int = campfire.stock_of(ResourceDefs.MEAL)
 	var delivered: Array[StringName] = []
+	var state: Dictionary = {"carcass": false}
 	var on_delivered: Callable = func(resource_id: StringName, _amount: int, _pos: Vector2) -> void: delivered.append(resource_id)
 	EventBus.resource_delivered.connect(on_delivered)
 	var animal: Animal = world.animals[0]
 	check(Commands.assign_job(hunter.id, animal), "Giao đi săn")
-	var campfire: Building = _campfire(world)
 	check(Commands.assign_job(cook.id, campfire), "Giao nấu ăn ở lửa trại")
 	check_eq(cook.job.skill, SkillDefs.COOK, "Chạm lửa trại = nấu ăn")
 	await _simulate(240.0, func(_elapsed: float) -> bool:
-		return GameState.get_amount(ResourceDefs.COOKED_MEAL) > meals_before)
-	check(delivered.has(ResourceDefs.RAW_MEAT), "Thợ săn mang thịt về")
-	check(GameState.get_amount(ResourceDefs.COOKED_MEAL) > meals_before, "Đầu bếp nấu ra món chín")
-	check(GameState.get_amount(ResourceDefs.RAW_MEAT) < meat_before + Balance.MEAT_PER_HUNT * 3, "Thịt sống được đem nấu")
+		if hunter.rig.is_carrying() and hunter.task is TaskHunt:
+			state["carcass"] = true
+		return delivered.has(ResourceDefs.FOOD) and campfire.stock_of(ResourceDefs.MEAL) > meals_before)
+	check_eq(hunter.tool, ToolDefs.SPEAR, "Thợ săn lấy giáo")
+	check(state["carcass"], "Săn xong vác nguyên con thú về")
+	check(delivered.has(ResourceDefs.FOOD), "Thợ săn mang thức ăn về")
+	check(campfire.stock_of(ResourceDefs.MEAL) > meals_before, "Đầu bếp nấu ra món chín, cất ở lửa trại")
+	check(GameState.get_amount(ResourceDefs.MEAL) == 0, "Món chín không phải tài nguyên chung")
 	check(hunter.job != null and hunter.job.skill == SkillDefs.HUNT, "Thợ săn vẫn đi săn tiếp")
 	EventBus.resource_delivered.disconnect(on_delivered)
 	await _free_world(world)
@@ -217,11 +243,143 @@ func test_fishing() -> void:
 	var world: World = await _make_world(42)
 	var fisher: Villager = _spawn(world, 1)[0]
 	_fill_needs(fisher)
-	var fish_before: int = GameState.get_amount(ResourceDefs.RAW_FISH)
-	check(Commands.assign_job(fisher.id, _nearest(world, MapData.KIND_FISH_SPOT)), "Giao câu cá")
+	var fish_before: int = GameState.item_amount(ResourceDefs.FOOD, ResourceDefs.ITEM_FISH)
+	check(Commands.assign_job(fisher.id, _nearest(world, MapData.KIND_FISH_SPOT)), "Giao câu cá (không cần đồ nghề rèn)")
 	await _simulate(120.0, func(_elapsed: float) -> bool:
-		return GameState.get_amount(ResourceDefs.RAW_FISH) > fish_before)
-	check(GameState.get_amount(ResourceDefs.RAW_FISH) > fish_before, "Câu được cá về kho")
+		return GameState.item_amount(ResourceDefs.FOOD, ResourceDefs.ITEM_FISH) > fish_before)
+	check(GameState.item_amount(ResourceDefs.FOOD, ResourceDefs.ITEM_FISH) > fish_before, "Câu được cá về kho thức ăn")
+	await _free_world(world)
+
+
+func test_hungry_sulks_then_eats_at_kitchen() -> void:
+	var world: World = await _make_world(42)
+	var villager: Villager = _spawn(world, 1)[0]
+	_fill_needs(villager)
+	GameState.take_resource(ResourceDefs.FOOD, GameState.get_amount(ResourceDefs.FOOD))
+	villager.status.hunger = 40.0
+	villager.status.energy = 70.0
+	await _simulate(3.0, func(_elapsed: float) -> bool: return villager.task is TaskSulk)
+	check(villager.task is TaskSulk, "Đói mà bếp hết đồ thì ngồi dỗi")
+	villager.status.hunger = 0.0
+	await _simulate(2.0, func(_elapsed: float) -> bool: return villager.rig.has_sign())
+	check(villager.rig.has_sign(), "Đói lả thì giơ biển vẽ đồ ăn")
+
+	GameState.add_resource(ResourceDefs.FOOD, 1, ResourceDefs.ITEM_FISH)
+	villager.status.health = 100.0
+	var energy_before: float = villager.status.energy
+	var state: Dictionary = {"ate": false}
+	await _simulate(30.0, func(_elapsed: float) -> bool:
+		if villager.task != null and villager.task.kind == &"eat":
+			state["ate"] = true
+		return state["ate"] and (villager.task == null or villager.task.kind != &"eat"))
+	check(state["ate"], "Bếp có đồ thì đứng dậy đi ăn")
+	check(not villager.rig.has_sign(), "Đi ăn thì hạ biển")
+	check(villager.status.hunger > 95.0, "Ăn ở bếp là no căng (đói = %.0f)" % villager.status.hunger)
+	check(villager.status.energy > energy_before + Balance.EAT_ENERGY * 0.5, "Ăn xong đỡ mệt chút")
+	check(villager.status.energy < energy_before + Balance.EAT_ENERGY * 1.5, "Nhưng không thay được giấc ngủ")
+	await _free_world(world)
+
+
+func test_worker_keeps_working_when_kitchen_empty() -> void:
+	var world: World = await _make_world(42)
+	var worker: Villager = _spawn(world, 1)[0]
+	_fill_needs(worker)
+	GameState.take_resource(ResourceDefs.FOOD, GameState.get_amount(ResourceDefs.FOOD))
+	Commands.debug_give_tools(1)
+	Commands.assign_job(worker.id, _nearest(world, MapData.KIND_TREE))
+	worker.status.hunger = 40.0
+	await _simulate(20.0)
+	check(not (worker.task is TaskSulk), "Đang được giao việc thì làm tiếp, không ngồi dỗi")
+	check(worker.job != null and worker.job.skill == SkillDefs.CHOP, "Vẫn nhớ việc chặt cây")
+	await _free_world(world)
+
+
+## Không có rìu / cuốc / giáo thì không chặt cây, đập đá tảng, săn được: giơ biển vẽ món
+## thiếu. Có rồi thì tự đi lấy, giữ luôn; việc không cần đồ nghề thì đeo sau lưng.
+func test_tools_needed_and_kept() -> void:
+	var world: World = await _make_world(42)
+	var worker: Villager = _spawn(world, 1)[0]
+	_fill_needs(worker)
+	var tree: ResourceNode = _nearest(world, MapData.KIND_TREE)
+	check(not Commands.assign_job(worker.id, tree), "Chưa có rìu thì không giao chặt cây được")
+	await host.get_tree().process_frame
+	check(worker.rig.has_sign(), "Thiếu rìu thì giơ biển")
+	check(not Commands.assign_job(worker.id, world.animals[0]), "Chưa có giáo thì không săn được")
+
+	Commands.debug_give_tools(1)
+	var campfire: Building = _campfire(world)
+	check(Commands.assign_job(worker.id, tree), "Có rìu trong kho thì giao được")
+	await _simulate(40.0, func(_elapsed: float) -> bool: return worker.tool == ToolDefs.AXE)
+	check_eq(worker.tool, ToolDefs.AXE, "Tự đi lấy rìu")
+	check_eq(campfire.stock_of(ToolDefs.AXE), 0, "Rìu ra khỏi kho")
+
+	# Nhặt đá cuội không cần đồ nghề: giữ rìu (đeo sau lưng), cầm xô.
+	world.nature.spawn_pebble()
+	var pebble: ResourceNode = _nearest(world, MapData.KIND_PEBBLES)
+	check(pebble != null, "Có đá cuội trên map")
+	if pebble != null:
+		check(Commands.assign_job(worker.id, pebble), "Nhặt đá cuội bằng tay")
+		await _simulate(40.0, func(_elapsed: float) -> bool: return worker.task is TaskHarvest)
+		check_eq(worker.tool, ToolDefs.AXE, "Nhặt đá cuội vẫn giữ rìu")
+		check_eq(campfire.stock_of(ToolDefs.AXE), 0, "Không cất rìu khi làm việc tay không")
+
+	# Sang việc cần món khác: về kho đổi rìu lấy cuốc.
+	check(Commands.assign_job(worker.id, _nearest(world, MapData.KIND_ROCK)), "Giao đập đá tảng")
+	await _simulate(60.0, func(_elapsed: float) -> bool: return worker.tool == ToolDefs.PICKAXE)
+	check_eq(worker.tool, ToolDefs.PICKAXE, "Đổi lấy cuốc")
+	check_eq(campfire.stock_of(ToolDefs.AXE), 1, "Rìu được cất lại")
+	await _free_world(world)
+
+
+## Củi và đá cuội nhặt tay theo mẻ: nhặt đủ một bó/xô rồi mới khuân về; 1 khúc gỗ = 10 củi.
+func test_loose_pickup_and_nature() -> void:
+	var world: World = await _make_world(42)
+	var worker: Villager = _spawn(world, 1)[0]
+	_fill_needs(worker)
+	check(_count_active(world, MapData.KIND_TWIGS) > 0, "Có củi dưới tán cây lúc đầu")
+	check(_count_active(world, MapData.KIND_PEBBLES) > 0, "Có đá cuội quanh đá tảng lúc đầu")
+	check(not world.map_data.cliffs.is_empty(), "Có vách đá")
+	var twig: ResourceNode = _nearest(world, MapData.KIND_TWIGS)
+	var wood_before: int = GameState.get_amount(ResourceDefs.WOOD)
+	var delivered: Array[int] = []
+	var on_delivered: Callable = func(resource_id: StringName, amount: int, _pos: Vector2) -> void:
+		if resource_id == ResourceDefs.WOOD:
+			delivered.append(amount)
+	EventBus.resource_delivered.connect(on_delivered)
+	check(Commands.assign_job(worker.id, twig), "Nhặt củi bằng tay")
+	await _simulate(90.0, func(_elapsed: float) -> bool: return not delivered.is_empty())
+	EventBus.resource_delivered.disconnect(on_delivered)
+	check(GameState.get_amount(ResourceDefs.WOOD) > wood_before, "Củi về kho thành gỗ")
+	check(not delivered.is_empty() and delivered[0] > 1, "Nhặt đủ mẻ rồi mới khuân về: %s" % str(delivered))
+	check_eq(ResourceDefs.item_value(ResourceDefs.ITEM_LOG, 1), 10, "1 khúc gỗ = 10 gỗ")
+
+	# Thiên nhiên có giới hạn: không mọc quá số tối đa.
+	for i: int in Balance.TWIG_MAX * 2:
+		world.nature.spawn_twig()
+	check(_count_active(world, MapData.KIND_TWIGS) <= Balance.TWIG_MAX, "Củi không mọc tràn map")
+	var boulders: int = _count_active(world, MapData.KIND_ROCK)
+	check(not world.nature.spawn_boulder(), "Đá tảng đủ số lúc đầu thì vách đá không lăn thêm")
+	check_eq(_count_active(world, MapData.KIND_ROCK), boulders, "Số đá tảng giữ nguyên")
+	await _free_world(world)
+
+
+## Tấm biển: đứng thì cắm xuống đất (không lơ lửng), ngồi thì hai tay giơ lên.
+func test_sign_planted_or_raised() -> void:
+	var world: World = await _make_world(42)
+	var villager: Villager = _spawn(world, 1)[0]
+	_fill_needs(villager)
+	# Đứng yên một chỗ để bộ não không chen hoạt cảnh rảnh rỗi vào giữa chừng.
+	villager.start_task(TaskWait.new(100.0))
+	villager.hold_sign("icons/res_food", true, Villager.UNTIL_CLEARED)
+	villager.rig.play(VillagerRig.ANIM_IDLE)
+	await host.get_tree().process_frame
+	check(villager.rig.has_sign() and not villager.rig.is_sign_raised(), "Đứng thì cắm biển xuống đất")
+	villager.rig.play(VillagerRig.ANIM_POUT)
+	await host.get_tree().process_frame
+	check(villager.rig.is_sign_raised(), "Ngồi thì giơ biển lên")
+	villager.rig.play(VillagerRig.ANIM_WALK)
+	await host.get_tree().process_frame
+	check(not villager.rig.has_sign(), "Đi thì cất biển")
 	await _free_world(world)
 
 
@@ -233,6 +391,7 @@ func test_controller_tap_assigns_and_moves() -> void:
 	host.add_child(controller)
 	controller.setup(world, NORMAL_MODE)
 	await host.get_tree().process_frame
+	Commands.debug_give_tools(1)
 	var tree: ResourceNode = _nearest(world, MapData.KIND_TREE)
 
 	controller._on_tapped(_to_screen(villager.position + Villager.PICK_CENTER))
@@ -307,6 +466,14 @@ func _spawn(world: World, count: int) -> Array[Villager]:
 	return result
 
 
+func _count_active(world: World, kind: StringName) -> int:
+	var count: int = 0
+	for node: ResourceNode in world.resource_nodes:
+		if node.kind == kind and not node.is_cleared and not node.is_depleted():
+			count += 1
+	return count
+
+
 func _fill_needs(villager: Villager) -> void:
 	villager.status.hunger = 100.0
 	villager.status.energy = 100.0
@@ -317,7 +484,7 @@ func _nearest(world: World, kind: StringName) -> ResourceNode:
 	var campfire: Vector2 = WorldGrid.cell_to_world(world.map_data.campfire_cell)
 	var best: ResourceNode = null
 	for node: ResourceNode in world.resource_nodes:
-		if node.kind == kind and node.can_harvest():
+		if node.kind == kind and node.visible and node.can_harvest():
 			if best == null or node.position.distance_to(campfire) < best.position.distance_to(campfire):
 				best = node
 	return best

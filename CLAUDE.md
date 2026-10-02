@@ -1,11 +1,15 @@
-# MVP_PROMPT — Tribe Vibes (Bộ Lạc Chill)
+# GAME_DESIGN — Tribe Vibes (Bộ Lạc Chill)
 
 > **Tên game: Tribe Vibes** (tiếng Việt: **Bộ Lạc Chill**). Tên chỉ được khai báo ở **hai chỗ**: `application/config/name = "Tribe Vibes"` trong `project.godot`, và key dịch `GAME_TITLE` trong `i18n/strings.csv` (cột `vi` = `Bộ Lạc Chill`, cột `en` = `Tribe Vibes`). Không viết cứng tên game ở bất kỳ chỗ nào khác (màn hình bắt đầu, tiêu đề cửa sổ, tên file save…), để sau này đổi tên hay thêm phụ đề chỉ cần sửa hai chỗ đó.
 
-> File này hướng dẫn Claude dựng project Godot và xây bản MVP chơi được của một game colony-sim tiền sử, lấy cảm hứng từ **Prehistoric Tribes** (Gear Games / THQ Wireless, 2008).
+> Tài liệu thiết kế game (trước đây tên `MVP_PROMPT.md`): luật chơi, hành vi thổ dân, tài nguyên, công trình, các đợt làm việc của một game colony-sim tiền sử lấy cảm hứng từ **Prehistoric Tribes** (Gear Games / THQ Wireless, 2008). Đây là **nguồn chính** — mọi quyết định thiết kế mới ghi vào đây.
 > Đặt file ở thư mục gốc project. `CLAUDE.md` là bản copy y nguyên của file này (cộng phụ lục ghi chú kỹ thuật cho Claude ở cuối) để Claude Code tự đọc mỗi phiên.
 
 > **Cập nhật thiết kế 2026-10-02** (sau khi chơi lại game gốc): thổ dân **nghe lời** — rảnh thì chỉ dạo quanh chỗ đứng, chỉ tự rời chỗ khi đói, mệt hoặc muốn tìm bạn đời; 4 chỉ số hiển thị bằng icon; kỹ năng theo từng việc + một việc thích; tìm bạn đời qua tặng hoa; công trình có diện tích, 3 cấp, nhiều thợ xây và người phụ trách. Các quyết định này ưu tiên hơn mọi spec cũ.
+
+> **Cập nhật thiết kế 2026-10-02 (lần 2):** thổ dân **không nói chữ**, chỉ "nói" bằng hình: **bong bóng nghĩ** (mây) khi muốn gì đó, **giơ tấm biển** vẽ hình khi cần người chơi ra tay, tán gẫu bằng icon (mục 6.2). Đói < 50 thì **chỉ đi ăn ở bếp** (không tự hái quả); bếp hết đồ thì **ngồi bệt nũng nịu**, đói lả thì giơ biển vẽ đồ ăn. Ăn ở bếp no căng, cộng chút vui và thể lực (mục 5.2, 5.3).
+
+> **Cập nhật thiết kế 2026-10-02 (lần 3) — tài nguyên & đồ nghề:** người chơi chỉ để ý **3 tài nguyên chung: gỗ, đá, thức ăn** (icon đùi thịt). Bên trong game nhớ món cụ thể (quả / cá / thịt, khúc gỗ / bó củi, đá tảng / đá cuội) để vẽ cho đúng. **Món chín và vũ khí là đồ riêng của công trình** (bếp, lò rèn), không nằm trên thanh tài nguyên. **Rìu, cuốc, giáo** rèn ở lò rèn: không có thì chỉ nhặt bằng tay (củi, đá cuội, hái quả, câu cá). Xây nhà: thợ xây đội mũ, khuân vật liệu từ kho tới đủ rồi mới xây. Tấm biển: đứng thì cắm xuống đất, ngồi thì giơ hai tay (mục 6.2, 9).
 
 ---
 
@@ -64,7 +68,7 @@ Các chi tiết dưới đây đã được xác minh qua trang chính thức c�
 - Thổ dân hay **bỏ dở việc** (ví dụ xây nhà dở dang) mà không báo gì.
 - Người chơi phải kéo màn hình theo dõi xem họ có đi đúng chỗ không.
 
-**Cách sửa:** luôn có **phản hồi rõ ràng**: icon việc đang làm trên đầu, đường đi chấm chấm tới nơi được giao, bong bóng giải thích khi bỏ việc ("đói quá!", "buồn ngủ...", "Hết cây rồi!"). Họ có thể lười một chút cho đáng yêu, nhưng **luôn tự quay lại làm tiếp** và người chơi luôn thấy được vì sao.
+**Cách sửa:** luôn có **phản hồi rõ ràng**: icon việc đang làm trên đầu, đường đi chấm chấm tới nơi được giao, bong bóng nghĩ / tấm biển vẽ hình giải thích khi bỏ việc (nghĩ tới đùi thịt, nghĩ tới giấc ngủ, giơ biển vẽ cái cây gạch chéo). Họ có thể lười một chút cho đáng yêu, nhưng **luôn tự quay lại làm tiếp** và người chơi luôn thấy được vì sao.
 
 ---
 
@@ -88,7 +92,7 @@ Các chi tiết dưới đây đã được xác minh qua trang chính thức c�
 
 Bản đầu chỉ có tiếng Việt, nhưng code phải sẵn sàng để thêm tiếng Anh (hoặc ngôn ngữ khác) bằng cách **chỉ thêm một cột vào CSV và một file tên**, không phải sửa code.
 
-1. **Không viết chữ cứng trong code hay scene.** Mọi chữ người chơi nhìn thấy đều là key, ví dụ `UI_BUILD`, `TOAST_BABY_BORN`, `TRAIT_LAZY_NAME`, `TRAIT_LAZY_DESC`. Đặt key theo tiền tố nhóm: `UI_`, `TOAST_`, `TRAIT_`, `JOB_`, `BUILDING_`, `RES_`, `GOAL_`, `LOG_`, `BUBBLE_`.
+1. **Không viết chữ cứng trong code hay scene.** Mọi chữ người chơi nhìn thấy đều là key, ví dụ `UI_BUILD`, `TOAST_BABY_BORN`, `TRAIT_LAZY_NAME`, `TRAIT_LAZY_DESC`. Đặt key theo tiền tố nhóm: `UI_`, `TOAST_`, `TRAIT_`, `JOB_`, `BUILDING_`, `RES_`, `GOAL_`, `LOG_`. (Thổ dân không nói chữ nên không có nhóm bong bóng thoại.)
 2. **Không ghép chuỗi.** Dùng chỗ giữ chỗ có tên:
    ```gdscript
    # CSV: TOAST_BABY_BORN,"{name} chào đời!","{name} was born!"
@@ -150,7 +154,7 @@ Simulation Core     → world, villager, AI, nhu cầu, kỹ năng, tài nguyên
 ```
 res://
 ├─ project.godot
-├─ MVP_PROMPT.md / CLAUDE.md / DEVLOG.md / ASSET_SPEC.md
+├─ GAME_DESIGN.md / CLAUDE.md / DEVLOG.md / ASSET_SPEC.md
 ├─ autoload/
 │  ├─ game_state.gd      # tài nguyên, dân số, ngày giờ, tốc độ game, độ khó, chế độ đang chơi
 │  ├─ event_bus.gd       # signal toàn cục (villager_born, raid_started, resource_changed…)
@@ -166,22 +170,28 @@ res://
 ├─ data/
 │  ├─ balance.gd         # MỌI con số cân bằng game nằm ở đây, dễ chỉnh
 │  ├─ needs.gd           # định nghĩa 4 chỉ số (icon, luật tăng/giảm, ngưỡng) dạng dữ liệu
-│  ├─ skills.gd          # định nghĩa các loại việc/kỹ năng (icon, việc nặng hay nhẹ, công trình liên quan)
-│  ├─ buildings.gd       # định nghĩa công trình (diện tích, 3 cấp, chi phí, người phụ trách, chức năng)
+│  ├─ skills.gd          # định nghĩa các kỹ năng (icon, việc nặng hay nhẹ)
+│  ├─ jobs.gd            # các việc giao được (mục tiêu, sản lượng, đồ cầm tay, đồ nghề bắt buộc) — nhiều việc chung một kỹ năng
+│  ├─ resources.gd       # 3 tài nguyên chung + các "món" khuân về (giỏ quả, khúc gỗ, xô đá cuội…) + đồ riêng của công trình
+│  ├─ tools.gd           # đồ nghề rèn: rìu, cuốc, giáo (mục 9.4)
+│  ├─ buildings.gd       # định nghĩa công trình (diện tích, 3 cấp, chi phí, người phụ trách, chức năng, kho riêng)
 │  ├─ traits.gd          # định nghĩa tính cách
 │  └─ names/
 │     ├─ names_vi.gd     # bộ tên thổ dân tiếng Việt
 │     └─ names_en.gd     # để trống / vài tên mẫu
 ├─ world/
 │  ├─ world.tscn/.gd     # map, sinh địa hình, quản lý lưới + AStarGrid2D
-│  ├─ resource_node.tscn # cây, đá, bụi quả, chỗ câu cá
+│  ├─ resource_node.tscn # cây, đá tảng, bụi quả, chỗ câu cá, củi, đá cuội
+│  ├─ nature_spawner.gd  # củi rơi, đá cuội lăn ra, đá tảng từ vách đá, cây mọc lại — có giới hạn
 │  └─ animal.tscn        # thú để săn
 ├─ villager/
 │  ├─ villager_data.gd   # Resource: ngoại hình (ID mảnh), tên, giới tính, tính cách, kỹ năng, việc thích… (xem mục 3.2)
-│  ├─ villager_status.gd # trạng thái lúc chơi: 4 chỉ số, kinh nghiệm kỹ năng
+│  ├─ villager_status.gd # trạng thái lúc chơi: 4 chỉ số, kinh nghiệm kỹ năng, đồ nghề đang giữ
 │  ├─ villager.tscn/.gd  # dữ liệu + máy trạng thái
 │  ├─ villager_rig.tscn/.gd   # bộ khung cutout + animation theo code
-│  └─ villager_brain.gd  # chọn việc theo villager_autonomy (mục 5.2)
+│  ├─ villager_brain.gd  # chọn việc theo villager_autonomy (mục 5.2)
+│  ├─ job.gd             # việc được giao mà thổ dân ghi nhớ
+│  └─ tasks/             # từng việc cụ thể đang làm (chặt, khuân, ăn, ngủ, ngồi dỗi, lấy đồ nghề…)
 ├─ buildings/
 │  └─ building.tscn/.gd  # một scene chung, cấu hình theo data
 ├─ enemies/
@@ -195,7 +205,7 @@ res://
 │     ├─ hud.tscn        # thanh tài nguyên, ngày, nút tốc độ
 │     ├─ build_menu.tscn
 │     └─ goals_panel.tscn
-├─ fx/                   # bụi, tim, sao, số bay "+3 gỗ"
+├─ fx/                   # bụi, tim, sao, số bay "+10 gỗ"
 ├─ assets/
 │  ├─ placeholder/       # SVG tạm do Claude vẽ
 │  ├─ art/               # art thật, ghi đè dần (cùng tên file)
@@ -237,7 +247,8 @@ res://
 
 - **4 chỉ số** (mục 5.3), **kỹ năng theo từng việc** và **một việc thích** (mục 5.4).
 - **Tâm trạng** = trung bình có trọng số của các chỉ số, chỉ để chọn nét mặt cười/mếu (không hiện số).
-- **Sức đánh**: dùng cho chiến đấu, tăng nhờ vũ khí và kỹ năng Chiến đấu.
+- **Sức đánh**: dùng cho chiến đấu, tăng nhờ đồ nghề đang giữ (rìu, cuốc, giáo — mục 9.4) và kỹ năng Chiến đấu.
+- **Đồ nghề đang giữ**: không có, hoặc đúng một món (rìu / cuốc / giáo). Giữ luôn cho tới khi đổi món khác (mục 9.4).
 
 ### 5.2 Hành vi: thổ dân nghe lời (`villager_autonomy = obedient`)
 
@@ -245,17 +256,20 @@ res://
 
 - **Rảnh (không có việc):** chỉ dạo chơi trong một vùng **rất nhỏ** quanh "điểm neo" (chỗ đứng lúc hết việc hoặc chỗ người chơi thả họ xuống), bán kính khoảng 2–3 ô (`IDLE_RADIUS_CELLS` trong `balance.gd`). Làm hoạt cảnh tại chỗ (mục 5.5). **Không tự nhận việc, không đi lung tung.**
 - **Chỉ tự rời vùng dạo chơi trong 3 trường hợp:**
-  1. **Đói < 50** → tự đi tìm **Bếp có đồ ăn** để ăn (trước khi có Bếp: lấy đồ ăn ở lửa trại hoặc hái quả ở bụi gần nhất). Ăn xong quay lại chỗ cũ / việc cũ.
+  1. **Đói < 50** → tự đi tới **Bếp có đồ ăn** (trước khi có Bếp: lửa trại), **vừa đi vừa nghĩ tới đồ ăn** (mây nghĩ đùi thịt). Không tự đi hái quả. Ăn xong quay lại chỗ cũ / việc cũ.
+     - **Bếp hết đồ:** người đang rảnh **ngồi bệt nũng nịu** tại chỗ, thỉnh thoảng nghĩ tới đùi thịt, tới khi bếp có đồ thì đứng dậy đi ăn. Người đang làm việc được giao thì **làm tiếp** (có khi chính họ đang kiếm đồ ăn về), chỉ thỉnh thoảng nghĩ tới đồ ăn.
+     - **Đói = 0:** ai cũng bỏ việc, ngồi bệt và **giơ tấm biển vẽ đồ ăn** (không còn sức nghĩ nữa).
+     - Ván mới có sẵn ít thức ăn ở lửa trại (`START_FOOD`) để người chơi kịp giao người đi kiếm đồ ăn.
   2. **Thể lực < 50%** → tự đi tìm **Lều còn chỗ** để ngủ (không có lều còn chỗ: ngủ đất cạnh lửa trại, hồi chậm hơn). Ngủ đủ thì quay lại việc cũ.
   3. **Muốn tìm bạn đời** (mục 10).
-- **Được giao việc:** việc đó thành **việc hiện tại** và **tự lặp lại** (chặt → khuân về kho → chặt tiếp). Hết tài nguyên thì tìm loại tương tự gần nhất trong bán kính hợp lý (`JOB_SEARCH_RADIUS_CELLS`); không có thì dừng, đứng chờ tại chỗ, bong bóng giải thích ("Hết cây rồi!"). Luôn có **icon việc đang làm** trên đầu.
+- **Được giao việc:** việc đó thành **việc hiện tại** và **tự lặp lại** (chặt → khuân về kho → chặt tiếp). Hết tài nguyên thì tìm loại tương tự gần nhất trong bán kính hợp lý (`JOB_SEARCH_RADIUS_CELLS`); không có thì dừng, đứng yên tại chỗ, **cắm biển vẽ icon việc đó gạch chéo** ("hết cây rồi"); thiếu đồ nghề thì cắm biển vẽ món đó gạch chéo; không tới được thì nghĩ dấu "?". Luôn có **icon việc đang làm** trên đầu.
 - **Bị ngắt quãng** (đói, buồn ngủ, tìm bạn đời, chạy trốn) thì **ghi nhớ việc đang làm** và tự quay lại sau. Không bao giờ bỏ việc âm thầm.
 - **Máy trạng thái** dùng enum đơn giản: `IDLE`, `MOVING`, `WORKING`, `CARRYING`, `EATING`, `SLEEPING`, `SOCIAL`, `FLEEING`, `FIGHTING`, `KNOCKED_OUT`, `STRIKING` (đình công). Không dùng plugin.
 - Mỗi thổ dân "suy nghĩ" mỗi 0.3–0.6 giây, lệch giờ ngẫu nhiên để không dồn CPU vào cùng một frame. **Thứ tự ưu tiên:**
   1. Nguy hiểm (cannibal ở gần) → chạy trốn hoặc tự vệ.
   2. Máu = 0 → ngất (mục 5.3). Thể lực = 0 → gục ngủ tại chỗ.
   3. Giải trí = 0 → đình công (mục 5.3).
-  4. Đói < 50 → đi ăn. Thể lực < 50% → đi ngủ. Hiện bong bóng giải thích.
+  4. Đói < 50 → đi ăn ở bếp (bếp hết đồ thì ngồi dỗi, xem trên). Thể lực < 50% → đi ngủ. Luôn có bong bóng nghĩ / tấm biển giải thích.
   5. Muốn tìm bạn đời (khi đủ điều kiện mục 10, chỉ lúc rảnh hoặc giữa hai lượt việc).
   6. Việc người chơi giao → làm, xong một lượt thì lặp lại.
   7. Rảnh → dạo chơi trong vùng nhỏ + hoạt cảnh tại chỗ.
@@ -269,16 +283,17 @@ Hệ nhu cầu viết dạng dữ liệu (`data/needs.gd`: icon, tốc độ tă
 | Chỉ số | Icon | Luật |
 |---|---|---|
 | **Máu** | ❤ | Đói = 0 → máu giảm dần. Máu = 0: độ khó **Dễ** chỉ **ngất** (nằm, sao quay quanh đầu), ăn lại thì hồi và tỉnh; độ khó **Thường** thì **chết** (bia mộ nhỏ dễ thương). Bị đánh cũng mất máu (mục 11). Không đói thì hồi chậm. |
-| **Đói** | 🍖 | 100 = no căng. Giảm theo thời gian, **nhanh hơn khi làm việc nặng** (chặt, đập đá, xây, săn, rèn, chiến đấu). **< 50** → tự đi ăn. Ăn quả hồi ít, món chín hồi nhiều. |
+| **Đói** | 🍖 | 100 = no căng. Giảm theo thời gian, **nhanh hơn khi làm việc nặng** (chặt, đập đá, xây, săn, rèn, chiến đấu). **< 50** → tự đi ăn ở bếp. Ăn một phần ở bếp (quả hay món chín) là **no căng 100**, cộng chút giải trí (món chín vui hơn) và **chút thể lực** (`EAT_ENERGY`, nhỏ hơn hẳn thể lực mất giữa hai bữa — ăn không thay được ngủ). |
 | **Thể lực** | ⚡ | Giảm khi làm việc (đứng chơi gần như không giảm). **< 50%** → tự đi tìm lều còn chỗ để ngủ. **= 0** → gục ngủ tại chỗ cho đến khi hồi 30%, rồi tự đi tìm lều ngủ tiếp. Ngủ trong lều hồi nhanh hơn ngủ đất; lều cấp cao hồi nhanh hơn nữa. Ngủ đủ (gần 100%) thì dậy. |
-| **Giải trí** | 🎉 | Giảm khi làm việc với tốc độ bình thường; **làm việc thích thì giảm rất chậm** (làm việc khác không bị phạt thêm gì). Hồi khi rảnh, tán gẫu, ở sân nhảy, ăn món ngon. **= 0 → đình công:** quăng đồ nghề, bong bóng 💢, toast "{tên} đình công!", từ chối việc và chỉ đứng chơi; **hồi ≥ 40% thì tự làm lại** việc cũ. |
+| **Giải trí** | 🎉 | Giảm khi làm việc với tốc độ bình thường; **làm việc thích thì giảm rất chậm** (làm việc khác không bị phạt thêm gì). Hồi khi rảnh, tán gẫu, ở sân nhảy, ăn món ngon. **= 0 → đình công:** quăng đồ nghề, bong bóng 💢, toast "{tên} đình công!", rồi **giơ biển vẽ việc đang làm gạch chéo** suốt lúc đình công, từ chối việc và chỉ đứng chơi; **hồi ≥ 40% thì tự làm lại** việc cũ. |
 
 - Bảng thông tin và tooltip chỉ dùng **icon + thanh nhỏ** cho 4 chỉ số (có thể đổi màu thanh khi thấp), không ghi chữ "No", "Năng lượng"…
 - Khi chỉ số tụt dưới ngưỡng, icon tương ứng nhấp nháy trên đầu thổ dân.
 
 ### 5.4 Kỹ năng & việc thích (hiển thị bằng icon)
 
-- **Các loại việc**, mỗi loại một icon riêng (`data/skills.gd`): Chặt cây 🪓, Đập đá ⛏, Hái lượm 🧺, Săn 🏹, Câu cá 🎣, Nấu ăn 🍲, Xây 🔨, Rèn ⚒, Chiến đấu 🦴. (Icon vẽ SVG, không dùng emoji font.)
+- **Các kỹ năng**, mỗi loại một icon riêng (`data/skills.gd`): Chặt cây 🪓, Đập đá ⛏, Hái lượm 🧺, Săn 🏹, Câu cá 🎣, Nấu ăn 🍲, Xây 🔨, Rèn ⚒, Chiến đấu 🦴. (Icon vẽ SVG, không dùng emoji font.)
+- **Một kỹ năng có thể gồm nhiều việc** (`data/jobs.gd`): Hái lượm = hái quả, nhặt củi, nhặt đá cuội. Làm việc nào cũng luyện kỹ năng đó.
 - **Cấp 1–5** cho từng việc, hiện bằng sao nhỏ cạnh icon trong bảng thông tin. Giá trị khởi đầu ngẫu nhiên, thiên theo tính cách (vd Khoẻ như trâu → Chặt cây/Đập đá/Chiến đấu cao hơn).
 - **Lên cấp:** làm việc đó đủ lâu (tích kinh nghiệm) thì lên cấp. Cấp cao làm nhanh hơn và/hoặc ra nhiều hơn (con số ở `balance.gd`).
 - **Việc thích ❤:** mỗi thổ dân có **đúng một** việc thích (không có việc ghét). Chỉ là **thưởng**, không có phạt: làm việc thích thì **kinh nghiệm lên nhanh hơn** và **giải trí giảm chậm hơn**; làm việc khác thì mọi thứ bình thường. Bảng thông tin đánh dấu tim cạnh icon việc đó.
@@ -287,7 +302,7 @@ Hệ nhu cầu viết dạng dữ liệu (`data/needs.gd`: icon, tốc độ tă
 ### 5.5 Hoạt cảnh rảnh rỗi (linh hồn của game gốc)
 
 Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ngẫu nhiên, có trọng số theo tính cách, mỗi cái kéo dài 3–10 giây:
-- **Tán gẫu** với người **đang ở gần**: hai người quay mặt vào nhau, bong bóng thoại chứa ký tự vô nghĩa ("Ugga bugga!", "Bùm ba la?"), kèm tiếng lẩm bẩm.
+- **Tán gẫu** với người **đang ở gần**: hai người quay mặt vào nhau, bong bóng nói chứa **1–2 hình ngẫu nhiên** (quả, đá, tim, ngôi sao, dấu ?…) thay cho chữ, kèm tiếng lẩm bẩm.
 - **Hái hoa dưới chân**: cúi xuống, đứng lên cầm bông hoa. (Mang hoa đi tặng là hoạt cảnh tìm bạn đời — mục 10.)
 - **Gãi mông**: tinh nghịch, nhanh, có hiệu ứng "gãi gãi".
 - **Ngồi phơi nắng** hoặc ngáp.
@@ -303,21 +318,28 @@ Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ng�
 
 ### 6.1 Khung cutout
 
-- Mỗi thổ dân là một `Node2D` gồm các `Sprite2D` con, thứ tự vẽ từ sau ra trước: `leg_back`, `arm_back`, `body`, `leg_front`, `head`, `face`, `hair`, `accessory`, `arm_front`, `held_item`.
+- Mỗi thổ dân là một `Node2D` gồm các `Sprite2D` con, thứ tự vẽ từ sau ra trước: (tấm biển), `leg_back`, `arm_back`, `back_item` (đồ nghề đeo sau lưng), `body`, `leg_front`, `head`, `face`, `hair`, `accessory`, `arm_front`, `held_item`, `carry_item` (đồ khuân trên đầu).
 - Tỉ lệ **chibi**: đầu chiếm khoảng 45% chiều cao. Cả nhân vật cao khoảng **72 px** ở độ phân giải gốc.
 - **Animation chủ yếu tạo bằng code** (tween, sin/cos), không vẽ từng frame:
   - Đi: thân nảy lên xuống, chân và tay đưa qua lại, nghiêng nhẹ theo hướng đi.
   - Đứng yên: thở (thân phồng xẹp 2–3%), **chớp mắt** ngẫu nhiên (đổi texture mặt).
   - Squash & stretch khi dừng lại, nhảy lên, hoặc đặt đồ xuống.
   - Lật ngang (`scale.x = -1`) theo hướng đi.
-- **Danh sách animation bắt buộc:** idle, walk, run (khi chạy trốn), chop (vung rìu), mine (gõ búa), gather (cúi hái), carry (giơ đồ trên đầu), eat, sleep (nằm, có "Zzz"), collapse (gục xuống ngủ khi thể lực = 0), talk, pick_flower, give_flower, scratch, dance, love (tim bay ra), strike (quăng đồ nghề, dậm chân, 💢), attack (vung chùy), hurt (giật lùi, nháy trắng), knocked_out (nằm, sao quay quanh đầu), baby_crawl, celebrate (nhảy cẫng lên khi xong việc lớn, lên cấp).
+- **Danh sách animation bắt buộc:** idle, walk, run (khi chạy trốn), chop (vung rìu), mine (gõ búa), gather (cúi hái), carry (hai tay giơ đồ trên đầu: giỏ quả, khúc gỗ, bó củi, xô đá cuội, con cá, **nguyên con thú chổng vó**), fish (quăng cần rồi chờ, dây câu + phao vẽ bằng code, giật nhẹ khi cá cắn), eat, sleep (nằm, có "Zzz"), collapse (gục xuống ngủ khi thể lực = 0), talk, pick_flower, give_flower, scratch, dance, love (tim bay ra), pout (ngồi bệt nũng nịu, đá chân), sign (đứng thì cắm biển xuống đất một tay vịn, ngồi thì hai tay giơ biển lên), strike (quăng đồ nghề, dậm chân, 💢), attack (vung / đâm / ném theo món đang cầm), hurt (giật lùi, nháy trắng), knocked_out (nằm, sao quay quanh đầu), baby_crawl, celebrate (nhảy cẫng lên khi xong việc lớn, lên cấp).
 
 ### 6.2 Phản hồi và "juice"
 
-- **Icon trên đầu** cho biết đang làm gì (icon của loại việc, quả, đĩa thức ăn, Zzz, tim, chùy).
-- **Bong bóng cảm xúc** khi có chuyện: đói 🍖, buồn ngủ 😴, vui ♪, yêu ❤, sợ ❗, đình công 💢. Vẽ thành icon SVG, không dùng emoji font.
+- **Icon trên đầu** cho biết đang làm gì (icon của loại việc, giỏ, xô, bó củi, đĩa thức ăn, Zzz, tim, đồ nghề đang đi lấy).
+- **Thổ dân không nói chữ.** Mọi "lời nói" đều là hình (icon SVG, không dùng emoji font), theo 3 kiểu:
+  - **Bong bóng nói** (khung tròn, 1–2 icon): cảm xúc tức thời — vui ♪, giận 💢, yêu ❤, sợ ❗, lên cấp (icon kỹ năng), tán gẫu.
+  - **Bong bóng nghĩ** (đám mây có chấm tròn dẫn xuống đầu): đang **muốn** gì đó — đùi thịt (đói, đang đi ăn / ngồi dỗi), Zzz (buồn ngủ, nghỉ tay), icon việc (được giao việc lúc đang bận: "lát nữa"), "…" (bảo đi đâu lúc đang bận), "?" (không tới được).
+  - **Tấm biển** (vẽ hình, có thể gạch chéo ✕): **cần người chơi ra tay** — đói lả (đùi thịt), bếp chưa có gì để nấu (đùi thịt ✕), hết cây/đá/quả/thú (icon việc ✕), thiếu đồ nghề (rìu/cuốc/giáo ✕), đình công (icon việc ✕, giữ suốt lúc đình công); Đợt 3: thiếu vật liệu xây (đứng trước công trình, gỗ/đá ✕).
+    - **Đứng thì cắm biển xuống đất** ngay trước mặt, một tay vịn; **ngồi thì hai tay giơ biển lên**; đang đi thì cất biển. **Không bao giờ để biển lơ lửng trên đầu.**
+    - Đang rảnh mà vừa cắm biển thì đứng yên cạnh biển một lúc cho người chơi kịp thấy, không đi dạo mất.
+  - Nhận lệnh thì nhún một cái, mặt tươi lên (không bong bóng). Chữ chỉ còn ở bảng thông tin, tooltip và toast.
 - **Icon chỉ số nhấp nháy** trên đầu khi một chỉ số dưới ngưỡng.
-- **Số bay lên** khi khuân đồ về kho: "+3 gỗ". Sao bay lên khi lên cấp kỹ năng.
+- **Số bay lên** khi khuân đồ về kho, tính theo tài nguyên chung: "+10 gỗ" (một khúc gỗ), "+3 đá" (xô đá cuội). Sao bay lên khi lên cấp kỹ năng.
+- **Đồ riêng của công trình bày ra cho thấy**: bát món chín quanh bếp, rìu/cuốc/giáo dựng cạnh lò rèn — nhìn là biết còn bao nhiêu.
 - **Bụi** khi chặt cây, đập đá hoặc dừng chạy.
 - **Công trình** mọc lên dần khi xây, nảy "bụp" khi xong hoặc lên cấp, có pháo giấy. Công trình sản xuất thiếu người phụ trách thì hiện **icon cảnh báo** phía trên.
 - **Ngày và đêm** (chỉ để **trang trí và tính ngày**; thổ dân đi ngủ theo **Thể lực**, không theo giờ):
@@ -346,14 +368,16 @@ Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ng�
   - `villager/body_01..03` (áo lông)
   - `villager/arm.svg`, `villager/leg.svg`
   - `villager/accessory_01..03`
-- Môi trường: cây (2 loại), gốc cây, đá (2 cỡ), bụi quả (có quả / hết quả), hoa, cỏ trang trí, ô nước, hang đá xuất phát, lửa trại.
-- Công trình: lều ngủ, bếp, kho, kho vũ khí, sân nhảy. Mỗi cái **3 cấp**, mỗi cấp có 3 trạng thái: móng (đang xây/nâng cấp), hoàn thành, hư hại. Hình phủ đúng **diện tích** của công trình (mục 9.3).
+- Môi trường: cây (2 loại), gốc cây, đá tảng (2 cỡ), **vách đá lớn**, **củi trên đất**, **đá cuội trên đất**, bụi quả (có quả / hết quả), hoa, cỏ trang trí, ô nước, hang đá xuất phát, lửa trại.
+- Đồ cầm tay & đồ khuân: giỏ (rỗng / đầy quả), xô (rỗng / đầy đá cuội), cần câu, khúc gỗ, bó củi, tấm biển (mặt để trống). Rìu, cuốc, giáo dùng chung hình với icon kỹ năng.
+- Công trình: lều ngủ, bếp, kho, lò rèn, sân nhảy. Mỗi cái **3 cấp**, mỗi cấp có 3 trạng thái: móng (đang xây/nâng cấp), hoàn thành, hư hại. Hình phủ đúng **diện tích** của công trình (mục 9.3).
 - Thú: lợn rừng, hươu nhỏ. Kẻ thù: cannibal (mặt nạ xương, sơn chiến), kèm biến thể màu.
 - **Không cần vẽ bóng đổ** cho từng vật: game tự tạo bóng theo mặt trời từ chính hình của vật (mục 6.2). Bóng elip nhỏ dưới chân trong hình tạm vẫn giữ làm "bóng tiếp đất".
 - Icon:
   - 4 chỉ số: ❤ máu, 🍖 đói, ⚡ thể lực, 🎉 giải trí.
   - Mỗi loại việc/kỹ năng (mục 5.4), sao cấp, tim việc thích.
-  - Mỗi tài nguyên, mỗi cảm xúc (gồm 💢), cảnh báo thiếu người phụ trách, nút tốc độ, nút nâng cấp.
+  - 3 tài nguyên chung (gỗ, đá, thức ăn = đùi thịt), từng món thức ăn (quả, cá, thịt), món chín.
+  - Mỗi cảm xúc (gồm 💢), dấu ✕, dấu ?, dấu "…", mây suy nghĩ, cảnh báo thiếu người phụ trách, nút tốc độ, nút nâng cấp.
 - **Viết `ASSET_SPEC.md`**: một bảng liệt kê **mọi** file gồm đường dẫn, kích thước khuyến nghị (px), điểm neo hoặc điểm xoay (ví dụ: tay xoay ở vai), và ghi chú. Mục đích là sau này mình vẽ PNG cùng tên, bỏ vào `assets/art/`, và game tự dùng mà không phải sửa code.
 
 ---
@@ -374,7 +398,7 @@ Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ng�
 | Tạm dừng / tốc độ | Space, phím 1–3 | Nút trên HUD |
 
 - Giao thổ dân cho một công trình: chạm/kéo vào **móng** → đi xây; vào **công trình sản xuất** đã xong → làm người phụ trách (đầu bếp, thợ rèn…); vào **sân nhảy** → đi chơi; vào **lều** → đi ngủ. Chạm vào **mặt đất trống** → đi tới đó và đặt điểm neo dạo chơi ở đó.
-- Chạm vào một công trình (khi không chọn thổ dân) → bảng công trình: cấp, người phụ trách, nút nâng cấp.
+- Chạm vào một công trình (khi không chọn thổ dân) → bảng công trình: cấp, người phụ trách, nút nâng cấp, đồ đang cất (lò rèn: thêm nút −/+ đặt số rìu/cuốc/giáo muốn rèn).
 - **Tự nhận biết** kiểu điều khiển từ sự kiện gần nhất và phát signal `input_mode_changed`. UI dùng signal đó để hiện hoặc ẩn nút ✕, chỉnh cỡ tooltip.
 - Phân biệt chạm với kéo bằng ngưỡng khoảng 10 px. Vùng chạm mỗi thổ dân **lớn hơn hình vẽ** (tối thiểu 48×48 px) để dễ chạm trên điện thoại.
 - Có setting **"Cỡ giao diện"** (80–150%).
@@ -388,7 +412,8 @@ Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ng�
 
 - Map khoảng **48×36 ô**, sinh ngẫu nhiên theo seed nhưng luôn đảm bảo các điểm sau:
   - Hang đá xuất phát và lửa trại ở giữa.
-  - Rừng cây ở một phía, bãi đá ở phía khác, rải rác bụi quả.
+  - Rừng cây ở một phía, bãi đá ở phía khác (có vài **vách đá lớn** 3×2 ô, mỗi vách có sẵn đá tảng sát chân), rải rác bụi quả.
+  - Củi nằm sẵn dưới tán cây, đá cuội nằm sẵn quanh đá tảng.
   - Một hồ hoặc suối nhỏ có chỗ câu cá.
   - Đồng cỏ có thú đi lang thang.
   - Một cạnh map là hướng cannibal kéo đến.
@@ -396,18 +421,23 @@ Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ng�
 
 ### 9.2 Tài nguyên
 
-| Tài nguyên | Nguồn | Ghi chú |
-|---|---|---|
-| Quả mọng | Hái ở bụi | Ăn sống được, hồi Đói ít. Bụi mọc lại quả sau một thời gian |
-| Thịt sống | Săn thú | Phải nấu ở bếp (hoặc lửa trại) mới ăn được |
-| Cá sống | Câu ở hồ | Phải nấu |
-| Món chín | Đầu bếp nấu ở bếp | Hồi Đói nhiều và tăng giải trí |
-| Gỗ | Chặt cây | Cây hết thì thành gốc, mọc lại rất chậm |
-| Đá | Đập đá | |
-| Vũ khí (chùy) | Thợ rèn làm ở kho vũ khí từ gỗ và đá | Trang bị thì tăng sức đánh |
+**Người chơi chỉ cần biết 3 tài nguyên chung** (thanh tài nguyên trên HUD): **Gỗ**, **Đá**, **Thức ăn** (icon đùi thịt). Bên trong game nhớ thổ dân khuân về **món** gì để vẽ cho đúng; tới kho thì quy ra tài nguyên chung.
 
-- Gỗ, đá, vũ khí **khuân về Kho** (ban đầu là lửa trại). Đồ ăn (quả, thịt, cá) **khuân về Bếp** (ban đầu là lửa trại). Thanh tài nguyên trên HUD chỉ tính đồ đã nằm trong kho/bếp.
-- **Bếp vừa nấu ăn vừa là nơi dân đến ăn** (cần có đồ ăn trong bếp). Trước khi có Bếp, lửa trại đóng vai "bếp tạm": chứa đồ ăn, nấu chậm, dân đói đến đó ăn.
+| Tài nguyên chung | Món khuân về (hình trên đầu) | Nguồn | Cần đồ nghề? |
+|---|---|---|---|
+| **Thức ăn** | Giỏ quả | Hái ở bụi (cầm giỏ đi hái). Bụi mọc lại quả sau 1 ngày | Không |
+| | Con cá | Câu ở hồ (cầm cần câu, quăng cần, phao nổi) | Không (cần câu không cần rèn) |
+| | Nguyên con thú (vác chổng vó trên đầu) | Săn thú | **Giáo** |
+| **Gỗ** | Bó củi = 1 gỗ | Củi rơi dần dưới tán cây (ngẫu nhiên, có giới hạn), nhặt tay, đủ một bó mới khuân về | Không |
+| | Khúc gỗ = 10 gỗ | Chặt cây. Cây hết khúc thì thành gốc; gốc chỉ mọc lại khi số cây ít hơn lúc đầu (không mọc tràn map) | **Rìu** |
+| **Đá** | Xô đá cuội = 1 đá mỗi viên | Đá cuội lăn ra dần quanh đá tảng (ngẫu nhiên, có giới hạn), nhặt tay bỏ vào xô | Không |
+| | Đá | Đập đá tảng. Đá tảng lăn ra dần từ **vách đá lớn** (phần của map, không khai thác được), chỉ khi số đá tảng ít hơn lúc đầu | **Cuốc** |
+
+- Thức ăn thô **ăn được luôn** (no căng) — không ai chết đói cạnh kho đầy chỉ vì chưa có đầu bếp. Kho nhớ có bao nhiêu phần là quả/cá/thịt; lấy ra ăn thì cầm đúng món trên tay.
+- **Đồ riêng của công trình** (không nằm trên thanh tài nguyên chung):
+  - **Món chín** của **Bếp**: đầu bếp lấy thức ăn thô trong kho nấu thành món chín, cất ngay ở bếp, tối đa theo cấp bếp (bày quanh bếp cho thấy còn bao nhiêu). Dân đói đến bếp ăn món chín trước (vui hơn), hết thì ăn thức ăn thô. Trước khi có Bếp, lửa trại là "bếp tạm" (chứa tối đa 4 món chín, nấu chậm).
+  - **Rìu, cuốc, giáo** của **Lò rèn** (mục 9.4).
+- Gỗ, đá **khuân về Kho** (ban đầu là lửa trại). Thức ăn **khuân về Bếp** (ban đầu là lửa trại). Thanh tài nguyên chỉ tính đồ đã nằm trong kho/bếp.
 
 ### 9.3 Công trình MVP
 
@@ -415,22 +445,42 @@ Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ng�
 1. Mỗi công trình chiếm **diện tích riêng** trên lưới (2×2, 3×3, 3×4…), không đè lên nhau, không đè lên cây/đá/nước.
 2. **Xây:** nhiều công nhân cùng xây một lúc, tối đa **max(1, số ô ÷ 2)** người (2×2 → 2 người, 3×3 → 4 người, 3×4 → 6 người). Thêm người thì xây nhanh hơn; kỹ năng Xây cao thì nhanh hơn. Người xây do người chơi giao (chế độ Normal không có ai tự đi xây).
 3. **Mọi công trình có 3 cấp.** Nâng cấp tốn tài nguyên và thời gian xây (giống xây mới, cũng cần công nhân). Trong lúc nâng cấp công trình vẫn hoạt động ở cấp cũ.
-4. **Công trình sản xuất** (Bếp → đầu bếp, Kho vũ khí → thợ rèn, …) phải có **dân phụ trách** mới hoạt động. Số người phụ trách tối đa: cấp 1 = 1, cấp 2 = 2, cấp 3 = 3. Người phụ trách làm việc tại công trình; kỹ năng tương ứng ảnh hưởng tốc độ sản xuất. Không có người phụ trách → công trình ngừng, hiện icon cảnh báo.
-5. Lửa trại có sẵn, 1×1, không nâng cấp, không cần người phụ trách để chứa đồ (nhưng muốn nấu ở lửa trại thì phải giao ai đó nấu).
+4. **Công trình sản xuất** (Bếp → đầu bếp, Lò rèn → thợ rèn, …) phải có **dân phụ trách** mới hoạt động. Số người phụ trách tối đa: cấp 1 = 1, cấp 2 = 2, cấp 3 = 3. Người phụ trách làm việc tại công trình; kỹ năng tương ứng ảnh hưởng tốc độ sản xuất. Không có người phụ trách → công trình ngừng, hiện icon cảnh báo.
+5. Lửa trại có sẵn, 1×1, không nâng cấp, không cần người phụ trách để chứa đồ (nhưng muốn nấu ở lửa trại thì phải giao ai đó nấu). Cất được tối đa 4 món chín.
+6. **Kho riêng của công trình:** món chín ở bếp, rìu/cuốc/giáo ở lò rèn — không tính vào thanh tài nguyên chung, có sức chứa theo cấp, bày hình ra cho thấy.
 
 | Công trình | Diện tích | Chi phí cấp 1 → 2 → 3 (gợi ý) | Chức năng theo cấp |
 |---|---|---|---|
-| Lửa trại (có sẵn) | 1×1 | — | Kho + bếp tạm ban đầu, nấu chậm, chỗ tụ tập buổi tối |
+| Lửa trại (có sẵn) | 1×1 | — | Kho + bếp tạm ban đầu, nấu chậm, chứa 4 món chín, chỗ tụ tập buổi tối |
 | Lều ngủ | 2×2 | 10 gỗ → 15 gỗ 5 đá → 20 gỗ 15 đá | Chỗ ngủ 2 / 3 / 4. Hồi thể lực ×1.5 / ×2 / ×2.5 so với ngủ đất. Cần lều còn chỗ thì cặp đôi mới có em bé (giới hạn dân số cố định 50) |
-| Bếp | 2×2 | 12 gỗ 6 đá → 15 gỗ 10 đá → 20 gỗ 20 đá | Đầu bếp 1 / 2 / 3. Chứa đồ ăn, nấu thịt/cá thành món chín, dân đói đến đây ăn |
+| Bếp | 2×2 | 12 gỗ 6 đá → 15 gỗ 10 đá → 20 gỗ 20 đá | Đầu bếp 1 / 2 / 3. Nhận thức ăn thô, nấu thành món chín cất tại bếp (sức chứa tăng theo cấp), dân đói đến đây ăn |
 | Kho | 3×3 | 15 gỗ → 20 gỗ 10 đá → 30 gỗ 25 đá | Điểm cất gỗ/đá (đỡ phải đi xa). Sức chứa 100 / 200 / 400 mỗi loại |
-| Kho vũ khí | 3×2 | 10 gỗ 10 đá → 15 gỗ 15 đá → 20 gỗ 25 đá | Thợ rèn 1 / 2 / 3. Làm chùy, trang bị cho dân |
+| Lò rèn | 3×2 | 10 gỗ 10 đá → 15 gỗ 15 đá → 20 gỗ 25 đá | Thợ rèn 1 / 2 / 3. Rèn rìu, cuốc, giáo theo số lượng người chơi đặt (mục 9.4), cất tại lò |
 | Sân nhảy | 3×3 | 8 gỗ 4 đá → 12 gỗ 8 đá → 16 gỗ 12 đá | Nhảy cùng lúc 4 / 6 / 8 người. Hồi giải trí nhanh, cấp cao nhanh hơn |
 
 - Chọn công trình trong menu → hiện **bóng mờ** đúng diện tích đi theo con trỏ hoặc ngón tay (xanh = đặt được, đỏ = không). Chạm lần nữa để đặt, có nút xác nhận hoặc huỷ trên cảm ứng.
-- Đặt xong thì thành **móng**. Người chơi giao công nhân → họ khuân vật liệu tới rồi xây. Có thanh tiến độ.
+- Đặt xong thì thành **móng**. Người chơi giao công nhân → họ **đội mũ công trường**, đi tới kho lấy vật liệu, khuân đổ vào công trường, lặp lại tới khi **đủ vật liệu thì mới bắt đầu xây**. Có thanh tiến độ cho cả phần vật liệu lẫn phần xây. Kho không đủ vật liệu thì thợ xây đứng trước công trình, cắm biển vẽ gỗ/đá gạch chéo.
 - Công trình bị cannibal đánh sẽ **hư hại** và mất chức năng cho đến khi được sửa (giao người sửa).
+- **Chi phí ở bảng trên là số cũ** (lúc 1 lượt chặt = 3 gỗ). Giờ 1 khúc gỗ = 10 gỗ, mỗi cây 30 gỗ — cân lại chi phí khi làm Đợt 3.
 - Thêm sau MVP: phòng tập (gym), bẫy lưới, lều tù trưởng, bãi cát cho trẻ con.
+
+### 9.4 Lò rèn & đồ nghề
+
+- Lò rèn làm **3 món**: **rìu**, **cuốc**, **giáo** (tốn gỗ + đá, con số ở `balance.gd`). Người chơi chạm lò rèn → bảng có 3 món, mỗi món nút **−/+** để đặt **số lượng muốn làm**; thợ rèn làm lần lượt tới đủ.
+- Đồ đã rèn **cất tại lò rèn**, hình lò rèn bày đúng số món đang có (vd 2 cái rìu dựng cạnh lò).
+- **Không có đồ nghề thì chỉ nhặt bằng tay**: nhặt củi, nhặt đá cuội, hái quả, câu cá. Chạm cây / đá tảng / con thú mà làng chưa có rìu / cuốc / giáo thì thổ dân cắm biển vẽ món đó gạch chéo.
+- **Lấy & giữ đồ nghề:** giao việc cần đồ nghề mà lò rèn còn món phù hợp → thổ dân tự tới lấy, rồi **giữ luôn**. Giao việc không cần đồ nghề (nhặt đá cuội…) thì vẫn giữ món cũ, **đeo sau lưng**, cầm xô/giỏ đi làm. Chỉ khi được giao việc cần món **khác** (đang cầm giáo mà được giao chặt cây) mới về lò rèn **đổi** món.
+- Công dụng:
+
+| Món | Làm việc | Chiến đấu (Đợt 5) |
+|---|---|---|
+| Rìu | Chặt cây ra khúc gỗ (10 gỗ) | Cận chiến, sát thương lớn, **không xuyên giáp** |
+| Cuốc | Đập đá tảng | Cận chiến, sát thương vừa, **xuyên giáp** |
+| Giáo | Săn thú (bắt buộc) | **Ném** khi địch ở xa, **đâm** khi ở gần |
+
+- Cần câu, giỏ, xô **không cần rèn** — ai cũng có.
+- Đồ nghề không hỏng (có thể thêm độ bền sau MVP).
+- Chưa có lò rèn (làm ở Đợt 3): bản debug bấm **F10** để thêm 1 rìu, 1 cuốc, 1 giáo vào lửa trại thử.
 
 ---
 
@@ -457,8 +507,8 @@ Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ng�
   - Đợt đầu vào khoảng **ngày 5**, sau đó cứ vài ngày một đợt, mỗi đợt mạnh dần.
   - Trước khi tấn công: tiếng tù và, toast cảnh báo, mũi tên ở rìa màn hình chỉ hướng kẻ địch đến (khoảng 20 giây để chuẩn bị).
   - Cannibal nhắm vào công trình và dân gần nhất.
-  - Dân có trang bị chùy **tự vệ** khi địch tới gần (đây là "nguy hiểm", ưu tiên 1, không phải tự kiếm việc). Người chơi chọn một nhóm dân rồi chạm vào một chỗ để **dàn quân** ở đó.
-  - Đánh nhau tự động: đứng gần, vung chùy theo nhịp, sát thương dựa vào sức đánh và kỹ năng Chiến đấu.
+  - Dân đang giữ rìu / cuốc / giáo **tự vệ** khi địch tới gần (đây là "nguy hiểm", ưu tiên 1, không phải tự kiếm việc). Người chơi chọn một nhóm dân rồi chạm vào một chỗ để **dàn quân** ở đó.
+  - Đánh nhau tự động theo món đang giữ (mục 9.4): rìu đánh đau nhưng không xuyên giáp, cuốc xuyên giáp, giáo ném từ xa rồi đâm khi tới gần. Sát thương dựa vào món, sức đánh và kỹ năng Chiến đấu. Tay không thì chỉ đẩy nhau.
   - Cannibal hết máu thì bỏ chạy, vừa chạy vừa lăn lộn cho hài.
 - **Độ khó** chọn khi bắt đầu game: Dễ (mặc định) hoặc Thường (xem trên).
 - Thêm sau MVP: bệnh tật và pháp sư đối phương, hổ răng kiếm, bẫy lưới, phòng tập tăng chỉ số, phản công vào làng địch.
@@ -503,21 +553,35 @@ Mỗi đợt kết thúc bằng một bản **chơi được**, và có tiêu ch
 ### Đợt 2 — Lao động & tài nguyên
 - Giao việc bằng chạm (chọn người rồi chạm mục tiêu) và bằng **kéo-thả** thổ dân vào mục tiêu. Toàn bộ logic diễn giải nằm trong `NormalController`, việc giao việc thực sự đi qua `Commands.assign_job()` (mục 3.2). Chạm mặt đất trống → đi tới đó, đặt điểm neo mới.
 - Các việc: chặt cây, đập đá, hái quả, săn thú, câu cá, khuân về kho, nấu ở lửa trại.
-- Việc tự lặp lại; hết tài nguyên thì tìm cái tương tự gần nhất, không có thì dừng + bong bóng "Hết cây rồi!". Bị ngắt quãng thì nhớ việc và tự quay lại.
+- Việc tự lặp lại; hết tài nguyên thì tìm cái tương tự gần nhất, không có thì dừng + giơ biển "hết cây" (cây gạch chéo). Bị ngắt quãng thì nhớ việc và tự quay lại.
 - Kỹ năng: tích kinh nghiệm, lên cấp (sao bay lên), cấp ảnh hưởng tốc độ/sản lượng; việc thích lên cấp nhanh hơn.
 - Chỉ số gắn với việc: việc nặng làm đói nhanh hơn, làm việc giảm thể lực và giải trí (việc không thích giảm giải trí nhanh hơn); thể lực = 0 thì gục; giải trí = 0 thì đình công.
 - Icon việc trên đầu, đường chấm chấm tới mục tiêu, số bay "+3 gỗ", HUD tài nguyên.
 - Nút tốc độ: tạm dừng, ×1, ×2, ×3.
 - **Xong khi:** giao 3 người chặt gỗ và 2 người đập đá, số trong kho tăng đều, không ai đứng đơ; người không được giao vẫn đứng chơi quanh chỗ cũ.
 
+### Đợt 2.1 — Thổ dân "nói" bằng hình + luật ăn mới (đã xong)
+- Bỏ hết chữ trên đầu thổ dân: bong bóng nói (icon), mây nghĩ, tấm biển (mục 6.2). Tán gẫu bằng hình.
+- Đói < 50 chỉ đi ăn ở bếp; bếp hết đồ thì ngồi bệt nũng nịu, đói lả thì giơ biển (mục 5.2). Ăn ở bếp no căng, cộng chút vui và thể lực.
+- Tooltip nền sáng dễ đọc.
+
+### Đợt 2.2 — Gộp tài nguyên, đồ nghề, củi & đá cuội (đã xong)
+- 3 tài nguyên chung gỗ/đá/thức ăn, bên trong nhớ món để vẽ đúng (mục 9.2). Món chín là đồ riêng của bếp.
+- Đồ cầm tay đúng việc: giỏ, xô, cần câu (quăng cần, dây + phao), giáo; vác nguyên con thú về.
+- Rìu/cuốc/giáo bắt buộc cho chặt cây/đập đá tảng/săn; thổ dân tự lấy, giữ, đeo sau lưng, đổi khi cần (mục 9.4). Chưa có lò rèn nên dùng F10 để thử.
+- Nhặt củi, nhặt đá cuội bằng tay theo mẻ; củi, đá cuội, đá tảng (từ vách đá), cây tự hồi lại có giới hạn.
+- Tấm biển cắm đất khi đứng, giơ tay khi ngồi.
+
 ### Đợt 3 — Xây dựng, nâng cấp & ngày đêm
-- Menu xây, bóng mờ đúng **diện tích** khi đặt, móng, giao công nhân (nhiều người, tối đa theo diện tích), khuân vật liệu, thanh tiến độ, hiệu ứng hoàn thành.
+- Menu xây, bóng mờ đúng **diện tích** khi đặt, móng, giao công nhân (nhiều người, tối đa theo diện tích): thợ xây **đội mũ công trường**, khuân vật liệu từ kho đổ vào công trường tới đủ rồi mới xây; thanh tiến độ, hiệu ứng hoàn thành.
+- **Lò rèn**: bảng đặt số lượng rìu/cuốc/giáo, thợ rèn làm lần lượt, đồ bày quanh lò; bỏ F10 khỏi bản chơi.
 - Năm công trình MVP, mỗi cái **3 cấp** + nâng cấp; bảng công trình (cấp, người phụ trách, nút nâng cấp).
 - Lều: chỗ ngủ và tốc độ hồi thể lực theo cấp; thổ dân mệt tự tìm lều còn chỗ. Bếp: đầu bếp nấu, dân đói tự đến bếp ăn. Công trình sản xuất cần người phụ trách, thiếu thì ngừng + icon cảnh báo.
 - Đổi chỗ "ngủ cạnh lửa trại / ăn ở lửa trại" của Đợt 1.5 sang Lều / Bếp.
 - Chu kỳ ngày đêm (trang trí + đếm ngày): ánh sáng mặt trời đổi liên tục theo giờ, mọi vật và thổ dân đổ bóng theo hướng mặt trời để ước được giờ (mục 6.2), có thể thêm đồng hồ mặt trời nhỏ.
 - Tự lưu mỗi ngày, có lưu và tải thủ công.
-- **Xong khi:** xây và nâng cấp được cả năm công trình, có đầu bếp thì bếp nấu ra món chín và dân đói tự đến ăn, dân mệt tự vào lều ngủ.
+- Cân lại chi phí công trình theo đơn vị gỗ mới (1 khúc = 10 gỗ).
+- **Xong khi:** xây và nâng cấp được cả năm công trình, có đầu bếp thì bếp nấu ra món chín và dân đói tự đến ăn, dân mệt tự vào lều ngủ, rèn được rìu rồi giao chặt cây được.
 
 ### Đợt 4 — Tìm bạn đời & dân số
 - Hoạt cảnh tìm bạn đời (tỉ lệ ~10% mỗi lần kiểm tra; hái hoa → tặng → vào lều → có em bé ngay), cặp đôi, em bé, lớn lên, giới hạn dân số 50 (mục 10).
@@ -526,7 +590,7 @@ Mỗi đợt kết thúc bằng một bản **chơi được**, và có tiêu ch
 - **Xong khi:** chơi khoảng 15 phút với dân vui vẻ thì có ít nhất 2 em bé chào đời và lớn lên.
 
 ### Đợt 5 — Cannibal & chiến đấu
-- Kho vũ khí có thợ rèn làm chùy, trang bị cho dân.
+- Rìu / cuốc / giáo dùng làm vũ khí theo mục 9.4 (ném giáo, xuyên giáp…).
 - Đợt tấn công: cảnh báo, kẻ địch kéo đến, phá nhà, tự vệ, dàn quân, ngất/chết theo độ khó, sửa nhà.
 - Chọn độ khó Dễ hoặc Thường.
 - **Xong khi:** sống sót qua 2 đợt tấn công ở độ khó Dễ. Nhà bị phá sửa được. Không crash.
@@ -551,6 +615,9 @@ Mỗi đợt kết thúc bằng một bản **chơi được**, và có tiêu ch
 | Bán kính tìm tài nguyên tương tự khi hết | khoảng 8 ô quanh chỗ làm cũ (`JOB_SEARCH_RADIUS_CELLS`) |
 | Đói giảm | 100 → 0 trong khoảng 1.5 ngày khi rảnh; ×1.5 khi làm việc nặng |
 | Ngưỡng tự đi ăn | Đói < 50 |
+| Ăn ở bếp | No căng 100; +6 giải trí (món chín +10 nữa); +10 thể lực (`EAT_ENERGY`) |
+| Đồ ăn có sẵn khi bắt đầu | 8 thức ăn (quả) ở lửa trại (`START_FOOD`) |
+| Món chín ở lửa trại | Tối đa 4 (`CAMPFIRE_MEAL_CAPACITY`) |
 | Thể lực giảm khi làm việc | 100 → 0 trong khoảng 1 ngày làm liên tục; rảnh gần như không giảm |
 | Ngưỡng tự đi ngủ | Thể lực < 50% |
 | Gục ngủ tại chỗ | Thể lực = 0, ngủ đến 30% rồi tự đi tìm lều |
@@ -559,9 +626,13 @@ Mỗi đợt kết thúc bằng một bản **chơi được**, và có tiêu ch
 | Đình công | Giải trí = 0; tự làm lại khi hồi ≥ 40 |
 | Máu giảm khi Đói = 0 | 100 → 0 trong khoảng 0.5 ngày |
 | Cấp kỹ năng | 1–5; mỗi cấp nhanh hơn ~10%; kinh nghiệm cần tăng dần; việc thích nhận kinh nghiệm ×2 (việc khác ×1) |
-| Chặt 1 cây | 6 giây → 3 gỗ (cây có 3 lượt) |
-| Đập 1 tảng đá | 8 giây → 2 đá (đá có 4 lượt) |
-| Hái 1 bụi quả | 3 giây → 2 quả. Mọc lại sau 1 ngày |
+| Chặt cây (cần rìu) | 10 giây → 1 khúc gỗ = 10 gỗ; mỗi cây 3 khúc |
+| Nhặt củi (tay) | 1.5 giây mỗi bó (1 gỗ), đủ 3 bó mới khuân về; củi dưới tán cây tối đa 20 bó, rơi thêm ~10 giây một bó |
+| Đập đá tảng (cần cuốc) | 8 giây → 4 đá; mỗi tảng 4 lượt |
+| Nhặt đá cuội (tay) | 1.5 giây mỗi viên (1 đá), đủ 3 viên mới khuân về; tối đa 14 viên, lăn thêm ~14 giây một viên |
+| Đá tảng mới / cây mọc lại | Đá tảng lăn ra từ vách ~90 giây một lần, cây mọc lại từ gốc ~45 giây một lần — chỉ khi ít hơn số lúc đầu |
+| Săn (cần giáo) | Vác nguyên con về = 4 thức ăn |
+| Hái 1 bụi quả | 3 giây → 2 thức ăn. Mọc lại sau 1 ngày |
 | Nấu 1 món | 5 giây ở bếp (chia theo số đầu bếp + kỹ năng), 10 giây ở lửa trại |
 | Thợ xây tối đa | max(1, số ô ÷ 2) |
 | Người phụ trách tối đa | cấp 1 = 1, cấp 2 = 2, cấp 3 = 3 |
@@ -607,7 +678,7 @@ Chưa làm, chỉ ghi lại để định hướng. Kiến trúc ở mục 3.2 l
 
 # PHỤ LỤC — Ghi chú kỹ thuật cho Claude
 
-> Phần trên là bản copy y nguyên `MVP_PROMPT.md` (nguồn chính — sửa ở đó rồi copy lại sang đây). Phần dưới là ghi chú riêng cho Claude về project này.
+> Phần trên là bản copy y nguyên `GAME_DESIGN.md` (nguồn chính — sửa ở đó rồi copy lại sang đây; trước đây file này tên `MVP_PROMPT.md`). Phần dưới là ghi chú riêng cho Claude về project này.
 
 Kế hoạch ban đầu + quyết định kỹ thuật: `PLAN.md`. Nhật ký từng đợt: `DEVLOG.md` — đọc mục mới nhất trước khi làm tiếp.
 
@@ -621,9 +692,9 @@ Godot 4.7.2 ở `C:\Tools\Godot\` (PowerShell: `godot`; Git Bash: `/c/Tools/Godo
 
 - Import + bắt lỗi parse: `godot --headless --path . --editor --quit`
 - Chạy game ~10 s: `godot --headless --path . --quit-after 600`
-- Smoke test: `godot --headless --path . res://tests/run_tests.tscn` — in `PASS`/`FAIL`, mã thoát 1 khi có test trượt. Thêm test = thêm file `tests/cases/test_*.gd` kế thừa `TestCase`.
+- Smoke test: `godot --headless --path . res://tests/run_tests.tscn` — in `PASS`/`FAIL`, mã thoát 1 khi có test trượt. Thêm test = thêm file `tests/cases/test_*.gd` kế thừa `TestCase`. Chỉ chạy vài test: thêm `-- --only=<đoạn tên>` (vd `--only=hunt`).
 - Soi cảnh báo GDScript (chạy ngoài editor thì Godot không in cảnh báo): copy `tools/strict_warnings.cfg` thành `override.cfg` ở gốc project → chạy test + game (cảnh báo thành lỗi) → **xoá** `override.cfg`.
-- Chụp màn hình (mở cửa sổ thật vài giây): `godot --path . res://tools/screenshot.tscn -- --out=<thư mục> --seed=42` (thêm `--wait=40 --speed=4 --select` để chờ làng sinh hoạt và mở bảng thông tin). Thêm `--jobs` để giao việc (2 chặt, 1 đập, 1 hái) ngay khi ra khỏi hang và chụp thêm `work.png`.
+- Chụp màn hình (mở cửa sổ thật vài giây): `godot --path . res://tools/screenshot.tscn -- --out=<thư mục> --seed=42` (thêm `--wait=40 --speed=4 --select` để chờ làng sinh hoạt và mở bảng thông tin). Thêm `--jobs` để cấp đồ nghề rồi giao việc (chặt cây, câu cá, nhặt đá cuội, hái quả) ngay khi ra khỏi hang và chụp thêm `work.png`; `--hungry` để dọn sạch bếp và chụp cảnh ngồi dỗi (`hungry.png`).
 - Seed cố định: `godot --path . -- --seed=42`, hoặc đặt `Balance.DEBUG_FIXED_SEED`. Chọn chế độ: `-- --mode=res://modes/normal_mode.tres`.
 - Sinh lại 15 hình nước: `godot --headless --path . -s res://tools/gen_water_tiles.gd`
 
@@ -632,7 +703,7 @@ Godot 4.7.2 ở `C:\Tools\Godot\` (PowerShell: `godot`; Git Bash: `/c/Tools/Godo
 ## Kiến trúc đa chế độ đã làm (Đợt 1.5)
 
 - 3 tầng: **UI/HUD** (`ui/common/` dùng chung, `ui/<chế độ>/` riêng) → **Controller** (`modes/controllers/`, kế thừa `PlayerController`) → **Lõi mô phỏng** (`world/`, `villager/`, `buildings/`, autoload). Lõi không biết đang ở chế độ nào.
-- Lõi KHÔNG gọi UI và KHÔNG tự dịch chữ: báo qua `EventBus`, hoặc `villager.say(key, args, icon)` / `emote()` / `show_heart()` — `Overhead` nghe và dịch.
+- Lõi KHÔNG gọi UI và KHÔNG tự dịch chữ: báo qua `EventBus`, hoặc qua hình trên đầu thổ dân: `emote(icon)` / `chatter(icons)` (bong bóng nói), `think(icon)` (mây nghĩ), `hold_sign(icon, crossed)` (tấm biển, vẽ ở `VillagerRig`), `show_heart()`. Thổ dân **không nói chữ** — không có `say()`, không có key `BUBBLE_*`.
 - Mọi hành động người chơi (và kịch bản) đi qua autoload `Commands`. UI/controller chỉ ĐỌC dữ liệu thổ dân.
 - Chỉ controller nghe lệnh từ `InputRouter` (ngoại lệ: camera và bảng debug — giống nhau mọi chế độ).
 - Luật chơi đọc từ `GameState.mode` (`GameModeConfig`, file `modes/normal_mode.tres`), không viết `if` theo tên chế độ.
@@ -648,6 +719,7 @@ Godot 4.7.2 ở `C:\Tools\Godot\` (PowerShell: `godot`; Git Bash: `/c/Tools/Godo
 - Input: chỉ nghe signal của `InputRouter` (tapped, pan/zoom_requested, drag_assign_*, long_pressed, hovered, cancel_requested), không đọc chuột/cảm ứng trực tiếp. Control phủ lên thế giới phải `mouse_filter = IGNORE` nếu không cần bấm.
 - Sinh map chỉ dùng RNG riêng của generator (không `randf()`/`shuffle()` toàn cục) để cùng seed ra cùng map.
 - Godot có sẵn enum toàn cục `Side` — đừng đặt tên enum/class trùng tên global.
+- **Tài nguyên (Đợt 2.2):** chung chỉ có gỗ/đá/thức ăn (`ResourceDefs`); thổ dân khuân MÓN (`ResourceDefs.ITEMS`), tới kho quy ra tài nguyên chung; `GameState.add_resource(id, n, item)` nhớ món để `take_one()` trả về đúng món. Đồ riêng của công trình (món chín, đồ nghề) ở `Building.stock`. Việc theo `job_id` (JobDefs), nhiều việc chung một kỹ năng; `tool_item` = đồ nghề bắt buộc (`ToolDefs`), thổ dân giữ ở `VillagerStatus.tool`. Củi/đá cuội/đá tảng mới/cây mọc lại: `NatureSpawner`. F10 (debug) = `Commands.debug_give_tools()`.
 - **Việc được giao (Đợt 2):** `Job` (villager/job.gd) là việc thổ dân GHI NHỚ; mỗi lượt làm là một `TaskWork` con (`TaskHarvest`, `TaskHunt`, `TaskCook`, `TaskDeliver`). Bộ não bước 6 tạo lượt tiếp theo khi task hiện tại là IDLE. Ưu tiên task: `IDLE < WORK < NEED < SCRIPTED` — đói/mệt/đình công ngắt được WORK. Cách làm từng việc ở `data/jobs.gd`, tài nguyên ở `data/resources.gd`. Kho = công trình có cờ `material_storage` / `food_storage`; nấu = cờ `cook_station`.
 - Cấp kỹ năng hiện tại: `villager.skill_level(skill)` (VillagerStatus giữ cấp đã lên + kinh nghiệm; VillagerData.skills chỉ là cấp khởi đầu).
 - Tham số dịch tên `*_key` được `Loc.t` dịch rồi thay vào chỗ giữ chỗ không đuôi (`{"job_key": "JOB_CHOP"}` → `{job}`) — lõi gửi key, không gửi chữ.

@@ -33,7 +33,6 @@ func tick(delta: float) -> Status:
 			status.hunger = maxf(status.hunger, Balance.KNOCKOUT_WAKE_HUNGER)
 			villager.state = Villager.State.IDLE
 			villager.rig.play(VillagerRig.ANIM_RUB_EYES)
-			villager.say("BUBBLE_DIZZY")
 			timer = WAKE_SECONDS
 			step = Step.WAKE
 		Step.WAKE:

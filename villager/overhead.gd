@@ -1,16 +1,19 @@
 class_name Overhead
 extends Node2D
-## Mọi thứ hiện trên đầu thổ dân: bong bóng thoại/cảm xúc, icon việc đang làm, tên,
-## chữ Z khi ngủ, tim bay. Đây là kênh "phản hồi rõ ràng" để người chơi luôn biết
-## thổ dân đang làm gì và vì sao.
+## Mọi thứ hiện trên đầu thổ dân: bong bóng nói / bong bóng nghĩ (chỉ có HÌNH, thổ dân
+## không nói chữ — giống game gốc), icon việc đang làm, tên, chữ Z khi ngủ, tim bay. Đây là
+## kênh "phản hồi rõ ràng" để người chơi luôn biết thổ dân đang làm gì và muốn gì.
+## (Tấm biển giơ trên tay nằm ở VillagerRig vì nó đi theo động tác tay.)
 ##
-## Chỉ NGHE thổ dân (signal + đọc trạng thái), tự dịch chữ bằng Loc — lõi mô phỏng
-## không cần biết chữ hiển thị ra sao.
+## Chỉ NGHE thổ dân (signal + đọc trạng thái) — lõi mô phỏng không biết hình hiện ra sao.
 
-const BUBBLE_SECONDS: float = 2.6
-const EMOTE_SECONDS: float = 1.6
-const BUBBLE_FONT_SIZE: int = 14
+const SPEECH_SECONDS: float = 1.6
+const THOUGHT_SECONDS: float = 2.6
 const BUBBLE_ICON_SIZE: float = 22.0
+## Icon nằm giữa phần mây (tính từ mép dưới đuôi mây, px hiển thị).
+const THOUGHT_ICON_POS: Vector2 = Vector2(0, -26)
+const THOUGHT_ICON_SCALE: float = 1.1
+const MAX_SPEECH_ICONS: int = 2
 const BUBBLE_GAP_ABOVE_NAME: float = 18.0
 const NAME_FONT_SIZE: int = 13
 const ACTIVITY_BOB: float = 2.0
@@ -26,8 +29,11 @@ const KNOCKOUT_STAR_SCALE: float = 0.3
 
 var _villager: Villager
 var _bubble: PanelContainer
-var _bubble_icon: TextureRect
-var _bubble_label: Label
+var _bubble_icons: Array[TextureRect] = []
+var _thought: Node2D
+var _thought_icon: Sprite2D
+## Bong bóng đang hiện (_bubble, _thought hoặc null) và thời gian còn lại (INF = tới khi xoá).
+var _shown: CanvasItem
 var _bubble_time: float = 0.0
 var _activity: Sprite2D
 var _name_label: Label
@@ -46,6 +52,8 @@ func _ready() -> void:
 	add_child(_name_label)
 	_bubble = _make_bubble()
 	add_child(_bubble)
+	_thought = _make_thought()
+	add_child(_thought)
 	_alert = Sprite2D.new()
 	_alert.visible = false
 	add_child(_alert)
@@ -58,7 +66,8 @@ func _ready() -> void:
 		_stars.append(star)
 	_villager = get_parent() as Villager
 	if _villager != null:
-		_villager.speech_requested.connect(_on_speech_requested)
+		_villager.bubble_requested.connect(_on_bubble_requested)
+		_villager.bubble_cleared.connect(_hide_bubble)
 		_villager.heart_requested.connect(_on_heart_requested)
 		_villager.task_changed.connect(_on_task_changed)
 		_name_label.text = _villager.data.display_name
@@ -69,10 +78,22 @@ func set_name_visible(on: bool) -> void:
 	_name_label.reset_size()
 
 
-func _on_speech_requested(key: String, args: Dictionary, icon_key: String, seconds: float) -> void:
-	var text: String = "" if key.is_empty() else Loc.t(key, args)
-	var default_seconds: float = EMOTE_SECONDS if key.is_empty() else BUBBLE_SECONDS
-	_show_bubble(text, icon_key, seconds if seconds > 0.0 else default_seconds)
+func _on_bubble_requested(style: Villager.Bubble, icon_keys: Array[String], seconds: float) -> void:
+	if icon_keys.is_empty():
+		return
+	_hide_bubble()
+	if style == Villager.Bubble.THOUGHT:
+		ArtLibrary.setup_sprite(_thought_icon, icon_keys[0])
+		_thought_icon.scale *= THOUGHT_ICON_SCALE
+		_pop_in(_thought, seconds if seconds > 0.0 else THOUGHT_SECONDS)
+		return
+	for i: int in _bubble_icons.size():
+		var rect: TextureRect = _bubble_icons[i]
+		rect.visible = i < icon_keys.size()
+		if rect.visible:
+			rect.texture = ArtLibrary.get_texture(icon_keys[i])
+	_bubble.reset_size()
+	_pop_in(_bubble, seconds if seconds > 0.0 else SPEECH_SECONDS)
 
 
 func _on_heart_requested() -> void:
@@ -86,34 +107,37 @@ func _on_task_changed(villager: Villager) -> void:
 		ArtLibrary.setup_sprite(_activity, icon_key)
 
 
-func _show_bubble(text: String, icon_key: String, seconds: float) -> void:
-	_bubble_label.text = text
-	_bubble_label.visible = not text.is_empty()
-	_bubble_icon.visible = not icon_key.is_empty()
-	if _bubble_icon.visible:
-		_bubble_icon.texture = ArtLibrary.get_texture(icon_key)
-	_bubble.reset_size()
-	_bubble.visible = true
+func _pop_in(item: CanvasItem, seconds: float) -> void:
+	_shown = item
 	_bubble_time = seconds
-	_bubble.scale = Vector2(0.6, 0.6)
-	var tween: Tween = _bubble.create_tween()
-	tween.tween_property(_bubble, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	item.visible = true
+	# Control và Node2D đều có `scale` nhưng không chung lớp cha có thuộc tính này.
+	item.set("scale", Vector2(0.6, 0.6))
+	var tween: Tween = item.create_tween()
+	tween.tween_property(item, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _hide_bubble() -> void:
+	_bubble.visible = false
+	_thought.visible = false
+	_shown = null
 
 
 func _process(delta: float) -> void:
 	_time += delta
-	if _bubble.visible:
+	if _shown != null:
 		_bubble_time -= delta
 		if _bubble_time <= 0.0:
-			_bubble.visible = false
+			_hide_bubble()
 	# Đặt bong bóng sao cho mép dưới ở giữa đầu, phía trên tên (nếu tên đang hiện).
 	var lift: float = BUBBLE_GAP_ABOVE_NAME if _name_label.visible else 0.0
 	_bubble.position = Vector2(-_bubble.size.x * 0.5, -_bubble.size.y - lift)
 	_bubble.pivot_offset = Vector2(_bubble.size.x * 0.5, _bubble.size.y)
+	_thought.position = Vector2(0, -lift)
 	_name_label.position = Vector2(-_name_label.size.x * 0.5, -_name_label.size.y + 4.0)
 	_activity.position = Vector2(0, -6 - lift + sin(_time * 3.0) * ACTIVITY_BOB)
 	# Bong bóng đang hiện thì giấu icon việc cho đỡ rối.
-	_activity.modulate.a = 0.0 if _bubble.visible else 1.0
+	_activity.modulate.a = 0.0 if _shown != null else 1.0
 	# Chữ Z bay lên khi đang ngủ — đọc thẳng trạng thái, lõi không phải báo riêng.
 	if _villager != null and _villager.state == Villager.State.SLEEPING:
 		_zzz_timer -= delta
@@ -193,19 +217,28 @@ func _make_bubble() -> PanelContainer:
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", 4)
 	panel.add_child(row)
-	_bubble_icon = TextureRect.new()
-	_bubble_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_bubble_icon.custom_minimum_size = Vector2(BUBBLE_ICON_SIZE, BUBBLE_ICON_SIZE)
-	_bubble_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_bubble_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	row.add_child(_bubble_icon)
-	_bubble_label = Label.new()
-	_bubble_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_bubble_label.add_theme_font_size_override("font_size", BUBBLE_FONT_SIZE)
-	_bubble_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	row.add_child(_bubble_label)
+	for i: int in MAX_SPEECH_ICONS:
+		var icon: TextureRect = TextureRect.new()
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.custom_minimum_size = Vector2(BUBBLE_ICON_SIZE, BUBBLE_ICON_SIZE)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		row.add_child(icon)
+		_bubble_icons.append(icon)
 	panel.visible = false
 	return panel
+
+
+func _make_thought() -> Node2D:
+	var root: Node2D = Node2D.new()
+	var cloud: Sprite2D = Sprite2D.new()
+	ArtLibrary.setup_sprite(cloud, "ui/thought_bubble")
+	root.add_child(cloud)
+	_thought_icon = Sprite2D.new()
+	_thought_icon.position = THOUGHT_ICON_POS
+	root.add_child(_thought_icon)
+	root.visible = false
+	return root
 
 
 func _make_name_label() -> Label:

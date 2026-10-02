@@ -3,8 +3,10 @@ extends Task
 ## Lớp gốc của các lượt lao động (chặt, đập, hái, câu, săn, nấu). Gom phần dùng chung:
 ## - Làm việc: đếm thời gian theo tốc độ làm (tính cách + cấp kỹ năng), tích kinh nghiệm,
 ##   mỗi nhát thì vật rung + tung bụi, Lười thì nghỉ tay giữa chừng rồi tự làm tiếp.
-## - Khuân đồ về kho gần nhất (giơ đồ trên đầu), đặt xuống, số bay "+3 gỗ".
-## Bị ngắt lúc đang khuân thì đồ được ghi vào Job để lượt sau khuân nốt.
+## - Cầm đúng đồ trên tay (rìu, giỏ, xô, cần câu…) từ lúc đi tới chỗ làm.
+## - Khuân MÓN về kho gần nhất (giơ trên đầu: khúc gỗ, giỏ quả, xác thú…), tới nơi quy ra
+##   tài nguyên chung, số bay "+10 gỗ".
+## Bị ngắt lúc đang khuân thì món được ghi vào Job để lượt sau khuân nốt.
 
 enum CarryStep { NONE, GO, DROP }
 
@@ -22,8 +24,8 @@ var _swing_timer: float = 0.0
 var _break_at: float = -1.0
 var _break_left: float = 0.0
 var _carry_step: CarryStep = CarryStep.NONE
-var _carry_resource: StringName = &""
-var _carry_amount: int = 0
+var _carry_item: StringName = &""
+var _carry_count: int = 0
 var _storage: Building
 
 
@@ -53,7 +55,7 @@ func activity_key() -> String:
 
 func activity_args() -> Dictionary:
 	if is_carrying():
-		return {"resource_key": ResourceDefs.noun_key(_carry_resource)}
+		return {"resource_key": ResourceDefs.item_noun_key(_carry_item)}
 	return {}
 
 
@@ -69,13 +71,18 @@ func impact_target() -> Node2D:
 	return null
 
 
+## Cầm đồ của việc này lên tay (rìu, giỏ, xô, cần câu…) — gọi từ lúc bắt đầu đi tới chỗ làm.
+func hold_job_item() -> void:
+	villager.rig.set_held_item(JobDefs.held_art(job.job_id), JobDefs.held_tilts(job.job_id))
+
+
 ## Bắt đầu làm một lượt dài `seconds` (ở cấp 1, tốc độ thường).
 func begin_work(seconds: float) -> void:
 	var def: Dictionary = job.def()
 	_work_left = seconds
 	_work_anim = def.get("anim", VillagerRig.ANIM_GATHER)
 	villager.rig.play(_work_anim)
-	villager.rig.set_held_item(str(def.get("tool", "")), true)
+	hold_job_item()
 	villager.state = Villager.State.WORKING
 	_swing_timer = float(def.get("swing", 0.0)) * FIRST_SWING_FRACTION
 	_break_at = -1.0
@@ -102,7 +109,7 @@ func tick_work(delta: float) -> bool:
 		_break_left = Balance.LAZY_BREAK_SECONDS
 		villager.rig.play(VillagerRig.ANIM_SIT)
 		villager.state = Villager.State.IDLE
-		villager.say("BUBBLE_LAZY_BREAK", {}, "icons/sleepy")
+		villager.think("icons/sleepy")
 		villager.notify_task_changed()
 	return _work_left <= 0.0
 
@@ -124,19 +131,21 @@ func _tick_swing(delta: float) -> void:
 
 # --- Khuân về kho ---
 
-## Bắt đầu khuân `amount` `resource` về kho gần nhất nhận loại đồ này.
-func begin_carry(resource: StringName, amount: int) -> void:
-	_carry_resource = resource
-	_carry_amount = amount
-	job.carried_resource = resource
-	job.carried_amount = amount
+## Bắt đầu khuân `count` món `item` về kho gần nhất nhận loại đồ này. `carry_art` thay hình
+## giơ trên đầu (vd xác đúng con thú vừa săn), `upside_down` = vác ngửa (thú chổng vó).
+func begin_carry(item: StringName, count: int, carry_art: String = "", upside_down: bool = false) -> void:
+	_carry_item = item
+	_carry_count = count
+	job.carried_item = item
+	job.carried_count = count
 	villager.rig.set_held_item("")
-	villager.rig.set_carry_item(ResourceDefs.icon(resource))
+	var art: String = carry_art if not carry_art.is_empty() else ResourceDefs.item_carry_art(item)
+	villager.rig.set_carry_item(art, upside_down)
 	villager.rig.squash(-0.1)
 	villager.state = Villager.State.CARRYING
 	_carry_step = CarryStep.GO
 	villager.notify_task_changed()
-	_storage = world().finder.find_storage_for(resource, villager)
+	_storage = world().finder.find_storage_for(ResourceDefs.item_resource(item), villager)
 	if _storage == null:
 		# Không có kho nào (không nên xảy ra vì lửa trại luôn là kho) — cất thẳng.
 		_deliver()
@@ -163,11 +172,14 @@ func tick_carry(delta: float) -> Status:
 
 
 func _deliver() -> void:
-	GameState.add_resource(_carry_resource, _carry_amount)
+	var resource: StringName = ResourceDefs.item_resource(_carry_item)
+	var amount: int = ResourceDefs.item_value(_carry_item, _carry_count)
+	# Thức ăn nhớ là quả / cá / thịt để lúc lấy ra ăn cầm đúng món.
+	GameState.add_resource(resource, amount, _carry_item if ResourceDefs.is_food(resource) else &"")
 	var drop_at: Vector2 = _storage.position if _storage != null else villager.position
-	EventBus.resource_delivered.emit(_carry_resource, _carry_amount, drop_at + FLOAT_TEXT_LIFT)
-	job.carried_resource = &""
-	job.carried_amount = 0
+	EventBus.resource_delivered.emit(resource, amount, drop_at + FLOAT_TEXT_LIFT)
+	job.carried_item = &""
+	job.carried_count = 0
 	villager.rig.set_carry_item("")
 	villager.rig.play(VillagerRig.ANIM_IDLE)
 	villager.rig.squash(0.18)

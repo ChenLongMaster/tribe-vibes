@@ -33,23 +33,28 @@ func get_villager(villager_id: int) -> Villager:
 	return _world.get_villager(villager_id)
 
 
-## Giao việc: `target` là cây, đá, bụi quả, chỗ câu cá, con thú, hoặc lửa trại (nấu ăn).
-## Thổ dân nhớ việc này và tự làm đi làm lại. Trả về false nếu không giao được (không phải
-## người lớn, chế độ không cho ra lệnh, mục tiêu không nhận việc, hoặc đã hết tài nguyên).
+## Giao việc: `target` là cây, đá tảng, bụi quả, củi, đá cuội, chỗ câu cá, con thú, hoặc lửa
+## trại (nấu ăn). Thổ dân nhớ việc này và tự làm đi làm lại. Trả về false nếu không giao
+## được (không phải người lớn, chế độ không cho ra lệnh, mục tiêu không nhận việc, đã hết
+## tài nguyên, hoặc làng không có đồ nghề cần cho việc đó — thổ dân giơ biển giải thích).
 func assign_job(villager_id: int, target: Node) -> bool:
 	var villager: Villager = _commandable(villager_id)
 	if villager == null or not is_instance_valid(target):
 		return false
-	var skill: StringName = JobDefs.skill_for_target(target)
-	if skill == &"":
+	var job_id: StringName = JobDefs.job_for_target(target)
+	if job_id == &"":
 		return false
 	var node: Node2D = target as Node2D
 	if node is ResourceNode and not (node as ResourceNode).can_harvest():
-		villager.say(str(JobDefs.get_def(skill).get("none_bubble", "")), {}, SkillDefs.icon(skill))
+		villager.hold_sign(JobDefs.icon(job_id), true)
 		return false
 	if node is Animal and not (node as Animal).is_huntable():
 		return false
-	villager.assign_job(Job.new(skill, node))
+	var tool: StringName = JobDefs.required_tool(job_id)
+	if tool != &"" and villager.tool != tool and not _world.finder.has_tool_in_stock(tool):
+		villager.hold_sign(ToolDefs.icon(tool), true)
+		return false
+	villager.assign_job(Job.new(job_id, node))
 	EventBus.job_assigned.emit(villager, node)
 	return true
 
@@ -65,6 +70,18 @@ func move_villager(villager_id: int, cell: Vector2i) -> bool:
 	villager.order_move(cell)
 	EventBus.move_ordered.emit(villager, cell)
 	return true
+
+
+## CHỈ ĐỂ PHÁT TRIỂN / TEST (chưa có lò rèn — Đợt 3): cất thêm `amount` mỗi loại đồ nghề
+## vào lửa trại để thử chặt cây, đập đá, săn. Phím F10 trong bản debug.
+func debug_give_tools(amount: int = 1) -> void:
+	if not _has_world():
+		return
+	for building: Building in _world.buildings:
+		if building.building_id == &"campfire":
+			for tool: StringName in ToolDefs.ORDER:
+				building.add_stock(tool, amount)
+			return
 
 
 ## 0 = tạm dừng, 1..3 = tốc độ.

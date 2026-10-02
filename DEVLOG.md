@@ -4,6 +4,72 @@ Mỗi đợt một mục: đã làm gì, chọn gì và vì sao. Mục mới nh�
 
 ---
 
+## Đợt 2.2 — Gộp tài nguyên, đồ nghề, củi & đá cuội (2026-10-02)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.
+
+### Đã làm
+- **3 tài nguyên chung:** gỗ, đá, thức ăn (icon đùi thịt). Thanh tài nguyên còn 3 ô.
+  - Bên trong, thổ dân khuân **món** (`ResourceDefs.ITEMS`): giỏ quả, con cá, nguyên con thú, khúc gỗ (= 10 gỗ), bó củi (1), đá (1), xô đá cuội (1 mỗi viên). Tới kho thì quy ra tài nguyên chung.
+  - Kho nhớ thức ăn gồm bao nhiêu quả/cá/thịt (`GameState.add_resource(id, n, item)` / `take_one()`), lúc ăn cầm đúng món trên tay.
+- **Đồ riêng của công trình** (`Building.stock`, có sức chứa, bày hình quanh công trình):
+  - Món chín cất ở lửa trại (tối đa 4 bát quanh lửa), không còn trên thanh tài nguyên.
+  - Đầu bếp lấy thức ăn thô nấu thành món chín; bếp đầy thì đứng chờ.
+  - Dân đói ăn món chín trước, hết thì ăn thức ăn thô.
+- **Đồ nghề** (`data/tools.gd`: rìu, cuốc, giáo):
+  - Chặt cây cần rìu, đập đá tảng cần cuốc, săn cần giáo. Thiếu thì thổ dân cắm biển vẽ món đó gạch chéo, không nhận việc.
+  - Có thì tự đi lấy (`TaskFetchTool`) và giữ luôn (`VillagerStatus.tool`). Việc tay không thì đeo đồ nghề sau lưng; việc cần món khác thì về đổi.
+  - Chưa có lò rèn: **F10** (bản debug) thêm 1 rìu, 1 cuốc, 1 giáo vào lửa trại.
+- **Việc theo `job_id`** (JobDefs): thêm **nhặt củi** và **nhặt đá cuội** (kỹ năng Hái lượm, tay không). Nhặt đủ 3 bó/viên gần nhau rồi mới khuân về.
+- **Đồ cầm tay đúng việc:**
+  - Hái quả: cầm giỏ, khuân giỏ quả về.
+  - Câu cá: cần câu riêng, động tác quăng cần, dây câu + phao vẽ bằng code, khuân cá về.
+  - Săn: cầm giáo, hạ thú, vác **nguyên con chổng vó** trên đầu về.
+  - Chặt cây: khuân khúc gỗ. Nhặt đá cuội: xách xô.
+- **Thiên nhiên** (`NatureSpawner`):
+  - Củi rơi dần dưới tán cây (tối đa 20), đá cuội lăn ra quanh đá tảng (tối đa 14).
+  - **Vách đá lớn** (3 cái, phía bãi đá, không khai thác được) thỉnh thoảng lăn ra đá tảng — chỉ khi số đá tảng ít hơn lúc đầu.
+  - Gốc cây chỉ mọc lại khi số cây ít hơn lúc đầu.
+- **Tấm biển:** đứng thì cắm xuống đất trước mặt (tay vịn), ngồi thì hai tay giơ lên, đang đi thì cất. Rảnh mà vừa cắm biển thì đứng yên cạnh biển (`TaskWait`), không đi dạo mất.
+- **Spec:** mục 9.2 viết lại, thêm mục 9.4 Lò rèn & đồ nghề (chọn số lượng rèn, rìu/cuốc/giáo trong chiến đấu), xây nhà có khuân vật liệu + mũ công trường (mục 9.3), bảng con số mục 13.
+- Hình mới: `icons/res_food`, `props/basket`, `basket_berries`, `bucket`, `bucket_pebbles`, `log`, `twig_bundle`, `fishing_rod`, `env/twigs`, `env/pebbles`, `env/cliff`.
+- Test: thêm đồ nghề (thiếu → biển, lấy, giữ khi nhặt đá, đổi món), củi theo mẻ + giới hạn thiên nhiên, biển cắm/giơ. Test runner thêm `-- --only=<tên>`.
+- **Đổi tên spec `MVP_PROMPT.md` → `GAME_DESIGN.md`** (giờ là tài liệu thiết kế cả game, không chỉ là prompt dựng MVP). Cập nhật các mục 4, 5, 6, 7, 8, 9, 11, 12 theo Đợt 2.1–2.2; thêm Đợt 2.1, 2.2 vào mục 12; Đợt 3 thêm lò rèn và xây có khuân vật liệu. Các mục cũ hơn trong DEVLOG vẫn ghi tên cũ.
+
+### Quyết định
+- **Thức ăn thô ăn được luôn** (no căng): không có đầu bếp vẫn không ai đói cạnh kho đầy. Món chín chỉ thêm vui.
+- **Cần câu không cần rèn** (lò rèn chỉ làm rìu, cuốc, giáo theo spec).
+- **Mỗi cây 3 khúc gỗ = 30 gỗ** (trước là 9). Chi phí công trình Đợt 3 (10–30 gỗ) sẽ phải tăng hoặc giữ — cần xem lại khi làm Đợt 3.
+- Đồ nghề không hỏng.
+
+## Đợt 2.1 — Thổ dân "nói" bằng hình + luật ăn mới (2026-10-02)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.
+
+### Đã làm
+- **Tooltip** (theme): nền kem, viền nâu, chữ nâu đậm cỡ 16 thay cho nền xám tối mặc định khó đọc.
+- **Bỏ hết chữ trên đầu thổ dân.** Ba kiểu "lời nói" bằng hình:
+  - Bong bóng nói (1–2 icon): cảm xúc, lên cấp, tán gẫu (icon ngẫu nhiên: quả, đá, tim, sao, "?"…).
+  - Mây nghĩ (`ui/thought_bubble`): đói (đùi thịt, giữ suốt lúc đi tới bếp), buồn ngủ, nghỉ tay (Lười), "lát nữa" (icon việc / "…"), không tới được ("?").
+  - Tấm biển (`props/sign`, vẽ trong `VillagerRig`, hai tay giơ lên): đói lả (đùi thịt), hết cây/đá/quả/thú (icon việc ✕), bếp chưa có gì nấu (đùi thịt ✕), đình công (icon việc ✕, giữ tới khi hết đình công).
+  - Nhận lệnh: nhún + mặt tươi, không bong bóng.
+  - API mới trên `Villager`: `emote` / `chatter` / `think` / `clear_bubble` / `hold_sign` / `lower_sign`; bỏ `say()` và 30 key `BUBBLE_*`.
+- **Luật ăn mới:**
+  - Đói < 50 → chỉ đi ăn ở bếp (lửa trại), vừa đi vừa nghĩ tới đùi thịt. Bỏ `BushFoodSource`: thổ dân không tự đi hái quả ăn nữa.
+  - Bếp hết đồ: người rảnh ngồi bệt nũng nịu (`TaskSulk`, hoạt họa `pout`), thỉnh thoảng nghĩ tới đùi thịt. Người đang làm việc được giao thì làm tiếp, chỉ thỉnh thoảng nghĩ.
+  - Đói = 0 thì ai cũng ngồi giơ biển đùi thịt.
+  - Vừa mệt vừa đói mà bếp hết đồ thì đi ngủ trước.
+  - Ăn một phần ở bếp: no căng 100, +6 giải trí (món chín +10 nữa), +10 thể lực.
+  - Ván mới có sẵn 8 quả ở lửa trại.
+- Hình mới: `ui/thought_bubble`, `props/sign`, `icons/cross`, `icons/question`, `icons/dots` (ASSET_SPEC + `art_specs`).
+- Spec: cập nhật `MVP_PROMPT.md` / `CLAUDE.md` (đầu file, mục 2, 3.1, 5.2, 5.3, 5.5, 6.1, 6.2, 13).
+- Test: 53 test (thêm: ngồi dỗi → giơ biển → có đồ thì đi ăn, no căng, thể lực chỉ +10; người đang làm việc không ngồi dỗi; hết quả thì giơ biển). Công cụ chụp màn hình thêm `--hungry`.
+
+### Quyết định
+- **Người đang được giao việc không ngồi dỗi khi bếp hết đồ** (chỉ dỗi khi đói lả). Nếu ai cũng bỏ việc để dỗi thì người hái quả cũng ngồi dỗi, làng kẹt luôn.
+- **`EAT_ENERGY = 10`:** làm việc nặng thì giữa hai bữa (Đói 100 → 50) mất ~120 giây, cũng là ~50 thể lực. Ăn chỉ bù ~20% nên vẫn phải ngủ.
+- **Một quả cũng làm no căng** (đúng "đồ bếp hồi 100%"). Hệ đồ ăn còn chờ chốt (gộp thịt/cá/quả) nên chưa cân lại.
+
 ## Đợt 2 — Lao động & tài nguyên (2026-10-02)
 
 **Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit (chủ project tự commit).

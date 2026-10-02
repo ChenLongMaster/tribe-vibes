@@ -1,5 +1,5 @@
 extends TestCase
-## 4 chỉ số dạng dữ liệu (MVP_PROMPT mục 5.3): tốc độ theo hoạt động, bật/tắt theo chế
+## 4 chỉ số dạng dữ liệu (GAME_DESIGN mục 5.3): tốc độ theo hoạt động, bật/tắt theo chế
 ## độ, việc nặng, việc thích; và hành vi khi chỉ số chạm đáy (gục ngủ, ngất).
 
 const WORLD_SCENE: PackedScene = preload("res://world/world.tscn")

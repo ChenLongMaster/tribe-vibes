@@ -29,16 +29,14 @@ func _init(world: World) -> void:
 
 # --- Đồ ăn & chỗ ngủ ---
 
-## Chỗ ăn tốt nhất cho thổ dân đang đói: ưu tiên đồ có sẵn (lửa trại; Đợt 3 Bếp), không
-## có thì bụi quả gần nhất còn quả. Trả về null nếu không còn gì ăn được.
+## Chỗ ăn cho thổ dân đang đói: chỉ ăn đồ đã cất ở bếp (lửa trại; Đợt 3 Bếp) — không tự
+## đi hái quả ăn, vì thổ dân nghe lời: muốn có đồ ăn thì người chơi giao người đi kiếm.
+## Trả về null nếu bếp hết đồ (thổ dân sẽ ngồi dỗi cho người chơi thấy).
 func find_food_for(villager: Villager) -> FoodSource:
 	var candidates: Array[FoodSource] = []
 	for building: Building in _world.buildings:
 		if building.def.get("food_storage", false):
 			candidates.append(StoredFoodSource.new(building))
-	for node: ResourceNode in _world.resource_nodes:
-		if node.has_berries():
-			candidates.append(BushFoodSource.new(node))
 	candidates.sort_custom(func(a: FoodSource, b: FoodSource) -> bool:
 		if a.priority() != b.priority():
 			return a.priority() < b.priority()
@@ -64,11 +62,14 @@ func find_bed_for(villager: Villager) -> SleepSpot:
 ## Mục tiêu tương tự gần nhất cho một việc (cây khác, tảng đá khác, con thú khác…) trong
 ## bán kính tìm của việc đó quanh `around`. Bỏ qua cái đã có người nhận và cái trong `skip`.
 ## Ưu tiên cái gần thổ dân nhất mà đi tới được. null nếu không còn gì.
-func find_job_target(skill: StringName, around: Vector2i, villager: Villager, skip: Array[Node2D] = []) -> Node2D:
-	var def: Dictionary = JobDefs.get_def(skill)
+## `radius` > 0 thì tìm trong bán kính đó thay cho bán kính của việc (vd nhặt thêm củi sát bên).
+func find_job_target(job_id: StringName, around: Vector2i, villager: Villager, skip: Array[Node2D] = [],
+		radius: float = -1.0) -> Node2D:
+	var def: Dictionary = JobDefs.get_def(job_id)
 	if def.is_empty():
 		return null
-	var radius: float = float(def.get("search_radius", Balance.JOB_SEARCH_RADIUS_CELLS))
+	if radius <= 0.0:
+		radius = float(def.get("search_radius", Balance.JOB_SEARCH_RADIUS_CELLS))
 	var candidates: Array[Node2D] = []
 	match def["target"]:
 		JobDefs.TARGET_ANIMAL:
@@ -94,6 +95,28 @@ func find_job_target(skill: StringName, around: Vector2i, villager: Villager, sk
 		if _can_reach_target(node, villager):
 			return node
 	return null
+
+
+## Chỗ cất đồ nghề gần nhất còn món `tool` (lò rèn — Đợt 3) mà đi tới được. null nếu hết.
+func find_tool(tool: StringName, villager: Villager) -> Building:
+	var best: Building = null
+	var best_distance: float = INF
+	for building: Building in _world.buildings:
+		if building.stock_of(tool) <= 0:
+			continue
+		var distance: float = building.position.distance_squared_to(villager.position)
+		if distance < best_distance and find_building_stand_cell(building, villager) != World.INVALID_CELL:
+			best = building
+			best_distance = distance
+	return best
+
+
+## Cả làng còn món đồ nghề này ở đâu không (không tính món đang trong tay ai).
+func has_tool_in_stock(tool: StringName) -> bool:
+	for building: Building in _world.buildings:
+		if building.stock_of(tool) > 0:
+			return true
+	return false
 
 
 ## Công trình gần nhất nhận cất loại tài nguyên này (lửa trại; Đợt 3 Kho, Bếp).
@@ -138,6 +161,8 @@ func _can_reach_target(node: Node2D, villager: Villager) -> bool:
 		return find_building_stand_cell(node as Building, villager) != World.INVALID_CELL
 	if node is Animal:
 		return _world.grid.has_path(_world.cell_of(villager), (node as Animal).current_cell())
+	if node is ResourceNode and (node as ResourceNode).is_loose():
+		return _world.grid.has_path(_world.cell_of(villager), (node as ResourceNode).cell)
 	return find_stand_cell(Job.target_cell(node), villager) != World.INVALID_CELL
 
 

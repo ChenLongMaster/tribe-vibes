@@ -114,8 +114,8 @@ Vị trí các khớp (hông, vai, cổ) nằm ở đầu `villager/villager_rig
 
 | Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
 |---|---|---|---|---|
-| `icons/hunger` | 48×48 | 24×24 | tâm | Đùi thịt — bong bóng "Đói quá!". |
-| `icons/sleepy` | 48×48 | 24×24 | tâm | Hai chữ Z — bong bóng "Buồn ngủ...". |
+| `icons/hunger` | 48×48 | 24×24 | tâm | Đùi thịt — icon chỉ số Đói nhấp nháy trên đầu. |
+| `icons/sleepy` | 48×48 | 24×24 | tâm | Hai chữ Z — mây nghĩ "buồn ngủ", bong bóng khi gục ngủ / nghỉ tay. |
 | `icons/happy` | 48×48 | 24×24 | tâm | Nốt nhạc — vui. |
 | `icons/love` | 48×48 | 24×24 | tâm | Trái tim. |
 | `icons/scared` | 48×48 | 24×24 | tâm | Dấu chấm than (Đợt 5). |
@@ -124,7 +124,7 @@ Vị trí các khớp (hông, vai, cổ) nằm ở đầu `villager/villager_rig
 | `icons/close` | 48×48 | 24×24 (nút 44×44) | tâm | Nút ✕ đóng bảng. |
 | `icons/mood_happy` · `mood_ok` · `mood_sad` | 48×48 | 26×26 | tâm | Mặt tâm trạng trong bảng thông tin. |
 | `icons/stat_health` | 48×48 | 22×22 | tâm | Chỉ số **Máu** ❤ (tim đỏ có dấu cộng). Dùng trong bảng thông tin và nhấp nháy trên đầu khi thấp. |
-| `icons/hunger` | 48×48 | 22×22 | tâm | Chỉ số **Đói** 🍖 (dùng chung với bong bóng "Đói quá!"). |
+| `icons/hunger` | 48×48 | 22×22 | tâm | Chỉ số **Đói** 🍖. |
 | `icons/stat_energy` | 48×48 | 22×22 | tâm | Chỉ số **Thể lực** ⚡. |
 | `icons/stat_fun` | 48×48 | 22×22 | tâm | Chỉ số **Giải trí** 🎉 (pháo giấy). |
 | `icons/skill_chop` · `skill_mine` · `skill_gather` · `skill_hunt` · `skill_fish` · `skill_cook` · `skill_build` · `skill_smith` · `skill_fight` | 48×48 | 24×24 | tâm | Icon 9 loại việc/kỹ năng: rìu, cuốc, giỏ quả, giáo, cần câu, nồi, búa, đe, chùy xương. Dùng trong bảng thông tin (kèm sao cấp), sau này làm icon việc trên đầu. |
@@ -134,13 +134,15 @@ Vị trí các khớp (hông, vai, cổ) nằm ở đầu `villager/villager_rig
 | `fx/heart` | 32×32 | 16×16 | tâm | Tim bay lên khi tặng hoa / hẹn hò (Đợt 4). |
 | `ui/selection_ring` | 96×40 | 48×20 | tâm | Vòng vàng dưới chân thổ dân đang được chọn. |
 
-Bong bóng thoại là khung vẽ bằng code (không phải hình), chữ luôn là `Label`.
+Bong bóng nói là khung vẽ bằng code (không phải hình) chứa 1–2 icon. **Thổ dân không nói chữ** — xem bảng "Bong bóng & tấm biển" bên dưới.
 
 ### Lao động & tài nguyên — Đợt 2
 
 | Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
 |---|---|---|---|---|
-| `icons/res_wood` · `res_stone` · `res_meat` · `res_fish` · `res_meal` | 48×48 | 22–26 | tâm | Icon tài nguyên: bó gỗ, hai hòn đá, đùi thịt sống, con cá, bát món chín. Quả mọng dùng lại `icons/berry`. Dùng trên thanh HUD, số bay "+3 gỗ", **và giơ trên đầu khi khuân** (hiển thị ~26×26). |
+| `icons/res_wood` · `res_stone` · `res_food` | 48×48 | 22–26 | tâm | 3 tài nguyên chung trên thanh HUD và số bay "+10 gỗ": bó gỗ, hai hòn đá, **đùi thịt (thức ăn)**. |
+| `icons/res_meat` · `res_fish` · `icons/berry` | 48×48 | 22–26 | tâm | Món thức ăn cụ thể: cầm trên tay lúc ăn; cá cũng giơ trên đầu khi khuân. |
+| `icons/res_meal` | 48×48 | ~20 | tâm | Bát món chín — đồ riêng của bếp, bày quanh lửa trại (tối đa 4 chỗ) cho thấy còn bao nhiêu. |
 | `icons/angry` | 48×48 | 22–24 | tâm | 💢 đình công — bong bóng và icon trên đầu suốt lúc đình công. |
 | `icons/skill_*` (đã có) | 48×48 | 24×24 | tâm | Nay dùng thêm làm **icon việc trên đầu** và **đồ nghề cầm tay** (rìu, cuốc, cần câu, giáo, muôi nồi). Code xoay đồ nghề theo cánh tay, nghiêng thêm `TOOL_TILT` trong `villager/villager_rig.gd` — vẽ cán chéo từ dưới-trái lên trên-phải như hình tạm. |
 | `animals/boar` | 128×96 | 64×48 | (0.48, 0.92) chân | Lợn rừng, **quay mặt sang PHẢI** (code tự lật). Có bóng elip dưới chân. |
@@ -152,9 +154,37 @@ Bong bóng thoại là khung vẽ bằng code (không phải hình), chữ luôn
 
 Đường chấm chấm tới nơi được giao, đường kéo khi kéo-thả và số "+3 gỗ" đều vẽ bằng code (không cần hình).
 
+### Đồ cầm tay, đồ khuân & thiên nhiên — Đợt 2.2
+
+| Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
+|---|---|---|---|---|
+| `props/basket` | 48×48 | ~17×17 | (0.5, 0.15) quai | Giỏ đan rỗng, **xách thõng** dưới bàn tay lúc đi hái quả (không xoay theo tay). |
+| `props/basket_berries` | 48×48 | ~26×26 | tâm | Giỏ đầy quả — giơ trên đầu khi khuân về. |
+| `props/bucket` | 48×48 | ~17×17 | (0.5, 0.15) quai | Xô gỗ rỗng, xách thõng lúc nhặt đá cuội. Cũng là icon việc "nhặt đá cuội" trên đầu. |
+| `props/bucket_pebbles` | 48×48 | ~26×26 | tâm | Xô đầy đá cuội — giơ trên đầu khi khuân về. |
+| `props/log` | 72×36 | ~40×20 | tâm | Khúc gỗ (= 10 gỗ) — giơ trên đầu khi khuân về. |
+| `props/twig_bundle` | 48×40 | ~26×22 | tâm | Bó củi buộc dây — giơ trên đầu khi khuân; icon việc "nhặt củi". |
+| `props/fishing_rod` | 48×48 | ~17×17 | tâm | Cần câu, **vẽ chéo từ dưới-trái lên trên-phải**, đầu cần ở góc trên-phải (16, −18 px so với tâm — `ROD_TIP_TEXTURE_OFFSET`). Dây câu + phao do code vẽ. |
+| `env/twigs` | 64×40 | 32×20 | (0.5, 0.75) | Củi rơi trên đất dưới tán cây. Không chặn đường. |
+| `env/pebbles` | 64×40 | 32×20 | (0.5, 0.75) | Đá cuội quanh đá tảng. Không chặn đường. |
+| `env/cliff` | 384×320 | 192×160 (phủ 3×2 ô) | (0.5, 0.97) chân vách | Vách đá lớn — một phần của map, không khai thác được. Đá tảng thỉnh thoảng lăn ra sát chân vách. |
+| `animals/boar` · `animals/deer` (đã có) | | ×0.7 | | Dùng lại làm **xác thú vác chổng vó trên đầu** (code lật dọc) — vẽ thú quay sang phải, chân ở mép dưới. |
+
+Đồ nghề rèn (rìu, cuốc, giáo) dùng lại `icons/skill_chop` · `skill_mine` · `skill_hunt`: cầm tay khi làm, **đeo xiên sau lưng** khi không dùng, vẽ trên tấm biển khi thiếu.
+
+### Bong bóng & tấm biển (thổ dân "nói" bằng hình)
+
+| Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
+|---|---|---|---|---|
+| `ui/thought_bubble` | 96×88 | 48×44 | (0.5, 1.0) giữa mép dưới | Mây suy nghĩ (đang muốn gì đó): đám mây trắng + 2 chấm tròn nhỏ dẫn xuống đầu. Phần mây ở nửa trên; code đặt icon vào tâm mây (`THOUGHT_ICON_POS` trong `villager/overhead.gd`). Để trống ruột mây, **không vẽ gì bên trong**. |
+| `props/sign` | 84×96 | 42×48 | (0.5, 1.0) đáy cán | Tấm biển gỗ khi cần người chơi ra tay (đói lả, đình công, hết cây, thiếu đồ nghề…). **Đứng thì cắm xuống đất** trước mặt (đáy cán chạm đất, một tay vịn), **ngồi thì hai tay giơ lên** trên đầu. Mặt biển **để trống** — code đặt icon vào giữa (`SIGN_ICON_POS` trong `villager/villager_rig.gd`). Không vẽ chữ. |
+| `icons/cross` | 48×48 | ~26×26 | tâm | Dấu ✕ đỏ, đè lên icon trên tấm biển: "hết rồi / không làm". Nét dày, có viền để nổi trên mọi icon. |
+| `icons/question` | 48×48 | ~26×26 | tâm | Dấu "?" — mây nghĩ khi không tới được chỗ làm; cũng là một "từ" khi tán gẫu. |
+| `icons/dots` | 48×48 | ~26×26 | tâm | Ba chấm "…" — mây nghĩ "lát nữa nhé" (bảo đi đâu khi đang ăn/ngủ). |
+
 ## Sẽ thêm ở các đợt sau
 
-Danh sách sẽ được bổ sung vào bảng trên khi làm tới (tên dự kiến theo `MVP_PROMPT.md` mục 7):
+Danh sách sẽ được bổ sung vào bảng trên khi làm tới (tên dự kiến theo `GAME_DESIGN.md` mục 7):
 
 - **Đợt 3:** lều, bếp, kho, kho vũ khí, sân nhảy — mỗi cái 3 trạng thái: móng, hoàn thành, hư hại.
 - **Đợt 5:** cannibal (mặt nạ xương, sơn chiến) và biến thể màu, chùy.

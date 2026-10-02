@@ -43,7 +43,7 @@ func tick(delta: float) -> Status:
 			if timer <= 0.0:
 				villager.rig.play(VillagerRig.ANIM_YAWN)
 				if randf() < WAKE_BUBBLE_CHANCE:
-					villager.say("BUBBLE_WAKE")
+					villager.emote("icons/sleepy")
 				timer = STRETCH_SECONDS
 				step = Step.STRETCH
 		Step.STRETCH:

@@ -4,14 +4,18 @@ extends Node2D
 ## Việc gì làm thế nào nằm ở các Task; chọn việc gì nằm ở VillagerBrain; hình ảnh ở
 ## VillagerRig và Overhead. File này chỉ nối chúng lại.
 ##
-## Lõi không ra lệnh thẳng cho phần hiển thị chữ/bong bóng: muốn "nói" gì thì gọi
-## say()/emote()/show_heart(), villager phát signal và Overhead tự lo hiển thị + dịch.
+## Thổ dân không nói chữ, chỉ "nói" bằng hình: emote()/chatter() (bong bóng nói), think()
+## (bong bóng nghĩ — muốn gì đó), hold_sign() (giơ biển — cần người chơi ra tay), show_heart().
+## Villager phát signal, Overhead / VillagerRig tự lo hiển thị.
 
 enum State { IDLE, MOVING, WORKING, CARRYING, EATING, SLEEPING, SOCIAL, FLEEING, FIGHTING, KNOCKED_OUT, STRIKING }
+## SPEECH = bong bóng nói (cảm xúc, tán gẫu); THOUGHT = mây suy nghĩ (đang muốn gì đó).
+enum Bubble { SPEECH, THOUGHT }
 
 signal task_changed(villager: Villager)
-## Muốn hiện bong bóng: key dịch (hoặc "" nếu chỉ có icon), tham số, icon, số giây (<0 = mặc định).
-signal speech_requested(key: String, args: Dictionary, icon_key: String, seconds: float)
+## Muốn hiện bong bóng chứa các icon, trong `seconds` giây (<=0 = mặc định, INF = tới khi xoá).
+signal bubble_requested(style: Bubble, icon_keys: Array[String], seconds: float)
+signal bubble_cleared
 signal heart_requested
 ## Vừa lên cấp một kỹ năng (Overhead hiện bong bóng, FxLayer bung sao qua EventBus).
 signal leveled_up(skill: StringName, level: int)
@@ -21,6 +25,11 @@ const PICK_CENTER: Vector2 = Vector2(0, -34)
 const PICK_RADIUS: float = 28.0
 const OVERHEAD_STANDING: Vector2 = Vector2(0, -78)
 const OVERHEAD_LYING: Vector2 = Vector2(-34, -30)
+## Đang giơ biển thì đẩy bong bóng/icon trên đầu lên cao hơn tấm biển.
+const OVERHEAD_SIGN_LIFT: float = 38.0
+## Giữ bong bóng / biển tới khi tự xoá (clear_bubble / lower_sign).
+const UNTIL_CLEARED: float = INF
+const SIGN_SECONDS: float = 3.5
 const AGE_SCALES: Dictionary[VillagerData.AgeStage, float] = {
 	VillagerData.AgeStage.BABY: 0.55,
 	VillagerData.AgeStage.CHILD: 0.75,
@@ -41,7 +50,7 @@ var world: World
 var state: State = State.IDLE
 var task: Task
 var speed_multiplier: float = 1.0
-## Điểm neo: rảnh thì chỉ dạo trong bán kính nhỏ quanh ô này (MVP_PROMPT mục 5.2).
+## Điểm neo: rảnh thì chỉ dạo trong bán kính nhỏ quanh ô này (GAME_DESIGN mục 5.2).
 ## Đặt khi chui ra khỏi hang; người chơi bảo đi tới đâu thì neo ở đó; hết việc thì neo tại chỗ.
 var anchor_cell: Vector2i = Vector2i.ZERO
 ## Hệ số hồi thể lực của chỗ đang ngủ (ngủ đất ×1; Đợt 3 lều cao hơn).
@@ -50,6 +59,10 @@ var sleep_rate_multiplier: float = 1.0
 var job: Job
 ## Đang đình công: từ chối mọi việc, chỉ đứng chơi tới khi giải trí hồi lại.
 var on_strike: bool = false
+## Đồ nghề đang giữ (lưu trong VillagerStatus). Đổi bằng set_tool().
+var tool: StringName:
+	get:
+		return status.tool
 
 var _brain: VillagerBrain = VillagerBrain.new()
 var _think_timer: float = 0.0
@@ -85,6 +98,7 @@ func setup(villager_id: int, villager_data: VillagerData, villager_status: Villa
 
 func _ready() -> void:
 	rig.setup(data)
+	rig.set_back_item(ToolDefs.icon(status.tool))
 	scale = age_scale()
 	ArtLibrary.setup_sprite(_selection_ring, "ui/selection_ring")
 	_selection_ring.visible = false
@@ -113,6 +127,8 @@ func _process(delta: float) -> void:
 			_finish_task(task_status)
 	rig.set_mood_face(status.mood() >= Balance.MOOD_SAD)
 	overhead.position = OVERHEAD_LYING * Vector2(rig.facing, 1) if rig.is_lying() else OVERHEAD_STANDING
+	if rig.is_sign_raised():
+		overhead.position.y -= OVERHEAD_SIGN_LIFT
 	_update_watchdog(delta)
 
 
@@ -172,20 +188,21 @@ func assign_job(new_job: Job) -> void:
 	var old_job: Job = job
 	job = new_job
 	if on_strike:
-		say("BUBBLE_STRIKE_REFUSE", {}, "icons/angry")
+		emote("icons/angry")
 		notify_task_changed()
 		return
 	if task != null and task.priority >= Task.Priority.NEED:
-		say("BUBBLE_LATER", {}, new_job.icon_key())
+		# "Lát nữa nhé": nghĩ về việc mới, làm xong việc đang dở (ăn, ngủ…) rồi đi.
+		think(new_job.icon_key())
 		notify_task_changed()
 		return
+	lower_sign()
 	start_task(null)
 	# Đang khuân dở đồ của việc cũ thì việc mới khuân nốt về kho trước.
-	if old_job != null and old_job.carried_amount > 0:
-		new_job.carried_resource = old_job.carried_resource
-		new_job.carried_amount = old_job.carried_amount
-	say("BUBBLE_JOB_OK", {}, new_job.icon_key())
-	rig.squash(-0.15)
+	if old_job != null and old_job.carried_count > 0:
+		new_job.carried_item = old_job.carried_item
+		new_job.carried_count = old_job.carried_count
+	_acknowledge()
 	_think_timer = 0.0
 
 
@@ -193,24 +210,36 @@ func assign_job(new_job: Job) -> void:
 func order_move(cell: Vector2i) -> void:
 	job = null
 	anchor_cell = cell
+	if not on_strike:
+		lower_sign()
 	if task != null and task.priority >= Task.Priority.NEED:
-		say("BUBBLE_LATER")
+		think("icons/dots")
 		notify_task_changed()
 		return
 	start_task(TaskReturn.new(true))
-	say("BUBBLE_MOVE_OK")
+	_acknowledge()
+
+
+## "Ugh!" không lời: nhún một cái, mặt tươi lên.
+func _acknowledge() -> void:
 	rig.squash(-0.15)
+	rig.flash_face(VillagerRig.FACE_HAPPY, 0.6)
 
 
-## Thôi việc đang giao (hết thứ để làm / không tới được): đứng chờ lệnh ngay tại chỗ.
-func stop_job(bubble_key: String) -> void:
+## Thôi việc đang giao: đứng chờ lệnh ngay tại chỗ. Hết thứ để làm thì giơ biển vẽ việc đó
+## gạch chéo ("Hết cây rồi!"), thiếu đồ nghề thì vẽ món đó gạch chéo; không tới được thì
+## nghĩ dấu "?".
+func stop_job() -> void:
 	if job == null:
 		return
-	var icon_key: String = job.icon_key()
+	var icon_key: String = job.stop_sign_icon()
+	var gave_up: bool = job.gave_up()
 	job = null
 	anchor_cell = world.cell_of(self)
-	if not bubble_key.is_empty():
-		say(bubble_key, {}, icon_key)
+	if gave_up:
+		think("icons/question")
+	else:
+		hold_sign(icon_key, true)
 	notify_task_changed()
 
 
@@ -220,36 +249,66 @@ func begin_strike() -> void:
 	on_strike = true
 	# Giận dỗi ngay tại chỗ đang làm, không lững thững đi về.
 	anchor_cell = world.cell_of(self)
-	var tool_key: String = "" if job == null else str(job.def().get("tool", ""))
-	start_task(TaskStrike.new(tool_key))
+	var tool_key: String = "" if job == null else JobDefs.held_art(job.job_id)
+	var sign_key: String = "icons/angry" if job == null else job.icon_key()
+	start_task(TaskStrike.new(tool_key, sign_key))
 	EventBus.village_event.emit("TOAST_STRIKE", {"name": data.display_name}, "icons/angry")
 
 
 func end_strike() -> void:
 	on_strike = false
+	lower_sign()
 	if job != null:
-		say("BUBBLE_BACK_TO_WORK", {}, job.icon_key())
+		emote(job.icon_key())
 		rig.squash(-0.15)
 	EventBus.village_event.emit("TOAST_STRIKE_END", {"name": data.display_name}, "icons/happy")
 	notify_task_changed()
 
 
 func on_skill_level_up(skill: StringName, level: int) -> void:
-	say("BUBBLE_LEVEL_UP", {}, SkillDefs.icon(skill))
+	emote(SkillDefs.icon(skill))
 	leveled_up.emit(skill, level)
 	EventBus.skill_leveled_up.emit(self, skill, level)
 	EventBus.village_event.emit("TOAST_LEVEL_UP",
 			{"name": data.display_name, "job_key": SkillDefs.name_key(skill), "level": level}, SkillDefs.icon(skill))
 
 
-## Nói một câu (bong bóng). `key` là key dịch, không phải chữ đã dịch.
-func say(key: String, args: Dictionary = {}, icon_key: String = "", seconds: float = -1.0) -> void:
-	speech_requested.emit(key, args, icon_key, seconds)
+## Cầm lấy món đồ nghề mới (món cũ đã cất lại chỗ cũ). Không dùng thì đeo sau lưng.
+func set_tool(new_tool: StringName) -> void:
+	status.tool = new_tool
+	rig.set_back_item(ToolDefs.icon(new_tool))
+	notify_task_changed()
 
 
-## Bong bóng chỉ có icon cảm xúc (vui ♪, đói…).
+## Bong bóng nói chứa một icon cảm xúc (vui ♪, giận 💢…).
 func emote(icon_key: String, seconds: float = -1.0) -> void:
-	speech_requested.emit("", {}, icon_key, seconds)
+	bubble_requested.emit(Bubble.SPEECH, [icon_key] as Array[String], seconds)
+
+
+## "Nói chuyện" bằng hình khi tán gẫu (1–2 icon vô nghĩa).
+func chatter(icon_keys: Array[String], seconds: float = -1.0) -> void:
+	bubble_requested.emit(Bubble.SPEECH, icon_keys, seconds)
+
+
+## Mây suy nghĩ: đang muốn gì đó (đồ ăn, ngủ, việc sắp làm…).
+func think(icon_key: String, seconds: float = -1.0) -> void:
+	bubble_requested.emit(Bubble.THOUGHT, [icon_key] as Array[String], seconds)
+
+
+func clear_bubble() -> void:
+	bubble_cleared.emit()
+
+
+## Giơ tấm biển vẽ `icon_key` (gạch chéo nếu `crossed`): có chuyện cần người chơi ra tay.
+## Đang rảnh thì đứng yên cạnh biển cho tới khi hạ biển (không đi dạo mất).
+func hold_sign(icon_key: String, crossed: bool = false, seconds: float = SIGN_SECONDS) -> void:
+	rig.show_sign(icon_key, crossed, seconds)
+	if seconds < UNTIL_CLEARED and (task == null or task.priority == Task.Priority.IDLE):
+		start_task(TaskWait.new(seconds))
+
+
+func lower_sign() -> void:
+	rig.lower_sign()
 
 
 func show_heart() -> void:
@@ -361,7 +420,7 @@ func _update_watchdog(delta: float) -> void:
 	_last_position = position
 	if _watchdog_warned or not OS.is_debug_build():
 		return
-	var long_task_ok: bool = task is TaskSleep or task is TaskKnockedOut
+	var long_task_ok: bool = task is TaskSleep or task is TaskKnockedOut or task is TaskSulk
 	var too_long: bool = task != null and not long_task_ok and _task_time > Balance.WATCHDOG_SECONDS
 	if too_long or _stuck_time > STUCK_SECONDS:
 		_watchdog_warned = true

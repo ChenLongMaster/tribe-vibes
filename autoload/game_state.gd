@@ -17,6 +17,9 @@ var time_of_day: float = Balance.START_HOUR_FRACTION
 ## 0 = tạm dừng, 1..Balance.MAX_GAME_SPEED = nhân tốc độ.
 var speed: int = 1
 var _resources: Dictionary[StringName, int] = {}
+## Trong một tài nguyên chung có bao nhiêu phần là món nào (thức ăn: quả / cá / thịt) — người
+## chơi chỉ thấy tổng, còn thổ dân lấy ra ăn thì cầm đúng món trên tay.
+var _items: Dictionary[StringName, Dictionary] = {}
 var _next_villager_id: int = 1
 ## Tốc độ trước khi tạm dừng — bấm Space lần nữa thì chạy lại đúng tốc độ đó.
 var _speed_before_pause: int = 1
@@ -31,6 +34,8 @@ func new_game(game_mode: GameModeConfig, chosen_difficulty: Difficulty = Difficu
 	day = 1
 	time_of_day = Balance.START_HOUR_FRACTION
 	_resources.clear()
+	_items.clear()
+	add_resource(ResourceDefs.FOOD, Balance.START_FOOD, ResourceDefs.ITEM_BERRIES)
 	_next_villager_id = 1
 	_speed_before_pause = 1
 	_clock_running = true
@@ -51,18 +56,56 @@ func get_amount(resource_id: StringName) -> int:
 	return _resources.get(resource_id, 0)
 
 
-func add_resource(resource_id: StringName, amount: int) -> void:
-	var total: int = maxi(get_amount(resource_id) + amount, 0)
-	_resources[resource_id] = total
-	EventBus.resource_changed.emit(resource_id, total)
+## Cất thêm `amount` vào kho. `item` = món cụ thể (vd quả, cá) nếu muốn nhớ để vẽ cho đúng.
+func add_resource(resource_id: StringName, amount: int, item: StringName = &"") -> void:
+	if amount <= 0:
+		return
+	if item != &"":
+		var items: Dictionary = _items.get_or_add(resource_id, {})
+		items[item] = int(items.get(item, 0)) + amount
+	_set_amount(resource_id, get_amount(resource_id) + amount)
 
 
 ## Lấy `amount` ra khỏi kho nếu đủ. Trả về false (và không lấy gì) nếu không đủ.
 func take_resource(resource_id: StringName, amount: int = 1) -> bool:
-	if get_amount(resource_id) < amount:
+	if amount <= 0 or get_amount(resource_id) < amount:
 		return false
-	add_resource(resource_id, -amount)
+	for i: int in amount:
+		_take_item(resource_id)
+	_set_amount(resource_id, get_amount(resource_id) - amount)
 	return true
+
+
+## Lấy MỘT phần ra khỏi kho, trả về món vừa lấy (vd &"fish"); không nhớ món thì trả về
+## chính `resource_id`. Kho trống thì trả về &"".
+func take_one(resource_id: StringName) -> StringName:
+	if get_amount(resource_id) < 1:
+		return &""
+	var item: StringName = _take_item(resource_id)
+	_set_amount(resource_id, get_amount(resource_id) - 1)
+	return item if item != &"" else resource_id
+
+
+## Trong kho có bao nhiêu phần là món `item`.
+func item_amount(resource_id: StringName, item: StringName) -> int:
+	return int(_items.get(resource_id, {}).get(item, 0))
+
+
+func _set_amount(resource_id: StringName, total: int) -> void:
+	_resources[resource_id] = maxi(total, 0)
+	EventBus.resource_changed.emit(resource_id, _resources[resource_id])
+
+
+# Bớt một phần của món đang có nhiều nhất (ăn cho đều, kho đỡ lệch). &"" nếu không nhớ món.
+func _take_item(resource_id: StringName) -> StringName:
+	var items: Dictionary = _items.get(resource_id, {})
+	var best: StringName = &""
+	for item: StringName in items:
+		if int(items[item]) > 0 and (best == &"" or int(items[item]) > int(items[best])):
+			best = item
+	if best != &"":
+		items[best] = int(items[best]) - 1
+	return best
 
 
 func set_speed(new_speed: int) -> void:

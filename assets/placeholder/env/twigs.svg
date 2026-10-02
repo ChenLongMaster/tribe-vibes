@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="40" viewBox="0 0 64 40">
+  <!-- Củi khô rơi dưới tán cây (nằm trên đất, nhặt tay) -->
+  <ellipse cx="32" cy="30" rx="26" ry="6" fill="#3E2723" opacity="0.15"/>
+  <g stroke="#4E342E" stroke-width="5" stroke-linecap="round">
+    <path d="M10 28 L50 20"/>
+    <path d="M16 18 L54 30"/>
+    <path d="M26 30 L40 12"/>
+  </g>
+  <g stroke="#A1887F" stroke-width="2.2" stroke-linecap="round">
+    <path d="M10 28 L50 20"/>
+    <path d="M16 18 L54 30"/>
+    <path d="M26 30 L40 12"/>
+  </g>
+  <path d="M44 21 l5 -6" stroke="#4E342E" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="50" cy="13" rx="4" ry="2.5" fill="#7CB342" stroke="#4E342E" stroke-width="1.5"/>
+</svg>

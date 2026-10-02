@@ -1,14 +1,14 @@
 class_name FoodSource
 extends RefCounted
 ## Một chỗ thổ dân đói có thể đến ăn. TaskEat chỉ làm việc với lớp này nên không quan
-## tâm đồ ăn đến từ đâu: bụi quả (BushFoodSource), đồ ăn cất ở lửa trại (StoredFoodSource),
+## tâm đồ ăn đến từ đâu: hiện chỉ có đồ ăn cất ở lửa trại (StoredFoodSource),
 ## Đợt 3 thêm Bếp — chỉ cần viết lớp con mới và đăng ký trong WorldFinder.find_food_for().
 
 ## Vật để đứng cạnh (bụi, lửa trại, bếp…) và ô của nó.
 var target: Node2D
 var target_cell: Vector2i
 ## Sau khi take(): icon món vừa lấy (cầm trên tay lúc ăn) và giải trí cộng thêm (món ngon).
-var taken_icon: String = "icons/berry"
+var taken_icon: String = "icons/res_food"
 var taken_fun: float = 0.0
 
 

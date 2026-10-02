@@ -9,7 +9,7 @@ func _init(owner_job: Job) -> void:
 
 
 func start() -> void:
-	begin_carry(job.carried_resource, job.carried_amount)
+	begin_carry(job.carried_item, job.carried_count)
 
 
 func tick(delta: float) -> Status:

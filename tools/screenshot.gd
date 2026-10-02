@@ -6,8 +6,11 @@ extends Node
 ##   --wait=20    chờ 20 giây game trước khi chụp (để làng kịp sinh hoạt)
 ##   --speed=4    tua nhanh lúc chờ
 ##   --select     chọn thổ dân đầu tiên để chụp cả bảng thông tin
-##   --jobs       ra khỏi hang xong thì giao việc (2 chặt cây, 1 đập đá, 1 hái quả) để chụp
-##                cảnh lao động; chụp thêm work.png quanh người đầu tiên
+##   --jobs       ra khỏi hang xong thì cấp đồ nghề (như phím F10) rồi giao việc: chặt cây,
+##                câu cá, nhặt đá cuội, hái quả — để chụp cảnh lao động; chụp thêm work.png
+##                quanh người đầu tiên
+##   --hungry     ra khỏi hang xong thì dọn sạch bếp, cho cả làng đói (người đầu đói lả) để
+##                chụp cảnh ngồi dỗi + bong bóng nghĩ + giơ biển; chụp thêm hungry.png
 
 const MAIN_SCENE: PackedScene = preload("res://main.tscn")
 const SETTLE_FRAMES: int = 30
@@ -19,6 +22,7 @@ func _ready() -> void:
 	var speed: float = 1.0
 	var select_first: bool = false
 	var give_jobs: bool = false
+	var make_hungry: bool = false
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
@@ -33,6 +37,8 @@ func _ready() -> void:
 			select_first = true
 		elif arg == "--jobs":
 			give_jobs = true
+		elif arg == "--hungry":
+			make_hungry = true
 	var main: Node = MAIN_SCENE.instantiate()
 	add_child(main)
 	var world: World = main.get_node("World")
@@ -40,10 +46,13 @@ func _ready() -> void:
 	var village: Vector2 = camera.position
 
 	Engine.time_scale = speed
-	if give_jobs:
+	if give_jobs or make_hungry:
 		while world.villagers.size() < Balance.START_VILLAGERS or _anyone_emerging(world):
 			await get_tree().process_frame
+	if give_jobs:
 		_give_jobs(world)
+	if make_hungry:
+		_make_hungry(world)
 	var waited: float = 0.0
 	while waited < wait_seconds:
 		await get_tree().process_frame
@@ -59,6 +68,11 @@ func _ready() -> void:
 	await _shot(camera, _lake_center(world.map_data), 1.0, out_dir.path_join("lake.png"))
 	if give_jobs and not world.villagers.is_empty():
 		await _shot(camera, world.villagers[0].position, 1.4, out_dir.path_join("work.png"))
+	if make_hungry and not world.villagers.is_empty():
+		await _shot(camera, world.villagers[0].position, 1.8, out_dir.path_join("hungry.png"))
+		if world.villagers.size() >= 4:
+			await _shot(camera, world.villagers[2].position + Vector2(0, -30), 2.0, out_dir.path_join("sign_planted.png"))
+			await _shot(camera, world.villagers[3].position + Vector2(0, -40), 2.0, out_dir.path_join("carcass.png"))
 	get_tree().quit()
 
 
@@ -78,18 +92,34 @@ func _anyone_emerging(world: World) -> bool:
 	return false
 
 
-# Giao việc qua Commands như người chơi: 2 chặt cây, 1 đập đá, 1 hái quả (gần lửa trại nhất).
+# Giao việc qua Commands như người chơi: chặt cây, câu cá, nhặt đá cuội, hái quả (gần lửa trại nhất).
 func _give_jobs(world: World) -> void:
-	var kinds: Array[StringName] = [MapData.KIND_TREE, MapData.KIND_TREE, MapData.KIND_ROCK, MapData.KIND_BUSH]
+	Commands.debug_give_tools()
+	var kinds: Array[StringName] = [MapData.KIND_TREE, MapData.KIND_FISH_SPOT, MapData.KIND_PEBBLES, MapData.KIND_BUSH]
 	var campfire: Vector2 = WorldGrid.cell_to_world(world.map_data.campfire_cell)
 	for i: int in mini(kinds.size(), world.villagers.size()):
 		var best: ResourceNode = null
 		for node: ResourceNode in world.resource_nodes:
-			if node.kind == kinds[i] and node.can_harvest():
+			if node.kind == kinds[i] and node.visible and node.can_harvest():
 				if best == null or node.position.distance_to(campfire) < best.position.distance_to(campfire):
 					best = node
 		if best != null:
 			Commands.assign_job(world.villagers[i].id, best)
+
+
+# Người 1 đói lả (ngồi giơ biển), người 2 ngồi dỗi; người 3 đứng cắm biển "thiếu rìu",
+# người 4 vác xác thú — để soi hình biển cắm đất / giơ tay và cảnh vác thú.
+func _make_hungry(world: World) -> void:
+	GameState.take_resource(ResourceDefs.FOOD, GameState.get_amount(ResourceDefs.FOOD))
+	for i: int in world.villagers.size():
+		var villager: Villager = world.villagers[i]
+		villager.status.energy = 90.0
+		villager.status.hunger = [0.0, 30.0, 100.0, 100.0][mini(i, 3)]
+		if i == 2:
+			villager.start_task(TaskWait.new(Balance.DAY_LENGTH_SECONDS))
+			villager.hold_sign(ToolDefs.icon(ToolDefs.AXE), true, Villager.UNTIL_CLEARED)
+		elif i == 3:
+			villager.rig.set_carry_item("animals/boar", true)
 
 
 func _lake_center(data: MapData) -> Vector2:

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- Xô đầy đá cuội — giơ trên đầu khi khuân về -->
+  <g fill="#BDBDBD" stroke="#4E342E" stroke-width="2.5">
+    <ellipse cx="16" cy="18" rx="7" ry="5.5"/>
+    <ellipse cx="32" cy="18" rx="7" ry="5.5"/>
+    <ellipse cx="24" cy="13" rx="7" ry="5.5" fill="#9E9E9E"/>
+  </g>
+  <path d="M8 20 H40 L36 44 H12 Z" fill="#A1887F" stroke="#4E342E" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M9.5 28 H38.5 M11 37 H37" stroke="#5D4037" stroke-width="3"/>
+</svg>

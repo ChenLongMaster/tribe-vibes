@@ -79,6 +79,8 @@ func test_trait_modifiers() -> void:
 
 
 func test_village_lives_for_five_minutes() -> void:
+	# Ván mới: lửa trại có sẵn START_FOOD phần thức ăn, không còn đồ thừa của test trước.
+	GameState.new_game(preload("res://modes/normal_mode.tres"))
 	var world: World = WORLD_SCENE.instantiate()
 	host.add_child(world)
 	world.build(42)
@@ -93,7 +95,7 @@ func test_village_lives_for_five_minutes() -> void:
 	while elapsed < SIM_SECONDS:
 		await host.get_tree().process_frame
 		elapsed += host.get_process_delta_time()
-		var berries_left: bool = _any_berries(world)
+		var food_left: bool = _kitchen_has_food()
 		for villager: Villager in world.villagers:
 			if villager.task != null:
 				activities[villager.task.kind] = true
@@ -102,7 +104,7 @@ func test_village_lives_for_five_minutes() -> void:
 				var away: float = Vector2(world.cell_of(villager) - villager.anchor_cell).length()
 				if away > Balance.IDLE_RADIUS_CELLS + IDLE_TOLERANCE_CELLS and not strayed.has(villager.data.display_name):
 					strayed.append("%s (%s, %.1f ô)" % [villager.data.display_name, villager.task.kind, away])
-			if villager.status.hunger <= 0.0 and berries_left and not starved_with_food.has(villager.data.display_name):
+			if villager.status.hunger <= 0.0 and food_left and not starved_with_food.has(villager.data.display_name):
 				starved_with_food.append(villager.data.display_name)
 			if villager.task == null or villager.task.kind != &"emerge":
 				if world.grid.is_blocked(world.cell_of(villager)) and not in_wall.has(villager.data.display_name):
@@ -110,7 +112,7 @@ func test_village_lives_for_five_minutes() -> void:
 	Engine.time_scale = 1.0
 
 	check_eq(world.villagers.size(), Balance.START_VILLAGERS, "Cả bộ lạc phải chui ra khỏi hang")
-	check(starved_with_food.is_empty(), "Chết đói dù còn quả: %s" % ", ".join(starved_with_food))
+	check(starved_with_food.is_empty(), "Đói lả dù bếp còn đồ ăn: %s" % ", ".join(starved_with_food))
 	check(in_wall.is_empty(), "Đứng lọt vào ô bị chặn: %s" % ", ".join(in_wall))
 	check_eq(Villager.watchdog_alerts, 0, "Watchdog báo có người đứng đơ")
 	check(activities.size() >= MIN_DISTINCT_ACTIVITIES, "Làng ít hoạt động quá: %s" % str(activities.keys()))
@@ -138,8 +140,5 @@ func test_village_lives_for_five_minutes() -> void:
 	await host.get_tree().process_frame
 
 
-func _any_berries(world: World) -> bool:
-	for node: ResourceNode in world.resource_nodes:
-		if node.has_berries():
-			return true
-	return false
+func _kitchen_has_food() -> bool:
+	return GameState.get_amount(ResourceDefs.FOOD) > 0

@@ -1,5 +1,5 @@
 extends TestCase
-## Kiến trúc đa chế độ (MVP_PROMPT mục 3.2): khởi động nạp chế độ qua GameModeConfig,
+## Kiến trúc đa chế độ (GAME_DESIGN mục 3.2): khởi động nạp chế độ qua GameModeConfig,
 ## gắn đúng controller + HUD, và lệnh tạo thổ dân đi qua Commands.
 
 const MAIN_SCENE: PackedScene = preload("res://main.tscn")

@@ -36,7 +36,7 @@ enum Autonomy {
 @export var starts_with_tribe: bool = true
 
 @export_group("Thổ dân")
-## Thổ dân nghe lời hay tự lập (xem MVP_PROMPT mục 5.2).
+## Thổ dân nghe lời hay tự lập (xem GAME_DESIGN mục 5.2).
 @export var villager_autonomy: Autonomy = Autonomy.OBEDIENT
 ## Chỉ số nào đang bật (xem data/needs.gd). Bỏ một id ra là chỉ số đó đứng yên và bị ẩn.
 @export var enabled_needs: Array[StringName] = [&"health", &"hunger", &"energy", &"fun"]

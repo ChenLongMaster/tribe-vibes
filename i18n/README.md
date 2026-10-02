@@ -20,7 +20,6 @@ Mọi chữ người chơi nhìn thấy nằm trong `strings.csv`. Code chỉ d�
 | `UI_` | Nút, nhãn, menu, bảng thông tin. `UI_DEBUG_*` chỉ hiện ở bản debug |
 | `TOAST_` | Thông báo nổi ("Bé Tí chào đời!") |
 | `LOG_` | Nhật ký làng |
-| `BUBBLE_` | Bong bóng thoại/cảm xúc của thổ dân |
 | `TRAIT_` | Tính cách: `TRAIT_<ID>_NAME`, `TRAIT_<ID>_DESC` |
 | `JOB_` | Tên việc |
 | `BUILDING_` | Công trình: `BUILDING_<ID>_NAME` |

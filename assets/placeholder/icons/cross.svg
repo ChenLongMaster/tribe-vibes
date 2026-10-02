@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- Dấu ✕ đè lên icon khác: "hết rồi / không có / không làm". -->
+  <path d="M10 10 L38 38 M38 10 L10 38" stroke="#4E342E" stroke-width="11" stroke-linecap="round"/>
+  <path d="M10 10 L38 38 M38 10 L10 38" stroke="#E53935" stroke-width="6" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="36" viewBox="0 0 72 36">
+  <!-- Khúc gỗ chặt từ cây (= 10 bó củi) -->
+  <rect x="6" y="6" width="58" height="24" rx="12" fill="#8D6E63" stroke="#4E342E" stroke-width="3"/>
+  <path d="M18 12 H44 M22 22 H52" stroke="#6D4C41" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="60" cy="18" rx="8" ry="12" fill="#FFCC80" stroke="#4E342E" stroke-width="3"/>
+  <ellipse cx="60" cy="18" rx="4" ry="6.5" fill="none" stroke="#BF8A5A" stroke-width="1.5"/>
+  <path d="M30 6 l4 -4 l3 4" fill="#7CB342" stroke="#4E342E" stroke-width="2" stroke-linejoin="round"/>
+</svg>

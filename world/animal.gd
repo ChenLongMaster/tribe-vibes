@@ -1,8 +1,8 @@
 class_name Animal
 extends Node2D
 ## Thú để săn (lợn rừng, hươu): lang thang trên đồng cỏ, đứng gặm cỏ, thấy thợ săn tới
-## gần thì giật mình đứng sững (❗). Bị săn thì ngất kiểu hoạt hình (sao quay) rồi "bụp"
-## một cái biến mất — không máu me. Một lúc sau có con mới xuất hiện ở đồng cỏ.
+## gần thì giật mình đứng sững (❗). Bị săn thì ngất kiểu hoạt hình (sao quay), thợ săn vác
+## nguyên con về — không máu me. Một lúc sau có con mới xuất hiện ở đồng cỏ.
 ## Thú không chặn đường và không bị xoá khỏi cây node (chỉ ẩn đi) để không ai giữ
 ## tham chiếu tới node đã giải phóng.
 
@@ -47,7 +47,7 @@ func _ready() -> void:
 	_body = Node2D.new()
 	add_child(_body)
 	_sprite = Sprite2D.new()
-	ArtLibrary.setup_sprite(_sprite, ART_DIR + String(species))
+	ArtLibrary.setup_sprite(_sprite, art_key())
 	_body.add_child(_sprite)
 	_alert_icon = Sprite2D.new()
 	ArtLibrary.setup_sprite(_alert_icon, "icons/scared")
@@ -69,6 +69,20 @@ func _ready() -> void:
 ## Còn săn được không (đang lang thang, chưa bị săn).
 func is_huntable() -> bool:
 	return state == State.GRAZE or state == State.WALK or state == State.ALERT
+
+
+func art_key() -> String:
+	return ART_DIR + String(species)
+
+
+## Thợ săn nhấc con thú đã ngất lên vai: biến khỏi đồng cỏ (không "bụp"), chờ con mới.
+func carry_off() -> void:
+	if state != State.KNOCKED:
+		return
+	_update_stars(false)
+	visible = false
+	state = State.GONE
+	_timer = Balance.ANIMAL_RESPAWN_SECONDS
 
 
 func current_cell() -> Vector2i:
@@ -131,7 +145,8 @@ func _process(delta: float) -> void:
 				_graze()
 		State.KNOCKED:
 			_update_stars(true)
-			if _timer <= 0.0:
+			# Không ai tới vác (thợ săn bị ngắt) thì tự "bụp" biến mất như cũ.
+			if _timer <= -Balance.HUNT_PICKUP_SECONDS * 3.0:
 				_vanish()
 		State.GONE:
 			if _timer <= 0.0:

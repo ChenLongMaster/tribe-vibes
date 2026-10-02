@@ -27,6 +27,7 @@ const ANIM_FISH: StringName = &"fish"
 const ANIM_COOK: StringName = &"cook"
 const ANIM_ATTACK: StringName = &"attack"
 const ANIM_STRIKE: StringName = &"strike"
+const ANIM_POUT: StringName = &"pout"
 
 ## Thư mục mảnh trong ArtLibrary — ID mảnh ghép sau thành key hình, vd "villager/hair_03".
 const PIECE_DIR: String = "villager/"
@@ -47,9 +48,32 @@ const NECK: Vector2 = Vector2(0, -31)
 const HAND_DISTANCE: float = 13.0
 const BACK_LIMB_SHADE: float = 0.85 # tay chân phía sau tối hơn chút cho có chiều sâu
 const HELD_ITEM_SCALE: float = 0.7
-## Đồ khuân giơ trên đầu (vị trí so với chân, theo nhịp nảy của thân).
-const CARRY_ITEM_POS: Vector2 = Vector2(0, -78)
+## Đồ khuân giơ trên đầu: mép dưới của hình đặt sát đỉnh đầu (y so với chân).
+const CARRY_HEAD_TOP: float = -65.0
 const CARRY_ITEM_SCALE: float = 1.1
+## Xác thú vác chổng vó trên đầu — hình thú to nên thu nhỏ lại. Hình thú có khoảng trống
+## phía trên lưng, lật ngược thì khoảng đó nằm dưới — hạ xuống cho lưng chạm tay.
+const CARCASS_SCALE: float = 0.85
+const CARCASS_SINK: float = 24.0
+## Tấm biển (px hiển thị): ngồi thì hai tay giơ lên trên đầu (gốc cán ở hai bàn tay); đứng
+## thì cắm xuống đất ngay trước mặt, một tay vịn. Icon vẽ giữa mặt biển.
+const SIGN_RAISED_POS: Vector2 = Vector2(0, -50)
+const SIGN_PLANTED_POS: Vector2 = Vector2(21, 3)
+const SIGN_PLANTED_ARM: float = -1.25
+const SIGN_ICON_POS: Vector2 = Vector2(0, -31)
+const SIGN_ICON_SCALE: float = 1.1
+## Đồ nghề đeo sau lưng khi không dùng (giáo, rìu, cuốc), xiên chéo qua lưng.
+const BACK_ITEM_POS: Vector2 = Vector2(-7, -21)
+const BACK_ITEM_ROTATION: float = -0.5
+## Câu cá: quăng cần ra trong FISH_CAST_SECONDS đầu, phao nổi trước mặt.
+const FISH_CAST_SECONDS: float = 0.7
+const FISH_BOBBER_POS: Vector2 = Vector2(46, 14)
+## Đầu cần câu tính từ tâm hình `props/fishing_rod` (px của file hình).
+const ROD_TIP_TEXTURE_OFFSET: Vector2 = Vector2(16, -18)
+## Ngồi (dỗi, phơi nắng) thì giơ biển; đi thì cất biển; còn lại cắm biển xuống đất.
+const SEATED_ANIMS: Array[StringName] = [ANIM_SIT, ANIM_POUT]
+
+enum SignPose { HIDDEN, PLANTED, RAISED }
 ## Đồ nghề nghiêng theo tay (rad) — hình rìu, cuốc vẽ chéo nên xoay thêm cho thẳng tay.
 const TOOL_TILT: float = 0.6
 ## Nhịp vung (giây) của chặt, đập, vung giáo — khớp "swing" trong data/jobs.gd.
@@ -95,7 +119,17 @@ var _hair: Sprite2D
 var _accessory: Sprite2D
 var _held_item: Sprite2D
 var _held_is_tool: bool = false
+var _held_key: String = ""
+var _back_item: Sprite2D
+var _back_key: String = ""
 var _carry_item: Sprite2D
+var _fishing_line: FishingLine
+var _sign_pose: SignPose = SignPose.HIDDEN
+var _sign: Node2D
+var _sign_icon: Sprite2D
+var _sign_cross: Sprite2D
+var _sign_wanted: bool = false
+var _sign_time: float = 0.0
 
 
 func _init() -> void:
@@ -166,22 +200,61 @@ func squash(amount: float = 0.14, duration: float = 0.25) -> void:
 func set_held_item(key: String, is_tool: bool = false) -> void:
 	_held_item.visible = not key.is_empty()
 	_held_is_tool = is_tool
+	_held_key = key
 	_held_item.rotation = 0.0
 	if _held_item.visible:
 		ArtLibrary.setup_sprite(_held_item, key)
 		_held_item.scale *= HELD_ITEM_SCALE
 
 
+## Đồ nghề đang giữ mà không cầm trên tay thì đeo sau lưng ("" = không có gì).
+func set_back_item(key: String) -> void:
+	_back_key = key
+	if not key.is_empty():
+		ArtLibrary.setup_sprite(_back_item, key)
+		_back_item.scale *= HELD_ITEM_SCALE
+
+
 ## Giơ một món đồ trên đầu để khuân (key hình), "" để đặt xuống. Hai tay giơ lên đỡ.
-func set_carry_item(key: String) -> void:
+## `upside_down` = vác ngửa (xác thú chổng vó), hình to nên thu nhỏ lại.
+func set_carry_item(key: String, upside_down: bool = false) -> void:
 	_carry_item.visible = not key.is_empty()
-	if _carry_item.visible:
-		ArtLibrary.setup_sprite(_carry_item, key)
-		_carry_item.scale *= CARRY_ITEM_SCALE
+	if not _carry_item.visible:
+		return
+	ArtLibrary.setup_sprite(_carry_item, key)
+	_carry_item.scale *= CARCASS_SCALE if upside_down else CARRY_ITEM_SCALE
+	_carry_item.flip_v = upside_down
+	# Mép dưới hình (dù lật hay không) đặt sát đỉnh đầu.
+	var below_pivot: float = (1.0 - ArtSpecs.pivot(key).y) * _carry_item.texture.get_size().y * _carry_item.scale.y
+	_carry_item.position = Vector2(0, CARRY_HEAD_TOP - below_pivot + (CARCASS_SINK if upside_down else 0.0))
 
 
 func is_carrying() -> bool:
 	return _carry_item.visible
+
+
+## Giơ tấm biển vẽ `icon_key` (có dấu ✕ nếu `crossed`) trong `seconds` giây (INF = tới khi
+## lower_sign()). Đang khuân đồ hoặc đang nằm thì tạm giấu biển, xong lại giơ tiếp.
+func show_sign(icon_key: String, crossed: bool, seconds: float) -> void:
+	ArtLibrary.setup_sprite(_sign_icon, icon_key)
+	_sign_icon.scale *= SIGN_ICON_SCALE
+	_sign_cross.visible = crossed
+	_sign_wanted = true
+	_sign_time = seconds
+	squash(-0.1)
+
+
+func lower_sign() -> void:
+	_sign_wanted = false
+
+
+func has_sign() -> bool:
+	return _sign.visible
+
+
+## Biển đang giơ cao trên đầu (lúc ngồi) — bong bóng trên đầu phải nhích lên cho khỏi đè.
+func is_sign_raised() -> bool:
+	return _sign.visible and _sign_pose == SignPose.RAISED
 
 
 ## Quăng một món đồ (đồ nghề khi đình công): bay vòng lên rồi rơi xuống đất, mờ dần.
@@ -213,11 +286,48 @@ func _process(delta: float) -> void:
 	if anim == ANIM_WALK or anim == ANIM_RUN:
 		_walk_phase += move_speed * delta * WALK_PHASE_PER_PIXEL
 	_update_blink(delta)
+	if _sign_wanted:
+		_sign_time -= delta
+		if _sign_time <= 0.0:
+			_sign_wanted = false
+	_sign_pose = _current_sign_pose()
+	_sign.visible = _sign_pose != SignPose.HIDDEN
+	_back_item.visible = not _back_key.is_empty() and _back_key != _held_key and not is_lying()
 	_reset_pose()
 	_animate(_anim_time)
 	_pose.scale = _pose_scale * Vector2(1.0 + _squash, 1.0 - _squash)
 	_face.texture = _faces.get(_current_face(), _face.texture)
 	_place_held_item()
+	_place_sign()
+	_update_fishing_line()
+
+
+func _current_sign_pose() -> SignPose:
+	if not _sign_wanted or _carry_item.visible or is_lying() or anim == ANIM_WALK or anim == ANIM_RUN:
+		return SignPose.HIDDEN
+	return SignPose.RAISED if SEATED_ANIMS.has(anim) else SignPose.PLANTED
+
+
+func _place_sign() -> void:
+	match _sign_pose:
+		SignPose.RAISED:
+			_sign.position = _pose.position + SIGN_RAISED_POS
+			_sign.rotation = 0.06 * sin(_anim_time * 5.0)
+		SignPose.PLANTED:
+			_sign.position = SIGN_PLANTED_POS
+			_sign.rotation = 0.0
+
+
+# Dây câu nối đầu cần tới phao trước mặt (chỉ khi đã quăng cần xong).
+func _update_fishing_line() -> void:
+	var fishing: bool = anim == ANIM_FISH and _held_item.visible and _anim_time > FISH_CAST_SECONDS
+	_fishing_line.visible = fishing
+	if not fishing:
+		return
+	var tip_local: Vector2 = _held_item.position + (ROD_TIP_TEXTURE_OFFSET * _held_item.scale).rotated(_held_item.rotation)
+	_fishing_line.tip = _pose.transform * tip_local
+	_fishing_line.bobber = FISH_BOBBER_POS + Vector2(0, 1.5 * sin(_anim_time * 2.2))
+	_fishing_line.queue_redraw()
 
 
 func _reset_pose() -> void:
@@ -280,6 +390,16 @@ func _animate(t: float) -> void:
 			_arm_front.rotation = -0.3
 			_arm_back.rotation = -0.2
 			_breathe(breathe)
+		ANIM_POUT:
+			# Ngồi bệt nũng nịu: đá chân thay nhau, người đung đưa, đầu nghiêng cúi.
+			var kick: float = sin(t * 5.0)
+			_pose.position.y = 7.0
+			_leg_front.rotation = -1.35 + 0.3 * maxf(kick, 0.0)
+			_leg_back.rotation = -1.25 + 0.3 * maxf(-kick, 0.0)
+			_arm_front.rotation = -0.5 + 0.12 * sin(t * 2.5)
+			_arm_back.rotation = -0.3
+			_pose.rotation = 0.06 * sin(t * 1.6)
+			_head.rotation = 0.18 + 0.06 * sin(t * 1.6)
 		ANIM_YAWN, ANIM_STRETCH:
 			var reach: float = minf(t * 3.0, 1.0)
 			_arm_front.rotation = lerpf(-0.12, -2.9, reach)
@@ -321,9 +441,18 @@ func _animate(t: float) -> void:
 			_pose.rotation = lerpf(0.2, 0.0, jab)
 			_pose.position.x = lerpf(3.0, -1.0, jab)
 		ANIM_FISH:
-			# Cầm cần câu chĩa ra trước, thỉnh thoảng giật nhẹ.
+			# Quăng cần: giơ cần ra sau đầu rồi vung ra trước. Sau đó chĩa cần ra, thỉnh
+			# thoảng giật nhẹ khi cá cắn câu.
 			var tug: float = maxf(sin(t * 0.9), 0.0) ** 8.0
-			_arm_front.rotation = -1.35 - 0.35 * tug
+			if t < FISH_CAST_SECONDS:
+				var cast: float = t / FISH_CAST_SECONDS
+				tug = 0.0
+				if cast < 0.45:
+					_arm_front.rotation = lerpf(-1.35, -2.9, cast / 0.45)
+				else:
+					_arm_front.rotation = lerpf(-2.9, -1.35, smoothstep(0.45, 1.0, cast))
+			else:
+				_arm_front.rotation = -1.35 - 0.35 * tug
 			_arm_back.rotation = -0.9 - 0.2 * tug
 			_pose.rotation = -0.05 * tug
 			_breathe(breathe)
@@ -349,6 +478,13 @@ func _animate(t: float) -> void:
 		# Khuân đồ: hai tay giơ lên đỡ món đồ trên đầu (chồng lên dáng đi/đứng).
 		_arm_front.rotation = -2.75 + 0.06 * sin(t * 6.0)
 		_arm_back.rotation = 2.75 - 0.06 * sin(t * 6.0)
+	elif _sign_pose == SignPose.RAISED:
+		# Ngồi giơ biển: hai tay giơ thẳng lên cầm cán, lắc nhẹ cho người chơi để ý.
+		_arm_front.rotation = -2.95 + 0.08 * sin(t * 5.0)
+		_arm_back.rotation = 2.95 - 0.08 * sin(t * 5.0)
+	elif _sign_pose == SignPose.PLANTED:
+		# Đứng cạnh biển cắm dưới đất, một tay vịn mép biển.
+		_arm_front.rotation = SIGN_PLANTED_ARM
 
 
 # Nhịp vung 0..1 trong một chu kỳ: giơ lên từ từ (0 → 1) rồi bổ xuống thật nhanh (1 → 0).
@@ -376,7 +512,7 @@ func _current_face() -> String:
 			return FACE_SURPRISED
 		ANIM_RUB_EYES, ANIM_SCRATCH, ANIM_KNOCKED_OUT:
 			return FACE_BLINK
-		ANIM_STRIKE:
+		ANIM_STRIKE, ANIM_POUT:
 			return FACE_SAD
 		ANIM_CELEBRATE, ANIM_EAT:
 			return FACE_HAPPY
@@ -399,8 +535,6 @@ func _place_held_item() -> void:
 		_held_item.position = SHOULDER_FRONT + Vector2(0, HAND_DISTANCE).rotated(_arm_front.rotation)
 		if _held_is_tool:
 			_held_item.rotation = _arm_front.rotation + TOOL_TILT
-	if _carry_item.visible:
-		_carry_item.position = CARRY_ITEM_POS
 
 
 func _set_part(sprite: Sprite2D, key: String, color: Color) -> void:
@@ -414,11 +548,18 @@ func _build_nodes() -> void:
 	ArtLibrary.setup_sprite(_shadow, "villager/shadow")
 	_flip = Node2D.new()
 	add_child(_flip)
+	# Biển vẽ sau người: ngồi giơ biển thì cán nằm sau đầu, đứng thì người đứng trước biển.
+	_sign = Node2D.new()
+	_sign.visible = false
+	_flip.add_child(_sign)
 	_pose = Node2D.new()
 	_flip.add_child(_pose)
-	# Thứ tự vẽ từ sau ra trước theo spec.
+	# Thứ tự vẽ từ sau ra trước theo spec (đồ nghề sau lưng nằm sau thân).
 	_leg_back = _add_sprite(_pose, HIP_BACK)
 	_arm_back = _add_sprite(_pose, SHOULDER_BACK)
+	_back_item = _add_sprite(_pose, BACK_ITEM_POS)
+	_back_item.rotation = BACK_ITEM_ROTATION
+	_back_item.visible = false
 	_torso = _add_sprite(_pose, TORSO_BOTTOM)
 	_leg_front = _add_sprite(_pose, HIP_FRONT)
 	_head = Node2D.new()
@@ -431,8 +572,16 @@ func _build_nodes() -> void:
 	_arm_front = _add_sprite(_pose, SHOULDER_FRONT)
 	_held_item = _add_sprite(_pose, SHOULDER_FRONT)
 	_held_item.visible = false
-	_carry_item = _add_sprite(_pose, CARRY_ITEM_POS)
+	_carry_item = _add_sprite(_pose, Vector2(0, CARRY_HEAD_TOP))
 	_carry_item.visible = false
+	_fishing_line = FishingLine.new()
+	_fishing_line.visible = false
+	_flip.add_child(_fishing_line)
+	ArtLibrary.setup_sprite(_add_sprite(_sign, Vector2.ZERO), "props/sign")
+	_sign_icon = _add_sprite(_sign, SIGN_ICON_POS)
+	_sign_cross = _add_sprite(_sign, SIGN_ICON_POS)
+	ArtLibrary.setup_sprite(_sign_cross, "icons/cross")
+	_sign_cross.scale *= SIGN_ICON_SCALE
 
 
 func _add_sprite(parent: Node, pos: Vector2) -> Sprite2D:

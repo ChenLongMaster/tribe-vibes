@@ -1,15 +1,20 @@
 class_name TaskCook
 extends TaskWork
-## Một lượt nấu ăn ở lửa trại (Đợt 3: bếp): lấy một phần thịt/cá sống trong kho, nấu, ra
-## một món chín cất luôn tại chỗ. Chưa có gì để nấu thì đứng chờ cạnh bếp một lúc (thợ săn,
-## thợ câu sẽ mang về) — mỗi lượt chờ ngắn để watchdog không tưởng là bị kẹt.
+## Một lượt nấu ăn ở lửa trại (Đợt 3: bếp): lấy một phần thức ăn thô trong kho chung, nấu,
+## ra một món chín cất ngay ở bếp (đồ RIÊNG của bếp, tối đa theo sức chứa — bày quanh bếp
+## cho thấy). Chưa có gì để nấu thì đứng chờ cạnh bếp, thỉnh thoảng giơ biển đùi thịt gạch
+## chéo; bếp đầy món chín thì đứng chờ người ăn bớt. Mỗi lượt chờ ngắn để watchdog không
+## tưởng là bị kẹt.
 
 enum Step { GO, WAIT, COOK }
 
 const WAIT_SECONDS: float = 6.0
 const NAG_SECONDS: float = 15.0 # nhắc "Chưa có gì để nấu…" thưa thưa thôi
 
+const NO_FOOD_SIGN: String = "icons/res_food"
+
 var _station: Building
+## Món thô đang nấu dở (quả / cá / thịt) — bị ngắt thì trả lại kho đúng món.
 var _raw: StringName = &""
 
 
@@ -20,6 +25,7 @@ func _init(owner_job: Job, station: Building) -> void:
 
 
 func start() -> void:
+	hold_job_item()
 	var stand: Vector2i = world().finder.find_building_stand_cell(_station, villager)
 	if stand == World.INVALID_CELL or not villager.move_to_cell(stand):
 		fail()
@@ -46,9 +52,9 @@ func tick(delta: float) -> Status:
 				return Status.RUNNING
 			villager.state = Villager.State.IDLE
 			villager.rig.play(VillagerRig.ANIM_IDLE)
-			if job.nag_cooldown <= 0.0:
+			if job.nag_cooldown <= 0.0 and _station.has_room_for(ResourceDefs.MEAL):
 				job.nag_cooldown = NAG_SECONDS
-				villager.say("BUBBLE_NOTHING_TO_COOK", {}, "icons/res_meat")
+				villager.hold_sign(NO_FOOD_SIGN, true)
 			timer -= delta
 			if timer <= 0.0:
 				return Status.DONE
@@ -56,8 +62,8 @@ func tick(delta: float) -> Status:
 			if not tick_work(delta):
 				return Status.RUNNING
 			_raw = &""
-			GameState.add_resource(ResourceDefs.COOKED_MEAL, 1)
-			EventBus.resource_delivered.emit(ResourceDefs.COOKED_MEAL, 1, _station.position + FLOAT_TEXT_LIFT)
+			_station.add_stock(ResourceDefs.MEAL)
+			EventBus.resource_delivered.emit(ResourceDefs.MEAL, 1, _station.position + FLOAT_TEXT_LIFT)
 			villager.emote("icons/happy")
 			return Status.DONE
 	return Status.RUNNING
@@ -65,9 +71,9 @@ func tick(delta: float) -> Status:
 
 func stop() -> void:
 	super.stop()
-	# Bị ngắt giữa chừng thì trả phần đồ sống lại kho, không làm mất.
+	# Bị ngắt giữa chừng thì trả phần đồ thô lại kho, không làm mất.
 	if _raw != &"":
-		GameState.add_resource(_raw, 1)
+		GameState.add_resource(ResourceDefs.FOOD, 1, _raw if _raw != ResourceDefs.FOOD else &"")
 		_raw = &""
 
 
@@ -75,9 +81,9 @@ func activity_key() -> String:
 	return "UI_ACTIVITY_COOK_WAIT" if step != Step.COOK else super.activity_key()
 
 
+# Bếp còn chỗ cất món chín và kho còn thức ăn thô thì lấy một phần ra nấu.
 func _try_take_raw() -> bool:
-	for raw: StringName in ResourceDefs.COOKABLE:
-		if GameState.take_resource(raw):
-			_raw = raw
-			return true
-	return false
+	if not _station.has_room_for(ResourceDefs.MEAL):
+		return false
+	_raw = GameState.take_one(ResourceDefs.FOOD)
+	return _raw != &""

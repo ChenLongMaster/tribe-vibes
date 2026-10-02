@@ -2,7 +2,7 @@ class_name World
 extends Node2D
 ## Dựng thế giới từ MapData: nền cỏ, nước, mảng đất, trang trí, vật thể, công trình,
 ## thổ dân. Giữ `grid` (WorldGrid) làm nguồn sự thật về ô, `reservations` để đặt chỗ,
-## `finder` để thổ dân hỏi "tìm chỗ".
+## `finder` để thổ dân hỏi "tìm chỗ", `nature` để củi/đá/cây tự hồi lại dần.
 
 ## Ô "không có" — trả về khi không tìm được chỗ nào.
 const INVALID_CELL: Vector2i = Vector2i(-1, -1)
@@ -11,6 +11,7 @@ const BUILDING_SCENE: PackedScene = preload("res://buildings/building.tscn")
 const VILLAGER_SCENE: PackedScene = preload("res://villager/villager.tscn")
 const SPAWN_SEED_SALT: int = 104729
 const ANIMAL_SEED_SALT: int = 15485863
+const NATURE_SEED_SALT: int = 32452843
 const GROUND_KEY_FORMAT: String = "ground/grass_%02d"
 const DIRT_PATCH_KEY_FORMAT: String = "ground/dirt_patch_%02d"
 const GRASS_PATCH_KEY_FORMAT: String = "ground/grass_patch_%02d"
@@ -25,6 +26,7 @@ var villagers: Array[Villager] = []
 var resource_nodes: Array[ResourceNode] = []
 var buildings: Array[Building] = []
 var animals: Array[Animal] = []
+var nature: NatureSpawner
 var _villagers_by_id: Dictionary[int, Villager] = {}
 ## RNG riêng cho nhu cầu ban đầu lúc spawn — gieo theo seed map để lặp lại được.
 var _spawn_rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -59,6 +61,9 @@ func build(seed_value: int) -> void:
 	_spawn_buildings()
 	_spawn_objects()
 	_spawn_animals(seed_value + ANIMAL_SEED_SALT)
+	nature = NatureSpawner.new()
+	add_child(nature)
+	nature.setup(self, seed_value + NATURE_SEED_SALT)
 	var focus: Vector2 = WorldGrid.cell_to_world(map_data.campfire_cell) + Vector2(0, -48)
 	_camera.setup(Rect2(Vector2.ZERO, grid.pixel_size()), focus)
 	EventBus.world_ready.emit(self)
@@ -117,9 +122,27 @@ func pick_job_target(world_point: Vector2) -> Node2D:
 	if best != null:
 		return best
 	for building: Building in buildings:
-		if building.hit_test(world_point) and JobDefs.skill_for_target(building) != &"":
+		if building.hit_test(world_point) and JobDefs.job_for_target(building) != &"":
 			return building
 	return null
+
+
+## Đặt một tài nguyên mới lên map lúc đang chơi (củi rơi, đá tảng lăn ra…). Dùng lại node đã
+## hết cùng loại nếu có — node không bao giờ bị xoá. Đá tảng chặn ô; củi, đá cuội thì không.
+func place_resource(kind: StringName, cell: Vector2i, variant: int, jitter: Vector2 = Vector2.ZERO) -> ResourceNode:
+	for node: ResourceNode in resource_nodes:
+		if node.kind == kind and node.is_cleared:
+			node.place_again(cell, variant, jitter)
+			_block_if_solid(node)
+			return node
+	var fresh: ResourceNode = RESOURCE_NODE_SCENE.instantiate()
+	fresh.setup(kind, cell, variant, jitter)
+	_entities.add_child(fresh)
+	fresh.set_wind(_wind)
+	resource_nodes.append(fresh)
+	fresh.cleared.connect(_on_resource_cleared)
+	_block_if_solid(fresh)
+	return fresh
 
 
 func get_villager(villager_id: int) -> Villager:
@@ -201,9 +224,15 @@ func _spawn_animals(seed_value: int) -> void:
 		animals.append(animal)
 
 
-# Đá vỡ hết thì ô đó thành lối đi.
+# Đá vỡ hết thì ô đó thành lối đi (củi, đá cuội vốn không chặn gì).
 func _on_resource_cleared(node: ResourceNode) -> void:
-	grid.set_blocked(node.cell, false)
+	if not node.is_loose():
+		grid.set_blocked(node.cell, false)
+
+
+func _block_if_solid(node: ResourceNode) -> void:
+	if not node.is_loose():
+		grid.set_blocked(node.cell, true)
 
 
 func _add_sprite(parent: Node2D, key: String, pos: Vector2) -> Sprite2D:

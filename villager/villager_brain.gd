@@ -2,11 +2,13 @@ class_name VillagerBrain
 extends RefCounted
 ## Bộ não chọn việc, được gọi mỗi 0.3–0.6 giây. Chế độ Normal (`villager_autonomy =
 ## OBEDIENT`): thổ dân NGHE LỜI — không tự kiếm việc, chỉ tự rời chỗ khi đói, mệt (và
-## Đợt 4: muốn tìm bạn đời). Thứ tự ưu tiên (MVP_PROMPT mục 5.2):
+## Đợt 4: muốn tìm bạn đời). Thứ tự ưu tiên (GAME_DESIGN mục 5.2):
 ##   1. Nguy hiểm (Đợt 5)
 ##   2. Máu = 0 → ngất. Thể lực = 0 → gục ngủ tại chỗ.
 ##   3. Giải trí = 0 → đình công (quăng đồ nghề, từ chối việc tới khi giải trí hồi lại)
-##   4. Đói < 50 → đi ăn. Thể lực < 50% → đi ngủ. Có bong bóng giải thích.
+##   4. Đói < 50 → đi tới bếp ăn (vừa đi vừa nghĩ tới đồ ăn); bếp hết đồ thì ngồi bệt
+##      nũng nịu (người đang làm việc được giao thì làm tiếp tới khi đói lả). Thể lực < 50%
+##      → đi ngủ. Luôn có bong bóng nghĩ / tấm biển giải thích.
 ##   5. Muốn tìm bạn đời (Đợt 4)
 ##   6. Việc người chơi giao (Job) → làm từng lượt, xong lượt lại làm tiếp — chế độ
 ##      AUTONOMOUS thêm "tự kiếm việc" ở đây
@@ -21,18 +23,21 @@ const IDLE_WEIGHTS: Dictionary[StringName, float] = {
 	&"sit": 1.2,
 }
 ## Không tìm được đồ ăn thì đợi chừng này giây rồi mới tìm lại (đỡ tìm liên tục).
-const FOOD_RETRY_SECONDS: float = 5.0
-const NO_FOOD_BUBBLE_SECONDS: float = 15.0
+const FOOD_RETRY_SECONDS: float = 3.0
+## Đang làm việc được giao mà bếp hết đồ: thỉnh thoảng nghĩ tới đồ ăn (không bỏ việc).
+const NO_FOOD_THINK_SECONDS: float = 15.0
+const FOOD_THOUGHT_ICON: String = "icons/res_food"
 ## Ra khỏi vùng dạo chơi quá chừng này ô thì đi về (dư một chút cho người đang đứng mép).
 const RETURN_MARGIN_CELLS: float = 0.5
 
 var _food_retry: float = 0.0
-var _no_food_bubble_cooldown: float = 0.0
+var _no_food: bool = false
+var _no_food_think_cooldown: float = 0.0
 
 
 func think(villager: Villager, elapsed: float) -> void:
 	_food_retry -= elapsed
-	_no_food_bubble_cooldown -= elapsed
+	_no_food_think_cooldown -= elapsed
 	var current: Task = villager.task
 	if current != null and current.priority == Task.Priority.SCRIPTED:
 		return
@@ -67,7 +72,7 @@ func _handle_collapse(villager: Villager, current: Task, mode: GameModeConfig) -
 		if current is TaskSleep:
 			return true
 		villager.start_task(TaskSleep.new(null, true))
-		villager.say("BUBBLE_EXHAUSTED", {}, "icons/sleepy")
+		villager.emote("icons/sleepy")
 		return true
 	return false
 
@@ -84,26 +89,49 @@ func _handle_needs(villager: Villager, current: Task, mode: GameModeConfig) -> b
 		var can_interrupt: bool = not asleep or status.hunger < Balance.HUNGER_WAKE
 		if can_interrupt and _food_retry <= 0.0:
 			var source: FoodSource = villager.world.finder.find_food_for(villager)
+			_no_food = source == null
 			if source != null:
 				villager.start_task(TaskEat.new(source))
-				villager.say("BUBBLE_HUNGRY", {}, "icons/hunger")
 				villager.rig.flash_face(VillagerRig.FACE_SURPRISED, 0.8)
 				return true
 			_food_retry = FOOD_RETRY_SECONDS
-			if _no_food_bubble_cooldown <= 0.0:
-				_no_food_bubble_cooldown = NO_FOOD_BUBBLE_SECONDS
-				villager.say("BUBBLE_NO_FOOD", {}, "icons/hunger")
+		# Vừa mệt vừa đói mà bếp hết đồ: ngủ trước (ngủ dậy vẫn dỗi tiếp nếu chưa có đồ ăn).
+		var tired: bool = mode.need_enabled(NeedDefs.ENERGY) and status.energy < Balance.ENERGY_SLEEP_BELOW 				and status.hunger >= Balance.HUNGER_WAKE
+		if current is TaskSulk and not tired:
+			return true
+		if can_interrupt and _no_food and not tired and _handle_no_food(villager, current):
+			return true
 
 	if mode.need_enabled(NeedDefs.ENERGY) and status.energy < Balance.ENERGY_SLEEP_BELOW:
 		if current != null and current.kind == &"sleep":
 			return true
-		if current != null and current.priority >= Task.Priority.NEED:
+		if current != null and current.priority >= Task.Priority.NEED and not (current is TaskSulk):
 			# Đang đi ăn thì ăn xong rồi ngủ.
 			return true
 		villager.start_task(TaskSleep.new(villager.world.finder.find_bed_for(villager)))
-		villager.say("BUBBLE_SLEEPY", {}, "icons/sleepy")
+		villager.think("icons/sleepy")
 		return true
 	return false
+
+
+# Đói mà bếp hết đồ ăn. Rảnh (hoặc đã đói lả) thì ngồi bệt nũng nịu cho người chơi thấy;
+# đang làm việc được giao thì làm tiếp — biết đâu chính họ đang kiếm đồ ăn về — chỉ
+# thỉnh thoảng nghĩ tới đồ ăn. Trả về true nếu vừa ngồi dỗi.
+func _handle_no_food(villager: Villager, current: Task) -> bool:
+	var busy_with_job: bool = villager.job != null and not villager.on_strike
+	if busy_with_job and villager.status.hunger > 0.0:
+		if _no_food_think_cooldown <= 0.0 and not villager.rig.is_carrying():
+			_no_food_think_cooldown = NO_FOOD_THINK_SECONDS
+			villager.think(FOOD_THOUGHT_ICON)
+		return false
+	# Đang ngủ thì chỉ dậy dỗi khi đói lắm; không chen ngang màn giận dỗi (việc NEED khác).
+	if current is TaskSleep:
+		if villager.status.hunger >= Balance.HUNGER_WAKE:
+			return false
+	elif current != null and current.priority >= Task.Priority.NEED:
+		return false
+	villager.start_task(TaskSulk.new())
+	return true
 
 
 # Giải trí = 0 → đình công; đang đình công mà giải trí hồi đủ thì làm lại. Trả về true nếu
@@ -134,7 +162,7 @@ func _handle_job(villager: Villager) -> bool:
 		return true
 	var next: Task = job.next_task(villager)
 	if next == null:
-		villager.stop_job(job.stop_bubble())
+		villager.stop_job()
 		return false
 	villager.start_task(next)
 	return true

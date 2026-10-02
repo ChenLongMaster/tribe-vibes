@@ -6,9 +6,14 @@ extends RefCounted
 enum Edge { NORTH, SOUTH, EAST, WEST }
 
 const KIND_TREE: StringName = &"tree"
+## Đá tảng (cần cuốc). Đá cuội nhặt tay là KIND_PEBBLES.
 const KIND_ROCK: StringName = &"rock"
 const KIND_BUSH: StringName = &"bush"
 const KIND_FISH_SPOT: StringName = &"fish_spot"
+## Đồ nằm lẫn trên mặt đất, nhặt tay, không chặn đường. Không sinh cùng map mà rơi ra dần
+## lúc chơi (NatureSpawner): củi dưới tán cây, đá cuội quanh đá tảng.
+const KIND_TWIGS: StringName = &"twigs"
+const KIND_PEBBLES: StringName = &"pebbles"
 
 const DECOR_FLOWER: StringName = &"flower"
 const DECOR_TUFT: StringName = &"grass_tuft"
@@ -43,6 +48,8 @@ var lake_side: Edge = Edge.NORTH
 ## Cạnh map mà cannibal kéo đến (Đợt 5).
 var raid_side: Edge = Edge.SOUTH
 var meadow_rect: Rect2i = Rect2i()
+## Ô gốc (trên-trái) của các vách đá — đá tảng mới lăn ra quanh đây.
+var cliffs: Array[Vector2i] = []
 
 
 func init_arrays(map_size: Vector2i) -> void:

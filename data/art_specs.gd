@@ -37,6 +37,14 @@ const PIVOTS: Dictionary[String, Vector2] = {
 	"animals/boar": Vector2(0.48, 0.92),
 	"animals/deer": Vector2(0.45, 0.94),
 	"ui/move_marker": Vector2(0.375, 0.875),
+	"ui/thought_bubble": Vector2(0.5, 1.0),
+	"props/sign": Vector2(0.5, 1.0),
+	# Giỏ, xô xách thõng: neo ở quai (mép trên) để treo dưới bàn tay.
+	"props/basket": Vector2(0.5, 0.15),
+	"props/bucket": Vector2(0.5, 0.15),
+	"env/twigs": Vector2(0.5, 0.75),
+	"env/pebbles": Vector2(0.5, 0.75),
+	"env/cliff": Vector2(0.5, 0.97),
 }
 
 ## Neo chung cho cả nhóm hình cùng tiền tố (dùng khi không có trong PIVOTS).
@@ -51,6 +59,7 @@ const PREFIX_PIVOTS: Dictionary[String, Vector2] = {
 	"villager/leg": Vector2(0.36, 0.1),
 	"villager/shadow": Vector2(0.5, 0.5),
 	"icons/": Vector2(0.5, 0.5),
+	"props/": Vector2(0.5, 0.5),
 	"fx/": Vector2(0.5, 0.5),
 	"ui/": Vector2(0.5, 0.5),
 }

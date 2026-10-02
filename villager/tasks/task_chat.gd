@@ -1,13 +1,17 @@
 class_name TaskChat
 extends Task
 ## Tán gẫu: người rủ đi tới cạnh người kia, hai người quay mặt vào nhau, thay phiên
-## nói "Ugga bugga!". Người được rủ đứng chờ; ai bỏ đi thì cuộc trò chuyện kết thúc.
+## "nói" bằng hình (1–2 icon ngẫu nhiên trong bong bóng — không có chữ). Người được rủ
+## đứng chờ; ai bỏ đi thì cuộc trò chuyện kết thúc.
 
 const WAIT_TIMEOUT: float = 12.0 # giây chờ người rủ đi tới
 const TALK_MIN: float = 4.0
 const TALK_MAX: float = 8.0
 const TURN_SECONDS: float = 1.4
-const GIBBERISH_COUNT: int = 8
+## Những thứ thổ dân hay "kể" cho nhau nghe.
+const TALK_ICONS: Array[String] = ["icons/berry", "icons/res_meat", "icons/res_fish", "icons/res_wood",
+		"icons/res_stone", "icons/star", "icons/love", "icons/happy", "icons/question", "icons/scared"]
+const TWO_ICON_CHANCE: float = 0.35
 const HAPPY_EMOTE_CHANCE: float = 0.5
 
 var session: ChatSession
@@ -64,7 +68,7 @@ func tick(delta: float) -> Status:
 		var listener: Villager = session.other(speaker)
 		speaker.rig.play(VillagerRig.ANIM_TALK)
 		listener.rig.play(VillagerRig.ANIM_IDLE)
-		speaker.say("BUBBLE_GIBBERISH_%02d" % randi_range(1, GIBBERISH_COUNT), {}, "", TURN_SECONDS * 0.9)
+		speaker.chatter(_random_talk(), TURN_SECONDS * 0.9)
 		session.initiator_speaking = not session.initiator_speaking
 	if session.talk_left <= 0.0:
 		session.ended = true
@@ -76,6 +80,13 @@ func tick(delta: float) -> Status:
 
 func stop() -> void:
 	session.ended = true
+
+
+func _random_talk() -> Array[String]:
+	var icons: Array[String] = [TALK_ICONS.pick_random()]
+	if randf() < TWO_ICON_CHANCE:
+		icons.append(TALK_ICONS.pick_random())
+	return icons
 
 
 func activity_key() -> String:

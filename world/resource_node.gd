@@ -1,12 +1,17 @@
 class_name ResourceNode
 extends Node2D
-## Một nguồn tài nguyên trên map: cây, đá, bụi quả, chỗ câu cá.
-## - Cây: chặt TREE_USES lượt thì thành gốc, rất lâu sau mọc lại.
-## - Đá: đập ROCK_USES lượt thì vỡ hết, biến mất (ô đó đi qua được).
+## Một nguồn tài nguyên trên map: cây, đá tảng, bụi quả, chỗ câu cá, củi, đá cuội.
+## - Cây: chặt (cần rìu) TREE_USES khúc gỗ thì thành gốc. Gốc chỉ mọc lại khi số cây trong
+##   rừng ít hơn lúc đầu — NatureSpawner quyết định, gọi regrow().
+## - Đá tảng: đập (cần cuốc) ROCK_USES lượt thì vỡ hết, biến mất (ô đó đi qua được). Đá tảng
+##   mới lăn ra từ vách đá (NatureSpawner gọi place_again()).
 ## - Bụi: hái một lần là hết quả, mọc lại sau một ngày.
 ## - Chỗ câu cá: không bao giờ cạn.
+## - Củi, đá cuội: nằm trên mặt đất, không chặn đường, nhặt tay một lần là hết.
+## Node đã hết KHÔNG bị xoá (chỉ ẩn) để không ai giữ tham chiếu tới node đã giải phóng;
+## NatureSpawner dùng lại chúng cho củi/đá mới.
 
-## Đá vỡ hết — World nghe để mở ô đó cho đi qua.
+## Hết hẳn, biến mất khỏi map (đá vỡ, củi/đá cuội đã nhặt) — World nghe để mở ô cho đi qua.
 signal cleared(node: ResourceNode)
 
 ## Gốc node nằm hơi thấp hơn tâm ô, để thổ dân đứng ô phía dưới được vẽ đè lên trên.
@@ -17,7 +22,12 @@ const HIT_RECTS: Dictionary[StringName, Rect2] = {
 	MapData.KIND_ROCK: Rect2(-40, -60, 80, 72),
 	MapData.KIND_BUSH: Rect2(-34, -54, 68, 64),
 	MapData.KIND_FISH_SPOT: Rect2(-32, -32, 64, 64),
+	MapData.KIND_TWIGS: Rect2(-28, -30, 56, 40),
+	MapData.KIND_PEBBLES: Rect2(-28, -30, 56, 40),
 }
+## Đồ nằm lẫn trên đất (nhặt tay, không chặn đường).
+const LOOSE_KINDS: Array[StringName] = [MapData.KIND_TWIGS, MapData.KIND_PEBBLES]
+const POP_SECONDS: float = 0.3
 const SHAKE_ANGLE: float = 0.06
 const SHAKE_SECONDS: float = 0.25
 
@@ -27,20 +37,50 @@ var variant: int = 0
 var uses_left: int = 0
 ## Đá đã vỡ hết (không còn trên map nữa).
 var is_cleared: bool = false
+## Giây đã thành gốc (cây) — gốc mới chặt chưa mọc lại ngay.
+var stump_age: float = 0.0
 var _regrow_left: float = 0.0
 
 @onready var _sprite: Sprite2D = $Sprite
 
 
-func setup(object_kind: StringName, object_cell: Vector2i, object_variant: int) -> void:
+## `jitter` (px) lệch khỏi tâm ô — cho củi/đá cuội nằm lộn xộn tự nhiên.
+func setup(object_kind: StringName, object_cell: Vector2i, object_variant: int, jitter: Vector2 = Vector2.ZERO) -> void:
 	kind = object_kind
 	cell = object_cell
 	variant = object_variant
 	uses_left = _initial_uses()
-	position = WorldGrid.cell_to_world(cell) + FOOT_OFFSET
+	position = WorldGrid.cell_to_world(cell) + FOOT_OFFSET + jitter
 	# Chỗ câu cá nằm giữa ô nước nên neo ở tâm, không cần lệch.
 	if kind == MapData.KIND_FISH_SPOT:
 		position = WorldGrid.cell_to_world(cell)
+
+
+func is_loose() -> bool:
+	return LOOSE_KINDS.has(kind)
+
+
+## Đặt lại một node đã hết ở chỗ mới (củi mới rơi, đá tảng mới lăn ra), nảy "bụp" lên.
+func place_again(object_cell: Vector2i, object_variant: int, jitter: Vector2 = Vector2.ZERO) -> void:
+	setup(kind, object_cell, object_variant, jitter)
+	is_cleared = false
+	visible = true
+	_refresh_visual()
+	scale = Vector2(0.2, 0.2)
+	create_tween().tween_property(self, "scale", Vector2.ONE, POP_SECONDS).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+## Gốc cây mọc lại thành cây (NatureSpawner gọi khi rừng còn thưa).
+func regrow() -> void:
+	if kind != MapData.KIND_TREE or not is_depleted():
+		return
+	uses_left = _initial_uses()
+	stump_age = 0.0
+	set_process(false)
+	_refresh_visual()
+	_sprite.scale.y *= 0.3
+	var base: Vector2 = Vector2(ArtLibrary.ART_SCALE, ArtLibrary.ART_SCALE)
+	_sprite.create_tween().tween_property(_sprite, "scale", base, 0.6).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _ready() -> void:
@@ -68,7 +108,7 @@ func has_berries() -> bool:
 	return kind == MapData.KIND_BUSH and not is_depleted()
 
 
-## Còn làm việc ở đây được không (chặt, đập, hái, câu).
+## Còn làm việc ở đây được không (chặt, đập, hái, câu, nhặt).
 func can_harvest() -> bool:
 	if is_cleared:
 		return false
@@ -113,11 +153,14 @@ func hit_test(world_point: Vector2) -> bool:
 func _on_depleted() -> void:
 	match kind:
 		MapData.KIND_TREE:
-			_start_regrow(Balance.TREE_REGROW_SECONDS)
+			# Đếm tuổi gốc; mọc lại hay không do NatureSpawner (giới hạn số cây).
+			stump_age = 0.0
+			set_process(true)
 		MapData.KIND_BUSH:
-			_start_regrow(Balance.BUSH_REGROW_SECONDS)
-		MapData.KIND_ROCK:
-			# Đá vỡ vụn: thu nhỏ rồi biến mất, ô trả lại cho lối đi.
+			_regrow_left = Balance.BUSH_REGROW_SECONDS
+			set_process(true)
+		MapData.KIND_ROCK, MapData.KIND_TWIGS, MapData.KIND_PEBBLES:
+			# Đá vỡ vụn / củi, đá cuội đã nhặt: thu nhỏ rồi biến mất, ô trả lại cho lối đi.
 			is_cleared = true
 			var tween: Tween = create_tween()
 			tween.tween_property(self, "scale", Vector2(1.2, 0.2), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
@@ -125,12 +168,10 @@ func _on_depleted() -> void:
 			cleared.emit(self)
 
 
-func _start_regrow(seconds: float) -> void:
-	_regrow_left = seconds
-	set_process(true)
-
-
 func _process(delta: float) -> void:
+	if kind == MapData.KIND_TREE:
+		stump_age += delta
+		return
 	_regrow_left -= delta
 	if _regrow_left <= 0.0:
 		uses_left = _initial_uses()
@@ -152,6 +193,10 @@ func _art_key() -> String:
 			return "env/bush_empty" if is_depleted() else "env/bush_berries"
 		MapData.KIND_FISH_SPOT:
 			return "env/fish_spot"
+		MapData.KIND_TWIGS:
+			return "env/twigs"
+		MapData.KIND_PEBBLES:
+			return "env/pebbles"
 	return "missing/" + String(kind)
 
 

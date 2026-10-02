@@ -21,6 +21,8 @@ var skill_xp: Dictionary[StringName, float] = {}
 ## Cấp hiện tại của kỹ năng đã lên cấp lúc chơi. Chưa có mục nào = vẫn ở cấp khởi đầu
 ## trong VillagerData.skills.
 var skill_levels: Dictionary[StringName, int] = {}
+## Đồ nghề đang giữ (ToolDefs: rìu, cuốc, giáo) — &"" = tay không. Giữ luôn tới khi đổi món khác.
+var tool: StringName = &""
 
 
 ## Nhu cầu ban đầu ngẫu nhiên trong khoảng cấu hình ở Balance — mỗi người một khác.
@@ -99,7 +101,7 @@ func to_dict() -> Dictionary:
 		levels[String(skill_id)] = skill_levels[skill_id]
 	return {
 		"health": health, "hunger": hunger, "energy": energy, "fun": fun, "attack": attack,
-		"skill_xp": xp, "skill_levels": levels,
+		"skill_xp": xp, "skill_levels": levels, "tool": String(tool),
 	}
 
 
@@ -113,6 +115,7 @@ static func from_dict(dict: Dictionary) -> VillagerStatus:
 	var xp: Dictionary = dict.get("skill_xp", {})
 	for skill_id: String in xp:
 		status.skill_xp[StringName(skill_id)] = float(xp[skill_id])
+	status.tool = StringName(str(dict.get("tool", "")))
 	var levels: Dictionary = dict.get("skill_levels", {})
 	for skill_id: String in levels:
 		status.skill_levels[StringName(skill_id)] = int(levels[skill_id])

@@ -49,6 +49,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		var next: int = (languages.find(Loc.get_language()) + 1) % languages.size()
 		Loc.set_language(languages[next])
 		get_viewport().set_input_as_handled()
+	# F10: thêm rìu, cuốc, giáo vào lửa trại để thử (chưa có lò rèn).
+	if OS.is_debug_build() and event is InputEventKey and event.is_pressed() and not event.is_echo() 			and (event as InputEventKey).physical_keycode == KEY_F10:
+		Commands.debug_give_tools()
+		get_viewport().set_input_as_handled()
 
 
 func _mode_from_command_line() -> GameModeConfig:

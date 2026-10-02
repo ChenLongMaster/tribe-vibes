@@ -1,10 +1,9 @@
 class_name TaskScratch
 extends Task
-## Đứng gãi mông. Tinh nghịch, nhanh, thỉnh thoảng kèm bong bóng "Gãi gãi...".
+## Đứng gãi mông. Tinh nghịch, nhanh.
 
 const SECONDS_MIN: float = 1.8
 const SECONDS_MAX: float = 3.2
-const BUBBLE_CHANCE: float = 0.5
 
 
 func _init() -> void:
@@ -14,8 +13,6 @@ func _init() -> void:
 func start() -> void:
 	villager.rig.play(VillagerRig.ANIM_SCRATCH)
 	timer = randf_range(SECONDS_MIN, SECONDS_MAX)
-	if randf() < BUBBLE_CHANCE:
-		villager.say("BUBBLE_SCRATCH")
 
 
 func tick(delta: float) -> Status:

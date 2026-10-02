@@ -31,6 +31,7 @@ func generate(seed_value: int) -> MapData:
 	_choose_layout()
 	_place_village()
 	_carve_lake()
+	_place_cliffs()
 	_place_forest()
 	_place_rocks()
 	_place_bushes()
@@ -109,6 +110,53 @@ func _smooth_water(bounds: Rect2i) -> void:
 						count += 1
 			result[_data.index(Vector2i(x, y))] = 1 if count >= 5 else 0
 	_data.water = result
+
+
+# Vách đá lớn sâu trong phía bãi đá, mỗi cái có sẵn vài đá tảng sát chân.
+func _place_cliffs() -> void:
+	var footprint: Vector2i = BuildingDefs.footprint(&"cliff")
+	var candidates: Array[Vector2i] = []
+	for y: int in range(1, _data.size.y - footprint.y - 1):
+		for x: int in range(1, _data.size.x - footprint.x - 1):
+			var cell: Vector2i = Vector2i(x, y)
+			if _side_factor(Vector2i(Vector2(cell) + Vector2(footprint) * 0.5), _data.rock_side) >= Balance.CLIFF_SIDE_START and _area_free(cell, footprint):
+				candidates.append(cell)
+	_shuffle(candidates)
+	var chosen: Array[Vector2i] = []
+	_pick_spaced(candidates, Balance.CLIFF_COUNT, Balance.CLIFF_MIN_SPACING, chosen)
+	for cell: Vector2i in chosen:
+		_add_building(&"cliff", cell)
+		_data.cliffs.append(cell)
+		var ring: Array[Vector2i] = cells_around(cell, footprint)
+		_shuffle(ring)
+		var placed: int = 0
+		for around: Vector2i in ring:
+			if placed >= Balance.BOULDERS_PER_CLIFF:
+				break
+			if _data.in_bounds(around) and _occupied[_data.index(around)] == 0:
+				_add_object(MapData.KIND_ROCK, around, 0 if _rng.randf() < Balance.ROCK_BIG_CHANCE else 1)
+				placed += 1
+
+
+func _area_free(origin: Vector2i, size: Vector2i) -> bool:
+	for y: int in size.y:
+		for x: int in size.x:
+			var cell: Vector2i = origin + Vector2i(x, y)
+			if not _data.in_bounds(cell) or _occupied[_data.index(cell)] == 1 or _data.meadow_rect.has_point(cell):
+				return false
+	return true
+
+
+## Các ô ngay sát quanh một khối ô (không tính góc chéo).
+static func cells_around(origin: Vector2i, size: Vector2i) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for x: int in size.x:
+		cells.append(origin + Vector2i(x, -1))
+		cells.append(origin + Vector2i(x, size.y))
+	for y: int in size.y:
+		cells.append(origin + Vector2i(-1, y))
+		cells.append(origin + Vector2i(size.x, y))
+	return cells
 
 
 func _place_forest() -> void:

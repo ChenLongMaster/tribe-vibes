@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="40" viewBox="0 0 48 40">
+  <!-- Bó củi nhặt tay, buộc dây rừng -->
+  <g stroke="#4E342E" stroke-width="5" stroke-linecap="round">
+    <path d="M6 28 L42 14"/>
+    <path d="M6 18 L42 30"/>
+    <path d="M5 23 H43"/>
+  </g>
+  <g stroke="#A1887F" stroke-width="2.2" stroke-linecap="round">
+    <path d="M6 28 L42 14"/>
+    <path d="M6 18 L42 30"/>
+    <path d="M5 23 H43"/>
+  </g>
+  <rect x="20" y="13" width="7" height="20" rx="3" fill="#7CB342" stroke="#4E342E" stroke-width="2.5"/>
+</svg>

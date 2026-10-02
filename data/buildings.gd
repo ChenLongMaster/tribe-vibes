@@ -8,12 +8,23 @@ class_name BuildingDefs
 ##   kèm extra_art_fps, extra_art_offset (lệch so với gốc), extra_art_sways (nghiêng theo gió).
 ## - fx_scene: scene hiệu ứng gắn kèm (vd tàn lửa), đặt lệch fx_offset so với gốc.
 ## - buildable: người chơi có xây được từ menu không.
-## - food_storage: nơi cất đồ ăn (quả, thịt, cá, món chín); dân đói đến đây lấy ăn (lửa trại; Đợt 3 Bếp).
+## - food_storage: nơi cất thức ăn chung; dân đói đến đây ăn (lửa trại; Đợt 3 Bếp).
 ## - material_storage: nơi cất gỗ, đá (lửa trại; Đợt 3 Kho).
-## - cook_station: giao người vào đây để nấu thịt/cá sống thành món chín (lửa trại; Đợt 3 Bếp).
+## - cook_station: giao người vào đây để nấu thức ăn thô thành món chín (lửa trại; Đợt 3 Bếp).
 ## - cook_seconds: thời gian nấu một món ở đây (cấp 1).
+## - stock_capacity: đồ RIÊNG của công trình cất tối đa bao nhiêu ({món: số}) — vd món chín
+##   ở bếp; Đợt 3 vũ khí ở lò rèn (cờ `tool_storage`).
+## - stock_display: vẽ đồ riêng quanh công trình, mỗi món một chỗ: {món: {art, slots: [lệch]}}
+##   — nhìn là biết còn bao nhiêu.
 
 const DEFS: Dictionary[StringName, Dictionary] = {
+	# Vách đá lớn: một phần của map, không khai thác được; thỉnh thoảng lăn ra đá tảng.
+	&"cliff": {
+		"name_key": "BUILDING_CLIFF_NAME",
+		"footprint": Vector2i(3, 2),
+		"art": "env/cliff",
+		"buildable": false,
+	},
 	&"cave": {
 		"name_key": "BUILDING_CAVE_NAME",
 		"footprint": Vector2i(3, 2),
@@ -37,6 +48,13 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 		# Bếp tạm: nấu chậm hơn bếp thật.
 		"cook_station": true,
 		"cook_seconds": Balance.COOK_SECONDS_CAMPFIRE,
+		"stock_capacity": {ResourceDefs.MEAL: Balance.CAMPFIRE_MEAL_CAPACITY},
+		"stock_display": {
+			ResourceDefs.MEAL: {
+				"art": "icons/res_meal",
+				"slots": [Vector2(-30, 4), Vector2(30, 4), Vector2(-20, 16), Vector2(20, 16)],
+			},
+		},
 		"fx_scene": "res://fx/campfire_embers.tscn",
 		"fx_offset": Vector2(0, -38),
 		"buildable": false,

@@ -1,11 +1,12 @@
 class_name TaskHunt
 extends TaskWork
-## Một lượt đi săn: đuổi theo con thú (nó thấy người tới gần thì giật mình đứng im) →
-## vung giáo một lúc → thú ngất, "bụp" → khuân thịt về chỗ cất đồ ăn.
+## Một lượt đi săn (cần giáo): đuổi theo con thú (nó thấy người tới gần thì giật mình đứng
+## im) → vung giáo một lúc → thú ngất, sao quay → vác NGUYÊN CON lên đầu (chổng vó) khuân
+## về chỗ cất thức ăn.
 ## Thú di chuyển nên đường đi được tính lại, nhưng chỉ khi nó đã đi xa khỏi đích cũ và
 ## không quá mỗi REPATH_SECONDS một lần (AStar tốn công).
 
-enum Step { CHASE, ATTACK, CARRY }
+enum Step { CHASE, ATTACK, PICKUP, CARRY }
 
 const REPATH_SECONDS: float = 1.0
 const ATTACK_RANGE: float = 60.0 # px — đứng gần chừng này thì bắt đầu vung giáo
@@ -24,6 +25,7 @@ func _init(owner_job: Job, animal: Animal) -> void:
 
 
 func start() -> void:
+	hold_job_item()
 	if not world().reservations.reserve(_animal, villager) or not _repath():
 		fail()
 		return
@@ -59,9 +61,19 @@ func tick(delta: float) -> Status:
 				return Status.RUNNING
 			if not _animal.knock_out():
 				return Status.DONE
-			world().reservations.release(_animal, villager)
 			villager.emote("icons/happy")
-			begin_carry(job.def()["resource"], int(job.def()["amount"]))
+			villager.rig.play(VillagerRig.ANIM_IDLE)
+			timer = Balance.HUNT_PICKUP_SECONDS
+			step = Step.PICKUP
+		Step.PICKUP:
+			timer -= delta
+			if timer > 0.0:
+				return Status.RUNNING
+			# Thú ngất xong thì nhấc lên vai: con trên đồng cỏ biến mất, con trên đầu hiện ra.
+			_animal.carry_off()
+			world().reservations.release(_animal, villager)
+			villager.rig.squash(0.2)
+			begin_carry(job.def()["item"], int(job.def()["amount"]), _animal.art_key(), true)
 			step = Step.CARRY
 		Step.CARRY:
 			return tick_carry(delta)

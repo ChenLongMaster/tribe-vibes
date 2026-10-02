@@ -3,40 +3,53 @@ extends RefCounted
 ## Việc người chơi GIAO cho một thổ dân (chặt cây, đập đá, săn…). Khác với Task (việc đang
 ## làm ngay lúc này): Job là thứ thổ dân GHI NHỚ. Mỗi lượt (làm → khuân về kho) là một Task
 ## do Job tạo ra; bị ngắt giữa chừng (đói, mệt, đình công) thì Task mất nhưng Job còn, nên
-## xong chuyện là tự quay lại làm tiếp (MVP_PROMPT mục 5.2).
+## xong chuyện là tự quay lại làm tiếp (GAME_DESIGN mục 5.2).
 ##
 ## Hết mục tiêu thì tìm cái tương tự gần đó (JobDefs.search_radius); không còn thì bộ não
-## dừng việc và cho thổ dân nói vì sao.
+## dừng việc và cho thổ dân giơ biển vì sao. Việc cần đồ nghề (rìu, cuốc, giáo) thì lượt đầu
+## là đi lấy đồ nghề; không còn món nào thì dừng việc, giơ biển vẽ món đó gạch chéo.
 
-## Loại việc = kỹ năng (SkillDefs.CHOP, MINE…), tra cách làm trong JobDefs.
+## Loại việc (JobDefs.CHOP, TWIGS…), tra cách làm trong JobDefs.
+var job_id: StringName = &""
+## Kỹ năng luyện được khi làm việc này (SkillDefs) — một kỹ năng có thể có nhiều việc.
 var skill: StringName = &""
 ## Mục tiêu hiện tại (ResourceNode, Animal hoặc Building). Có thể đổi sang cái tương tự.
 var target: Node2D
 ## Tâm vùng tìm mục tiêu tương tự — ô của mục tiêu gần nhất đã làm.
 var origin_cell: Vector2i = Vector2i.ZERO
-## Đồ đang khuân dở khi bị ngắt — lượt sau khuân nốt về kho trước rồi mới làm tiếp.
-var carried_resource: StringName = &""
-var carried_amount: int = 0
+## Món đang khuân dở khi bị ngắt — lượt sau khuân nốt về kho trước rồi mới làm tiếp.
+var carried_item: StringName = &""
+var carried_count: int = 0
 ## Chờ (giây) trước khi được nhắc lại bong bóng "Chưa có gì để nấu…" — đỡ nói liên tục.
 var nag_cooldown: float = 0.0
 
 var _failures: int = 0
+## Lần tìm gần nhất không còn đồ nghề cần thiết ở đâu cả.
+var _missing_tool: bool = false
 ## Mục tiêu vừa không tới được — lần tìm sau bỏ qua cho tới khi làm được một lượt.
 var _skipped: Array[Node2D] = []
 
 
-func _init(job_skill: StringName, first_target: Node2D) -> void:
-	skill = job_skill
+func _init(id: StringName, first_target: Node2D) -> void:
+	job_id = id
+	skill = JobDefs.skill_of(id)
 	target = first_target
 	origin_cell = target_cell(first_target)
 
 
 func def() -> Dictionary:
-	return JobDefs.get_def(skill)
+	return JobDefs.get_def(job_id)
 
 
 func icon_key() -> String:
-	return SkillDefs.icon(skill)
+	return JobDefs.icon(job_id)
+
+
+## Hình vẽ trên tấm biển khi phải dừng việc: thiếu đồ nghề thì vẽ món đó, không thì vẽ việc.
+func stop_sign_icon() -> String:
+	if _missing_tool:
+		return ToolDefs.icon(JobDefs.required_tool(job_id))
+	return icon_key()
 
 
 ## Ô của một mục tiêu bất kỳ.
@@ -56,7 +69,7 @@ static func is_workable(node: Node2D, villager: Villager) -> bool:
 		return false
 	if node is ResourceNode:
 		var resource: ResourceNode = node as ResourceNode
-		return resource.can_harvest() and not villager.world.reservations.is_taken_by_other(resource, villager)
+		return resource.visible and resource.can_harvest() and not villager.world.reservations.is_taken_by_other(resource, villager)
 	if node is Animal:
 		var animal: Animal = node as Animal
 		return animal.is_huntable() and not villager.world.reservations.is_taken_by_other(animal, villager)
@@ -65,10 +78,18 @@ static func is_workable(node: Node2D, villager: Villager) -> bool:
 
 ## Lượt việc tiếp theo, hoặc null nếu không còn gì để làm (bộ não sẽ dừng việc).
 func next_task(villager: Villager) -> Task:
-	if carried_amount > 0:
+	if carried_count > 0:
 		return TaskDeliver.new(self)
 	if gave_up():
 		return null
+	var tool: StringName = JobDefs.required_tool(job_id)
+	_missing_tool = false
+	if tool != &"" and villager.tool != tool:
+		var rack: Building = villager.world.finder.find_tool(tool, villager)
+		if rack == null:
+			_missing_tool = true
+			return null
+		return TaskFetchTool.new(self, rack, tool)
 	var node: Node2D = pick_target(villager)
 	if node == null:
 		return null
@@ -83,7 +104,7 @@ func next_task(villager: Villager) -> Task:
 func pick_target(villager: Villager) -> Node2D:
 	if not _skipped.has(target) and is_workable(target, villager):
 		return target
-	target = villager.world.finder.find_job_target(skill, origin_cell, villager, _skipped)
+	target = villager.world.finder.find_job_target(job_id, origin_cell, villager, _skipped)
 	if target != null:
 		origin_cell = target_cell(target)
 	return target
@@ -106,16 +127,11 @@ func gave_up() -> bool:
 	return _failures >= Balance.JOB_MAX_FAILURES
 
 
-## Bong bóng khi dừng việc: không tới được, hay hết thứ để làm.
-func stop_bubble() -> String:
-	return "BUBBLE_CANT_REACH" if gave_up() else str(def().get("none_bubble", ""))
-
-
 ## Để lưu game (Đợt 3): chỉ cần loại việc + chỗ làm + đồ đang khuân.
 func to_dict() -> Dictionary:
 	return {
-		"skill": String(skill),
+		"job": String(job_id),
 		"origin_cell": [origin_cell.x, origin_cell.y],
-		"carried_resource": String(carried_resource),
-		"carried_amount": carried_amount,
+		"carried_item": String(carried_item),
+		"carried_count": carried_count,
 	}

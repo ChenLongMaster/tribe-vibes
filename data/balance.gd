@@ -40,6 +40,10 @@ const MEADOW_TUFT_CHANCE: float = 0.15
 const MEADOW_FLOWER_CHANCE: float = 0.25
 const DIRT_PATCH_COUNT: int = 3
 const GRASS_PATCH_COUNT: int = 30 # mảng cỏ sáng/tối trang trí nền
+const CLIFF_COUNT: int = 3 # vách đá lớn ở phía bãi đá (không khai thác được, sinh ra đá tảng)
+const CLIFF_MIN_SPACING: float = 6.0 # ô
+const CLIFF_SIDE_START: float = 0.55 # 0 = giữa map, 1 = mép — vách đá nằm sâu phía bãi đá
+const BOULDERS_PER_CLIFF: int = 2 # đá tảng nằm sẵn sát chân mỗi vách lúc mới sinh map
 
 # --- Camera ---
 const CAMERA_ZOOM_MIN: float = 0.5
@@ -48,20 +52,36 @@ const CAMERA_ZOOM_SMOOTHING: float = 12.0 # càng lớn zoom càng nhanh tới �
 const CAMERA_KEY_PAN_SPEED: float = 700.0 # px/giây khi zoom = 1
 
 # --- Tài nguyên trên map ---
-const TREE_USES: int = 3 # lượt chặt mỗi cây
-const WOOD_PER_CHOP: int = 3
-const CHOP_SECONDS: float = 6.0
-const ROCK_USES: int = 4
-const STONE_PER_MINE: int = 2
+const WOOD_PER_LOG: int = 10 # 1 khúc gỗ (chặt cây) = 10 bó củi (nhặt tay)
+const TREE_USES: int = 3 # mỗi cây chặt ra chừng này khúc gỗ rồi thành gốc
+const CHOP_SECONDS: float = 10.0 # chặt ra một khúc gỗ (cần rìu)
+const ROCK_USES: int = 4 # đá tảng đập chừng này lượt thì vỡ hết
+const STONE_PER_MINE: int = 4 # mỗi lượt đập đá tảng (cần cuốc)
 const MINE_SECONDS: float = 8.0
 const BUSH_BERRIES_PER_PICK: int = 2
 const PICK_SECONDS: float = 3.0
-const TREE_REGROW_SECONDS: float = 3.0 * DAY_LENGTH_SECONDS # gốc cây mọc lại thành cây sau ~3 ngày
+const TWIG_PICK_SECONDS: float = 1.5 # nhặt một bó củi (tay không)
+const PEBBLE_PICK_SECONDS: float = 1.5 # nhặt một viên đá cuội (tay không, bỏ vào xô)
+const LOOSE_PICK_BATCH: int = 3 # nhặt đủ chừng này bó củi / viên đá cuội gần nhau rồi mới khuân về
+## Củi rơi dưới tán cây, đá cuội lăn ra từ đá tảng — mọc thêm dần, có giới hạn để map không đầy.
+const TWIG_START: int = 12
+const TWIG_MAX: int = 20
+const TWIG_SPAWN_SECONDS: float = 10.0 # trung bình chừng này giây rơi thêm một bó (nếu chưa đủ)
+const PEBBLE_START: int = 8
+const PEBBLE_MAX: int = 14
+const PEBBLE_SPAWN_SECONDS: float = 14.0
+## Đá tảng thỉnh thoảng lăn ra từ vách đá, chỉ khi số đá tảng còn ít hơn lúc đầu.
+const BOULDER_SPAWN_SECONDS: float = 90.0
+## Gốc cây mọc lại thành cây — chỉ khi số cây còn ít hơn lúc đầu (không mọc tràn map).
+const TREE_REGROW_CHECK_SECONDS: float = 45.0 # mỗi chừng này giây thử cho một gốc mọc lại
+const STUMP_MIN_SECONDS: float = DAY_LENGTH_SECONDS # gốc phải để ít nhất chừng này mới mọc lại
 const FISH_SECONDS: float = 10.0 # câu một con cá
 const FISH_PER_CATCH: int = 1
 const HUNT_SECONDS: float = 4.0 # đứng cạnh con thú vung giáo bao lâu thì nó ngất
-const MEAT_PER_HUNT: int = 3
+const MEAT_PER_HUNT: int = 4 # vác nguyên con thú về = chừng này phần thức ăn
+const HUNT_PICKUP_SECONDS: float = 1.0 # thú ngất (sao quay) một chút rồi mới bị vác lên vai
 const COOK_SECONDS_CAMPFIRE: float = 10.0 # nấu một món ở lửa trại (bếp Đợt 3 nhanh hơn)
+const CAMPFIRE_MEAL_CAPACITY: int = 4 # lửa trại cất tối đa chừng này món chín (bếp Đợt 3 theo cấp)
 
 # --- Thú để săn ---
 const ANIMAL_COUNT: int = 4 # số thú lang thang trên đồng cỏ cùng lúc
@@ -79,6 +99,9 @@ const DAY_LENGTH_SECONDS: float = 240.0 # một ngày trong game = 4 phút thậ
 
 # --- Thổ dân: dân số ---
 const START_VILLAGERS: int = 4 # nửa nam nửa nữ
+## Ra khỏi hang đã có sẵn ít thức ăn (quả) ở lửa trại — đủ vài bữa để người chơi kịp giao
+## người đi kiếm đồ ăn (thổ dân không tự đi hái).
+const START_FOOD: int = 8
 const MAX_POPULATION: int = 50
 const INTRO_INTERVAL: float = 1.3 # giây giữa hai người chui ra khỏi hang
 const SECOND_TRAIT_CHANCE: float = 0.5
@@ -149,12 +172,14 @@ const FAVORITE_XP_MULT: float = 2.0 # làm việc thích lên cấp nhanh gấp 
 const SKILL_XP_TO_NEXT: Array[float] = [90.0, 180.0, 300.0, 480.0]
 
 # --- Ăn uống ---
-const BERRY_HUNGER: float = 20.0 # một quả mọng hồi bao nhiêu Đói
 const BUSH_REGROW_SECONDS: float = DAY_LENGTH_SECONDS # bụi ra quả lại sau 1 ngày
 const STORED_FOOD_FETCH_SECONDS: float = 1.0 # lấy đồ ăn có sẵn ở lửa trại/bếp
 const EAT_SECONDS: float = 2.0
 const FUN_EAT: float = 6.0
-const COOKED_MEAL_HUNGER: float = 60.0 # món chín hồi Đói nhiều
+const KITCHEN_MEAL_HUNGER: float = 100.0 # ăn một phần ở bếp là no căng
+## Ăn xong đỡ mệt chút. Phải nhỏ hơn hẳn thể lực mất giữa hai bữa (làm việc nặng: Đói
+## 100 → 50 mất ~120 giây, cũng là ~50 thể lực) — để không ai "sống bằng ăn" mà khỏi ngủ.
+const EAT_ENERGY: float = 10.0
 const FUN_COOKED_MEAL: float = 10.0 # ăn món chín thì vui thêm chừng này
 
 # --- Hoạt cảnh rảnh rỗi ---
