@@ -12,23 +12,40 @@ extends RefCounted
 ##   5. Muốn tìm bạn đời (Đợt 4)
 ##   6. Việc người chơi giao (Job) → làm từng lượt, xong lượt lại làm tiếp — chế độ
 ##      AUTONOMOUS thêm "tự kiếm việc" ở đây
-##   7. Rảnh → về vùng dạo chơi nếu đang ở xa, rồi hoạt cảnh tại chỗ
+##   7. Rảnh → về đúng chỗ được thả (điểm neo) rồi ĐỨNG YÊN làm trò tại chỗ: đứng chờ, vẫy
+##      người chơi, ngó nghiêng, vươn vai, gãi, tán gẫu với người sát bên. Đứng quá
+##      IDLE_BORED_SECONDS mà chưa có việc thì chán: ngồi phịch xuống, nằm ngủ gật, hoặc đi hái
+##      bông hoa gần đó rồi quay về đúng chỗ cũ. Không đi dạo lung tung.
 
-## Trọng số gốc của hoạt cảnh rảnh rỗi (nhân thêm theo tính cách và tình trạng).
-const IDLE_WEIGHTS: Dictionary[StringName, float] = {
-	&"stroll": 2.0,
-	&"chat": 2.0,
-	&"pick_flower": 1.0,
-	&"scratch": 0.6,
-	&"sit": 1.2,
+## Trọng số hoạt cảnh lúc mới đứng chờ (nhân thêm theo tính cách và tình trạng).
+const WAITING_WEIGHTS: Dictionary[StringName, float] = {
+	&"stand": 3.0,
+	&"wave": 1.2,
+	&"look": 1.5,
+	&"stretch": 0.5,
+	&"scratch": 0.5,
+	&"chat": 1.5,
+}
+## Trọng số lúc đã chán (đứng chờ quá lâu).
+const BORED_WEIGHTS: Dictionary[StringName, float] = {
+	&"sit": 2.0,
+	&"nap": 1.5,
+	&"pick_flower": 1.5,
+	&"look": 0.6,
+	&"scratch": 0.5,
+	&"chat": 1.0,
+}
+const FIDGET_ANIMS: Dictionary[StringName, StringName] = {
+	&"stand": VillagerRig.ANIM_IDLE,
+	&"wave": VillagerRig.ANIM_WAVE,
+	&"look": VillagerRig.ANIM_LOOK,
+	&"stretch": VillagerRig.ANIM_STRETCH,
 }
 ## Không tìm được đồ ăn thì đợi chừng này giây rồi mới tìm lại (đỡ tìm liên tục).
 const FOOD_RETRY_SECONDS: float = 3.0
 ## Đang làm việc được giao mà bếp hết đồ: thỉnh thoảng nghĩ tới đồ ăn (không bỏ việc).
 const NO_FOOD_THINK_SECONDS: float = 15.0
 const FOOD_THOUGHT_ICON: String = "icons/res_food"
-## Ra khỏi vùng dạo chơi quá chừng này ô thì đi về (dư một chút cho người đang đứng mép).
-const RETURN_MARGIN_CELLS: float = 0.5
 
 var _food_retry: float = 0.0
 var _no_food: bool = false
@@ -56,7 +73,7 @@ func think(villager: Villager, elapsed: float) -> void:
 		pass
 	if villager.task != null:
 		return
-	if _is_far_from_anchor(villager):
+	if _is_away_from_anchor(villager):
 		villager.start_task(TaskReturn.new())
 	else:
 		villager.start_task(_choose_idle_task(villager))
@@ -168,29 +185,36 @@ func _handle_job(villager: Villager) -> bool:
 	return true
 
 
-func _is_far_from_anchor(villager: Villager) -> bool:
-	var offset: Vector2 = Vector2(villager.world.cell_of(villager) - villager.anchor_cell)
-	return offset.length() > Balance.IDLE_RADIUS_CELLS + RETURN_MARGIN_CELLS
+# Rảnh thì đứng đúng ô được thả. Ô đó bị chặn mất (vd có nhà xây đè) thì neo luôn chỗ đang đứng.
+func _is_away_from_anchor(villager: Villager) -> bool:
+	var here: Vector2i = villager.world.cell_of(villager)
+	if villager.world.grid.is_blocked(villager.anchor_cell):
+		villager.anchor_cell = here
+	return here != villager.anchor_cell
 
 
 func _choose_idle_task(villager: Villager) -> Task:
 	var data: VillagerData = villager.data
 	var world: World = villager.world
-	var weights: Dictionary[StringName, float] = {}
-	for activity: StringName in IDLE_WEIGHTS:
-		weights[activity] = IDLE_WEIGHTS[activity] * Traits.idle_weight(data.traits, activity)
-	# Mệt thì muốn ngồi, chán thì muốn tán gẫu.
+	var bored: bool = villager.idle_seconds >= Balance.IDLE_BORED_SECONDS
+	var weights: Dictionary[StringName, float] = (BORED_WEIGHTS if bored else WAITING_WEIGHTS).duplicate()
+	for activity: StringName in weights:
+		weights[activity] *= Traits.idle_weight(data.traits, activity)
+	# Mệt thì muốn ngồi / ngủ gật, chán thì muốn tán gẫu.
 	if villager.status.energy < Balance.ENERGY_TIRED:
-		weights[&"sit"] *= 2.5
+		for activity: StringName in [&"sit", &"nap"]:
+			if weights.has(activity):
+				weights[activity] *= 2.5
 	if villager.status.fun < 50.0:
 		weights[&"chat"] *= 1.5
 	var partner: Villager = world.finder.find_chat_partner(villager)
 	if partner == null:
 		weights[&"chat"] = 0.0
-	if world.finder.find_flower_near(villager).is_empty():
+	if weights.has(&"pick_flower") and world.finder.find_flower_near(villager).is_empty():
 		weights[&"pick_flower"] = 0.0
 
-	match _weighted_pick(weights):
+	var choice: StringName = _weighted_pick(weights)
+	match choice:
 		&"chat":
 			var session: ChatSession = ChatSession.new(villager, partner)
 			partner.start_task(TaskChat.new(session, false))
@@ -201,7 +225,10 @@ func _choose_idle_task(villager: Villager) -> Task:
 			return TaskScratch.new()
 		&"sit":
 			return TaskSit.new()
-	return TaskStroll.new()
+		&"nap":
+			return TaskNap.new()
+	var seconds: float = randf_range(Balance.IDLE_MIN_SECONDS, Balance.IDLE_MAX_SECONDS)
+	return TaskFidget.new(FIDGET_ANIMS.get(choice, VillagerRig.ANIM_IDLE), seconds)
 
 
 func _weighted_pick(weights: Dictionary[StringName, float]) -> StringName:
@@ -213,4 +240,4 @@ func _weighted_pick(weights: Dictionary[StringName, float]) -> StringName:
 		roll -= weights[key]
 		if roll <= 0.0 and weights[key] > 0.0:
 			return key
-	return &"stroll"
+	return &"stand"

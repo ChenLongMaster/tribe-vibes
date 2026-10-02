@@ -61,6 +61,8 @@ var job: Job
 var on_strike: bool = false
 ## Đang ở trong công trình nào (ngủ trong lều) — null = ở ngoài.
 var inside: Building
+## Đã đứng rảnh (không việc, không lo ăn ngủ) bao lâu — quá IDLE_BORED_SECONDS thì chán.
+var idle_seconds: float = 0.0
 ## Đồ nghề đang giữ (lưu trong VillagerStatus). Đổi bằng set_tool().
 var tool: StringName:
 	get:
@@ -122,6 +124,8 @@ func _process(delta: float) -> void:
 		_since_think = 0.0
 		_think_timer = randf_range(Balance.THINK_INTERVAL_MIN, Balance.THINK_INTERVAL_MAX)
 		_brain.think(self, elapsed)
+	if job == null and (task == null or task.priority == Task.Priority.IDLE):
+		idle_seconds += delta
 	if task != null:
 		# Watchdog chỉ đếm lúc đứng một chỗ: đi đường xa (rừng ↔ kho) không phải là kẹt —
 		# đi mà không nhúc nhích thì đã có _stuck_time lo.
@@ -147,6 +151,8 @@ func start_task(new_task: Task) -> void:
 	state = State.IDLE
 	rig.play(VillagerRig.ANIM_IDLE)
 	task = new_task
+	if new_task != null and new_task.priority != Task.Priority.IDLE:
+		idle_seconds = 0.0
 	_task_time = 0.0
 	_watchdog_warned = false
 	if task != null:
@@ -242,6 +248,7 @@ func assign_job(new_job: Job) -> void:
 func order_move(cell: Vector2i) -> void:
 	job = null
 	anchor_cell = cell
+	idle_seconds = 0.0
 	if not on_strike:
 		lower_sign()
 	if task != null and task.priority >= Task.Priority.NEED:

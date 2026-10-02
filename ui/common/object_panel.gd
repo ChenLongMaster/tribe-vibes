@@ -171,12 +171,10 @@ func _count_tool(tool: StringName) -> int:
 	return count
 
 
-# Key gốc cho tên + mô tả: OBJECT_TREE, OBJECT_STUMP, OBJECT_ROCK, OBJECT_SMALL_ROCK…
+# Key gốc cho tên + mô tả: OBJECT_TREE, OBJECT_STUMP, OBJECT_ROCK, OBJECT_BUSH…
 func _resource_key(node: ResourceNode) -> String:
 	if node.kind == MapData.KIND_TREE and node.is_depleted():
 		return "OBJECT_STUMP"
-	if node.is_small_rock():
-		return "OBJECT_SMALL_ROCK"
 	return "OBJECT_" + String(node.kind).to_upper()
 
 

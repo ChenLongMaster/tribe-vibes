@@ -374,6 +374,46 @@ func test_tap_object_shows_info() -> void:
 	await _free_world(world)
 
 
+## Kéo khung chọn nhiều người rồi click phải: cả nhóm cùng làm (mỗi người một cây) / đi tới
+## thì đứng tản ra, không chồng lên nhau.
+func test_box_select_and_group_commands() -> void:
+	var world: World = await _make_world(42)
+	var villagers: Array[Villager] = _spawn(world, 3)
+	var controller: NormalController = NormalController.new()
+	host.add_child(controller)
+	controller.setup(world, NORMAL_MODE)
+	await host.get_tree().process_frame
+	InputRouter.mode = InputRouter.Mode.MOUSE
+	var left: float = INF
+	var top: float = INF
+	var right: float = -INF
+	var bottom: float = -INF
+	for villager: Villager in villagers:
+		left = minf(left, villager.position.x)
+		right = maxf(right, villager.position.x)
+		top = minf(top, villager.position.y)
+		bottom = maxf(bottom, villager.position.y)
+	controller._on_box_ended(_to_screen(Vector2(left - 40, top - 80)), _to_screen(Vector2(right + 40, bottom + 20)))
+	check_eq(controller.selection.size(), 3, "Kéo khung chọn cả 3 người")
+	var target: Vector2i = _free_origin(world, BuildingDefs.STORAGE) + Vector2i(1, 1)
+	controller._on_secondary_tapped(_to_screen(WorldGrid.cell_to_world(target)))
+	var anchors: Dictionary[Vector2i, bool] = {}
+	for villager: Villager in villagers:
+		anchors[villager.anchor_cell] = true
+	check_eq(anchors.size(), 3, "Cả nhóm đi tới thì mỗi người một ô")
+	Commands.debug_give_tools(3)
+	var tree: ResourceNode = _nearest(world, MapData.KIND_TREE)
+	controller._on_secondary_tapped(_to_screen(tree.position + Vector2(0, -90)))
+	var targets: Dictionary[Node2D, bool] = {}
+	for villager: Villager in villagers:
+		check(villager.job != null and villager.job.skill == SkillDefs.CHOP, "%s nhận chặt cây" % villager.data.display_name)
+		if villager.job != null:
+			targets[villager.job.target] = true
+	check_eq(targets.size(), 3, "Mỗi người một cây, không xúm vào một cây")
+	controller.queue_free()
+	await _free_world(world)
+
+
 func _all_text(node: Node) -> String:
 	var out: String = ""
 	if node is Label:

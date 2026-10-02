@@ -62,7 +62,7 @@ Ví dụ `water_03` = hai ô trên là nước (bờ nằm ngang ở giữa hìn
 | `env/tree_02` | 176×272 | 88×136 | (0.5, 0.93) | Cây lá kim (nhiều hơn ở sâu trong rừng). |
 | `env/tree_stump` | 96×72 | 48×36 | (0.5, 0.8) | Gốc cây sau khi chặt hết (Đợt 2). |
 | `env/rock_big` | 160×128 | 80×64 | (0.5, 0.88) | Tảng đá lớn. |
-| `env/rock_small` | 112×88 | 56×44 | (0.5, 0.86) | Đá nhỏ — **nhặt bằng tay**, không cần cuốc (nên trông nhỏ, nhẹ hơn hẳn đá tảng to). Cũng là hình trong bảng thông tin. |
+| `env/rock_small` | 112×88 | 56×44 | (0.5, 0.86) | Tảng đá nhỏ (vẫn cần cuốc như đá to). |
 | `env/bush_berries` | 128×112 | 64×56 | (0.5, 0.9) | Bụi có quả mọng. |
 | `env/bush_empty` | 128×112 | 64×56 | (0.5, 0.9) | Cùng bụi, đã hái hết quả — **giữ nguyên dáng** với bản có quả. |
 | `env/flower_01` … `03` | 48×56 | 24×28 | (0.5, 0.95) | Hoa trang trí (hồng, vàng, tím). Không chặn đường. |
@@ -125,9 +125,12 @@ Vị trí các khớp (hông, vai, cổ) nằm ở đầu `villager/villager_rig
 | `icons/mood_happy` · `mood_ok` · `mood_sad` | 48×48 | 26×26 | tâm | Mặt tâm trạng trong bảng thông tin. |
 | `icons/stat_health` | 48×48 | 22×22 | tâm | Chỉ số **Máu** ❤ (tim đỏ có dấu cộng). Dùng trong bảng thông tin và nhấp nháy trên đầu khi thấp. |
 | `icons/hunger` | 48×48 | 22×22 | tâm | Chỉ số **Đói** 🍖. |
-| `icons/stat_energy` | 48×48 | 22×22 | tâm | Chỉ số **Thể lực** ⚡. |
-| `icons/stat_fun` | 48×48 | 22×22 | tâm | Chỉ số **Giải trí** 🎉 (pháo giấy). |
-| `icons/skill_chop` · `skill_mine` · `skill_gather` · `skill_hunt` · `skill_fish` · `skill_cook` · `skill_build` · `skill_smith` · `skill_fight` | 48×48 | 24×24 | tâm | Icon 9 loại việc/kỹ năng: rìu, cuốc, giỏ quả, giáo, cần câu, nồi, búa, đe, chùy xương. Dùng trong bảng thông tin (kèm sao cấp), sau này làm icon việc trên đầu. |
+| `icons/stat_energy` | 48×48 | 22×22 | tâm | Chỉ số **Thể lực**: chữ **Zzz** xanh (ngủ là hồi sức). |
+| `icons/stat_fun_happy` | 48×48 | 22×22 | tâm | Chỉ số **Giải trí** khi cao (≥ 60): mặt cười tít mắt. |
+| `icons/stat_fun_ok` | 48×48 | 22×22 | tâm | Giải trí vừa (≥ 30): mặt bình thường, miệng thẳng. |
+| `icons/stat_fun_angry` | 48×48 | 22×22 | tâm | Giải trí thấp: mặt **bực bội đỏ cả mặt**, lông mày chau (sắp đình công). Cũng nhấp nháy trên đầu khi giải trí thấp. |
+| `icons/skill_chop` · `skill_mine` · `skill_gather` · `skill_hunt` · `skill_fish` · `skill_cook` · `skill_build` · `skill_smith` | 48×48 | 22×22 | tâm | Icon 8 kỹ năng: rìu, cuốc, giỏ quả, giáo (**Săn bắn & chiến đấu** — một kỹ năng), cần câu, nồi, búa, đe. Dùng trong bảng thông tin (kèm số cấp) và làm icon việc trên đầu. |
+| `icons/skill_fight` | 48×48 | — | tâm | Chùy xương — **tạm chưa dùng** (kỹ năng Chiến đấu đã gộp vào Săn bắn, dùng icon giáo). Giữ lại cho vũ khí cannibal Đợt 5. |
 | `icons/star` (nhỏ) | 48×48 | 10×10 | tâm | Mỗi sao = một cấp kỹ năng. Cũng dùng làm sao quay quanh đầu khi ngất. |
 | `icons/love` (nhỏ) | 48×48 | 14×14 | tâm | Tim cạnh kỹ năng = việc thích. |
 | `fx/zzz` | 32×32 | 8–18 | tâm | Một chữ Z bay lên khi ngủ. |

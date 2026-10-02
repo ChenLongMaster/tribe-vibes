@@ -16,6 +16,8 @@ extends Node
 ##   --ui         (cùng --buildings) chụp bảng công trình (lò rèn, móng), bảng thông tin vật thể
 ##                (bụi, cây, đá), menu xây, bóng mờ khi đặt nhà: panel_forge.png, panel_site.png,
 ##                panel_bush.png, panel_tree.png, panel_rock.png, build_menu.png, placing.png
+##   --group      ra khỏi hang xong thì kéo khung chọn cả làng, rê chuột lên bụi quả (con trỏ hình
+##                đồ ăn) và chụp group.png (khung chọn đang kéo + bảng nhóm + icon con trỏ)
 ##   --times      chụp làng lúc sáng / trưa / hoàng hôn / đêm: morning.png, day.png, sunset.png, night.png
 
 const MAIN_SCENE: PackedScene = preload("res://main.tscn")
@@ -32,6 +34,7 @@ func _ready() -> void:
 	var with_buildings: bool = false
 	var with_times: bool = false
 	var with_ui: bool = false
+	var with_group: bool = false
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
@@ -54,6 +57,8 @@ func _ready() -> void:
 			with_times = true
 		elif arg == "--ui":
 			with_ui = true
+		elif arg == "--group":
+			with_group = true
 	var main: Node = MAIN_SCENE.instantiate()
 	add_child(main)
 	var world: World = main.get_node("World")
@@ -61,7 +66,7 @@ func _ready() -> void:
 	var village: Vector2 = camera.position
 
 	Engine.time_scale = speed
-	if give_jobs or make_hungry or with_buildings:
+	if give_jobs or make_hungry or with_buildings or with_group:
 		while world.villagers.size() < Balance.START_VILLAGERS or _anyone_emerging(world):
 			await get_tree().process_frame
 	if give_jobs:
@@ -121,6 +126,8 @@ func _ready() -> void:
 		controller.begin_placement(BuildingDefs.STORAGE)
 		await _shot(camera, village + Vector2(0, 60), 1.0, out_dir.path_join("placing.png"))
 		controller.cancel_placement()
+	if with_group and not world.villagers.is_empty():
+		await _group_shot(main, world, camera, out_dir.path_join("group.png"))
 	if with_times:
 		for entry: Array in [[0.2, "morning.png"], [0.5, "day.png"], [0.84, "sunset.png"], [0.97, "night.png"]]:
 			GameState.time_of_day = entry[0]
@@ -241,3 +248,32 @@ func _nearest_node(world: World, kind: StringName) -> ResourceNode:
 			if best == null or node.position.distance_to(campfire) < best.position.distance_to(campfire):
 				best = node
 	return best
+
+
+# Chọn cả làng bằng khung, rê chuột lên bụi quả gần nhất (con trỏ hình đồ ăn), chụp lúc khung
+# chọn thứ hai đang kéo dở để thấy cả khung lẫn bảng nhóm.
+func _group_shot(main: Node, world: World, camera: CameraController, path: String) -> void:
+	var controller: NormalController = main.get_controller() as NormalController
+	var center: Vector2 = Vector2.ZERO
+	for villager: Villager in world.villagers:
+		center += villager.position
+	center /= world.villagers.size()
+	camera.position = center + Vector2(0, -20)
+	camera._on_zoom_requested(1.2 / camera.zoom.x, get_viewport().get_visible_rect().size * 0.5)
+	for i: int in 20:
+		await get_tree().process_frame
+	var all: Array[Villager] = []
+	all.assign(world.villagers)
+	controller.set_selection(all)
+	var bush: ResourceNode = _nearest_node(world, MapData.KIND_BUSH)
+	var screen: Vector2 = get_viewport().get_canvas_transform() * (bush.position + Vector2(0, -20))
+	InputRouter.mode = InputRouter.Mode.MOUSE
+	InputRouter.mouse_on_screen = true
+	InputRouter.mouse_position = screen
+	controller._on_hovered(screen)
+	var a: Vector2 = center + Vector2(-260, -160)
+	controller._on_box_moved(get_viewport().get_canvas_transform() * a, get_viewport().get_canvas_transform() * (a + Vector2(160, 110)))
+	for i: int in 10:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path)
+	print("Đã lưu ", path)

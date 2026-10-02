@@ -76,8 +76,9 @@ static func from_dict(dict: Dictionary) -> VillagerData:
 		data.traits.append(StringName(trait_id))
 	var saved_skills: Dictionary = dict.get("skills", {})
 	for skill_id: String in saved_skills:
-		data.skills[StringName(skill_id)] = int(saved_skills[skill_id])
-	data.favorite_job = StringName(str(dict.get("favorite_job", "")))
+		var id: StringName = SkillDefs.from_saved_id(skill_id)
+		data.skills[id] = maxi(data.skills.get(id, 0), int(saved_skills[skill_id]))
+	data.favorite_job = SkillDefs.from_saved_id(str(dict.get("favorite_job", "")))
 	return data
 
 

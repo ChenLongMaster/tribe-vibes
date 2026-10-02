@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- Giải trí thấp: bực bội đỏ cả mặt, sắp đình công -->
+  <circle cx="24" cy="25" r="20" fill="#EF5350" stroke="#4E342E" stroke-width="3.5"/>
+  <path d="M11 15 L21 20 M37 15 L27 20" fill="none" stroke="#4E342E" stroke-width="3.5" stroke-linecap="round"/>
+  <g fill="#4E342E">
+    <ellipse cx="17" cy="24" rx="2.5" ry="2.8"/>
+    <ellipse cx="31" cy="24" rx="2.5" ry="2.8"/>
+  </g>
+  <path d="M15 36 Q24 28 33 36" fill="none" stroke="#4E342E" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M38 6 l3 -4 M42 10 l5 -2 M34 4 l0 -4" stroke="#C62828" stroke-width="3" stroke-linecap="round"/>
+</svg>

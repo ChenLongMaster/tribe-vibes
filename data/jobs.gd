@@ -13,19 +13,18 @@ class_name JobDefs
 ##   đồ nghề thì cầm chính món đó. held_tilts: false = xách thõng (giỏ, xô), không xoay
 ##   chéo theo cánh tay như cán rìu.
 ## - icon: icon việc trên đầu (mặc định icon kỹ năng).
+## - cursor: icon cạnh con trỏ khi rê lên mục tiêu lúc đang chọn người (mặc định = icon).
 ## - anim: hoạt họa lúc làm. impact: hiệu ứng mỗi nhát, "" = không có. swing: giây giữa hai nhát.
 ## - activity_key: chữ "đang làm gì" trong bảng thông tin.
 ## - search_radius: hết mục tiêu thì tìm cái tương tự trong bán kính này (ô).
-## - small_rock: chỉ cho việc nhắm vào đá — true = đá nhỏ (nhặt tay), false = đá tảng to (cuốc).
-## - any_rock: đang làm việc này mà hết đá to quanh đó thì đập luôn đá nhỏ (có cuốc thì đá nào
-##   cũng đập được).
+## - fallback_job: làng chưa có đồ nghề cho việc này thì làm việc tay không này với mục tiêu
+##   nằm sát bên (vd chưa có cuốc → nhặt đá cuội quanh tảng đá), trong TOOL_FALLBACK_RADIUS_CELLS.
 
 const CHOP: StringName = &"chop"
 const MINE: StringName = &"mine"
 const GATHER: StringName = &"gather"
 const TWIGS: StringName = &"twigs"
 const PEBBLES: StringName = &"pebbles"
-const PICK_ROCK: StringName = &"pick_rock"
 const FISH: StringName = &"fish"
 const HUNT: StringName = &"hunt"
 const COOK: StringName = &"cook"
@@ -63,27 +62,11 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 		"item": ResourceDefs.ITEM_STONE,
 		"amount": Balance.STONE_PER_MINE,
 		"tool_item": ToolDefs.PICKAXE,
-		"small_rock": false,
-		"any_rock": true,
+		"fallback_job": PEBBLES,
 		"anim": VillagerRig.ANIM_MINE,
 		"impact": IMPACT_STONE,
 		"swing": 0.8,
 		"activity_key": "UI_ACTIVITY_MINE",
-		"search_radius": Balance.JOB_SEARCH_RADIUS_CELLS,
-	},
-	# Đá nhỏ nhặt bằng tay (không cần cuốc), giơ đá trên đầu khuân về.
-	PICK_ROCK: {
-		"skill": SkillDefs.GATHER,
-		"target": MapData.KIND_ROCK,
-		"small_rock": true,
-		"seconds": Balance.SMALL_ROCK_PICK_SECONDS,
-		"item": ResourceDefs.ITEM_STONE,
-		"amount": Balance.STONE_PER_SMALL_ROCK,
-		"icon": "icons/res_stone",
-		"anim": VillagerRig.ANIM_GATHER,
-		"impact": IMPACT_STONE,
-		"swing": 1.0,
-		"activity_key": "UI_ACTIVITY_PICK_ROCK",
 		"search_radius": Balance.JOB_SEARCH_RADIUS_CELLS,
 	},
 	GATHER: {
@@ -94,6 +77,7 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 		"amount": Balance.BUSH_BERRIES_PER_PICK,
 		"held": "props/basket",
 		"held_tilts": false,
+		"cursor": "icons/res_food",
 		"anim": VillagerRig.ANIM_GATHER,
 		"activity_key": "UI_ACTIVITY_GATHER",
 		"search_radius": Balance.GATHER_SEARCH_RADIUS_CELLS,
@@ -131,12 +115,14 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 		"item": ResourceDefs.ITEM_FISH,
 		"amount": Balance.FISH_PER_CATCH,
 		"held": "props/fishing_rod",
+		"cursor": "icons/res_food",
 		"anim": VillagerRig.ANIM_FISH,
 		"activity_key": "UI_ACTIVITY_FISH",
 		"search_radius": Balance.JOB_SEARCH_RADIUS_CELLS,
 	},
 	HUNT: {
-		"skill": SkillDefs.HUNT,
+		"skill": SkillDefs.FIGHT,
+		"icon": "icons/skill_hunt",
 		"target": TARGET_ANIMAL,
 		"seconds": Balance.HUNT_SECONDS,
 		"item": ResourceDefs.ITEM_MEAT,
@@ -234,6 +220,16 @@ static func held_art(job_id: StringName) -> String:
 	return str(get_def(job_id).get("held", ""))
 
 
+## Việc tay không thay thế khi làng chưa có đồ nghề (&"" nếu không có).
+static func fallback_job(job_id: StringName) -> StringName:
+	return get_def(job_id).get("fallback_job", &"")
+
+
+## Icon cạnh con trỏ khi rê chuột lên mục tiêu của việc này.
+static func cursor_icon(job_id: StringName) -> String:
+	return str(get_def(job_id).get("cursor", icon(job_id)))
+
+
 static func held_tilts(job_id: StringName) -> bool:
 	return bool(get_def(job_id).get("held_tilts", true))
 
@@ -255,10 +251,6 @@ static func job_for_target(target: Node) -> StringName:
 	if target_kind == &"":
 		return &""
 	for job_id: StringName in DEFS:
-		if DEFS[job_id]["target"] != target_kind:
-			continue
-		# Đá nhỏ nhặt tay, đá tảng to đập bằng cuốc — cùng loại vật, khác việc.
-		if DEFS[job_id].has("small_rock") and bool(DEFS[job_id]["small_rock"]) != (target as ResourceNode).is_small_rock():
-			continue
-		return job_id
+		if DEFS[job_id]["target"] == target_kind:
+			return job_id
 	return &""

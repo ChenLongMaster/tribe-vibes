@@ -9,7 +9,9 @@ const SIM_SECONDS: float = 300.0 # 5 phút trong game
 const SIM_TIME_SCALE: float = 20.0
 const MIN_DISTINCT_ACTIVITIES: int = 5
 ## Hoạt cảnh rảnh rỗi tại chỗ — lúc làm mấy việc này phải ở trong vùng dạo chơi.
-const IDLE_KINDS: Array[StringName] = [&"stroll", &"sit", &"scratch", &"chat", &"pick_flower"]
+const IDLE_KINDS: Array[StringName] = [&"fidget", &"sit", &"scratch", &"chat", &"pick_flower", &"nap"]
+## Hoạt cảnh tại chỗ: phải đứng đúng ô điểm neo, không bước đi đâu.
+const IN_PLACE_KINDS: Array[StringName] = [&"fidget", &"sit", &"scratch", &"chat", &"nap"]
 ## Dư cho người đứng cạnh bạn tán gẫu / bông hoa ở mép vùng.
 const IDLE_TOLERANCE_CELLS: float = 1.5
 
@@ -102,7 +104,8 @@ func test_village_lives_for_five_minutes() -> void:
 			# Nghe lời: đang rảnh (hoạt cảnh tại chỗ) thì không được ra xa điểm neo.
 			if villager.task != null and IDLE_KINDS.has(villager.task.kind):
 				var away: float = Vector2(world.cell_of(villager) - villager.anchor_cell).length()
-				if away > Balance.IDLE_RADIUS_CELLS + IDLE_TOLERANCE_CELLS and not strayed.has(villager.data.display_name):
+				var limit: float = 0.0 if IN_PLACE_KINDS.has(villager.task.kind) else Balance.IDLE_RADIUS_CELLS + IDLE_TOLERANCE_CELLS
+				if away > limit and not strayed.has(villager.data.display_name):
 					strayed.append("%s (%s, %.1f ô)" % [villager.data.display_name, villager.task.kind, away])
 			if villager.status.hunger <= 0.0 and food_left and not starved_with_food.has(villager.data.display_name):
 				starved_with_food.append(villager.data.display_name)
@@ -116,7 +119,8 @@ func test_village_lives_for_five_minutes() -> void:
 	check(in_wall.is_empty(), "Đứng lọt vào ô bị chặn: %s" % ", ".join(in_wall))
 	check_eq(Villager.watchdog_alerts, 0, "Watchdog báo có người đứng đơ")
 	check(activities.size() >= MIN_DISTINCT_ACTIVITIES, "Làng ít hoạt động quá: %s" % str(activities.keys()))
-	check(activities.has(&"chat"), "Phải có người tán gẫu")
+	check(activities.has(&"fidget"), "Rảnh thì đứng làm trò tại chỗ")
+	check(not activities.has(&"stroll"), "Không còn đi dạo lung tung")
 	check(activities.has(&"eat"), "Đói < 50 thì phải tự đi ăn")
 	check(not activities.has(&"snack"), "Không còn ăn vặt khi rảnh")
 	check(strayed.is_empty(), "Rảnh mà đi xa điểm neo: %s" % ", ".join(strayed))
@@ -136,6 +140,76 @@ func test_village_lives_for_five_minutes() -> void:
 	EventBus.villager_selected.emit(null)
 	check(not panel.visible, "Bỏ chọn thì bảng thông tin phải ẩn")
 	panel.queue_free()
+	world.queue_free()
+	await host.get_tree().process_frame
+
+
+## Thả ở đâu đứng yên ở đó: 30 giây đầu chỉ làm trò tại chỗ (không bước đi), sau đó mới chán
+## (ngồi, ngủ gật, hái hoa gần đó rồi quay về đúng chỗ). Hai người đứng sát nhau thì tán gẫu
+## tại chỗ.
+func test_idle_stays_put_then_gets_bored() -> void:
+	GameState.new_game(preload("res://modes/normal_mode.tres"))
+	var world: World = WORLD_SCENE.instantiate()
+	host.add_child(world)
+	world.build(42)
+	await host.get_tree().process_frame
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = 99
+	var cell: Vector2i = world.finder.find_free_cell_near(world.map_data.campfire_cell, 3.0, 4.0)
+	var villager: Villager = world.spawn_villager(VillagerFactory.create(rng, VillagerData.Gender.MALE, "vi"), cell)
+	villager.status.hunger = 100.0
+	villager.status.energy = 100.0
+	villager.status.fun = 100.0
+	var seen_early: Dictionary[StringName, bool] = {}
+	var seen_late: Dictionary[StringName, bool] = {}
+	var moved_early: bool = false
+	var elapsed: float = 0.0
+	Engine.time_scale = SIM_TIME_SCALE
+	while elapsed < 150.0:
+		await host.get_tree().process_frame
+		elapsed += host.get_process_delta_time()
+		villager.status.hunger = 100.0
+		villager.status.energy = 100.0
+		var kind: StringName = villager.task.kind if villager.task != null else &"-"
+		if villager.idle_seconds < Balance.IDLE_BORED_SECONDS - 1.0:
+			seen_early[kind] = true
+			if world.cell_of(villager) != cell:
+				moved_early = true
+		elif villager.idle_seconds > Balance.IDLE_BORED_SECONDS + 1.0:
+			seen_late[kind] = true
+	Engine.time_scale = 1.0
+	check(not moved_early, "30 giây đầu không bước khỏi chỗ được thả")
+	check(not seen_early.has(&"sit") and not seen_early.has(&"nap") and not seen_early.has(&"pick_flower"),
+			"Chưa chán thì không ngồi / ngủ gật / đi hái hoa: %s" % str(seen_early.keys()))
+	check(seen_early.has(&"fidget"), "Đứng chờ thì làm trò tại chỗ")
+	check(seen_late.has(&"sit") or seen_late.has(&"nap") or seen_late.has(&"pick_flower"),
+			"Chán rồi thì ngồi / ngủ gật / hái hoa: %s" % str(seen_late.keys()))
+	check(not seen_late.has(&"stroll"), "Không đi dạo lung tung")
+
+	# Hai người đứng sát nhau: tán gẫu tại chỗ, không ai bước đi.
+	var neighbor: Vector2i = World.INVALID_CELL
+	for offset: Vector2i in WorldGrid.NEIGHBORS_4:
+		if not world.grid.is_blocked(cell + offset):
+			neighbor = cell + offset
+			break
+	var friend: Villager = world.spawn_villager(VillagerFactory.create(rng, VillagerData.Gender.FEMALE, "vi"), neighbor)
+	friend.status.fun = 20.0
+	villager.status.fun = 20.0
+	var state: Dictionary = {"chat": false, "moved": false}
+	elapsed = 0.0
+	Engine.time_scale = SIM_TIME_SCALE
+	while elapsed < 120.0 and not state["chat"]:
+		await host.get_tree().process_frame
+		elapsed += host.get_process_delta_time()
+		for one: Villager in [villager, friend]:
+			one.status.hunger = 100.0
+			one.status.energy = 100.0
+		if villager.task is TaskChat:
+			state["chat"] = true
+			state["moved"] = world.cell_of(villager) != cell or world.cell_of(friend) != neighbor
+	Engine.time_scale = 1.0
+	check(state["chat"], "Đứng sát nhau thì tán gẫu")
+	check(not state["moved"], "Tán gẫu tại chỗ, không ai bước đi")
 	world.queue_free()
 	await host.get_tree().process_frame
 

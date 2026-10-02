@@ -158,7 +158,7 @@ func _update_alert(lift: float) -> void:
 		return
 	if need_id != _alert_need:
 		_alert_need = need_id
-		ArtLibrary.setup_sprite(_alert, NeedDefs.icon(need_id))
+		ArtLibrary.setup_sprite(_alert, NeedDefs.icon_for(need_id, _villager.status.get_need(need_id)))
 	_alert.position = ALERT_OFFSET + Vector2(0, -lift)
 	_alert.modulate.a = 0.55 + 0.45 * sin(_time * ALERT_BLINK_SPEED)
 

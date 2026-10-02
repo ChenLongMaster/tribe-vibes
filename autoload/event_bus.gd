@@ -15,6 +15,12 @@ signal resource_changed(resource_id: StringName, amount: int)
 signal villager_spawned(villager: Node)
 ## Thổ dân được chọn (null = bỏ chọn) — bảng thông tin nghe signal này.
 signal villager_selected(villager: Node)
+## Nhóm thổ dân đang chọn (mảng rỗng = không chọn ai) — bảng nhóm nghe signal này.
+signal villagers_selected(villagers: Array)
+## UI (vd bảng nhóm) muốn chọn riêng một thổ dân.
+signal villager_focus_requested(villager: Node)
+## Icon nhún nhún cạnh con trỏ cho biết click phải sẽ làm gì ("" = không hiện).
+signal command_cursor_changed(icon_key: String)
 ## UI (vd nút ✕) muốn bỏ chọn.
 signal deselect_requested
 ## Tốc độ game đổi (0 = tạm dừng).

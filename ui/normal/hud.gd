@@ -4,6 +4,7 @@ extends Control
 ##   mặt trời, nút tạm dừng / ×1 / ×2 / ×3 (phím Space, 1–3 do controller lo), nút lưu / tải.
 ## - Góc dưới-phải: nút Xây mở menu xây.
 ## - Dưới-giữa: khi đang đặt công trình thì hiện gợi ý + nút ✓ (cảm ứng) / ✕.
+## - Icon nhún nhún cạnh con trỏ cho biết click phải sẽ làm gì (CommandCursor).
 ## Đợt 6 thêm thẻ nhiệm vụ. Chế độ Thần Linh sau này có HUD riêng trong ui/god/. Phần dùng
 ## chung mọi chế độ (bảng thông tin, bảng công trình, toast) nằm ở ui/common/.
 ## Mọi bố cục dùng container tự giãn theo độ dài chữ, không đặt chiều rộng cứng.
@@ -123,6 +124,7 @@ func _build() -> void:
 
 	_build_bottom_right()
 	_build_placement_bar()
+	add_child(CommandCursor.new())
 
 
 # Nút Xây to ở góc dưới-phải, menu bật lên ngay phía trên.

@@ -114,9 +114,11 @@ static func from_dict(dict: Dictionary) -> VillagerStatus:
 	status.attack = float(dict.get("attack", DEFAULT_ATTACK))
 	var xp: Dictionary = dict.get("skill_xp", {})
 	for skill_id: String in xp:
-		status.skill_xp[StringName(skill_id)] = float(xp[skill_id])
+		var xp_id: StringName = SkillDefs.from_saved_id(skill_id)
+		status.skill_xp[xp_id] = maxf(status.skill_xp.get(xp_id, 0.0), float(xp[skill_id]))
 	status.tool = StringName(str(dict.get("tool", "")))
 	var levels: Dictionary = dict.get("skill_levels", {})
 	for skill_id: String in levels:
-		status.skill_levels[StringName(skill_id)] = int(levels[skill_id])
+		var level_id: StringName = SkillDefs.from_saved_id(skill_id)
+		status.skill_levels[level_id] = maxi(status.skill_levels.get(level_id, 0), int(levels[skill_id]))
 	return status

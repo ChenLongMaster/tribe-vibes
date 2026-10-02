@@ -1,26 +1,41 @@
 extends Node
-## Gom chuột + cảm ứng thành lệnh chung (chạm, kéo, zoom, huỷ…) để phần còn lại
+## Gom chuột + cảm ứng thành lệnh chung (chạm, ra lệnh, kéo khung, zoom, huỷ…) để phần còn lại
 ## của game không cần biết người chơi đang dùng gì.
 ##
-## - Bắt đầu cử chỉ ở `_unhandled_input`: UI được ăn sự kiện trước, bấm nút không
-##   làm camera chạy.
-## - Theo dõi/kết thúc cử chỉ ở `_input`: đã kéo từ thế giới thì lướt qua UI vẫn
-##   không bị đứt.
-## - Chuột giả lập từ cảm ứng (device = DEVICE_ID_EMULATION) bị bỏ qua, vì cảm ứng
-##   đã được xử lý trực tiếp — tránh nhận đôi.
+## Chuột (kiểu Age of Empires):
+## - Click trái = `tapped` (chọn). Kéo chuột trái = khung chọn (`box_*`) — KHÔNG kéo bản đồ.
+## - Click phải = `secondary_tapped` (ra lệnh cho người đang chọn).
+## - Kéo chuột giữa = kéo bản đồ. Lăn chuột = zoom. Bản đồ còn trượt bằng phím WASD / mũi tên và
+##   khi đưa chuột sát mép màn hình (CameraController đọc `mouse_on_screen` / `mouse_position`).
+## Cảm ứng (điện thoại không có chuột phải / rê chuột):
+## - Chạm = `tapped` (controller tự hiểu: chọn, hoặc ra lệnh nếu đang chọn người).
+## - Kéo một ngón = kéo bản đồ; kéo bắt đầu từ một thổ dân = kéo-thả giao việc (`drag_assign_*`).
+## - Nhấn giữ = xem nhanh (`long_pressed`); nhấn giữ rồi kéo = khung chọn.
+## - Chụm hai ngón = zoom.
+##
+## - Bắt đầu cử chỉ ở `_unhandled_input`: UI được ăn sự kiện trước, bấm nút không làm camera chạy.
+## - Theo dõi/kết thúc cử chỉ ở `_input`: đã kéo từ thế giới thì lướt qua UI vẫn không bị đứt.
+## - Chuột giả lập từ cảm ứng (device = DEVICE_ID_EMULATION) bị bỏ qua, vì cảm ứng đã được xử lý
+##   trực tiếp — tránh nhận đôi.
 
 enum Mode { MOUSE, TOUCH }
 
 signal input_mode_changed(mode: Mode)
-## Chạm/click nhanh (không kéo). Ai nhận sẽ tự quyết là "chọn" hay "giao việc".
+## Chạm / click trái nhanh (không kéo). Ai nhận sẽ tự quyết là "chọn" hay "giao việc".
 signal tapped(screen_pos: Vector2)
+## Click phải (chỉ có ở chuột): ra lệnh cho người đang chọn.
+signal secondary_tapped(screen_pos: Vector2)
 ## Nhấn giữ trên cảm ứng — dùng để xem thông tin nhanh.
 signal long_pressed(screen_pos: Vector2)
-## Chuột di chuyển không bấm — dùng để xem thông tin nhanh bằng rê chuột.
+## Chuột di chuyển không bấm — dùng để xem thông tin nhanh / đổi hình con trỏ.
 signal hovered(screen_pos: Vector2)
 signal drag_assign_started(screen_pos: Vector2, target: Node)
 signal drag_assign_moved(screen_pos: Vector2)
 signal drag_assign_ended(screen_pos: Vector2)
+## Khung chọn nhiều người: kéo chuột trái (hoặc nhấn giữ rồi kéo trên cảm ứng).
+signal box_select_started(screen_pos: Vector2)
+signal box_select_moved(from_pos: Vector2, to_pos: Vector2)
+signal box_select_ended(from_pos: Vector2, to_pos: Vector2)
 signal pan_requested(screen_delta: Vector2)
 signal zoom_requested(factor: float, screen_pos: Vector2)
 signal cancel_requested
@@ -31,12 +46,15 @@ const LONG_PRESS_SECONDS: float = 0.4
 const WHEEL_ZOOM_STEP: float = 1.12
 const PAN_GESTURE_SPEED: float = 12.0
 
-enum Gesture { NONE, PENDING, PAN, DRAG_ASSIGN, PINCH, CONSUMED }
+enum Gesture { NONE, PENDING, PAN, DRAG_ASSIGN, BOX, PINCH, CONSUMED }
 
 var mode: Mode = Mode.MOUSE
-## Hàm (screen_pos: Vector2) -> Node do World đăng ký: trả về vật kéo-giao-việc được
-## (thổ dân) dưới ngón tay, hoặc null. Để trống thì mọi cú kéo đều là pan.
+## Hàm (screen_pos: Vector2) -> Node do controller đăng ký: trả về vật kéo-giao-việc được
+## (thổ dân) dưới ngón tay, hoặc null. Chỉ dùng cho cảm ứng (chuột kéo = khung chọn).
 var drag_picker: Callable = Callable()
+## Chuột đang nằm trong cửa sổ (đã từng di chuyển) — để camera trượt khi chuột sát mép.
+var mouse_on_screen: bool = false
+var mouse_position: Vector2 = Vector2.ZERO
 
 var _gesture: Gesture = Gesture.NONE
 var _press_pos: Vector2 = Vector2.ZERO
@@ -45,6 +63,7 @@ var _press_time_ms: int = 0
 var _long_press_fired: bool = false
 var _drag_target: Node = null
 var _middle_panning: bool = false
+var _right_press_pos: Vector2 = Vector2.INF
 var _touches: Dictionary[int, Vector2] = {}
 var _pinch_distance: float = 0.0
 var _pinch_center: Vector2 = Vector2.ZERO
@@ -53,6 +72,11 @@ var _pinch_center: Vector2 = Vector2.ZERO
 func _ready() -> void:
 	# Vẫn kéo/zoom được khi game tạm dừng.
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_MOUSE_EXIT or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		mouse_on_screen = false
 
 
 func _process(_delta: float) -> void:
@@ -67,6 +91,16 @@ func _process(_delta: float) -> void:
 ## Đổi toạ độ màn hình sang toạ độ thế giới (đã tính camera).
 func screen_to_world(screen_pos: Vector2) -> Vector2:
 	return get_viewport().get_canvas_transform().affine_inverse() * screen_pos
+
+
+## Đang giữ Shift: chọn thêm / bớt vào nhóm đang chọn thay vì chọn lại từ đầu.
+func is_additive() -> bool:
+	return Input.is_key_pressed(KEY_SHIFT)
+
+
+## Đang kéo khung chọn (để controller / UI không hiểu nhầm là chạm).
+func is_box_selecting() -> bool:
+	return _gesture == Gesture.BOX
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -114,6 +148,8 @@ func _input(event: InputEvent) -> void:
 		if motion.device == InputEvent.DEVICE_ID_EMULATION:
 			return
 		_set_mode(Mode.MOUSE)
+		mouse_on_screen = true
+		mouse_position = motion.position
 		_on_mouse_moved(motion)
 
 
@@ -126,7 +162,7 @@ func _on_mouse_pressed(event: InputEventMouseButton) -> void:
 		MOUSE_BUTTON_MIDDLE:
 			_middle_panning = true
 		MOUSE_BUTTON_RIGHT:
-			cancel_requested.emit()
+			_right_press_pos = event.position
 		MOUSE_BUTTON_WHEEL_UP:
 			zoom_requested.emit(WHEEL_ZOOM_STEP, event.position)
 		MOUSE_BUTTON_WHEEL_DOWN:
@@ -139,6 +175,11 @@ func _on_mouse_released(event: InputEventMouseButton) -> void:
 			_end_press(event.position, false)
 		MOUSE_BUTTON_MIDDLE:
 			_middle_panning = false
+		MOUSE_BUTTON_RIGHT:
+			# Chỉ tính là click phải nếu bấm và nhả gần nhau (và bấm bắt đầu từ thế giới).
+			if _right_press_pos != Vector2.INF and event.position.distance_to(_right_press_pos) <= DRAG_THRESHOLD:
+				secondary_tapped.emit(event.position)
+			_right_press_pos = Vector2.INF
 
 
 func _on_mouse_moved(event: InputEventMouseMotion) -> void:
@@ -158,6 +199,8 @@ func _on_touch_pressed(index: int, pos: Vector2) -> void:
 		# Ngón thứ hai chạm vào: bỏ cú kéo đang dở, chuyển sang chụm để zoom.
 		if _gesture == Gesture.DRAG_ASSIGN:
 			drag_assign_ended.emit(_last_pos)
+		elif _gesture == Gesture.BOX:
+			box_select_ended.emit(_press_pos, _last_pos)
 		_gesture = Gesture.PINCH
 		_pinch_distance = _touch_distance()
 		_pinch_center = _touch_center()
@@ -209,7 +252,7 @@ func _first_two_touches() -> Array[Vector2]:
 	return points
 
 
-# --- Cử chỉ một điểm (dùng chung cho chuột trái và một ngón) ---
+# --- Cử chỉ một điểm (chuột trái hoặc một ngón) ---
 
 func _begin_press(pos: Vector2) -> void:
 	_gesture = Gesture.PENDING
@@ -217,25 +260,39 @@ func _begin_press(pos: Vector2) -> void:
 	_last_pos = pos
 	_press_time_ms = Time.get_ticks_msec()
 	_long_press_fired = false
-	_drag_target = drag_picker.call(pos) as Node if drag_picker.is_valid() else null
+	_drag_target = null
+	if mode == Mode.TOUCH and drag_picker.is_valid():
+		_drag_target = drag_picker.call(pos) as Node
 
 
 func _move_press(pos: Vector2) -> void:
 	match _gesture:
 		Gesture.PENDING:
 			if pos.distance_to(_press_pos) > DRAG_THRESHOLD:
-				if is_instance_valid(_drag_target):
-					_gesture = Gesture.DRAG_ASSIGN
-					drag_assign_started.emit(_press_pos, _drag_target)
-					drag_assign_moved.emit(pos)
-				else:
-					_gesture = Gesture.PAN
-					pan_requested.emit(pos - _press_pos)
+				_start_drag(pos)
 		Gesture.PAN:
 			pan_requested.emit(pos - _last_pos)
 		Gesture.DRAG_ASSIGN:
 			drag_assign_moved.emit(pos)
+		Gesture.BOX:
+			box_select_moved.emit(_press_pos, pos)
 	_last_pos = pos
+
+
+# Bắt đầu kéo: chuột → khung chọn; cảm ứng → kéo-giao-việc (từ thổ dân), khung chọn (sau khi
+# nhấn giữ) hoặc kéo bản đồ.
+func _start_drag(pos: Vector2) -> void:
+	if mode == Mode.MOUSE or _long_press_fired:
+		_gesture = Gesture.BOX
+		box_select_started.emit(_press_pos)
+		box_select_moved.emit(_press_pos, pos)
+	elif is_instance_valid(_drag_target):
+		_gesture = Gesture.DRAG_ASSIGN
+		drag_assign_started.emit(_press_pos, _drag_target)
+		drag_assign_moved.emit(pos)
+	else:
+		_gesture = Gesture.PAN
+		pan_requested.emit(pos - _press_pos)
 
 
 func _end_press(pos: Vector2, canceled: bool) -> void:
@@ -246,6 +303,8 @@ func _end_press(pos: Vector2, canceled: bool) -> void:
 				tapped.emit(pos)
 		Gesture.DRAG_ASSIGN:
 			drag_assign_ended.emit(pos)
+		Gesture.BOX:
+			box_select_ended.emit(_press_pos, pos)
 	_gesture = Gesture.NONE
 	_drag_target = null
 

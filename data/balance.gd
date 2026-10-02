@@ -49,7 +49,8 @@ const BOULDERS_PER_CLIFF: int = 2 # đá tảng nằm sẵn sát chân mỗi vá
 const CAMERA_ZOOM_MIN: float = 0.5
 const CAMERA_ZOOM_MAX: float = 2.0
 const CAMERA_ZOOM_SMOOTHING: float = 12.0 # càng lớn zoom càng nhanh tới đích
-const CAMERA_KEY_PAN_SPEED: float = 700.0 # px/giây khi zoom = 1
+const CAMERA_KEY_PAN_SPEED: float = 700.0 # px/giây khi zoom = 1 (phím và chuột sát mép)
+const CAMERA_EDGE_SCROLL_PX: float = 8.0 # chuột cách mép màn hình chừng này thì bản đồ trượt
 
 # --- Tài nguyên trên map ---
 const WOOD_PER_LOG: int = 10 # 1 khúc gỗ (chặt cây) = 10 bó củi (nhặt tay)
@@ -58,10 +59,9 @@ const CHOP_SECONDS: float = 10.0 # chặt ra một khúc gỗ (cần rìu)
 const ROCK_USES: int = 4 # đá tảng đập chừng này lượt thì vỡ hết
 const STONE_PER_MINE: int = 4 # mỗi lượt đập đá tảng (cần cuốc)
 const MINE_SECONDS: float = 8.0
-## Đá nhỏ (hình đá tảng cỡ nhỏ): nhặt bằng tay, không cần cuốc — ít đá hơn đá tảng to.
-const SMALL_ROCK_USES: int = 2 # nhặt chừng này lượt thì hết
-const STONE_PER_SMALL_ROCK: int = 2 # mỗi lượt
-const SMALL_ROCK_PICK_SECONDS: float = 4.0
+## Giao đập đá tảng mà làng chưa có cuốc: tự nhặt đá cuội nằm trong chừng này ô quanh tảng đá
+## đó (không có mới cắm biển "cần cuốc").
+const TOOL_FALLBACK_RADIUS_CELLS: float = 3.0
 const BUSH_BERRIES_PER_PICK: int = 2
 const PICK_SECONDS: float = 3.0
 const TWIG_PICK_SECONDS: float = 1.5 # nhặt một bó củi (tay không)
@@ -146,8 +146,13 @@ const THINK_INTERVAL_MAX: float = 0.6
 const LANE_JITTER: float = 10.0 # px lệch khỏi tâm ô để nhiều người không đi chồng lên nhau
 
 # --- Hành vi "nghe lời" (chế độ Normal) ---
-const IDLE_RADIUS_CELLS: float = 3.0 # rảnh thì chỉ dạo trong bán kính này quanh điểm neo
-const IDLE_CHAT_RANGE_CELLS: float = 3.0 # chỉ tán gẫu với người đứng gần chừng này
+## Rảnh thì đứng yên tại điểm neo. Chán rồi mới đi hái hoa trong bán kính này, hái xong quay về.
+const IDLE_RADIUS_CELLS: float = 3.0
+const IDLE_CHAT_RANGE_CELLS: float = 1.6 # chỉ tán gẫu với người đứng sát bên (không đi tìm nhau)
+## Đứng chờ lệnh chừng này giây (chỉ làm trò tại chỗ) rồi mới chán: ngồi, ngủ gật, hái hoa.
+const IDLE_BORED_SECONDS: float = 30.0
+const NAP_MIN_SECONDS: float = 8.0 # chán quá nằm ngủ gật tại chỗ
+const NAP_MAX_SECONDS: float = 15.0
 const JOB_SEARCH_RADIUS_CELLS: float = 8.0 # hết tài nguyên thì tìm cái tương tự trong bán kính này
 const HUNT_SEARCH_RADIUS_CELLS: float = 14.0 # thú chạy lung tung nên tìm rộng hơn
 const GATHER_SEARCH_RADIUS_CELLS: float = 14.0 # bụi quả mọc thưa (cách nhau ~9–13 ô) nên tìm rộng hơn
@@ -181,6 +186,8 @@ const KNOCKOUT_WAKE_HEALTH: float = 20.0
 const KNOCKOUT_WAKE_HUNGER: float = 10.0 # tỉnh dậy còn chút sức để đi tới chỗ ăn
 const ALERT_HEALTH_BELOW: float = 50.0 # icon chỉ số nhấp nháy trên đầu dưới các mức này
 const ALERT_FUN_BELOW: float = 20.0
+const FUN_FACE_HAPPY: float = 60.0 # icon giải trí: từ mức này trở lên là mặt vui
+const FUN_FACE_OK: float = 30.0 # từ mức này là mặt bình thường, dưới nữa là bực bội đỏ mặt
 const MOOD_WEIGHT_HUNGER: float = 0.35
 const MOOD_WEIGHT_ENERGY: float = 0.25
 const MOOD_WEIGHT_FUN: float = 0.4

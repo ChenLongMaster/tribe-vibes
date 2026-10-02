@@ -6,6 +6,7 @@ extends Node2D
 ## - Vòng vàng dưới mục tiêu: mục tiêu đang rê chuột / đang kéo tới / việc vừa giao.
 ## - Đường kéo từ thổ dân tới ngón tay khi kéo-thả giao việc.
 ## - Cắm cờ nhỏ ở chỗ bảo thổ dân đi tới.
+## - Khung chọn nhiều người khi kéo chuột trái.
 ## Chỉ ĐỌC thổ dân (đường đi, việc được giao) — không đổi gì trong lõi.
 
 const SHOW_SECONDS: float = 3.0
@@ -16,6 +17,8 @@ const DOT_SPEED: float = 28.0 # px/giây — chấm chạy về phía đích cho
 const DOT_COLOR: Color = Color("#FFF8E1")
 const DRAG_DOT_COLOR: Color = Color("#FFEB3B")
 const OUTLINE_COLOR: Color = Color("#4E342E")
+const BOX_FILL: Color = Color(1.0, 0.97, 0.75, 0.18)
+const BOX_LINE: Color = Color("#FFF8E1")
 const DRAG_LIFT: Vector2 = Vector2(0, -30)
 const RING_KEY: String = "ui/target_ring"
 const MARKER_KEY: String = "ui/move_marker"
@@ -26,7 +29,10 @@ const RING_SCALE_TREE: float = 1.1
 const RING_SCALE_DEFAULT: float = 1.0
 const RING_SCALE_FISH: float = 0.9
 
-var _selected: Villager
+var _selection: Array[Villager] = []
+## Khung chọn đang kéo (toạ độ thế giới); rỗng = không kéo.
+var _box: Rect2 = Rect2()
+var _box_active: bool = false
 ## Thổ dân vừa nhận lệnh → số giây còn hiện đường đi.
 var _recent: Dictionary[Villager, float] = {}
 var _hover_target: Node2D
@@ -50,8 +56,17 @@ func _ready() -> void:
 	add_child(_marker)
 
 
-func set_selected(villager: Villager) -> void:
-	_selected = villager
+func set_selection(villagers: Array[Villager]) -> void:
+	_selection = villagers.duplicate()
+
+
+func update_box(from_point: Vector2, to_point: Vector2) -> void:
+	_box = Rect2(from_point, Vector2.ZERO).expand(to_point)
+	_box_active = true
+
+
+func end_box() -> void:
+	_box_active = false
 
 
 func show_command(villager: Villager, _target: Node2D) -> void:
@@ -111,8 +126,9 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var shown: Array[Villager] = []
-	if is_instance_valid(_selected):
-		shown.append(_selected)
+	for villager: Villager in _selection:
+		if is_instance_valid(villager):
+			shown.append(villager)
 	for villager: Villager in _recent:
 		if is_instance_valid(villager) and not shown.has(villager):
 			shown.append(villager)
@@ -124,6 +140,10 @@ func _draw() -> void:
 		_draw_ring(_hover_target)
 	if is_instance_valid(_selected_object):
 		_draw_ring(_selected_object)
+	if _box_active:
+		draw_rect(_box, BOX_FILL)
+		draw_rect(_box, OUTLINE_COLOR, false, 3.0)
+		draw_rect(_box, BOX_LINE, false, 1.5)
 	if is_instance_valid(_drag_villager):
 		var line: PackedVector2Array = PackedVector2Array([_drag_villager.position + DRAG_LIFT, _drag_point])
 		_draw_dots(line, DRAG_DOT_COLOR)

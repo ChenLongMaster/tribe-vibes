@@ -9,7 +9,7 @@ const NORMAL_MODE: GameModeConfig = preload("res://modes/normal_mode.tres")
 const SIM_TIME_SCALE: float = 20.0
 const WORK_SIM_SECONDS: float = 300.0 # 5 phút trong game
 const SAMPLE_SECONDS: float = 60.0
-const IDLE_KINDS: Array[StringName] = [&"stroll", &"sit", &"scratch", &"chat", &"pick_flower"]
+const IDLE_KINDS: Array[StringName] = [&"fidget", &"sit", &"scratch", &"chat", &"pick_flower", &"nap"]
 const IDLE_TOLERANCE_CELLS: float = 1.5
 
 
@@ -76,7 +76,7 @@ func test_three_choppers_two_miners() -> void:
 	check(_add_built(world, BuildingDefs.STORAGE, 3, 7) != null, "Có chỗ dựng Kho")
 	Commands.debug_give_tools(3)
 	var tree: ResourceNode = _nearest(world, MapData.KIND_TREE)
-	var rock: ResourceNode = _nearest_rock(world, false)
+	var rock: ResourceNode = _nearest_rock(world)
 	for i: int in 3:
 		check(Commands.assign_job(villagers[i].id, tree), "Giao chặt cây cho người %d" % i)
 	for i: int in range(3, 5):
@@ -170,7 +170,7 @@ func test_job_stops_when_nothing_left() -> void:
 	await _simulate(90.0, func(_elapsed: float) -> bool: return worker.job == null)
 	check(worker.job == null, "Hết bụi quả thì thôi việc")
 	await host.get_tree().process_frame
-	check(worker.rig.has_sign(), "Thôi việc vì hết quả thì phải giơ biển (quả gạch chéo)")
+	check(worker.rig.has_sign() and worker.rig.is_sign_crossed(), "Thôi việc vì hết quả thì phải giơ biển (quả gạch chéo)")
 	check(GameState.item_amount(ResourceDefs.FOOD, ResourceDefs.ITEM_BERRIES) > berries_before, "Quả hái được vào kho thức ăn (nhớ là quả)")
 	check_eq(worker.anchor_cell, world.cell_of(worker), "Dừng việc thì đứng chờ tại chỗ")
 	await _free_world(world)
@@ -184,7 +184,7 @@ func test_strike_and_resume() -> void:
 	var on_event: Callable = func(key: String, _args: Dictionary, _icon: String) -> void: toasts.append(key)
 	EventBus.village_event.connect(on_event)
 	Commands.debug_give_tools(1)
-	Commands.assign_job(worker.id, _nearest_rock(world, false))
+	Commands.assign_job(worker.id, _nearest_rock(world))
 	var job: Job = worker.job
 	# Đặt giải trí = 0 đúng lúc đang làm (đang đi thì giải trí còn hồi chút ít).
 	await _simulate(60.0, func(_elapsed: float) -> bool:
@@ -236,7 +236,7 @@ func test_hunt_then_cook() -> void:
 	check(delivered.has(ResourceDefs.FOOD), "Thợ săn mang thức ăn về")
 	check(campfire.stock_of(ResourceDefs.MEAL) > meals_before, "Đầu bếp nấu ra món chín, cất ở lửa trại")
 	check(GameState.get_amount(ResourceDefs.MEAL) == 0, "Món chín không phải tài nguyên chung")
-	check(hunter.job != null and hunter.job.skill == SkillDefs.HUNT, "Thợ săn vẫn đi săn tiếp")
+	check(hunter.job != null and hunter.job.skill == SkillDefs.FIGHT, "Thợ săn vẫn đi săn tiếp")
 	EventBus.resource_delivered.disconnect(on_delivered)
 	await _free_world(world)
 
@@ -326,42 +326,44 @@ func test_tools_needed_and_kept() -> void:
 		check_eq(rack.stock_of(ToolDefs.AXE), 0, "Không cất rìu khi làm việc tay không")
 
 	# Sang việc cần món khác: về kho đổi rìu lấy cuốc.
-	check(Commands.assign_job(worker.id, _nearest_rock(world, false)), "Giao đập đá tảng")
+	check(Commands.assign_job(worker.id, _nearest_rock(world)), "Giao đập đá tảng")
 	await _simulate(60.0, func(_elapsed: float) -> bool: return worker.tool == ToolDefs.PICKAXE)
 	check_eq(worker.tool, ToolDefs.PICKAXE, "Đổi lấy cuốc")
 	check_eq(rack.stock_of(ToolDefs.AXE), 1, "Rìu được cất lại")
 	await _free_world(world)
 
 
-## Đá nhỏ nhặt bằng tay (không cần cuốc), đá tảng to thì vẫn cần cuốc. Biển "thiếu đồ nghề"
-## chỉ vẽ món cần, không gạch chéo; biển "hết rồi" thì gạch chéo.
-func test_small_rock_by_hand_and_sign_cross() -> void:
+## Giao đập đá tảng mà làng chưa có cuốc: tự nhặt đá cuội ngay cạnh tảng đá (nghĩ tới cái
+## cuốc). Không có đá cuội thì cắm biển vẽ cái cuốc — KHÔNG gạch chéo ("cần cái này").
+func test_no_pickaxe_picks_pebbles_beside_rock() -> void:
 	var world: World = await _make_world(42)
 	var worker: Villager = _spawn(world, 1)[0]
 	_fill_needs(worker)
-	var big: ResourceNode = _nearest_rock(world, false)
-	var small: ResourceNode = _nearest_rock(world, true)
-	check(big != null and small != null, "Map có cả đá to lẫn đá nhỏ")
-	check_eq(JobDefs.job_for_target(big), JobDefs.MINE, "Đá to = đập đá (cần cuốc)")
-	check_eq(JobDefs.job_for_target(small), JobDefs.PICK_ROCK, "Đá nhỏ = nhặt tay")
-	check(not Commands.assign_job(worker.id, big), "Chưa có cuốc thì không đập được đá to")
-	await host.get_tree().process_frame
-	check(worker.rig.has_sign() and not worker.rig.is_sign_crossed(), "Thiếu cuốc: biển vẽ cuốc, không gạch chéo")
-	var stone_before: int = GameState.get_amount(ResourceDefs.STONE)
-	check(Commands.assign_job(worker.id, small), "Đá nhỏ giao được khi chưa có cuốc")
-	check_eq(worker.job.skill, SkillDefs.GATHER, "Nhặt đá nhỏ luyện Hái lượm")
-	await _simulate(60.0, func(_elapsed: float) -> bool: return GameState.get_amount(ResourceDefs.STONE) > stone_before)
-	check(GameState.get_amount(ResourceDefs.STONE) > stone_before, "Nhặt đá nhỏ về kho")
-	check_eq(worker.tool, &"", "Không cần cầm cuốc")
-	# Nhặt hết đá nhỏ quanh đó thì thôi việc, giơ biển gạch chéo ("hết rồi").
+	var rock: ResourceNode = _nearest_rock(world)
+	# Dọn sạch đá cuội: chưa có gì để nhặt thay → cắm biển cuốc.
 	for node: ResourceNode in world.resource_nodes:
-		if node.is_small_rock() and node != small:
-			while node.can_harvest():
-				node.harvest(1)
-	await _simulate(90.0, func(_elapsed: float) -> bool: return worker.job == null)
+		if node.kind == MapData.KIND_PEBBLES and not node.is_cleared:
+			node.clear_away()
+	check(not Commands.assign_job(worker.id, rock), "Không cuốc, không đá cuội: không giao được")
 	await host.get_tree().process_frame
-	check(worker.job == null and worker.rig.has_sign() and worker.rig.is_sign_crossed(), "Hết đá nhỏ: biển gạch chéo")
+	check(worker.rig.has_sign() and not worker.rig.is_sign_crossed(), "Biển vẽ cái cuốc, không gạch chéo")
+	# Có đá cuội sát tảng đá: tự nhặt đá cuội.
+	var pebble: ResourceNode = world.place_resource(MapData.KIND_PEBBLES, _free_neighbor(world, rock.cell), 0)
+	check(Commands.assign_job(worker.id, rock), "Có đá cuội cạnh đó thì vẫn nhận việc")
+	check(worker.job != null and worker.job.job_id == JobDefs.PEBBLES, "Chuyển sang nhặt đá cuội")
+	check(worker.job != null and worker.job.target == pebble, "Nhặt đúng viên đá cuội cạnh tảng đá")
+	var stone_before: int = GameState.get_amount(ResourceDefs.STONE)
+	await _simulate(60.0, func(_elapsed: float) -> bool: return GameState.get_amount(ResourceDefs.STONE) > stone_before)
+	check(GameState.get_amount(ResourceDefs.STONE) > stone_before, "Đá cuội về kho")
+	check_eq(worker.tool, &"", "Không cần cầm cuốc")
 	await _free_world(world)
+
+
+func _free_neighbor(world: World, cell: Vector2i) -> Vector2i:
+	for offset: Vector2i in WorldGrid.NEIGHBORS_8:
+		if not world.grid.is_blocked(cell + offset):
+			return cell + offset
+	return cell
 
 
 ## Củi và đá cuội nhặt tay theo mẻ: nhặt đủ một bó/xô rồi mới khuân về; 1 khúc gỗ = 10 củi.
@@ -427,6 +429,8 @@ func test_controller_tap_assigns_and_moves() -> void:
 	Commands.debug_give_tools(1)
 	var tree: ResourceNode = _nearest(world, MapData.KIND_TREE)
 
+	# Cảm ứng: chạm chọn, chạm mục tiêu để ra lệnh.
+	InputRouter.mode = InputRouter.Mode.TOUCH
 	controller._on_tapped(_to_screen(villager.position + Villager.PICK_CENTER))
 	check(controller.selected == villager, "Chạm thổ dân thì chọn")
 	controller._on_tapped(_to_screen(tree.position + Vector2(0, -40)))
@@ -443,6 +447,21 @@ func test_controller_tap_assigns_and_moves() -> void:
 	controller._on_drag_started(Vector2.ZERO, villager)
 	controller._on_drag_ended(_to_screen(tree.position + Vector2(0, -40)))
 	check(villager.job != null and villager.job.skill == SkillDefs.CHOP, "Kéo thổ dân thả vào cây → giao chặt cây")
+
+	# Chuột: click trái chỉ chọn, click phải mới ra lệnh (và vẫn giữ chọn).
+	InputRouter.mode = InputRouter.Mode.MOUSE
+	Commands.move_villager(villager.id, ground)
+	controller._on_tapped(_to_screen(villager.position + Villager.PICK_CENTER))
+	controller._on_tapped(_to_screen(tree.position + Vector2(0, -90)))
+	check(villager.job == null, "Chuột: click trái vào cây KHÔNG giao việc")
+	check(controller.selected_object == tree, "Click trái vào cây = xem thông tin cây")
+	controller._on_tapped(_to_screen(villager.position + Villager.PICK_CENTER))
+	controller._on_secondary_tapped(_to_screen(tree.position + Vector2(0, -90)))
+	check(villager.job != null and villager.job.skill == SkillDefs.CHOP, "Click phải vào cây → giao chặt cây")
+	check(controller.selected == villager, "Ra lệnh bằng click phải vẫn giữ chọn")
+	check_eq(controller.command_icon(tree, tree.position), JobDefs.cursor_icon(JobDefs.CHOP), "Rê lên cây: con trỏ hình rìu")
+	var bush: ResourceNode = _nearest(world, MapData.KIND_BUSH)
+	check_eq(controller.command_icon(bush, bush.position), "icons/res_food", "Rê lên bụi quả: con trỏ hình đồ ăn")
 	controller.queue_free()
 	await _free_world(world)
 	check(not InputRouter.drag_picker.is_valid(), "Bỏ controller thì trả lại drag_picker")
@@ -523,15 +542,8 @@ func _nearest(world: World, kind: StringName) -> ResourceNode:
 	return best
 
 
-## Đá gần lửa trại nhất: `small` = đá nhỏ (nhặt tay), không thì đá tảng to (cần cuốc).
-func _nearest_rock(world: World, small: bool) -> ResourceNode:
-	var campfire: Vector2 = WorldGrid.cell_to_world(world.map_data.campfire_cell)
-	var best: ResourceNode = null
-	for node: ResourceNode in world.resource_nodes:
-		if node.kind == MapData.KIND_ROCK and node.is_small_rock() == small and node.visible and node.can_harvest():
-			if best == null or node.position.distance_to(campfire) < best.position.distance_to(campfire):
-				best = node
-	return best
+func _nearest_rock(world: World) -> ResourceNode:
+	return _nearest(world, MapData.KIND_ROCK)
 
 
 func _campfire(world: World) -> Building:

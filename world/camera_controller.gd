@@ -2,6 +2,7 @@ class_name CameraController
 extends Camera2D
 ## Camera kéo/zoom mượt và luôn nằm trong map. Nhận lệnh từ InputRouter nên không
 ## cần biết người chơi dùng chuột hay cảm ứng. Chạy cả khi game tạm dừng.
+## Trượt bằng phím WASD / mũi tên, kéo chuột giữa, hoặc đưa chuột sát mép màn hình (kiểu AoE).
 
 var _map_rect: Rect2 = Rect2()
 var _target_zoom: float = 1.0
@@ -29,6 +30,8 @@ func _process(delta: float) -> void:
 	# delta đã bị nhân tốc độ game; camera cần thời gian thật để mượt như nhau ở ×1 lẫn ×3.
 	var real_delta: float = delta / maxf(Engine.time_scale, 0.001)
 	var key_direction: Vector2 = Input.get_vector("cam_left", "cam_right", "cam_up", "cam_down")
+	if key_direction == Vector2.ZERO:
+		key_direction = _edge_direction()
 	if key_direction != Vector2.ZERO:
 		_has_zoom_anchor = false
 		position += key_direction * Balance.CAMERA_KEY_PAN_SPEED * real_delta / zoom.x
@@ -61,6 +64,25 @@ func _on_zoom_requested(factor: float, screen_pos: Vector2) -> void:
 	_zoom_anchor_screen = screen_pos
 	_has_zoom_anchor = true
 	_target_zoom = clampf(_target_zoom * factor, _min_zoom(), Balance.CAMERA_ZOOM_MAX)
+
+
+# Chuột sát mép màn hình thì trượt về phía đó (chỉ khi đang dùng chuột và chuột trong cửa sổ).
+func _edge_direction() -> Vector2:
+	if InputRouter.mode != InputRouter.Mode.MOUSE or not InputRouter.mouse_on_screen:
+		return Vector2.ZERO
+	var view: Vector2 = get_viewport_rect().size
+	var pos: Vector2 = InputRouter.mouse_position
+	var margin: float = Balance.CAMERA_EDGE_SCROLL_PX
+	var direction: Vector2 = Vector2.ZERO
+	if pos.x <= margin:
+		direction.x = -1.0
+	elif pos.x >= view.x - margin:
+		direction.x = 1.0
+	if pos.y <= margin:
+		direction.y = -1.0
+	elif pos.y >= view.y - margin:
+		direction.y = 1.0
+	return direction.normalized()
 
 
 func _screen_center() -> Vector2:

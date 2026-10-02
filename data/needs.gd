@@ -38,7 +38,10 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 		"idle": -Balance.ENERGY_DECAY_IDLE, "work": -Balance.ENERGY_DECAY_WORK, "sleep": Balance.ENERGY_RESTORE_GROUND,
 	},
 	FUN: {
-		"icon": "icons/stat_fun",
+		"icon": "icons/stat_fun_happy",
+		# Icon đổi theo mức: vui / bình thường / bực bội đỏ mặt (xem icon_for).
+		"icon_levels": [[Balance.FUN_FACE_HAPPY, "icons/stat_fun_happy"], [Balance.FUN_FACE_OK, "icons/stat_fun_ok"],
+				[0.0, "icons/stat_fun_angry"]],
 		"name_key": "UI_NEED_FUN",
 		"color": Color("#F06292"),
 		"alert_below": Balance.ALERT_FUN_BELOW,
@@ -49,6 +52,14 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 
 static func icon(id: StringName) -> String:
 	return DEFS[id]["icon"]
+
+
+## Icon theo giá trị hiện tại (giải trí: mặt vui / bình thường / bực bội); chỉ số khác dùng một icon.
+static func icon_for(id: StringName, value: float) -> String:
+	for level: Array in DEFS[id].get("icon_levels", []):
+		if value >= float(level[0]):
+			return level[1]
+	return icon(id)
 
 
 static func rate(id: StringName, activity: String) -> float:

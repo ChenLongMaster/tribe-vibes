@@ -30,6 +30,10 @@ const ANIM_STRIKE: StringName = &"strike"
 const ANIM_POUT: StringName = &"pout"
 ## Gõ búa (xây nhà, rèn): nhịp nhanh, nhẹ hơn đập đá.
 const ANIM_HAMMER: StringName = &"hammer"
+## Vẫy vẫy người chơi (đứng chờ lệnh).
+const ANIM_WAVE: StringName = &"wave"
+## Ngó nghiêng (đứng chờ lệnh).
+const ANIM_LOOK: StringName = &"look"
 
 ## Thư mục mảnh trong ArtLibrary — ID mảnh ghép sau thành key hình, vd "villager/hair_03".
 const PIECE_DIR: String = "villager/"
@@ -473,6 +477,18 @@ func _animate(t: float) -> void:
 			_arm_back.rotation = _arm_front.rotation + 0.25
 			_pose.rotation = lerpf(0.22, -0.05, pound)
 			_pose.position.y = lerpf(1.5, -1.0, pound)
+		ANIM_WAVE:
+			# Giơ tay cao vẫy qua vẫy lại, nhún nhẹ theo nhịp — "ê, ở đây nè!".
+			_arm_front.rotation = -2.75 + 0.45 * sin(t * 9.0)
+			_arm_back.rotation = 0.2
+			_pose.position.y = -absf(sin(t * 4.5)) * 2.0
+			_head.rotation = -0.08 + 0.05 * sin(t * 4.5)
+			_breathe(breathe)
+		ANIM_LOOK:
+			# Ngó nghiêng: đầu xoay chậm qua lại, người hơi nghiêng theo.
+			_head.rotation = 0.16 * sin(t * 1.8)
+			_pose.rotation = 0.03 * sin(t * 1.8)
+			_breathe(breathe)
 		ANIM_HAMMER:
 			# Gõ búa lách cách: tay giơ ngang đầu rồi gõ xuống, người hơi khom.
 			var tap: float = _swing(t, HAMMER_PERIOD)
@@ -561,7 +577,7 @@ func _current_face() -> String:
 			return FACE_BLINK
 		ANIM_STRIKE, ANIM_POUT:
 			return FACE_SAD
-		ANIM_CELEBRATE, ANIM_EAT:
+		ANIM_CELEBRATE, ANIM_EAT, ANIM_WAVE:
 			return FACE_HAPPY
 	if _blink_time > 0.0:
 		return FACE_BLINK
@@ -595,10 +611,6 @@ func _build_nodes() -> void:
 	ArtLibrary.setup_sprite(_shadow, "villager/shadow")
 	_flip = Node2D.new()
 	add_child(_flip)
-	# Biển vẽ sau người: ngồi giơ biển thì cán nằm sau đầu, đứng thì người đứng trước biển.
-	_sign = Node2D.new()
-	_sign.visible = false
-	_flip.add_child(_sign)
 	_pose = Node2D.new()
 	_flip.add_child(_pose)
 	# Thứ tự vẽ từ sau ra trước theo spec (đồ nghề sau lưng nằm sau thân).
@@ -626,6 +638,11 @@ func _build_nodes() -> void:
 	_fishing_line = FishingLine.new()
 	_fishing_line.visible = false
 	_flip.add_child(_fishing_line)
+	# Biển vẽ ĐÈ LÊN người (thêm sau cùng): tay, đầu, đồ cầm không che mất hình trên biển —
+	# biển là để người chơi đọc.
+	_sign = Node2D.new()
+	_sign.visible = false
+	_flip.add_child(_sign)
 	ArtLibrary.setup_sprite(_add_sprite(_sign, Vector2.ZERO), "props/sign")
 	_sign_icon = _add_sprite(_sign, SIGN_ICON_POS)
 	_sign_cross = _add_sprite(_sign, SIGN_ICON_POS)

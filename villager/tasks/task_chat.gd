@@ -1,8 +1,8 @@
 class_name TaskChat
 extends Task
-## Tán gẫu: người rủ đi tới cạnh người kia, hai người quay mặt vào nhau, thay phiên
-## "nói" bằng hình (1–2 icon ngẫu nhiên trong bong bóng — không có chữ). Người được rủ
-## đứng chờ; ai bỏ đi thì cuộc trò chuyện kết thúc.
+## Tán gẫu với người đứng sát bên: không ai bước đi đâu, chỉ quay mặt vào nhau, thay phiên
+## "nói" bằng hình (1–2 icon ngẫu nhiên trong bong bóng — không có chữ). Ai bỏ đi thì cuộc
+## trò chuyện kết thúc.
 
 const WAIT_TIMEOUT: float = 12.0 # giây chờ người rủ đi tới
 const TALK_MIN: float = 4.0
@@ -28,12 +28,8 @@ func _init(chat: ChatSession, initiator: bool) -> void:
 
 func start() -> void:
 	villager.state = Villager.State.SOCIAL
-	if not _is_initiator:
-		villager.rig.play(VillagerRig.ANIM_IDLE)
-		return
-	var stand: Vector2i = world().finder.find_stand_cell(world().cell_of(session.partner), villager)
-	if stand == World.INVALID_CELL or not villager.move_to_cell(stand):
-		fail()
+	villager.rig.play(VillagerRig.ANIM_IDLE)
+	villager.face_towards(session.other(villager).position)
 
 
 func tick(delta: float) -> Status:

@@ -1,5 +1,6 @@
 extends TestCase
-## InputRouter: chuột và cảm ứng phải ra cùng một lệnh; chuột giả lập từ cảm ứng bị bỏ qua.
+## InputRouter: chuột kiểu AoE (trái chọn / kéo khung, phải ra lệnh, giữa kéo bản đồ), cảm ứng
+## (chạm, kéo bản đồ, kéo-thả giao việc, nhấn giữ rồi kéo = khung chọn); chuột giả lập bị bỏ qua.
 
 var _taps: Array[Vector2] = []
 var _pans: Array[Vector2] = []
@@ -7,6 +8,8 @@ var _zooms: Array[float] = []
 var _cancels: int = 0
 var _long_presses: int = 0
 var _drag_events: Array[String] = []
+var _secondary: Array[Vector2] = []
+var _boxes: Array[String] = []
 
 
 func test_mouse_click_is_tap() -> void:
@@ -18,24 +21,37 @@ func test_mouse_click_is_tap() -> void:
 	_end()
 
 
-func test_mouse_drag_pans() -> void:
+func test_mouse_left_drag_is_box_select() -> void:
 	_begin()
 	_mouse_button(MOUSE_BUTTON_LEFT, true, Vector2(100, 100))
 	_mouse_motion(Vector2(130, 100), MOUSE_BUTTON_MASK_LEFT)
 	_mouse_motion(Vector2(150, 110), MOUSE_BUTTON_MASK_LEFT)
 	_mouse_button(MOUSE_BUTTON_LEFT, false, Vector2(150, 110))
-	check_eq(_sum(_pans), Vector2(50, 10), "Tổng quãng kéo")
+	check(_pans.is_empty(), "Kéo chuột trái KHÔNG kéo bản đồ")
+	check(not _boxes.is_empty() and _boxes[0] == "start" and _boxes[-1] == "end", "Kéo chuột trái = khung chọn: %s" % str(_boxes))
 	check(_taps.is_empty(), "Kéo xong không được tính là chạm")
 	_end()
 
 
-func test_wheel_zooms_and_right_click_cancels() -> void:
+func test_middle_drag_pans() -> void:
+	_begin()
+	_mouse_button(MOUSE_BUTTON_MIDDLE, true, Vector2(100, 100))
+	_mouse_motion_relative(Vector2(130, 110), Vector2(30, 10), MOUSE_BUTTON_MASK_MIDDLE)
+	_mouse_button(MOUSE_BUTTON_MIDDLE, false, Vector2(130, 110))
+	check_eq(_sum(_pans), Vector2(30, 10), "Kéo chuột giữa = kéo bản đồ")
+	_end()
+
+
+func test_wheel_zooms_and_right_click_commands() -> void:
 	_begin()
 	_mouse_button(MOUSE_BUTTON_WHEEL_UP, true, Vector2(10, 10))
 	_mouse_button(MOUSE_BUTTON_WHEEL_DOWN, true, Vector2(10, 10))
 	_mouse_button(MOUSE_BUTTON_RIGHT, true, Vector2(10, 10))
+	_mouse_button(MOUSE_BUTTON_RIGHT, false, Vector2(12, 11))
 	check(_zooms.size() == 2 and _zooms[0] > 1.0 and _zooms[1] < 1.0, "Lăn lên phóng to, lăn xuống thu nhỏ")
-	check_eq(_cancels, 1, "Chuột phải = huỷ")
+	check_eq(_secondary.size(), 1, "Click phải = ra lệnh")
+	check_eq(_cancels, 0, "Click phải không còn là huỷ")
+	check(_taps.is_empty(), "Click phải không phải là chọn")
 	_end()
 
 
@@ -80,17 +96,40 @@ func test_long_press_then_no_tap() -> void:
 	_end()
 
 
-func test_drag_from_pickable_assigns() -> void:
+func test_touch_drag_from_pickable_assigns() -> void:
 	_begin()
 	var target: Node = Node.new()
 	InputRouter.drag_picker = func(_pos: Vector2) -> Node: return target
+	_touch(0, true, Vector2(100, 100))
+	_drag(0, Vector2(140, 100))
+	_touch(0, false, Vector2(140, 100))
+	var expected: Array[String] = ["start", "move", "end"]
+	check_eq(_drag_events, expected, "Cảm ứng: kéo từ thổ dân = kéo-giao-việc")
+	check(_pans.is_empty(), "Kéo-giao-việc không được kéo camera")
+	_drag_events.clear()
+	# Chuột kéo từ thổ dân thì là khung chọn, không phải kéo-giao-việc.
 	_mouse_button(MOUSE_BUTTON_LEFT, true, Vector2(100, 100))
 	_mouse_motion(Vector2(140, 100), MOUSE_BUTTON_MASK_LEFT)
 	_mouse_button(MOUSE_BUTTON_LEFT, false, Vector2(140, 100))
-	var expected: Array[String] = ["start", "move", "end"]
-	check_eq(_drag_events, expected, "Kéo từ thổ dân = kéo-giao-việc")
-	check(_pans.is_empty(), "Kéo-giao-việc không được kéo camera")
+	check(_drag_events.is_empty(), "Chuột không kéo-thả giao việc")
 	target.free()
+	_end()
+
+
+func test_touch_drag_pans_and_long_press_drag_boxes() -> void:
+	_begin()
+	_touch(0, true, Vector2(100, 100))
+	_drag(0, Vector2(130, 100))
+	_touch(0, false, Vector2(130, 100))
+	check_eq(_sum(_pans), Vector2(30, 0), "Cảm ứng: kéo một ngón = kéo bản đồ")
+	_pans.clear()
+	_touch(0, true, Vector2(50, 50))
+	InputRouter._press_time_ms -= 1000
+	InputRouter._process(0.0)
+	_drag(0, Vector2(120, 90))
+	_touch(0, false, Vector2(120, 90))
+	check(_pans.is_empty(), "Nhấn giữ rồi kéo không kéo bản đồ")
+	check(not _boxes.is_empty() and _boxes[-1] == "end", "Nhấn giữ rồi kéo = khung chọn")
 	_end()
 
 
@@ -101,6 +140,8 @@ func _begin() -> void:
 	_pans.clear()
 	_zooms.clear()
 	_drag_events.clear()
+	_secondary.clear()
+	_boxes.clear()
 	_cancels = 0
 	_long_presses = 0
 	InputRouter.tapped.connect(_on_tapped)
@@ -111,9 +152,15 @@ func _begin() -> void:
 	InputRouter.drag_assign_started.connect(_on_drag_started)
 	InputRouter.drag_assign_moved.connect(_on_drag_moved)
 	InputRouter.drag_assign_ended.connect(_on_drag_ended)
+	InputRouter.secondary_tapped.connect(_on_secondary)
+	InputRouter.box_select_started.connect(_on_box_started)
+	InputRouter.box_select_ended.connect(_on_box_ended)
 
 
 func _end() -> void:
+	InputRouter.secondary_tapped.disconnect(_on_secondary)
+	InputRouter.box_select_started.disconnect(_on_box_started)
+	InputRouter.box_select_ended.disconnect(_on_box_ended)
 	InputRouter.tapped.disconnect(_on_tapped)
 	InputRouter.pan_requested.disconnect(_on_pan)
 	InputRouter.zoom_requested.disconnect(_on_zoom)
@@ -144,6 +191,14 @@ func _mouse_button(button: MouseButton, pressed: bool, pos: Vector2, device: int
 func _mouse_motion(pos: Vector2, mask: MouseButtonMask) -> void:
 	var event: InputEventMouseMotion = InputEventMouseMotion.new()
 	event.position = pos
+	event.button_mask = mask
+	_send(event)
+
+
+func _mouse_motion_relative(pos: Vector2, relative: Vector2, mask: MouseButtonMask) -> void:
+	var event: InputEventMouseMotion = InputEventMouseMotion.new()
+	event.position = pos
+	event.relative = relative
 	event.button_mask = mask
 	_send(event)
 
@@ -200,3 +255,15 @@ func _on_drag_moved(_pos: Vector2) -> void:
 
 func _on_drag_ended(_pos: Vector2) -> void:
 	_drag_events.append("end")
+
+
+func _on_secondary(pos: Vector2) -> void:
+	_secondary.append(pos)
+
+
+func _on_box_started(_pos: Vector2) -> void:
+	_boxes.append("start")
+
+
+func _on_box_ended(_from: Vector2, _to: Vector2) -> void:
+	_boxes.append("end")

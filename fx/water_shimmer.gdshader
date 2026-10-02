@@ -20,7 +20,8 @@ void fragment() {
 	// Các đường gợn mảnh nằm ngang, uốn lượn và trôi dần.
 	float line = sin(world_pos.y * 0.16 + sin(world_pos.x * 0.035 - t * 1.3) * 1.8 + t * 0.8);
 	// Chỉ hiện từng vùng (vùng này trôi theo gió) để không thành hoạ tiết đều tăm tắp.
-	float patches = 0.5 + 0.5 * sin(world_pos.x * 0.021 + world_pos.y * 0.013 - t * (0.7 + wind_strength))
+	// Tốc độ trôi KHÔNG nhân sức gió: thời gian lớn dần nên hễ sức gió đổi là pha nhảy vọt.
+	float patches = 0.5 + 0.5 * sin(world_pos.x * 0.021 + world_pos.y * 0.013 - t * 1.2)
 		* sin(world_pos.x * 0.008 - world_pos.y * 0.02 + t * 0.5);
 	float glint = smoothstep(0.8, 1.0, line) * smoothstep(0.35, 0.8, patches);
 	COLOR.rgb = mix(base.rgb, glint_color.rgb, glint * water * (0.35 + 0.3 * wind_strength));

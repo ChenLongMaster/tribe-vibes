@@ -10,7 +10,7 @@ extends RefCounted
 const IDLE_ATTEMPTS: int = 12
 const FREE_CELL_ATTEMPTS: int = 24
 ## Việc rảnh có thể bị ngắt để tán gẫu.
-const CHATTABLE_KINDS: Array[StringName] = [&"stroll", &"sit", &"scratch"]
+const CHATTABLE_KINDS: Array[StringName] = [&"fidget", &"sit", &"scratch"]
 ## Chỉ kiểm tra đường đi (AStar) cho chừng này mục tiêu gần nhất — đỡ tốn công.
 const JOB_TARGET_PATH_CHECKS: int = 6
 ## Đứng ngay trên/dưới vật bị tính xa thêm chừng này px (ưu tiên đứng hai bên).
@@ -105,7 +105,7 @@ func find_job_target(job_id: StringName, around: Vector2i, villager: Villager, s
 				candidates.append(building)
 		_:
 			for node: ResourceNode in _world.resource_nodes:
-				if node.kind == def["target"] and (bool(def.get("any_rock", false)) or JobDefs.job_for_target(node) == job_id):
+				if node.kind == def["target"]:
 					candidates.append(node)
 	var nearby: Array[Node2D] = []
 	for node: Node2D in candidates:
@@ -194,21 +194,7 @@ func _can_reach_target(node: Node2D, villager: Villager) -> bool:
 	return find_stand_cell(Job.target_cell(node), villager) != World.INVALID_CELL
 
 
-# --- Vùng dạo chơi quanh điểm neo ---
-
-## Một ô trong bán kính dạo chơi quanh điểm neo (rảnh thì chỉ đi trong vùng này).
-func random_idle_cell(villager: Villager) -> Vector2i:
-	var from_cell: Vector2i = _world.cell_of(villager)
-	var anchor: Vector2i = villager.anchor_cell
-	var reach: int = floori(Balance.IDLE_RADIUS_CELLS)
-	for attempt: int in IDLE_ATTEMPTS:
-		var cell: Vector2i = anchor + Vector2i(randi_range(-reach, reach), randi_range(-reach, reach))
-		if cell == from_cell or not is_in_idle_area(villager, cell):
-			continue
-		if not _world.grid.is_blocked(cell) and _world.grid.has_path(from_cell, cell):
-			return cell
-	return World.INVALID_CELL
-
+# --- Quanh điểm neo (chỗ đứng chờ lệnh) ---
 
 func is_in_idle_area(villager: Villager, cell: Vector2i) -> bool:
 	return Vector2(cell - villager.anchor_cell).length() <= Balance.IDLE_RADIUS_CELLS
@@ -225,7 +211,7 @@ func find_flower_near(villager: Villager) -> Dictionary:
 	return nearby[randi() % nearby.size()]
 
 
-## Người lớn đang rảnh, đứng gần, cũng ở trong vùng dạo chơi của mình — để tán gẫu tại chỗ.
+## Người lớn đang rảnh đứng sát bên — để tán gẫu tại chỗ (không ai phải đi tìm ai).
 func find_chat_partner(villager: Villager) -> Villager:
 	var reach: float = Balance.IDLE_CHAT_RANGE_CELLS * Balance.TILE_SIZE
 	var best: Villager = null

@@ -6,6 +6,8 @@ extends Node
 ## Đợt sau thêm: apply_effect(effect_id, cell) (phép thần).
 
 const INVALID_ID: int = -1
+## Tản nhóm người ra quanh điểm đến tối đa chừng này ô.
+const GROUP_SPREAD_MAX_RADIUS: int = 6
 
 var _world: World
 
@@ -59,12 +61,55 @@ func assign_job(villager_id: int, target: Node) -> bool:
 		return false
 	var tool: StringName = JobDefs.required_tool(job_id)
 	if tool != &"" and villager.tool != tool and not _world.finder.has_tool_in_stock(tool):
+		# Chưa có cuốc: tự nhặt đá cuội ngay cạnh tảng đá (nghĩ tới cái cuốc cho người chơi biết).
+		var fallback: Node2D = _fallback_target(job_id, node, villager)
+		if fallback != null:
+			villager.assign_job(Job.new(JobDefs.fallback_job(job_id), fallback))
+			villager.think(ToolDefs.icon(tool))
+			EventBus.job_assigned.emit(villager, fallback)
+			return true
 		# Biển "cần món này" — chỉ vẽ món đó, không gạch chéo.
 		villager.hold_sign(ToolDefs.icon(tool))
 		return false
 	villager.assign_job(Job.new(job_id, node))
 	EventBus.job_assigned.emit(villager, node)
 	return true
+
+
+## Giao việc cho cả nhóm. Vật chỉ một người làm được (cây, đá, bụi…) thì mỗi người nhận một
+## cái tương tự gần đó (không xúm vào một cây); công trình thì cùng vào đó (thừa người thì người
+## thừa cắm biển). Trả về số người nhận việc.
+func assign_group(villager_ids: Array[int], target: Node) -> int:
+	if not _has_world():
+		return 0
+	var job_id: StringName = JobDefs.job_for_target(target)
+	var taken: Array[Node2D] = []
+	var count: int = 0
+	for villager_id: int in villager_ids:
+		var mine: Node = target
+		var villager: Villager = _commandable(villager_id)
+		if villager != null and job_id != &"" and not (target is Building) and taken.has(target as Node2D):
+			var near: Node2D = _world.finder.find_job_target(job_id, Job.target_cell(target as Node2D), villager, taken)
+			if near != null:
+				mine = near
+		if assign_job(villager_id, mine):
+			count += 1
+			if mine is Node2D:
+				taken.append(mine as Node2D)
+	return count
+
+
+## Bảo cả nhóm đi tới quanh ô `cell`: mỗi người một ô trống gần đó (không đứng chồng lên nhau).
+## Trả về số người đi.
+func move_group(villager_ids: Array[int], cell: Vector2i) -> int:
+	if not _has_world():
+		return 0
+	var spots: Array[Vector2i] = _spread_cells(cell, villager_ids.size())
+	var count: int = 0
+	for i: int in mini(spots.size(), villager_ids.size()):
+		if move_villager(villager_ids[i], spots[i]):
+			count += 1
+	return count
 
 
 ## Bảo thổ dân đi tới ô `cell` rồi đứng chơi quanh đó (bỏ việc đang giao).
@@ -189,6 +234,37 @@ func toggle_pause() -> void:
 
 func _on_world_ready(world: Node) -> void:
 	_world = world as World
+
+
+# Các ô trống gần `cell` nhất (theo từng vòng), dùng để tản một nhóm người ra.
+func _spread_cells(cell: Vector2i, count: int) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	if not _world.grid.is_blocked(cell):
+		result.append(cell)
+	var radius: int = 1
+	while result.size() < count and radius <= GROUP_SPREAD_MAX_RADIUS:
+		var ring: Array[Vector2i] = []
+		for y: int in range(-radius, radius + 1):
+			for x: int in range(-radius, radius + 1):
+				if maxi(absi(x), absi(y)) == radius:
+					ring.append(cell + Vector2i(x, y))
+		ring.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+			return Vector2(a - cell).length_squared() < Vector2(b - cell).length_squared())
+		for spot: Vector2i in ring:
+			if result.size() >= count:
+				break
+			if not _world.grid.is_blocked(spot):
+				result.append(spot)
+		radius += 1
+	return result
+
+
+# Mục tiêu tay không sát bên cho việc thiếu đồ nghề (vd đá cuội quanh tảng đá), hoặc null.
+func _fallback_target(job_id: StringName, node: Node2D, villager: Villager) -> Node2D:
+	var fallback: StringName = JobDefs.fallback_job(job_id)
+	if fallback == &"":
+		return null
+	return _world.finder.find_job_target(fallback, Job.target_cell(node), villager, [], Balance.TOOL_FALLBACK_RADIUS_CELLS)
 
 
 # Công trình không có việc để giao: lều → đi ngủ ngay (nếu còn chỗ), sân nhảy → lên đứng chơi

@@ -128,6 +128,10 @@ func next_task(villager: Villager) -> Task:
 	if tool != &"" and villager.tool != tool:
 		var rack: Building = villager.world.finder.find_tool(tool, villager)
 		if rack == null:
+			# Hết đồ nghề giữa chừng: có việc tay không thay thế ngay cạnh thì chuyển sang làm
+			# (vd không còn cuốc → nhặt đá cuội quanh tảng đá).
+			if _switch_to_fallback(villager):
+				return next_task(villager)
 			_missing_tool = true
 			return null
 		return TaskFetchTool.new(self, rack, tool)
@@ -144,6 +148,22 @@ func next_task(villager: Villager) -> Task:
 				return TaskSmith.new(self, node as Building)
 		return TaskCook.new(self, node as Building)
 	return TaskHarvest.new(self, node as ResourceNode)
+
+
+func _switch_to_fallback(villager: Villager) -> bool:
+	var fallback: StringName = JobDefs.fallback_job(job_id)
+	if fallback == &"":
+		return false
+	var near: Node2D = villager.world.finder.find_job_target(fallback, origin_cell, villager, [],
+			Balance.TOOL_FALLBACK_RADIUS_CELLS)
+	if near == null:
+		return false
+	job_id = fallback
+	skill = JobDefs.skill_of(fallback)
+	target = near
+	origin_cell = target_cell(near)
+	villager.notify_task_changed()
+	return true
 
 
 ## Giữ mục tiêu cũ nếu còn làm được, không thì tìm cái tương tự gần đó.

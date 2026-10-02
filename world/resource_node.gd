@@ -3,9 +3,8 @@ extends Node2D
 ## Một nguồn tài nguyên trên map: cây, đá tảng, bụi quả, chỗ câu cá, củi, đá cuội.
 ## - Cây: chặt (cần rìu) TREE_USES khúc gỗ thì thành gốc. Gốc chỉ mọc lại khi số cây trong
 ##   rừng ít hơn lúc đầu — NatureSpawner quyết định, gọi regrow().
-## - Đá tảng to: đập (cần cuốc) ROCK_USES lượt thì vỡ hết, biến mất (ô đó đi qua được).
-##   Đá nhỏ (variant 1): nhặt bằng tay, SMALL_ROCK_USES lượt. Đá mới lăn ra từ vách đá
-##   (NatureSpawner gọi place_again()).
+## - Đá tảng (to hay nhỏ): đập (cần cuốc) ROCK_USES lượt thì vỡ hết, biến mất (ô đó đi qua
+##   được). Đá tảng mới lăn ra từ vách đá (NatureSpawner gọi place_again()).
 ## - Bụi: hái một lần là hết quả, mọc lại sau một ngày.
 ## - Chỗ câu cá: không bao giờ cạn.
 ## - Củi, đá cuội: nằm trên mặt đất, không chặn đường, nhặt tay một lần là hết.
@@ -59,11 +58,6 @@ func setup(object_kind: StringName, object_cell: Vector2i, object_variant: int, 
 
 func is_loose() -> bool:
 	return LOOSE_KINDS.has(kind)
-
-
-## Đá nhỏ — nhặt bằng tay, không cần cuốc (đá tảng to thì cần cuốc).
-func is_small_rock() -> bool:
-	return kind == MapData.KIND_ROCK and variant != 0
 
 
 ## Số lượt tối đa khi còn nguyên (để bảng thông tin hiện "còn 2/3").
@@ -269,7 +263,7 @@ func _initial_uses() -> int:
 		MapData.KIND_TREE:
 			return Balance.TREE_USES
 		MapData.KIND_ROCK:
-			return Balance.SMALL_ROCK_USES if variant != 0 else Balance.ROCK_USES
+			return Balance.ROCK_USES
 		MapData.KIND_BUSH:
 			return 1
 	# Chỗ câu cá không bao giờ cạn.

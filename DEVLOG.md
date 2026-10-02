@@ -4,6 +4,62 @@ Mỗi đợt một mục: đã làm gì, chọn gì và vì sao. Mục mới nh�
 
 ---
 
+## Đợt B — Điều khiển chuột kiểu AoE, khung chọn nhiều người, con trỏ đổi hình (2026-10-03)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.
+
+### Đã làm
+- **Chuột kiểu AoE** (`autoload/input_router.gd` viết lại, `NormalController` viết lại):
+  - **Click trái = chọn** thổ dân / công trình / vật thể (không bao giờ ra lệnh). Shift + click: thêm / bớt người vào nhóm. Click chỗ trống: bỏ chọn.
+  - **Kéo chuột trái = khung chọn** nhiều thổ dân (Shift: thêm vào nhóm đang chọn). Bỏ kéo chuột trái để trượt bản đồ và bỏ kéo-thả giao việc bằng chuột.
+  - **Click phải = ra lệnh** cho những người đang chọn (vẫn giữ chọn sau khi ra lệnh). Lúc đang đặt nhà hoặc không chọn ai thì click phải = huỷ / bỏ chọn.
+  - **Trượt bản đồ:** phím WASD / mũi tên, **chuột sát mép màn hình** (8 px), kéo **chuột giữa**. Lăn chuột zoom như cũ.
+- **Ra lệnh cho nhóm** (`Commands.assign_group`, `Commands.move_group`): vào cây / đá / bụi… thì mỗi người nhận một cái gần nhau (không xúm một cây); vào công trình thì cùng vào (thừa người thì người thừa cắm biển); vào mặt đất thì mỗi người một ô quanh điểm đó (không đứng chồng).
+- **Bảng nhóm** (`ui/common/group_panel.gd`): "Đang chọn N người", mỗi người một nút (icon việc đang làm + tên), bấm để chọn riêng người đó. Đường chấm chấm hiện cho cả nhóm.
+- **Con trỏ đổi hình** (`ui/normal/command_cursor.gd`): đang chọn người mà rê chuột lên mục tiêu thì cạnh con trỏ có icon nhún nhún — bụi quả / chỗ câu cá → đồ ăn, cây → rìu, đá → cuốc, thú → giáo, củi → bó củi, đá cuội → xô, móng → búa, bếp → nồi, lò rèn → búa rèn, lều → Zzz, sân nhảy → mặt cười, mặt đất → cờ, chỗ không đi được → ✕. Dữ liệu: khoá `cursor` trong `data/jobs.gd`.
+- **Cảm ứng giữ cách cũ** (điện thoại không có chuột phải): chạm chọn, đang chọn mà chạm mục tiêu / mặt đất thì ra lệnh rồi bỏ chọn, kéo một ngón trượt bản đồ, kéo từ thổ dân = kéo-thả giao việc, **nhấn giữ rồi kéo = khung chọn**.
+- Đổi các dòng gợi ý ("Chọn thổ dân rồi click phải (hoặc chạm)…") và dòng hướng dẫn điều khiển ở bảng debug.
+- Test: 75 test (viết lại test InputRouter: kéo trái = khung, kéo giữa = trượt, click phải = ra lệnh, cảm ứng kéo / nhấn giữ kéo; controller: click trái chỉ chọn, click phải ra lệnh + giữ chọn, icon con trỏ; kéo khung chọn 3 người → đi tới mỗi người một ô, chặt cây mỗi người một cây). Soi cảnh báo strict: sạch. Công cụ chụp màn hình thêm `--group`.
+
+### Quyết định
+- Click phải ra lệnh xong **giữ chọn** (như AoE) để ra lệnh tiếp; cảm ứng vẫn bỏ chọn sau lệnh (tránh lỡ chạm).
+- Thổ dân chui vào lều ngủ thì tự rời khỏi nhóm đang chọn.
+- Không đổi hình con trỏ hệ thống (giữ mũi tên), chỉ thêm icon nhỏ cạnh con trỏ — chạy được cả bản Web.
+
+### Còn biết
+- Khung chọn vẽ dưới thổ dân / cây (lớp mặt đất).
+- Bảng nhóm tối đa vài chục nút; chọn cả làng 50 người thì bảng khá cao.
+- Chuột sát mép màn hình cũng trượt khi chuột đang nằm trên thanh HUD ở mép trên (giống AoE).
+
+### Số nên tinh chỉnh
+- `CAMERA_EDGE_SCROLL_PX` = 8, `CAMERA_KEY_PAN_SPEED` = 700 (dùng chung cho trượt mép). `Commands.GROUP_SPREAD_MAX_RADIUS` = 6.
+
+---
+
+## Đợt A (sau Đợt 3) — Dân đứng yên khi rảnh, đá cuội thay cuốc, biển đè lên người, bảng thổ dân, gió (2026-10-03)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit. (Đợt B: điều khiển chuột kiểu AoE; Đợt C: map rộng gấp 4, tài nguyên theo cụm, dãy vách đá.)
+
+### Đã làm
+- **Rảnh thì đứng yên tại chỗ được thả.** 30 giây đầu chỉ làm trò tại chỗ: đứng chờ, **vẫy vẫy người chơi** (hoạt họa mới), **ngó nghiêng** (quay qua quay lại), vươn vai, gãi, tán gẫu với người **đứng sát bên** (không ai bước đi tìm ai). Quá 30 giây mà chưa có việc thì **chán**: ngồi phịch, **nằm ngủ gật** tại chỗ 8–15 giây (task mới `TaskNap`, hồi chút sức), hoặc đi hái bông hoa trong 3 ô rồi **quay về đúng ô cũ**. Bỏ hẳn đi dạo (xoá `TaskStroll`). Lười hay ngồi / ngủ gật, Ham chơi hay vẫy tay.
+- **Đá:** bỏ "đá nhỏ nhặt tay" (Đợt 3.1) — đá tảng to hay nhỏ đều cần cuốc. **Giao đập đá tảng mà làng chưa có cuốc → tự nhặt đá cuội nằm trong 3 ô quanh tảng đá đó** (nghĩ tới cái cuốc cho người chơi biết); không có đá cuội mới cắm biển cuốc (không gạch chéo). Đang đập đá mà cuốc bị lấy hết cũng tự chuyển như vậy. Viết dạng dữ liệu (`fallback_job` trong `data/jobs.gd`) để sau này việc khác dùng lại.
+- **Tấm biển vẽ đè lên người** (tay, đầu, đồ cầm không che hình trên biển).
+- **Bảng thổ dân gọn lại** (cao chỉ còn ~một nửa): chân dung nhỏ hơn; tên + mặt tâm trạng + giới tính một dòng; tính cách thành **thẻ nhỏ** (giải thích trong tooltip); bên dưới trái 4 chỉ số xếp dọc (icon + thanh), phải kỹ năng dạng lưới 4 cột (icon + **số cấp** — bỏ hàng sao; việc thích là ô có **khung viền vàng + nền vàng nhạt** thay cho trái tim).
+- **Gộp Săn bắn + Chiến đấu thành một kỹ năng** "Săn bắn & chiến đấu" (id `FIGHT`, icon cây giáo): đi săn luyện kỹ năng này; Đợt 5 dùng nó cho sát thương cận chiến lẫn ném giáo. Còn 8 kỹ năng. Save cũ có kỹ năng "HUNT" tự đổi sang (lấy cấp cao hơn), việc thích "HUNT" cũng vậy. Icon thể lực đổi thành **Zzz**; icon giải trí là **mặt người đổi theo mức**: vui (≥ 60), bình thường (≥ 30), bực bội đỏ cả mặt (thấp hơn — cũng là icon nhấp nháy trên đầu khi sắp đình công).
+- **Gió cố định** ở mức vừa (bỏ gió giật ngẫu nhiên). Sửa luôn lỗi gốc của gợn sóng: shader mặt hồ nhân `thời gian × sức gió`, nên game chạy lâu thì mỗi lần sức gió đổi chút xíu là gợn sóng giật vọt — giờ tốc độ trôi không phụ thuộc sức gió.
+- Test: 72 test (thêm: đứng yên 30 giây đầu rồi mới chán + tán gẫu tại chỗ; không cuốc thì nhặt đá cuội cạnh tảng đá / không có thì cắm biển không gạch chéo). Test làng sống 5 phút giờ kiểm tra hoạt cảnh tại chỗ phải đứng **đúng ô** điểm neo. Soi cảnh báo strict: sạch.
+
+### Quyết định
+- "Đá cuội cạnh tảng đá" = trong 3 ô quanh tảng đá (đá cuội vốn lăn ra sát đá tảng).
+- Ngủ gật lúc chán là việc rảnh: giao việc là dậy ngay; mệt thật (< 50%) thì vẫn đi tìm lều như cũ.
+- Nhiều người cùng được thả một chỗ thì đứng chồng một ô — Đợt B (ra lệnh cho nhóm) sẽ tản họ ra.
+
+### Số nên tinh chỉnh
+- `IDLE_BORED_SECONDS` = 30, `NAP_MIN/MAX_SECONDS` = 8/15, `IDLE_RADIUS_CELLS` = 3 (bán kính đi hái hoa), `IDLE_CHAT_RANGE_CELLS` = 1,6.
+- `TOOL_FALLBACK_RADIUS_CELLS` = 3. `Wind.STRENGTH` = 0,6. `FUN_FACE_HAPPY/OK` = 60/30.
+
+---
+
 ## Đợt 3.1 — Đá nhỏ nhặt tay, biển "cần cái này", bảng thông tin vật thể (2026-10-03)
 
 **Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.

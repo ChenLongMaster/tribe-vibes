@@ -19,13 +19,13 @@ const PLAYFUL: StringName = &"PLAYFUL"
 const DILIGENT: StringName = &"DILIGENT"
 
 const DEFS: Dictionary[StringName, Dictionary] = {
-	LAZY: {"work_speed": 0.8, "flags": [&"takes_breaks"], "idle_weights": {&"sit": 2.5, &"scratch": 1.5}},
+	LAZY: {"work_speed": 0.8, "flags": [&"takes_breaks"], "idle_weights": {&"sit": 2.5, &"nap": 2.0, &"scratch": 1.5}},
 	GLUTTON: {"hunger_rate": 1.35, "eat_joy": 2.0},
 	STRONG: {"skill_bonus": [&"CHOP", &"MINE", &"FIGHT"], "attack": 1.3},
 	COWARD: {"flags": [&"flee_from_danger"]},
 	DANCER: {"idle_weights": {&"dance": 3.0, &"chat": 1.2}},
 	ROMANTIC: {"romance": 2.0, "idle_weights": {&"pick_flower": 3.0}},
-	PLAYFUL: {"idle_weights": {&"chat": 1.8, &"stroll": 1.5, &"scratch": 1.3}},
+	PLAYFUL: {"idle_weights": {&"chat": 1.8, &"wave": 2.0, &"scratch": 1.3}},
 	DILIGENT: {"work_speed": 1.15, "work_fun_drain": 0.75, "idle_weights": {&"sit": 0.5}},
 }
 
