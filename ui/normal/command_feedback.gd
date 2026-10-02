@@ -30,6 +30,8 @@ var _selected: Villager
 ## Thổ dân vừa nhận lệnh → số giây còn hiện đường đi.
 var _recent: Dictionary[Villager, float] = {}
 var _hover_target: Node2D
+## Vật đang mở bảng thông tin — sáng vòng dưới chân cho biết đang xem cái nào.
+var _selected_object: Node2D
 var _drag_villager: Villager
 var _drag_point: Vector2 = Vector2.ZERO
 var _drag_target: Node2D
@@ -66,6 +68,10 @@ func show_move(villager: Villager, cell: Vector2i) -> void:
 	_marker.scale = base * Vector2(1.3, 0.5)
 	var tween: Tween = _marker.create_tween()
 	tween.tween_property(_marker, "scale", base, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func set_selected_object(target: Node2D) -> void:
+	_selected_object = target
 
 
 func set_hover_target(target: Node2D) -> void:
@@ -116,6 +122,8 @@ func _draw() -> void:
 			_draw_ring(villager.job.target)
 	if is_instance_valid(_hover_target):
 		_draw_ring(_hover_target)
+	if is_instance_valid(_selected_object):
+		_draw_ring(_selected_object)
 	if is_instance_valid(_drag_villager):
 		var line: PackedVector2Array = PackedVector2Array([_drag_villager.position + DRAG_LIFT, _drag_point])
 		_draw_dots(line, DRAG_DOT_COLOR)

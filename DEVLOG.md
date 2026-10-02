@@ -4,6 +4,27 @@ Mỗi đợt một mục: đã làm gì, chọn gì và vì sao. Mục mới nh�
 
 ---
 
+## Đợt 3.1 — Đá nhỏ nhặt tay, biển "cần cái này", bảng thông tin vật thể (2026-10-03)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.
+
+### Đã làm
+- **Đá nhỏ nhặt bằng tay** (việc mới `pick_rock`, kỹ năng Hái lượm): chạm đá nhỏ → thổ dân cúi nhặt, giơ đá trên đầu khuân về; 4 giây → 2 đá, mỗi viên 2 lượt. Đá tảng to vẫn cần cuốc. Người đang đập đá bằng cuốc mà quanh đó hết đá to thì đập luôn đá nhỏ (khỏi dừng việc sớm vì đá to giờ chỉ ~40% số đá).
+- **Tấm biển "thiếu đồ nghề / nguyên liệu" bỏ dấu ✕** — chỉ vẽ món đang cần: thiếu rìu/cuốc/giáo, thiếu gỗ/đá để xây hay rèn, bếp chưa có gì để nấu. Dấu ✕ chỉ còn cho "hết rồi / không làm được": hết cây/đá/quả/thú, kho đầy, đủ người, lều hết chỗ, đình công. Nhờ vậy "cần rìu" (rìu) và "hết cây" (rìu ✕) không còn trông giống hệt nhau.
+- **Bảng thông tin vật thể** (`ui/common/object_panel.gd`): không chọn thổ dân mà chạm cây, gốc cây, đá tảng, đá nhỏ, bụi quả, củi, đá cuội, chỗ câu cá, con thú → bảng góc dưới-trái: hình, tên, mô tả, mỗi lượt ra gì (bao nhiêu, mấy giây), còn mấy lượt, cần đồ nghề gì (làng đang có mấy / chưa có thì xây Lò rèn) hay làm bằng tay, bụi hết quả thì còn bao lâu ra quả lại, gốc cây, ai đang làm ở đó, gợi ý cách giao việc. Vật đang xem có vòng vàng dưới chân. Chạm lại / ✕ / chạm chỗ trống thì đóng; củi nhặt mất, thú bị săn thì bảng tự đóng.
+- **Watchdog** không đếm thời gian đang đi đường nữa (đi rừng ↔ kho xa không phải kẹt) — trước đó test "3 chặt 2 đập" thỉnh thoảng trượt vì vậy.
+- Test: 71 test (thêm: đá nhỏ nhặt tay + biển không/có ✕; chạm bụi / cây / thú hiện bảng, chạm lại thì đóng). Test cũ giao "đập đá" giờ nhắm đá tảng to. Soi cảnh báo strict: sạch. Công cụ chụp màn hình `--ui` chụp thêm `panel_bush/tree/rock.png`.
+
+### Quyết định
+- "Đá nhỏ" = hình đá tảng cỡ nhỏ có sẵn trên map (khác đá cuội nằm lẫn trên đất). Nhặt tay ra ít đá hơn đập đá to (4 đá vs 16 đá mỗi viên).
+- Bảng vật thể chỉ để xem, không có nút giao việc — vẫn giao bằng cách chọn thổ dân rồi chạm (đúng kiểu game gốc).
+
+### Số nên tinh chỉnh
+- `SMALL_ROCK_USES` = 2, `STONE_PER_SMALL_ROCK` = 2, `SMALL_ROCK_PICK_SECONDS` = 4.
+- `ROCK_BIG_CHANCE` = 0,4 (tỉ lệ đá to khi sinh map) — muốn nhiều đá phải dùng cuốc hơn thì tăng lên.
+
+---
+
 ## Đợt 3 — Xây dựng, nâng cấp, ngày đêm & lưu game (2026-10-02)
 
 **Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.

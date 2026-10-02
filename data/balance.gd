@@ -58,6 +58,10 @@ const CHOP_SECONDS: float = 10.0 # chặt ra một khúc gỗ (cần rìu)
 const ROCK_USES: int = 4 # đá tảng đập chừng này lượt thì vỡ hết
 const STONE_PER_MINE: int = 4 # mỗi lượt đập đá tảng (cần cuốc)
 const MINE_SECONDS: float = 8.0
+## Đá nhỏ (hình đá tảng cỡ nhỏ): nhặt bằng tay, không cần cuốc — ít đá hơn đá tảng to.
+const SMALL_ROCK_USES: int = 2 # nhặt chừng này lượt thì hết
+const STONE_PER_SMALL_ROCK: int = 2 # mỗi lượt
+const SMALL_ROCK_PICK_SECONDS: float = 4.0
 const BUSH_BERRIES_PER_PICK: int = 2
 const PICK_SECONDS: float = 3.0
 const TWIG_PICK_SECONDS: float = 1.5 # nhặt một bó củi (tay không)

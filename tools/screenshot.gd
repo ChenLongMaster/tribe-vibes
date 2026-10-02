@@ -13,8 +13,9 @@ extends Node
 ##                chụp cảnh ngồi dỗi + bong bóng nghĩ + giơ biển; chụp thêm hungry.png
 ##   --buildings  dựng sẵn lều cấp 1/2/3, lò rèn bày đồ, bếp, kho, sân nhảy, một móng bếp có thợ
 ##                xây đang khuân/gõ; chụp thêm buildings.png, levels.png, forge.png, construction.png
-##   --ui         (cùng --buildings) chụp bảng công trình (lò rèn, móng), menu xây, bóng mờ khi
-##                đặt nhà: panel_forge.png, panel_site.png, build_menu.png, placing.png
+##   --ui         (cùng --buildings) chụp bảng công trình (lò rèn, móng), bảng thông tin vật thể
+##                (bụi, cây, đá), menu xây, bóng mờ khi đặt nhà: panel_forge.png, panel_site.png,
+##                panel_bush.png, panel_tree.png, panel_rock.png, build_menu.png, placing.png
 ##   --times      chụp làng lúc sáng / trưa / hoàng hôn / đêm: morning.png, day.png, sunset.png, night.png
 
 const MAIN_SCENE: PackedScene = preload("res://main.tscn")
@@ -107,6 +108,12 @@ func _ready() -> void:
 		if site != null:
 			controller.select_building(site)
 			await _shot(camera, site.position + Vector2(-220, -60), 1.2, out_dir.path_join("panel_site.png"))
+		controller.deselect()
+		for entry: Array in [[MapData.KIND_BUSH, "panel_bush.png"], [MapData.KIND_TREE, "panel_tree.png"], [MapData.KIND_ROCK, "panel_rock.png"]]:
+			var node: ResourceNode = _nearest_node(world, entry[0])
+			if node != null:
+				controller.select_object(node)
+				await _shot(camera, node.position + Vector2(-220, -60), 1.2, out_dir.path_join(entry[1]))
 		controller.deselect()
 		(main.get_hud().call("get_build_menu") as BuildMenu).visible = true
 		await _shot(camera, village, 1.0, out_dir.path_join("build_menu.png"))
@@ -210,7 +217,7 @@ func _make_hungry(world: World) -> void:
 		villager.status.hunger = [0.0, 30.0, 100.0, 100.0][mini(i, 3)]
 		if i == 2:
 			villager.start_task(TaskWait.new(Balance.DAY_LENGTH_SECONDS))
-			villager.hold_sign(ToolDefs.icon(ToolDefs.AXE), true, Villager.UNTIL_CLEARED)
+			villager.hold_sign(ToolDefs.icon(ToolDefs.AXE), false, Villager.UNTIL_CLEARED)
 		elif i == 3:
 			villager.rig.set_carry_item("animals/boar", true)
 
@@ -224,3 +231,13 @@ func _lake_center(data: MapData) -> Vector2:
 				total += WorldGrid.cell_to_world(Vector2i(x, y))
 				count += 1
 	return total / maxi(count, 1)
+
+
+func _nearest_node(world: World, kind: StringName) -> ResourceNode:
+	var campfire: Vector2 = WorldGrid.cell_to_world(world.map_data.campfire_cell)
+	var best: ResourceNode = null
+	for node: ResourceNode in world.resource_nodes:
+		if node.kind == kind and node.visible and node.can_harvest():
+			if best == null or node.position.distance_to(campfire) < best.position.distance_to(campfire):
+				best = node
+	return best

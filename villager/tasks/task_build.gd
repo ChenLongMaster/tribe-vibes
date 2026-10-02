@@ -3,7 +3,7 @@ extends TaskWork
 ## Một lượt của thợ xây (đội mũ công trường — xem Villager._refresh_gear):
 ## - Công trường còn thiếu vật liệu: ra kho gần nhất lấy một chuyến (gỗ hoặc đá), giơ trên đầu
 ##   khuân tới, đổ vào công trường. Kho không đủ thì đứng trước công trình, cắm biển vẽ gỗ/đá
-##   gạch chéo, chờ một lúc rồi thử lại (không bỏ việc — có người mang về là xây tiếp).
+##   (món đang cần), chờ một lúc rồi thử lại (không bỏ việc — có người mang về là xây tiếp).
 ## - Đủ vật liệu: đứng cạnh công trình gõ búa. Nhiều thợ cùng gõ thì nhanh hơn.
 ## Bị ngắt giữa đường thì vật liệu đang khuân được cất lại kho (không mất).
 
@@ -220,7 +220,7 @@ func _wait_at_site(missing: StringName) -> void:
 	# nốt thì chỉ đứng chờ.
 	if missing != &"" and GameState.get_amount(missing) <= 0 and job.nag_cooldown <= 0.0:
 		job.nag_cooldown = TaskCook.NAG_SECONDS
-		villager.hold_sign(ResourceDefs.icon(missing), true, Balance.BUILD_WAIT_SECONDS + SIGN_WALK_SECONDS)
+		villager.hold_sign(ResourceDefs.icon(missing), false, Balance.BUILD_WAIT_SECONDS + SIGN_WALK_SECONDS)
 	villager.notify_task_changed()
 
 

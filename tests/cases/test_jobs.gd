@@ -76,7 +76,7 @@ func test_three_choppers_two_miners() -> void:
 	check(_add_built(world, BuildingDefs.STORAGE, 3, 7) != null, "Có chỗ dựng Kho")
 	Commands.debug_give_tools(3)
 	var tree: ResourceNode = _nearest(world, MapData.KIND_TREE)
-	var rock: ResourceNode = _nearest(world, MapData.KIND_ROCK)
+	var rock: ResourceNode = _nearest_rock(world, false)
 	for i: int in 3:
 		check(Commands.assign_job(villagers[i].id, tree), "Giao chặt cây cho người %d" % i)
 	for i: int in range(3, 5):
@@ -184,7 +184,7 @@ func test_strike_and_resume() -> void:
 	var on_event: Callable = func(key: String, _args: Dictionary, _icon: String) -> void: toasts.append(key)
 	EventBus.village_event.connect(on_event)
 	Commands.debug_give_tools(1)
-	Commands.assign_job(worker.id, _nearest(world, MapData.KIND_ROCK))
+	Commands.assign_job(worker.id, _nearest_rock(world, false))
 	var job: Job = worker.job
 	# Đặt giải trí = 0 đúng lúc đang làm (đang đi thì giải trí còn hồi chút ít).
 	await _simulate(60.0, func(_elapsed: float) -> bool:
@@ -326,10 +326,41 @@ func test_tools_needed_and_kept() -> void:
 		check_eq(rack.stock_of(ToolDefs.AXE), 0, "Không cất rìu khi làm việc tay không")
 
 	# Sang việc cần món khác: về kho đổi rìu lấy cuốc.
-	check(Commands.assign_job(worker.id, _nearest(world, MapData.KIND_ROCK)), "Giao đập đá tảng")
+	check(Commands.assign_job(worker.id, _nearest_rock(world, false)), "Giao đập đá tảng")
 	await _simulate(60.0, func(_elapsed: float) -> bool: return worker.tool == ToolDefs.PICKAXE)
 	check_eq(worker.tool, ToolDefs.PICKAXE, "Đổi lấy cuốc")
 	check_eq(rack.stock_of(ToolDefs.AXE), 1, "Rìu được cất lại")
+	await _free_world(world)
+
+
+## Đá nhỏ nhặt bằng tay (không cần cuốc), đá tảng to thì vẫn cần cuốc. Biển "thiếu đồ nghề"
+## chỉ vẽ món cần, không gạch chéo; biển "hết rồi" thì gạch chéo.
+func test_small_rock_by_hand_and_sign_cross() -> void:
+	var world: World = await _make_world(42)
+	var worker: Villager = _spawn(world, 1)[0]
+	_fill_needs(worker)
+	var big: ResourceNode = _nearest_rock(world, false)
+	var small: ResourceNode = _nearest_rock(world, true)
+	check(big != null and small != null, "Map có cả đá to lẫn đá nhỏ")
+	check_eq(JobDefs.job_for_target(big), JobDefs.MINE, "Đá to = đập đá (cần cuốc)")
+	check_eq(JobDefs.job_for_target(small), JobDefs.PICK_ROCK, "Đá nhỏ = nhặt tay")
+	check(not Commands.assign_job(worker.id, big), "Chưa có cuốc thì không đập được đá to")
+	await host.get_tree().process_frame
+	check(worker.rig.has_sign() and not worker.rig.is_sign_crossed(), "Thiếu cuốc: biển vẽ cuốc, không gạch chéo")
+	var stone_before: int = GameState.get_amount(ResourceDefs.STONE)
+	check(Commands.assign_job(worker.id, small), "Đá nhỏ giao được khi chưa có cuốc")
+	check_eq(worker.job.skill, SkillDefs.GATHER, "Nhặt đá nhỏ luyện Hái lượm")
+	await _simulate(60.0, func(_elapsed: float) -> bool: return GameState.get_amount(ResourceDefs.STONE) > stone_before)
+	check(GameState.get_amount(ResourceDefs.STONE) > stone_before, "Nhặt đá nhỏ về kho")
+	check_eq(worker.tool, &"", "Không cần cầm cuốc")
+	# Nhặt hết đá nhỏ quanh đó thì thôi việc, giơ biển gạch chéo ("hết rồi").
+	for node: ResourceNode in world.resource_nodes:
+		if node.is_small_rock() and node != small:
+			while node.can_harvest():
+				node.harvest(1)
+	await _simulate(90.0, func(_elapsed: float) -> bool: return worker.job == null)
+	await host.get_tree().process_frame
+	check(worker.job == null and worker.rig.has_sign() and worker.rig.is_sign_crossed(), "Hết đá nhỏ: biển gạch chéo")
 	await _free_world(world)
 
 
@@ -487,6 +518,17 @@ func _nearest(world: World, kind: StringName) -> ResourceNode:
 	var best: ResourceNode = null
 	for node: ResourceNode in world.resource_nodes:
 		if node.kind == kind and node.visible and node.can_harvest():
+			if best == null or node.position.distance_to(campfire) < best.position.distance_to(campfire):
+				best = node
+	return best
+
+
+## Đá gần lửa trại nhất: `small` = đá nhỏ (nhặt tay), không thì đá tảng to (cần cuốc).
+func _nearest_rock(world: World, small: bool) -> ResourceNode:
+	var campfire: Vector2 = WorldGrid.cell_to_world(world.map_data.campfire_cell)
+	var best: ResourceNode = null
+	for node: ResourceNode in world.resource_nodes:
+		if node.kind == MapData.KIND_ROCK and node.is_small_rock() == small and node.visible and node.can_harvest():
 			if best == null or node.position.distance_to(campfire) < best.position.distance_to(campfire):
 				best = node
 	return best

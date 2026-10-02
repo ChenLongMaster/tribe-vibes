@@ -3,7 +3,7 @@ extends TaskWork
 ## Một lượt của thợ rèn ở lò rèn: nhận món kế tiếp trong đơn người chơi đặt (rìu, cuốc,
 ## giáo — lần lượt từng loại), lấy gỗ + đá trong kho chung, gõ búa, xong thì món đó dựng
 ## cạnh lò (đồ RIÊNG của lò rèn). Không có đơn thì đứng chờ cạnh lò; thiếu vật liệu thì cắm
-## biển vẽ gỗ/đá gạch chéo; lò đầy chỗ cất thì chờ người lấy bớt. Mỗi lượt chờ ngắn để
+## biển vẽ gỗ/đá (món đang cần); lò đầy chỗ cất thì chờ người lấy bớt. Mỗi lượt chờ ngắn để
 ## watchdog không tưởng là bị kẹt.
 
 enum Step { GO, WAIT, FORGE }
@@ -100,7 +100,7 @@ func _try_start() -> bool:
 		if GameState.get_amount(resource_id) < int(cost[resource_id]):
 			if job.nag_cooldown <= 0.0:
 				job.nag_cooldown = TaskCook.NAG_SECONDS
-				villager.hold_sign(ResourceDefs.icon(resource_id), true)
+				villager.hold_sign(ResourceDefs.icon(resource_id))
 			return false
 	for resource_id: StringName in cost:
 		GameState.take_resource(resource_id, int(cost[resource_id]))

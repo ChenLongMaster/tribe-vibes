@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://ui/common/villager_panel.tscn" id="4_panel"]
 [ext_resource type="PackedScene" path="res://ui/common/toast.tscn" id="5_toast"]
 [ext_resource type="Script" path="res://ui/common/building_panel.gd" id="6_building_panel"]
+[ext_resource type="Script" path="res://ui/common/object_panel.gd" id="7_object_panel"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -23,5 +24,9 @@ layer = 10
 [node name="BuildingPanel" type="MarginContainer" parent="UI"]
 mouse_filter = 2
 script = ExtResource("6_building_panel")
+
+[node name="ObjectPanel" type="MarginContainer" parent="UI"]
+mouse_filter = 2
+script = ExtResource("7_object_panel")
 
 [node name="Toast" parent="UI" instance=ExtResource("5_toast")]

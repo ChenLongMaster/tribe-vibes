@@ -23,6 +23,9 @@ Mọi chữ người chơi nhìn thấy nằm trong `strings.csv`. Code chỉ d�
 | `TRAIT_` | Tính cách: `TRAIT_<ID>_NAME`, `TRAIT_<ID>_DESC` |
 | `JOB_` | Tên việc |
 | `BUILDING_` | Công trình: `BUILDING_<ID>_NAME` |
+| `OBJECT_` | Vật thể trên map (bảng thông tin): `OBJECT_<LOẠI>_NAME`, `OBJECT_<LOẠI>_DESC` (TREE, STUMP, ROCK, SMALL_ROCK, BUSH, FISH_SPOT, TWIGS, PEBBLES) |
+| `ANIMAL_` | Thú: `ANIMAL_<LOÀI>_NAME`, `ANIMAL_DESC` |
+| `TOOL_` | Đồ nghề rèn: `TOOL_<ID>_NAME` |
 | `RES_` | Tài nguyên: `RES_<ID>_NAME` (viết hoa, đứng một mình), `RES_<ID>_NOUN` (viết thường, ghép vào câu), `RES_<ID>_COUNT_ONE/_OTHER` |
 | `GOAL_` | Nhiệm vụ |
 

@@ -7,7 +7,8 @@ extends PlayerController
 ##   Chạm mặt đất trống → Commands.move_villager() (đi tới đó, đặt điểm neo mới).
 ##   Ra lệnh xong thì bỏ chọn — để lỡ chạm nhầm mặt đất không làm người đó bỏ việc.
 ## - Kéo từ một thổ dân rồi thả vào mục tiêu → như trên (kéo-thả giao việc).
-## - Không chọn ai mà chạm công trình → chọn công trình (mở bảng công trình).
+## - Không chọn ai mà chạm công trình → chọn công trình (mở bảng công trình); chạm cây, đá, bụi
+##   quả, củi, chỗ câu cá, con thú → mở bảng thông tin của vật đó. Chạm lại lần nữa thì đóng.
 ## - Chọn công trình trong menu xây → chế độ đặt: bóng mờ đúng diện tích đi theo con trỏ
 ##   (xanh/đỏ); chuột: click để đặt; cảm ứng: chạm để dời bóng, chạm lại đúng chỗ hoặc bấm ✓
 ##   để đặt. Esc / chuột phải / ✕ để thôi.
@@ -21,6 +22,8 @@ const SPEED_ACTIONS: Dictionary[StringName, int] = {&"speed_1": 1, &"speed_2": 2
 
 var selected: Villager
 var selected_building: Building
+## Vật thể đang xem thông tin (ResourceNode / Animal).
+var selected_object: Node2D
 ## Công trình đang chọn chỗ đặt (&"" = không đặt gì).
 var placing: StringName = &""
 var _hovered: Villager
@@ -67,6 +70,7 @@ func _exit_tree() -> void:
 func select(villager: Villager) -> void:
 	if villager != null:
 		select_building(null)
+		select_object(null)
 	if selected == villager:
 		return
 	if is_instance_valid(selected):
@@ -83,6 +87,7 @@ func select(villager: Villager) -> void:
 func deselect() -> void:
 	select(null)
 	select_building(null)
+	select_object(null)
 
 
 func select_building(building: Building) -> void:
@@ -90,10 +95,24 @@ func select_building(building: Building) -> void:
 		return
 	if building != null:
 		select(null)
+		select_object(null)
 	selected_building = building
 	if building != null:
 		building.wiggle()
 	EventBus.building_selected.emit(building)
+
+
+## Xem thông tin một vật thể (cây, đá, bụi, củi, chỗ câu cá, thú). null = đóng bảng.
+func select_object(target: Node2D) -> void:
+	if selected_object == target:
+		return
+	if target != null:
+		select(null)
+		select_building(null)
+	selected_object = target
+	if _feedback != null:
+		_feedback.set_selected_object(target)
+	EventBus.object_selected.emit(target)
 
 
 # --- Đặt công trình ---
@@ -189,9 +208,12 @@ func _on_tapped(screen_pos: Vector2) -> void:
 		_command(selected, point)
 		deselect()
 		return
-	var building: Building = world.pick_building(point)
-	if building != null and building != selected_building:
-		select_building(building)
+	var target: Node2D = world.pick_job_target(point)
+	if target is Building and target != selected_building:
+		select_building(target as Building)
+		return
+	if target != null and not (target is Building) and target != selected_object:
+		select_object(target)
 		return
 	deselect()
 

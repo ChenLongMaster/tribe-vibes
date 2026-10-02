@@ -7,6 +7,7 @@ const WORLD_SCENE: PackedScene = preload("res://world/world.tscn")
 const NORMAL_MODE: GameModeConfig = preload("res://modes/normal_mode.tres")
 const SIM_TIME_SCALE: float = 20.0
 const TEST_SAVE_PATH: String = "user://test_save.json"
+const OBJECT_PANEL: GDScript = preload("res://ui/common/object_panel.gd")
 
 
 func test_building_defs_complete() -> void:
@@ -335,6 +336,51 @@ func test_controller_places_and_selects_building() -> void:
 	EventBus.building_selected.disconnect(on_selected)
 	controller.queue_free()
 	await _free_world(world)
+
+
+## Không chọn ai mà chạm cây / bụi / đá / thú thì mở bảng thông tin vật đó; chạm lại thì đóng.
+func test_tap_object_shows_info() -> void:
+	var world: World = await _make_world(42)
+	var controller: NormalController = NormalController.new()
+	host.add_child(controller)
+	controller.setup(world, NORMAL_MODE)
+	var panel: Control = OBJECT_PANEL.new()
+	host.add_child(panel)
+	EventBus.world_ready.emit(world)
+	await host.get_tree().process_frame
+	var bush: ResourceNode = _nearest(world, MapData.KIND_BUSH)
+	controller._on_tapped(_to_screen(bush.position + Vector2(0, -20)))
+	check(controller.selected_object == bush, "Chạm bụi quả thì chọn bụi")
+	await host.get_tree().process_frame
+	check(panel.visible, "Bảng thông tin vật thể hiện ra")
+	var texts: String = _all_text(panel)
+	check(texts.contains(Loc.t("OBJECT_BUSH_NAME")), "Bảng có tên bụi quả: %s" % texts)
+	check(texts.contains(Loc.t("UI_OBJECT_BY_HAND")), "Bảng nói hái bằng tay")
+	var tree: ResourceNode = _nearest(world, MapData.KIND_TREE)
+	controller._on_tapped(_to_screen(tree.position + Vector2(0, -90)))
+	check(controller.selected_object == tree, "Chạm cây thì chuyển sang cây")
+	await host.get_tree().process_frame
+	texts = _all_text(panel)
+	check(texts.contains(Loc.t("UI_OBJECT_TOOL_NONE")), "Cây: báo cần rìu mà làng chưa có")
+	var animal: Animal = world.animals[0]
+	controller.select_object(animal)
+	await host.get_tree().process_frame
+	check(_all_text(panel).contains(Loc.t("ANIMAL_DESC")), "Bảng thông tin thú")
+	controller._on_tapped(_to_screen(animal.position + Vector2(0, -20)))
+	await host.get_tree().process_frame
+	check(controller.selected_object == null and not panel.visible, "Chạm lại thì đóng bảng")
+	panel.queue_free()
+	controller.queue_free()
+	await _free_world(world)
+
+
+func _all_text(node: Node) -> String:
+	var out: String = ""
+	if node is Label:
+		out += (node as Label).text + " | "
+	for child: Node in node.get_children():
+		out += _all_text(child)
+	return out
 
 
 # --- Hỗ trợ ---

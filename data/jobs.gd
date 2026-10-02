@@ -16,12 +16,16 @@ class_name JobDefs
 ## - anim: hoạt họa lúc làm. impact: hiệu ứng mỗi nhát, "" = không có. swing: giây giữa hai nhát.
 ## - activity_key: chữ "đang làm gì" trong bảng thông tin.
 ## - search_radius: hết mục tiêu thì tìm cái tương tự trong bán kính này (ô).
+## - small_rock: chỉ cho việc nhắm vào đá — true = đá nhỏ (nhặt tay), false = đá tảng to (cuốc).
+## - any_rock: đang làm việc này mà hết đá to quanh đó thì đập luôn đá nhỏ (có cuốc thì đá nào
+##   cũng đập được).
 
 const CHOP: StringName = &"chop"
 const MINE: StringName = &"mine"
 const GATHER: StringName = &"gather"
 const TWIGS: StringName = &"twigs"
 const PEBBLES: StringName = &"pebbles"
+const PICK_ROCK: StringName = &"pick_rock"
 const FISH: StringName = &"fish"
 const HUNT: StringName = &"hunt"
 const COOK: StringName = &"cook"
@@ -59,10 +63,27 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 		"item": ResourceDefs.ITEM_STONE,
 		"amount": Balance.STONE_PER_MINE,
 		"tool_item": ToolDefs.PICKAXE,
+		"small_rock": false,
+		"any_rock": true,
 		"anim": VillagerRig.ANIM_MINE,
 		"impact": IMPACT_STONE,
 		"swing": 0.8,
 		"activity_key": "UI_ACTIVITY_MINE",
+		"search_radius": Balance.JOB_SEARCH_RADIUS_CELLS,
+	},
+	# Đá nhỏ nhặt bằng tay (không cần cuốc), giơ đá trên đầu khuân về.
+	PICK_ROCK: {
+		"skill": SkillDefs.GATHER,
+		"target": MapData.KIND_ROCK,
+		"small_rock": true,
+		"seconds": Balance.SMALL_ROCK_PICK_SECONDS,
+		"item": ResourceDefs.ITEM_STONE,
+		"amount": Balance.STONE_PER_SMALL_ROCK,
+		"icon": "icons/res_stone",
+		"anim": VillagerRig.ANIM_GATHER,
+		"impact": IMPACT_STONE,
+		"swing": 1.0,
+		"activity_key": "UI_ACTIVITY_PICK_ROCK",
 		"search_radius": Balance.JOB_SEARCH_RADIUS_CELLS,
 	},
 	GATHER: {
@@ -234,6 +255,10 @@ static func job_for_target(target: Node) -> StringName:
 	if target_kind == &"":
 		return &""
 	for job_id: StringName in DEFS:
-		if DEFS[job_id]["target"] == target_kind:
-			return job_id
+		if DEFS[job_id]["target"] != target_kind:
+			continue
+		# Đá nhỏ nhặt tay, đá tảng to đập bằng cuốc — cùng loại vật, khác việc.
+		if DEFS[job_id].has("small_rock") and bool(DEFS[job_id]["small_rock"]) != (target as ResourceNode).is_small_rock():
+			continue
+		return job_id
 	return &""

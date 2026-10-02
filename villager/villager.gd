@@ -123,7 +123,10 @@ func _process(delta: float) -> void:
 		_think_timer = randf_range(Balance.THINK_INTERVAL_MIN, Balance.THINK_INTERVAL_MAX)
 		_brain.think(self, elapsed)
 	if task != null:
-		_task_time += delta
+		# Watchdog chỉ đếm lúc đứng một chỗ: đi đường xa (rừng ↔ kho) không phải là kẹt —
+		# đi mà không nhúc nhích thì đã có _stuck_time lo.
+		if not _moving:
+			_task_time += delta
 		var task_status: Task.Status = task.tick(delta)
 		if task_status != Task.Status.RUNNING:
 			_finish_task(task_status)
@@ -268,12 +271,13 @@ func _acknowledge() -> void:
 
 
 ## Thôi việc đang giao: đứng chờ lệnh ngay tại chỗ. Hết thứ để làm thì giơ biển vẽ việc đó
-## gạch chéo ("Hết cây rồi!"), thiếu đồ nghề thì vẽ món đó gạch chéo, kho đầy thì vẽ cái kho
-## gạch chéo; không tới được thì nghĩ dấu "?". Xây xong công trình thì ăn mừng.
+## gạch chéo ("Hết cây rồi!"), thiếu đồ nghề thì vẽ món đó (không gạch chéo — "cần cái này"),
+## kho đầy thì vẽ cái kho gạch chéo; không tới được thì nghĩ dấu "?". Xây xong công trình thì ăn mừng.
 func stop_job() -> void:
 	if job == null:
 		return
 	var icon_key: String = job.stop_sign_icon()
+	var crossed: bool = job.stop_sign_crossed()
 	var gave_up: bool = job.gave_up()
 	var celebrate: bool = job.finished_building
 	job = null
@@ -284,7 +288,7 @@ func stop_job() -> void:
 	elif gave_up:
 		think("icons/question")
 	else:
-		hold_sign(icon_key, true)
+		hold_sign(icon_key, crossed)
 	notify_task_changed()
 
 
@@ -458,7 +462,8 @@ func _finish_task(result: Task.Status) -> void:
 	_think_timer = 0.0 if result == Task.Status.DONE else Balance.THINK_INTERVAL_MIN
 
 
-# Cảnh báo khi có gì đó kẹt: một việc kéo quá lâu, hoặc đang đi mà không nhúc nhích.
+# Cảnh báo khi có gì đó kẹt: một việc kéo quá lâu (không tính lúc đang đi), hoặc đang đi mà
+# không nhúc nhích.
 func _update_watchdog(delta: float) -> void:
 	if _moving and position.distance_to(_last_position) < 0.01:
 		_stuck_time += delta

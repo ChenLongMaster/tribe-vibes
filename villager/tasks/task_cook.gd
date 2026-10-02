@@ -2,8 +2,8 @@ class_name TaskCook
 extends TaskWork
 ## Một lượt nấu ăn ở lửa trại hoặc Bếp: lấy một phần thức ăn thô trong kho chung, nấu,
 ## ra một món chín cất ngay ở bếp (đồ RIÊNG của bếp, tối đa theo sức chứa — bày quanh bếp
-## cho thấy). Chưa có gì để nấu thì đứng chờ cạnh bếp, thỉnh thoảng giơ biển đùi thịt gạch
-## chéo; bếp đầy món chín thì đứng chờ người ăn bớt. Mỗi lượt chờ ngắn để watchdog không
+## cho thấy). Chưa có gì để nấu thì đứng chờ cạnh bếp, thỉnh thoảng giơ biển đùi thịt (cần
+## thức ăn thô); bếp đầy món chín thì đứng chờ người ăn bớt. Mỗi lượt chờ ngắn để watchdog không
 ## tưởng là bị kẹt.
 
 enum Step { GO, WAIT, COOK }
@@ -54,7 +54,7 @@ func tick(delta: float) -> Status:
 			villager.rig.play(VillagerRig.ANIM_IDLE)
 			if job.nag_cooldown <= 0.0 and _station.has_room_for(ResourceDefs.MEAL):
 				job.nag_cooldown = NAG_SECONDS
-				villager.hold_sign(NO_FOOD_SIGN, true)
+				villager.hold_sign(NO_FOOD_SIGN)
 			timer -= delta
 			if timer <= 0.0:
 				return Status.DONE

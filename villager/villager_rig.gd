@@ -287,6 +287,11 @@ func has_sign() -> bool:
 	return _sign.visible
 
 
+## Biển đang vẽ dấu ✕ ("hết rồi / không làm") hay chỉ vẽ món cần.
+func is_sign_crossed() -> bool:
+	return _sign_cross.visible
+
+
 ## Biển đang giơ cao trên đầu (lúc ngồi) — bong bóng trên đầu phải nhích lên cho khỏi đè.
 func is_sign_raised() -> bool:
 	return _sign.visible and _sign_pose == SignPose.RAISED

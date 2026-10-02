@@ -62,7 +62,7 @@ Ví dụ `water_03` = hai ô trên là nước (bờ nằm ngang ở giữa hìn
 | `env/tree_02` | 176×272 | 88×136 | (0.5, 0.93) | Cây lá kim (nhiều hơn ở sâu trong rừng). |
 | `env/tree_stump` | 96×72 | 48×36 | (0.5, 0.8) | Gốc cây sau khi chặt hết (Đợt 2). |
 | `env/rock_big` | 160×128 | 80×64 | (0.5, 0.88) | Tảng đá lớn. |
-| `env/rock_small` | 112×88 | 56×44 | (0.5, 0.86) | Tảng đá nhỏ. |
+| `env/rock_small` | 112×88 | 56×44 | (0.5, 0.86) | Đá nhỏ — **nhặt bằng tay**, không cần cuốc (nên trông nhỏ, nhẹ hơn hẳn đá tảng to). Cũng là hình trong bảng thông tin. |
 | `env/bush_berries` | 128×112 | 64×56 | (0.5, 0.9) | Bụi có quả mọng. |
 | `env/bush_empty` | 128×112 | 64×56 | (0.5, 0.9) | Cùng bụi, đã hái hết quả — **giữ nguyên dáng** với bản có quả. |
 | `env/flower_01` … `03` | 48×56 | 24×28 | (0.5, 0.95) | Hoa trang trí (hồng, vàng, tím). Không chặn đường. |
@@ -178,7 +178,7 @@ Bong bóng nói là khung vẽ bằng code (không phải hình) chứa 1–2 ic
 |---|---|---|---|---|
 | `ui/thought_bubble` | 96×88 | 48×44 | (0.5, 1.0) giữa mép dưới | Mây suy nghĩ (đang muốn gì đó): đám mây trắng + 2 chấm tròn nhỏ dẫn xuống đầu. Phần mây ở nửa trên; code đặt icon vào tâm mây (`THOUGHT_ICON_POS` trong `villager/overhead.gd`). Để trống ruột mây, **không vẽ gì bên trong**. |
 | `props/sign` | 84×96 | 42×48 | (0.5, 1.0) đáy cán | Tấm biển gỗ khi cần người chơi ra tay (đói lả, đình công, hết cây, thiếu đồ nghề…). **Đứng thì cắm xuống đất** trước mặt (đáy cán chạm đất, một tay vịn), **ngồi thì hai tay giơ lên** trên đầu. Mặt biển **để trống** — code đặt icon vào giữa (`SIGN_ICON_POS` trong `villager/villager_rig.gd`). Không vẽ chữ. |
-| `icons/cross` | 48×48 | ~26×26 | tâm | Dấu ✕ đỏ, đè lên icon trên tấm biển: "hết rồi / không làm". Nét dày, có viền để nổi trên mọi icon. |
+| `icons/cross` | 48×48 | ~26×26 | tâm | Dấu ✕ đỏ, đè lên icon trên tấm biển: "hết rồi / không làm" (hết cây, kho đầy, đủ người, đình công). Biển "thiếu đồ nghề / nguyên liệu" **không** có dấu này. Nét dày, có viền để nổi trên mọi icon. |
 | `icons/question` | 48×48 | ~26×26 | tâm | Dấu "?" — mây nghĩ khi không tới được chỗ làm; cũng là một "từ" khi tán gẫu. |
 | `icons/dots` | 48×48 | ~26×26 | tâm | Ba chấm "…" — mây nghĩ "lát nữa nhé" (bảo đi đâu khi đang ăn/ngủ). |
 

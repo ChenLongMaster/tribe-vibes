@@ -55,7 +55,12 @@ func icon_key() -> String:
 
 
 ## Hình vẽ trên tấm biển khi phải dừng việc: thiếu đồ nghề thì vẽ món đó, kho đầy thì vẽ cái
-## kho, không thì vẽ việc.
+## kho, không thì vẽ việc (hết cây, hết đá…).
+## Biển "thiếu đồ nghề" chỉ vẽ món cần (không gạch chéo); "hết rồi" / "kho đầy" thì gạch chéo.
+func stop_sign_crossed() -> bool:
+	return not _missing_tool
+
+
 func stop_sign_icon() -> String:
 	if _missing_tool:
 		return ToolDefs.icon(JobDefs.required_tool(job_id))

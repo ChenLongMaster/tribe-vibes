@@ -105,7 +105,7 @@ func find_job_target(job_id: StringName, around: Vector2i, villager: Villager, s
 				candidates.append(building)
 		_:
 			for node: ResourceNode in _world.resource_nodes:
-				if node.kind == def["target"]:
+				if node.kind == def["target"] and (bool(def.get("any_rock", false)) or JobDefs.job_for_target(node) == job_id):
 					candidates.append(node)
 	var nearby: Array[Node2D] = []
 	for node: Node2D in candidates:

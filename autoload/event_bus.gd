@@ -46,6 +46,8 @@ signal building_completed(building: Node, level: int)
 signal building_removed(building: Node)
 ## Công trình được chọn (null = bỏ chọn) — bảng công trình nghe signal này.
 signal building_selected(building: Node)
+## Vật thể được chọn để xem thông tin: cây, đá, bụi quả, củi, chỗ câu cá, con thú (null = bỏ chọn).
+signal object_selected(target: Node)
 
 # --- Chế độ đặt công trình (UI ↔ controller) ---
 ## Người chơi chọn một công trình trong menu xây.

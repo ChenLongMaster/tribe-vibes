@@ -59,7 +59,8 @@ func assign_job(villager_id: int, target: Node) -> bool:
 		return false
 	var tool: StringName = JobDefs.required_tool(job_id)
 	if tool != &"" and villager.tool != tool and not _world.finder.has_tool_in_stock(tool):
-		villager.hold_sign(ToolDefs.icon(tool), true)
+		# Biển "cần món này" — chỉ vẽ món đó, không gạch chéo.
+		villager.hold_sign(ToolDefs.icon(tool))
 		return false
 	villager.assign_job(Job.new(job_id, node))
 	EventBus.job_assigned.emit(villager, node)

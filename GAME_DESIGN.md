@@ -13,6 +13,8 @@
 
 > **Cập nhật thiết kế 2026-10-02 (lần 4) — Đợt 3:** **hang đá là kho tạm** lúc đầu (cất gỗ, đá, thức ăn thô nhưng ít); **lửa trại chỉ cất món chín** (ít). Muốn phát triển thì xây **Kho** (gỗ, đá) và **Bếp** (thức ăn) — kho đầy thì thổ dân cắm biển vẽ cái kho gạch chéo. Chỉ **huỷ được móng / lượt nâng cấp đang dở** (trả lại vật liệu), không phá hay dời công trình đã xong. Ngủ trong lều = **chui vào lều** (lều bay Zzz). Ván mới **tay trắng**, Lò rèn cấp 1 rẻ để nhặt tay vài phút là xây được (mục 9.2–9.4).
 
+> **Cập nhật 2026-10-03:** **đá nhỏ nhặt bằng tay**, không cần cuốc (chỉ đá tảng to mới cần cuốc). Tấm biển **"thiếu đồ nghề / thiếu nguyên liệu" không có dấu ✕** — chỉ vẽ món đang cần; ✕ chỉ dùng cho "hết rồi / không làm được" (hết cây, kho đầy, đủ người, lều hết chỗ, đình công). **Chạm vào vật thể** (cây, gốc cây, đá, bụi quả, củi, đá cuội, chỗ câu cá, con thú) khi không chọn thổ dân thì hiện **bảng thông tin** của vật đó (mục 8).
+
 ---
 
 ## 0. Cách làm việc (đọc trước)
@@ -340,7 +342,9 @@ Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ng�
 - **Thổ dân không nói chữ.** Mọi "lời nói" đều là hình (icon SVG, không dùng emoji font), theo 3 kiểu:
   - **Bong bóng nói** (khung tròn, 1–2 icon): cảm xúc tức thời — vui ♪, giận 💢, yêu ❤, sợ ❗, lên cấp (icon kỹ năng), tán gẫu.
   - **Bong bóng nghĩ** (đám mây có chấm tròn dẫn xuống đầu): đang **muốn** gì đó — đùi thịt (đói, đang đi ăn / ngồi dỗi), Zzz (buồn ngủ, nghỉ tay), icon việc (được giao việc lúc đang bận: "lát nữa"), "…" (bảo đi đâu lúc đang bận), "?" (không tới được).
-  - **Tấm biển** (vẽ hình, có thể gạch chéo ✕): **cần người chơi ra tay** — đói lả (đùi thịt), bếp chưa có gì để nấu (đùi thịt ✕), hết cây/đá/quả/thú (icon việc ✕), thiếu đồ nghề (rìu/cuốc/giáo ✕), đình công (icon việc ✕, giữ suốt lúc đình công), thiếu vật liệu xây / rèn (đứng trước công trình, gỗ/đá ✕), kho đầy (cái kho ✕), lều hết chỗ (Zzz ✕), đủ người rồi (icon việc ✕).
+  - **Tấm biển** (vẽ hình): **cần người chơi ra tay**. Hai loại:
+    - **"Cần cái này"** — chỉ vẽ món đang cần, **không gạch chéo**: đói lả (đùi thịt), bếp chưa có gì để nấu (đùi thịt), thiếu đồ nghề (rìu / cuốc / giáo), thiếu vật liệu xây / rèn (đứng trước công trình, gỗ / đá).
+    - **"Hết rồi / không làm được"** — vẽ thêm dấu ✕: hết cây/đá/quả/thú (icon việc ✕), kho đầy (cái kho ✕), lều hết chỗ (Zzz ✕), đủ người rồi (icon việc ✕), đình công (icon việc ✕, giữ suốt lúc đình công).
     - **Đứng thì cắm biển xuống đất** ngay trước mặt, một tay vịn; **ngồi thì hai tay giơ biển lên**; đang đi thì cất biển. **Không bao giờ để biển lơ lửng trên đầu.**
     - Đang rảnh mà vừa cắm biển thì đứng yên cạnh biển một lúc cho người chơi kịp thấy, không đi dạo mất.
   - Nhận lệnh thì nhún một cái, mặt tươi lên (không bong bóng). Chữ chỉ còn ở bảng thông tin, tooltip và toast.
@@ -405,6 +409,7 @@ Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ng�
 | Tạm dừng / tốc độ | Space, phím 1–3 | Nút trên HUD |
 
 - Giao thổ dân cho một công trình: chạm/kéo vào **móng** → đi xây; vào **công trình sản xuất** đã xong → làm người phụ trách (đầu bếp, thợ rèn…); vào **sân nhảy** → đi chơi; vào **lều** → đi ngủ. Chạm vào **mặt đất trống** → đi tới đó và đặt điểm neo dạo chơi ở đó.
+- Chạm vào một **vật thể** (khi không chọn thổ dân): cây, gốc cây, đá tảng, đá nhỏ, bụi quả, củi, đá cuội, chỗ câu cá, con thú → **bảng thông tin**: hình, tên, mô tả ngắn, mỗi lượt làm ra gì (bao nhiêu, mấy giây), còn mấy lượt (chỗ câu cá: không cạn), cần đồ nghề gì (làng đang có mấy cái / chưa có thì xây Lò rèn) hay làm bằng tay, đang mọc lại (bụi hết quả: còn bao lâu; gốc cây), ai đang làm ở đó, và gợi ý "chọn thổ dân rồi chạm vào đây để giao việc …". Vật đang xem có vòng vàng dưới chân. Chạm lại lần nữa / ✕ / chạm chỗ trống thì đóng.
 - Chạm vào một công trình (khi không chọn thổ dân) → bảng công trình: tên, cấp (sao), tiến độ xây (vật liệu đã khuân / cần, thanh gõ búa, số thợ), người phụ trách hoặc cảnh báo thiếu người, chỗ ngủ / ai đang ngủ, chỗ cất góp cho làng, đồ đang cất, nút nâng cấp (kèm giá), nút huỷ móng / huỷ nâng cấp (lò rèn: thêm nút −/+ đặt số rìu/cuốc/giáo muốn rèn).
 - Nút **Xây** (cái búa) góc dưới-phải mở menu xây. Chọn công trình → **bóng mờ** đúng diện tích: chuột thì bóng đi theo con trỏ, click là đặt; cảm ứng thì chạm để dời bóng, chạm lại đúng chỗ hoặc bấm ✓ để đặt. Thanh dưới màn hình có gợi ý + nút ✕ (Esc / chuột phải cũng huỷ). Đặt xong thì mở luôn bảng của móng.
 - **Tự nhận biết** kiểu điều khiển từ sự kiện gần nhất và phát signal `input_mode_changed`. UI dùng signal đó để hiện hoặc ẩn nút ✕, chỉnh cỡ tooltip.
@@ -439,7 +444,8 @@ Chỉ diễn ra **trong vùng dạo chơi nhỏ** quanh điểm neo. Chọn ng�
 | **Gỗ** | Bó củi = 1 gỗ | Củi rơi dần dưới tán cây (ngẫu nhiên, có giới hạn), nhặt tay, đủ một bó mới khuân về | Không |
 | | Khúc gỗ = 10 gỗ | Chặt cây. Cây hết khúc thì thành gốc; gốc chỉ mọc lại khi số cây ít hơn lúc đầu (không mọc tràn map) | **Rìu** |
 | **Đá** | Xô đá cuội = 1 đá mỗi viên | Đá cuội lăn ra dần quanh đá tảng (ngẫu nhiên, có giới hạn), nhặt tay bỏ vào xô | Không |
-| | Đá | Đập đá tảng. Đá tảng lăn ra dần từ **vách đá lớn** (phần của map, không khai thác được), chỉ khi số đá tảng ít hơn lúc đầu | **Cuốc** |
+| | Đá (giơ trên đầu) | **Nhặt đá nhỏ** bằng tay: 2 lượt × 2 đá (kỹ năng Hái lượm). Người đang đập đá bằng cuốc mà hết đá to quanh đó thì đập luôn đá nhỏ | Không |
+| | Đá | Đập **đá tảng to**. Đá tảng lăn ra dần từ **vách đá lớn** (phần của map, không khai thác được), chỉ khi số đá tảng ít hơn lúc đầu | **Cuốc** |
 
 - Thức ăn thô **ăn được luôn** (no căng) — không ai chết đói cạnh kho đầy chỉ vì chưa có đầu bếp. Kho nhớ có bao nhiêu phần là quả/cá/thịt; lấy ra ăn thì cầm đúng món trên tay.
 - **Đồ riêng của công trình** (không nằm trên thanh tài nguyên chung):
@@ -649,7 +655,8 @@ Mỗi đợt kết thúc bằng một bản **chơi được**, và có tiêu ch
 | Cấp kỹ năng | 1–5; mỗi cấp nhanh hơn ~10%; kinh nghiệm cần tăng dần; việc thích nhận kinh nghiệm ×2 (việc khác ×1) |
 | Chặt cây (cần rìu) | 10 giây → 1 khúc gỗ = 10 gỗ; mỗi cây 3 khúc |
 | Nhặt củi (tay) | 1.5 giây mỗi bó (1 gỗ), đủ 3 bó mới khuân về; củi dưới tán cây tối đa 20 bó, rơi thêm ~10 giây một bó |
-| Đập đá tảng (cần cuốc) | 8 giây → 4 đá; mỗi tảng 4 lượt |
+| Đập đá tảng to (cần cuốc) | 8 giây → 4 đá; mỗi tảng 4 lượt |
+| Nhặt đá nhỏ (tay) | 4 giây → 2 đá; mỗi viên 2 lượt (`SMALL_ROCK_*`) |
 | Nhặt đá cuội (tay) | 1.5 giây mỗi viên (1 đá), đủ 3 viên mới khuân về; tối đa 14 viên, lăn thêm ~14 giây một viên |
 | Đá tảng mới / cây mọc lại | Đá tảng lăn ra từ vách ~90 giây một lần, cây mọc lại từ gốc ~45 giây một lần — chỉ khi ít hơn số lúc đầu |
 | Săn (cần giáo) | Vác nguyên con về = 4 thức ăn |
