@@ -19,5 +19,20 @@ signal villager_selected(villager: Node)
 signal deselect_requested
 ## Tốc độ game đổi (0 = tạm dừng).
 signal game_speed_changed(speed: int)
+## Sang ngày mới.
+signal day_changed(day: int)
+
+## Người chơi vừa giao việc (target = cây, đá, thú, lửa trại…) hoặc bảo đi tới một ô.
+signal job_assigned(villager: Node, target: Node)
+signal move_ordered(villager: Node, cell: Vector2i)
+## Một chuyến hàng vừa vào kho tại vị trí `pos` (để hiện số bay "+3 gỗ").
+signal resource_delivered(resource_id: StringName, amount: int, pos: Vector2)
+## Một nhát chặt/đập trúng vật (để tung bụi). kind = JobDefs.IMPACT_*.
+signal work_impact(pos: Vector2, kind: StringName)
+## Thổ dân lên cấp một kỹ năng.
+signal skill_leveled_up(villager: Node, skill: StringName, level: int)
+## Chuyện đáng kể trong làng — thông báo nổi (và sau này nhật ký làng) hiển thị.
+## Chỉ mang key dịch + tham số; tham số tên `*_key` là key dịch (xem Loc.t).
+signal village_event(key: String, args: Dictionary, icon_key: String)
 
 @warning_ignore_restore("unused_signal")

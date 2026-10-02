@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="GameModeConfig" format=3 uid="uid://bgsse7fnd77v6"]
+
+[ext_resource type="Script" uid="uid://bq5pm5keypduq" path="res://modes/game_mode_config.gd" id="1_config"]
+[ext_resource type="PackedScene" path="res://modes/controllers/normal_controller.tscn" id="2_controller"]
+[ext_resource type="PackedScene" path="res://ui/normal/hud.tscn" id="3_hud"]
+
+[resource]
+script = ExtResource("1_config")
+controller_scene = ExtResource("2_controller")
+hud_scene = ExtResource("3_hud")

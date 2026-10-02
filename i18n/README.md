@@ -10,6 +10,7 @@ Mọi chữ người chơi nhìn thấy nằm trong `strings.csv`. Code chỉ d�
 - Ô để trống → game tự dùng chữ tiếng Việt thay thế (không bao giờ hiện chữ rỗng).
 - Chỗ giữ chỗ có tên: `{name} chào đời!` → trong code `Loc.t("TOAST_BABY_BORN", {"name": baby.display_name})`. **Không** ghép chuỗi.
 - Câu có số đếm: hai key `..._ONE` (n = 1) và `..._OTHER`, gọi `Loc.plural("RES_WOOD_COUNT", n)`. `{n}` được tự định dạng theo ngôn ngữ (vi `1.250`, en `1,250`).
+- Tham số là một **key khác**: đặt tên tham số có đuôi `_key`, `Loc` dịch key đó rồi thay vào chỗ giữ chỗ không đuôi: `Loc.t("TOAST_LEVEL_UP", {"name": "Bạp", "job_key": "JOB_CHOP", "level": 2})` → `{job}` = "Chặt cây". Nhờ vậy thông báo/nhật ký chỉ lưu key, đổi ngôn ngữ là đổi theo.
 
 ## Nhóm key (tiền tố)
 
@@ -23,7 +24,7 @@ Mọi chữ người chơi nhìn thấy nằm trong `strings.csv`. Code chỉ d�
 | `TRAIT_` | Tính cách: `TRAIT_<ID>_NAME`, `TRAIT_<ID>_DESC` |
 | `JOB_` | Tên việc |
 | `BUILDING_` | Công trình: `BUILDING_<ID>_NAME` |
-| `RES_` | Tài nguyên |
+| `RES_` | Tài nguyên: `RES_<ID>_NAME` (viết hoa, đứng một mình), `RES_<ID>_NOUN` (viết thường, ghép vào câu), `RES_<ID>_COUNT_ONE/_OTHER` |
 | `GOAL_` | Nhiệm vụ |
 
 Key đặc biệt `UI_LANGUAGE_NAME`: tên ngôn ngữ viết bằng chính ngôn ngữ đó ("Tiếng Việt", "English"), dùng cho menu chọn ngôn ngữ — mỗi cột phải điền.

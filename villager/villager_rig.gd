@@ -20,6 +20,16 @@ const ANIM_STRETCH: StringName = &"stretch"
 const ANIM_RUB_EYES: StringName = &"rub_eyes"
 const ANIM_CELEBRATE: StringName = &"celebrate"
 const ANIM_HOLD: StringName = &"hold"
+const ANIM_KNOCKED_OUT: StringName = &"knocked_out"
+const ANIM_CHOP: StringName = &"chop"
+const ANIM_MINE: StringName = &"mine"
+const ANIM_FISH: StringName = &"fish"
+const ANIM_COOK: StringName = &"cook"
+const ANIM_ATTACK: StringName = &"attack"
+const ANIM_STRIKE: StringName = &"strike"
+
+## Thư mục mảnh trong ArtLibrary — ID mảnh ghép sau thành key hình, vd "villager/hair_03".
+const PIECE_DIR: String = "villager/"
 
 const FACE_HAPPY: String = "happy"
 const FACE_SAD: String = "sad"
@@ -37,6 +47,16 @@ const NECK: Vector2 = Vector2(0, -31)
 const HAND_DISTANCE: float = 13.0
 const BACK_LIMB_SHADE: float = 0.85 # tay chân phía sau tối hơn chút cho có chiều sâu
 const HELD_ITEM_SCALE: float = 0.7
+## Đồ khuân giơ trên đầu (vị trí so với chân, theo nhịp nảy của thân).
+const CARRY_ITEM_POS: Vector2 = Vector2(0, -78)
+const CARRY_ITEM_SCALE: float = 1.1
+## Đồ nghề nghiêng theo tay (rad) — hình rìu, cuốc vẽ chéo nên xoay thêm cho thẳng tay.
+const TOOL_TILT: float = 0.6
+## Nhịp vung (giây) của chặt, đập, vung giáo — khớp "swing" trong data/jobs.gd.
+const CHOP_PERIOD: float = 0.9
+const MINE_PERIOD: float = 0.8
+const ATTACK_PERIOD: float = 0.55
+const THROW_SECONDS: float = 0.7
 
 const BLINK_MIN: float = 2.0 # giây
 const BLINK_MAX: float = 5.0
@@ -74,32 +94,34 @@ var _face: Sprite2D
 var _hair: Sprite2D
 var _accessory: Sprite2D
 var _held_item: Sprite2D
+var _held_is_tool: bool = false
+var _carry_item: Sprite2D
 
 
 func _init() -> void:
 	_build_nodes()
 
 
-## Dựng ngoại hình từ chỉ số trong VillagerData.appearance.
-func setup(appearance: Dictionary) -> void:
-	var skin: Color = VillagerPalette.pick(VillagerPalette.SKIN, appearance.get("skin", 0))
+## Dựng ngoại hình từ ID mảnh và mã màu trong VillagerData.appearance.
+func setup(data: VillagerData) -> void:
+	var skin: Color = Color(data.look("skin"))
 	var back_skin: Color = skin * Color(BACK_LIMB_SHADE, BACK_LIMB_SHADE, BACK_LIMB_SHADE)
-	_set_part(_head_sprite, "villager/head_%02d" % (int(appearance.get("head", 0)) + 1), skin)
-	_set_part(_hair, "villager/hair_%02d" % (int(appearance.get("hair", 0)) + 1),
-		VillagerPalette.pick(VillagerPalette.HAIR, appearance.get("hair_color", 0)))
-	_set_part(_torso, "villager/body_%02d" % (int(appearance.get("body", 0)) + 1),
-		VillagerPalette.pick(VillagerPalette.FUR, appearance.get("fur", 0)))
-	_set_part(_arm_front, "villager/arm", skin)
-	_set_part(_arm_back, "villager/arm", back_skin)
-	_set_part(_leg_front, "villager/leg", skin)
-	_set_part(_leg_back, "villager/leg", back_skin)
-	var accessory: int = appearance.get("accessory", -1)
-	_accessory.visible = accessory >= 0
+	_set_part(_head_sprite, PIECE_DIR + data.look("head"), skin)
+	_set_part(_hair, PIECE_DIR + data.look("hair"), Color(data.look("hair_color")))
+	_set_part(_torso, PIECE_DIR + data.look("body"), Color(data.look("fur")))
+	_set_part(_arm_front, PIECE_DIR + "arm", skin)
+	_set_part(_arm_back, PIECE_DIR + "arm", back_skin)
+	_set_part(_leg_front, PIECE_DIR + "leg", skin)
+	_set_part(_leg_back, PIECE_DIR + "leg", back_skin)
+	var accessory: String = data.look("accessory")
+	_accessory.visible = not accessory.is_empty()
 	if _accessory.visible:
-		_set_part(_accessory, "villager/accessory_%02d" % (accessory + 1), Color.WHITE)
+		_set_part(_accessory, PIECE_DIR + accessory, Color.WHITE)
+	# Mỗi bộ mặt (vd "face_01") có đủ các biểu cảm: face_01_happy, face_01_sad…
+	var face_set: String = PIECE_DIR + data.look("face")
 	for face_name: String in [FACE_HAPPY, FACE_SAD, FACE_BLINK, FACE_SLEEP, FACE_SURPRISED]:
-		_faces[face_name] = ArtLibrary.get_texture("villager/face_" + face_name)
-	_set_part(_face, "villager/face_" + FACE_HAPPY, Color.WHITE)
+		_faces[face_name] = ArtLibrary.get_texture("%s_%s" % [face_set, face_name])
+	_set_part(_face, "%s_%s" % [face_set, FACE_HAPPY], Color.WHITE)
 	_blink_timer = randf_range(BLINK_MIN, BLINK_MAX)
 
 
@@ -108,6 +130,11 @@ func play(anim_name: StringName) -> void:
 		return
 	anim = anim_name
 	_anim_time = 0.0
+
+
+## Đang nằm (ngủ, ngất) — bong bóng trên đầu dời xuống theo đầu.
+func is_lying() -> bool:
+	return anim == ANIM_SLEEP or anim == ANIM_KNOCKED_OUT
 
 
 func set_facing(direction: float) -> void:
@@ -134,12 +161,47 @@ func squash(amount: float = 0.14, duration: float = 0.25) -> void:
 	tween.tween_method(_set_squash, amount, 0.0, duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
-## Cầm một vật trên tay (key hình), "" để bỏ xuống.
-func set_held_item(key: String) -> void:
+## Cầm một vật trên tay (key hình), "" để bỏ xuống. `is_tool` = đồ nghề (rìu, cuốc…)
+## thì nghiêng theo tay khi vung.
+func set_held_item(key: String, is_tool: bool = false) -> void:
 	_held_item.visible = not key.is_empty()
+	_held_is_tool = is_tool
+	_held_item.rotation = 0.0
 	if _held_item.visible:
 		ArtLibrary.setup_sprite(_held_item, key)
 		_held_item.scale *= HELD_ITEM_SCALE
+
+
+## Giơ một món đồ trên đầu để khuân (key hình), "" để đặt xuống. Hai tay giơ lên đỡ.
+func set_carry_item(key: String) -> void:
+	_carry_item.visible = not key.is_empty()
+	if _carry_item.visible:
+		ArtLibrary.setup_sprite(_carry_item, key)
+		_carry_item.scale *= CARRY_ITEM_SCALE
+
+
+func is_carrying() -> bool:
+	return _carry_item.visible
+
+
+## Quăng một món đồ (đồ nghề khi đình công): bay vòng lên rồi rơi xuống đất, mờ dần.
+func throw_item(key: String) -> void:
+	var item: Sprite2D = Sprite2D.new()
+	ArtLibrary.setup_sprite(item, key)
+	item.scale *= HELD_ITEM_SCALE
+	var start: Vector2 = (SHOULDER_FRONT + Vector2(0, -HAND_DISTANCE)) * Vector2(facing, 1)
+	item.position = start
+	add_child(item)
+	var land: Vector2 = Vector2(facing * 46.0, -4.0)
+	var peak: Vector2 = Vector2(facing * 24.0, -64.0)
+	var tween: Tween = item.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(item, "rotation", facing * TAU * 1.5, THROW_SECONDS)
+	var fly: Callable = func(t: float) -> void:
+		item.position = start.lerp(peak, t).lerp(peak.lerp(land, t), t)
+	tween.tween_method(fly, 0.0, 1.0, THROW_SECONDS)
+	tween.chain().tween_property(item, "modulate:a", 0.0, 0.6).set_delay(0.6)
+	tween.chain().tween_callback(item.queue_free)
 
 
 func _set_squash(value: float) -> void:
@@ -196,7 +258,7 @@ func _animate(t: float) -> void:
 			_arm_front.rotation = -2.3 + 0.25 * sin(t * 9.0)
 			_head.scale.y = 1.0 + 0.035 * sin(t * 18.0)
 			_breathe(breathe)
-		ANIM_SLEEP:
+		ANIM_SLEEP, ANIM_KNOCKED_OUT:
 			# Nằm ngửa, đầu quay ra sau; nhấc lên để nửa người không chìm xuống đất.
 			_pose.rotation = -1.5
 			_pose.position = Vector2(30, -10)
@@ -237,8 +299,64 @@ func _animate(t: float) -> void:
 		ANIM_HOLD:
 			_arm_front.rotation = -1.1
 			_breathe(breathe)
+		ANIM_CHOP:
+			# Vung rìu: giơ chậm ra sau đầu rồi bổ nhanh về phía trước.
+			var swing: float = _swing(t, CHOP_PERIOD)
+			_arm_front.rotation = lerpf(-1.0, -3.3, swing)
+			_arm_back.rotation = _arm_front.rotation + 0.35
+			_pose.rotation = lerpf(0.14, -0.1, swing)
+			_head.rotation = lerpf(0.05, -0.08, swing)
+		ANIM_MINE:
+			# Gõ búa đập đá: hai tay giơ thẳng lên đầu rồi nện xuống, người khom theo.
+			var pound: float = _swing(t, MINE_PERIOD)
+			_arm_front.rotation = lerpf(-0.7, -3.0, pound)
+			_arm_back.rotation = _arm_front.rotation + 0.25
+			_pose.rotation = lerpf(0.22, -0.05, pound)
+			_pose.position.y = lerpf(1.5, -1.0, pound)
+		ANIM_ATTACK:
+			# Vung giáo nhanh, chồm người tới.
+			var jab: float = _swing(t, ATTACK_PERIOD)
+			_arm_front.rotation = lerpf(-1.2, -2.9, jab)
+			_arm_back.rotation = -0.6
+			_pose.rotation = lerpf(0.2, 0.0, jab)
+			_pose.position.x = lerpf(3.0, -1.0, jab)
+		ANIM_FISH:
+			# Cầm cần câu chĩa ra trước, thỉnh thoảng giật nhẹ.
+			var tug: float = maxf(sin(t * 0.9), 0.0) ** 8.0
+			_arm_front.rotation = -1.35 - 0.35 * tug
+			_arm_back.rotation = -0.9 - 0.2 * tug
+			_pose.rotation = -0.05 * tug
+			_breathe(breathe)
+		ANIM_COOK:
+			# Khuấy nồi: tay quay vòng, người hơi cúi, đầu ngó xuống.
+			_arm_front.rotation = -1.0 + 0.35 * sin(t * 7.0)
+			_arm_back.rotation = -0.5
+			_pose.rotation = 0.12
+			_pose.position.y = -absf(sin(t * 7.0)) * 1.0
+			_head.rotation = 0.12
+		ANIM_STRIKE:
+			# Dậm chân giận dỗi: hai chân thay nhau, tay vung loạn xạ, lắc đầu.
+			var stomp: float = sin(t * 11.0)
+			_leg_front.rotation = 0.5 * maxf(stomp, 0.0)
+			_leg_back.rotation = -0.5 * maxf(-stomp, 0.0)
+			_arm_front.rotation = -2.5 + 0.5 * sin(t * 14.0)
+			_arm_back.rotation = 2.5 - 0.5 * sin(t * 14.0 + 1.3)
+			_pose.position.y = -absf(stomp) * 3.0
+			_head.rotation = 0.15 * sin(t * 9.0)
 		_:
 			_breathe(breathe)
+	if _carry_item.visible:
+		# Khuân đồ: hai tay giơ lên đỡ món đồ trên đầu (chồng lên dáng đi/đứng).
+		_arm_front.rotation = -2.75 + 0.06 * sin(t * 6.0)
+		_arm_back.rotation = 2.75 - 0.06 * sin(t * 6.0)
+
+
+# Nhịp vung 0..1 trong một chu kỳ: giơ lên từ từ (0 → 1) rồi bổ xuống thật nhanh (1 → 0).
+func _swing(t: float, period: float) -> float:
+	var phase: float = fmod(t, period) / period
+	if phase < 0.72:
+		return smoothstep(0.0, 0.72, phase)
+	return 1.0 - smoothstep(0.72, 0.82, phase)
 
 
 func _breathe(breathe: float) -> void:
@@ -256,8 +374,10 @@ func _current_face() -> String:
 			return FACE_SLEEP
 		ANIM_YAWN:
 			return FACE_SURPRISED
-		ANIM_RUB_EYES, ANIM_SCRATCH:
+		ANIM_RUB_EYES, ANIM_SCRATCH, ANIM_KNOCKED_OUT:
 			return FACE_BLINK
+		ANIM_STRIKE:
+			return FACE_SAD
 		ANIM_CELEBRATE, ANIM_EAT:
 			return FACE_HAPPY
 	if _blink_time > 0.0:
@@ -277,6 +397,10 @@ func _update_blink(delta: float) -> void:
 func _place_held_item() -> void:
 	if _held_item.visible:
 		_held_item.position = SHOULDER_FRONT + Vector2(0, HAND_DISTANCE).rotated(_arm_front.rotation)
+		if _held_is_tool:
+			_held_item.rotation = _arm_front.rotation + TOOL_TILT
+	if _carry_item.visible:
+		_carry_item.position = CARRY_ITEM_POS
 
 
 func _set_part(sprite: Sprite2D, key: String, color: Color) -> void:
@@ -307,6 +431,8 @@ func _build_nodes() -> void:
 	_arm_front = _add_sprite(_pose, SHOULDER_FRONT)
 	_held_item = _add_sprite(_pose, SHOULDER_FRONT)
 	_held_item.visible = false
+	_carry_item = _add_sprite(_pose, CARRY_ITEM_POS)
+	_carry_item.visible = false
 
 
 func _add_sprite(parent: Node, pos: Vector2) -> Sprite2D:

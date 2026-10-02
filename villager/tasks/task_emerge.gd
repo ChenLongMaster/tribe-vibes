@@ -25,7 +25,7 @@ func start() -> void:
 	var tween: Tween = villager.create_tween().set_parallel(true)
 	tween.tween_property(villager, "position", end_pos, POP_SECONDS).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_property(villager, "modulate:a", 1.0, POP_SECONDS * 0.6)
-	tween.tween_property(villager, "scale", villager.stage_scale(), POP_SECONDS).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(villager, "scale", villager.age_scale(), POP_SECONDS).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	villager.face_towards(villager.position + Vector2(1 if randf() < 0.5 else -1, 0))
 	timer = POP_SECONDS
 	step = Step.POP
@@ -43,12 +43,15 @@ func tick(delta: float) -> Status:
 			if timer <= 0.0:
 				villager.rig.play(VillagerRig.ANIM_YAWN)
 				if randf() < WAKE_BUBBLE_CHANCE:
-					villager.overhead.show_bubble(Loc.t("BUBBLE_WAKE"))
+					villager.say("BUBBLE_WAKE")
 				timer = STRETCH_SECONDS
 				step = Step.STRETCH
 		Step.STRETCH:
 			if timer <= 0.0:
 				var target: Vector2i = world().finder.find_free_cell_near(world().map_data.campfire_cell, 2.0, 4.0)
+				if target != World.INVALID_CELL:
+					# Chỗ đứng sau khi ra khỏi hang thành điểm neo: rảnh thì dạo quanh đây.
+					villager.anchor_cell = target
 				if target == World.INVALID_CELL or not villager.move_to_cell(target):
 					return Status.DONE
 				step = Step.WALK

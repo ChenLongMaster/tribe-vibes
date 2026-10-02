@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://ui/villager_panel.gd" id="1_panel"]
+[ext_resource type="Script" path="res://ui/common/villager_panel.gd" id="1_panel"]
 
 [node name="VillagerPanel" type="MarginContainer"]
 anchors_preset = 2

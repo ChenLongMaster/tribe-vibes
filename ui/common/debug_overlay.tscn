@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://ui/debug_overlay.gd" id="1_script"]
+[ext_resource type="Script" path="res://ui/common/debug_overlay.gd" id="1_script"]
 
 [node name="DebugOverlay" type="MarginContainer"]
 offset_right = 420.0

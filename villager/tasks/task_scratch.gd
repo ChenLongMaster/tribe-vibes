@@ -15,14 +15,14 @@ func start() -> void:
 	villager.rig.play(VillagerRig.ANIM_SCRATCH)
 	timer = randf_range(SECONDS_MIN, SECONDS_MAX)
 	if randf() < BUBBLE_CHANCE:
-		villager.overhead.show_bubble(Loc.t("BUBBLE_SCRATCH"))
+		villager.say("BUBBLE_SCRATCH")
 
 
 func tick(delta: float) -> Status:
 	timer -= delta
 	if timer > 0.0:
 		return Status.RUNNING
-	villager.data.fun = minf(villager.data.fun + Balance.FUN_SCRATCH, VillagerData.MAX_NEED)
+	villager.status.add_fun(Balance.FUN_SCRATCH)
 	return Status.DONE
 
 

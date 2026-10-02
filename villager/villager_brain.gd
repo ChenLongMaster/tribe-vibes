@@ -1,24 +1,30 @@
 class_name VillagerBrain
 extends RefCounted
-## Bộ não chọn việc (utility AI đơn giản), được gọi mỗi 0.3–0.6 giây. Thứ tự ưu tiên:
+## Bộ não chọn việc, được gọi mỗi 0.3–0.6 giây. Chế độ Normal (`villager_autonomy =
+## OBEDIENT`): thổ dân NGHE LỜI — không tự kiếm việc, chỉ tự rời chỗ khi đói, mệt (và
+## Đợt 4: muốn tìm bạn đời). Thứ tự ưu tiên (MVP_PROMPT mục 5.2):
 ##   1. Nguy hiểm (Đợt 5)
-##   2. Nhu cầu khẩn cấp — đói thì đi ăn, kiệt sức thì đi ngủ, có bong bóng giải thích
-##   3. Việc người chơi giao (Đợt 2)
-##   4. Việc chung của làng (Đợt 2–3)
-##   5. Rảnh → hoạt cảnh rảnh rỗi, chọn ngẫu nhiên có trọng số theo tính cách
+##   2. Máu = 0 → ngất. Thể lực = 0 → gục ngủ tại chỗ.
+##   3. Giải trí = 0 → đình công (quăng đồ nghề, từ chối việc tới khi giải trí hồi lại)
+##   4. Đói < 50 → đi ăn. Thể lực < 50% → đi ngủ. Có bong bóng giải thích.
+##   5. Muốn tìm bạn đời (Đợt 4)
+##   6. Việc người chơi giao (Job) → làm từng lượt, xong lượt lại làm tiếp — chế độ
+##      AUTONOMOUS thêm "tự kiếm việc" ở đây
+##   7. Rảnh → về vùng dạo chơi nếu đang ở xa, rồi hoạt cảnh tại chỗ
 
 ## Trọng số gốc của hoạt cảnh rảnh rỗi (nhân thêm theo tính cách và tình trạng).
 const IDLE_WEIGHTS: Dictionary[StringName, float] = {
-	&"wander": 2.0,
+	&"stroll": 2.0,
 	&"chat": 2.0,
 	&"pick_flower": 1.0,
 	&"scratch": 0.6,
 	&"sit": 1.2,
-	&"snack": 2.0,
 }
 ## Không tìm được đồ ăn thì đợi chừng này giây rồi mới tìm lại (đỡ tìm liên tục).
 const FOOD_RETRY_SECONDS: float = 5.0
 const NO_FOOD_BUBBLE_SECONDS: float = 15.0
+## Ra khỏi vùng dạo chơi quá chừng này ô thì đi về (dư một chút cho người đang đứng mép).
+const RETURN_MARGIN_CELLS: float = 0.5
 
 var _food_retry: float = 0.0
 var _no_food_bubble_cooldown: float = 0.0
@@ -30,40 +36,113 @@ func think(villager: Villager, elapsed: float) -> void:
 	var current: Task = villager.task
 	if current != null and current.priority == Task.Priority.SCRIPTED:
 		return
-	if _handle_urgent_needs(villager, current):
+	var mode: GameModeConfig = GameState.get_mode()
+	if _handle_collapse(villager, current, mode):
 		return
-	if villager.task == null:
+	if _handle_strike(villager, mode):
+		return
+	if _handle_needs(villager, current, mode):
+		return
+	# Đợt 4: muốn tìm bạn đời (bước 5) chen vào đây.
+	if _handle_job(villager):
+		return
+	if mode.villager_autonomy == GameModeConfig.Autonomy.AUTONOMOUS:
+		# Sau MVP (chế độ Thần Linh): tự kiếm việc của làng ở đây.
+		pass
+	if villager.task != null:
+		return
+	if _is_far_from_anchor(villager):
+		villager.start_task(TaskReturn.new())
+	else:
 		villager.start_task(_choose_idle_task(villager))
 
 
-# Trả về true nếu đã giao một việc vì nhu cầu (hoặc đang làm sẵn rồi).
-func _handle_urgent_needs(villager: Villager, current: Task) -> bool:
-	var data: VillagerData = villager.data
+# Máu = 0 → ngất; thể lực = 0 → gục ngủ tại chỗ. Trả về true nếu đã xử lý.
+func _handle_collapse(villager: Villager, current: Task, mode: GameModeConfig) -> bool:
+	var status: VillagerStatus = villager.status
+	if mode.need_enabled(NeedDefs.HEALTH) and status.health <= 0.0:
+		villager.start_task(TaskKnockedOut.new())
+		return true
+	if mode.need_enabled(NeedDefs.ENERGY) and status.energy <= 0.0:
+		if current is TaskSleep:
+			return true
+		villager.start_task(TaskSleep.new(null, true))
+		villager.say("BUBBLE_EXHAUSTED", {}, "icons/sleepy")
+		return true
+	return false
+
+
+# Đói < 50 → đi ăn; thể lực < 50% → đi ngủ. Trả về true nếu đang lo nhu cầu.
+func _handle_needs(villager: Villager, current: Task, mode: GameModeConfig) -> bool:
+	var status: VillagerStatus = villager.status
 	var asleep: bool = current is TaskSleep and (current as TaskSleep).is_asleep()
 
-	if data.hunger < Balance.HUNGER_URGENT:
+	if mode.need_enabled(NeedDefs.HUNGER) and status.hunger < Balance.HUNGER_EAT_BELOW:
 		if current != null and current.kind == &"eat":
 			return true
 		# Đang ngủ thì chỉ dậy khi đói lắm.
-		var can_interrupt: bool = not asleep or data.hunger < Balance.HUNGER_WAKE
+		var can_interrupt: bool = not asleep or status.hunger < Balance.HUNGER_WAKE
 		if can_interrupt and _food_retry <= 0.0:
-			if villager.world.finder.find_bush_for(villager) != null:
-				villager.start_task(TaskEat.new(true))
-				villager.overhead.show_bubble(Loc.t("BUBBLE_HUNGRY"), "icons/hunger")
+			var source: FoodSource = villager.world.finder.find_food_for(villager)
+			if source != null:
+				villager.start_task(TaskEat.new(source))
+				villager.say("BUBBLE_HUNGRY", {}, "icons/hunger")
 				villager.rig.flash_face(VillagerRig.FACE_SURPRISED, 0.8)
 				return true
 			_food_retry = FOOD_RETRY_SECONDS
 			if _no_food_bubble_cooldown <= 0.0:
 				_no_food_bubble_cooldown = NO_FOOD_BUBBLE_SECONDS
-				villager.overhead.show_bubble(Loc.t("BUBBLE_NO_FOOD"), "icons/hunger")
+				villager.say("BUBBLE_NO_FOOD", {}, "icons/hunger")
 
-	if data.energy < Balance.ENERGY_URGENT:
-		if current != null and (current.kind == &"sleep" or current.priority >= Task.Priority.NEED):
-			return current.kind == &"sleep"
-		villager.start_task(TaskSleep.new())
-		villager.overhead.show_bubble(Loc.t("BUBBLE_SLEEPY"), "icons/sleepy")
+	if mode.need_enabled(NeedDefs.ENERGY) and status.energy < Balance.ENERGY_SLEEP_BELOW:
+		if current != null and current.kind == &"sleep":
+			return true
+		if current != null and current.priority >= Task.Priority.NEED:
+			# Đang đi ăn thì ăn xong rồi ngủ.
+			return true
+		villager.start_task(TaskSleep.new(villager.world.finder.find_bed_for(villager)))
+		villager.say("BUBBLE_SLEEPY", {}, "icons/sleepy")
 		return true
 	return false
+
+
+# Giải trí = 0 → đình công; đang đình công mà giải trí hồi đủ thì làm lại. Trả về true nếu
+# vừa bắt đầu đình công (màn quăng đồ nghề).
+func _handle_strike(villager: Villager, mode: GameModeConfig) -> bool:
+	if not mode.need_enabled(NeedDefs.FUN):
+		if villager.on_strike:
+			villager.end_strike()
+		return false
+	if villager.on_strike:
+		if villager.status.fun >= Balance.STRIKE_RESUME_FUN:
+			villager.end_strike()
+		return false
+	if villager.status.fun <= 0.0 and villager.state != Villager.State.SLEEPING:
+		villager.begin_strike()
+		return true
+	return false
+
+
+# Bước 6: có việc được giao (và không đình công) thì làm lượt tiếp theo. Đang ăn/ngủ thì
+# để xong đã. Hết thứ để làm thì thôi việc, đứng chờ tại chỗ. Trả về true nếu đang bận việc.
+func _handle_job(villager: Villager) -> bool:
+	var job: Job = villager.job
+	if job == null or villager.on_strike:
+		return false
+	var current: Task = villager.task
+	if current != null and current.priority != Task.Priority.IDLE:
+		return true
+	var next: Task = job.next_task(villager)
+	if next == null:
+		villager.stop_job(job.stop_bubble())
+		return false
+	villager.start_task(next)
+	return true
+
+
+func _is_far_from_anchor(villager: Villager) -> bool:
+	var offset: Vector2 = Vector2(villager.world.cell_of(villager) - villager.anchor_cell)
+	return offset.length() > Balance.IDLE_RADIUS_CELLS + RETURN_MARGIN_CELLS
 
 
 func _choose_idle_task(villager: Villager) -> Task:
@@ -72,13 +151,11 @@ func _choose_idle_task(villager: Villager) -> Task:
 	var weights: Dictionary[StringName, float] = {}
 	for activity: StringName in IDLE_WEIGHTS:
 		weights[activity] = IDLE_WEIGHTS[activity] * Traits.idle_weight(data.traits, activity)
-	# Tình trạng hiện tại cũng ảnh hưởng: mệt thì muốn ngồi, chán thì muốn tán gẫu.
-	if data.energy < Balance.ENERGY_TIRED:
+	# Mệt thì muốn ngồi, chán thì muốn tán gẫu.
+	if villager.status.energy < Balance.ENERGY_TIRED:
 		weights[&"sit"] *= 2.5
-	if data.fun < 50.0:
+	if villager.status.fun < 50.0:
 		weights[&"chat"] *= 1.5
-	if data.hunger >= Balance.HUNGER_SNACK or _food_retry > 0.0 or world.finder.find_bush_for(villager) == null:
-		weights[&"snack"] = 0.0
 	var partner: Villager = world.finder.find_chat_partner(villager)
 	if partner == null:
 		weights[&"chat"] = 0.0
@@ -96,9 +173,7 @@ func _choose_idle_task(villager: Villager) -> Task:
 			return TaskScratch.new()
 		&"sit":
 			return TaskSit.new()
-		&"snack":
-			return TaskEat.new(false)
-	return TaskWander.new()
+	return TaskStroll.new()
 
 
 func _weighted_pick(weights: Dictionary[StringName, float]) -> StringName:
@@ -110,4 +185,4 @@ func _weighted_pick(weights: Dictionary[StringName, float]) -> StringName:
 		roll -= weights[key]
 		if roll <= 0.0 and weights[key] > 0.0:
 			return key
-	return &"wander"
+	return &"stroll"

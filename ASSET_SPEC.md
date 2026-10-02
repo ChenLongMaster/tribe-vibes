@@ -99,8 +99,8 @@ Cả nhân vật cao ~72 px trên màn hình, đầu chiếm ~45% (chibi). **M�
 | Key | Cỡ file (2×) | Hiển thị | Neo | Tô màu bằng code? | Ghi chú |
 |---|---|---|---|---|---|
 | `villager/head_01` … `03` | 80×80 | 40×40 | (0.5, 0.9) cổ | **Có — màu da** | Đầu + tai phía sau. Vẽ trắng/xám rất nhạt, viền nâu. |
-| `villager/face_happy` | 80×80 | 40×40 | (0.5, 0.9) | Không | Mắt, miệng, má hồng. Mắt nằm khoảng (40, 42) và (58, 42). |
-| `villager/face_sad` · `face_blink` · `face_sleep` · `face_surprised` | 80×80 | 40×40 | (0.5, 0.9) | Không | Buồn · chớp mắt (cũng dùng khi gãi, dụi mắt) · ngủ · ngạc nhiên/ngáp. |
+| `villager/face_01_happy` | 80×80 | 40×40 | (0.5, 0.9) | Không | Bộ mặt số 01, biểu cảm vui. Mắt nằm khoảng (40, 42) và (58, 42). |
+| `villager/face_01_sad` · `face_01_blink` · `face_01_sleep` · `face_01_surprised` | 80×80 | 40×40 | (0.5, 0.9) | Không | Buồn · chớp mắt (cũng dùng khi gãi, dụi mắt) · ngủ · ngạc nhiên/ngáp. **Mỗi bộ mặt phải đủ 5 biểu cảm.** Thêm kiểu mặt mới = vẽ bộ `face_02_*` rồi tăng `FACE_COUNT` trong `villager/villager_palette.gd`. |
 | `villager/hair_01` … `05` | 80×80 | 40×40 | (0.5, 0.9) | **Có — màu tóc** | 01 tóc dựng, 02 búi, 03 tóc dài, 04 đuôi ngựa, 05 chỏm tóc. Vẽ trắng/xám nhạt. |
 | `villager/accessory_01` … `03` | 80×80 | 40×40 | (0.5, 0.9) | Không | 01 xương cài tóc, 02 lông chim, 03 bông hoa. |
 | `villager/body_01` … `03` | 56×48 | 28×24 | (0.5, 1.0) mép dưới vạt áo | **Có — màu áo lông** | Áo lông từ cổ xuống hông. Đốm/hoạ tiết vẽ xám đậm hơn nền một chút. |
@@ -108,9 +108,9 @@ Cả nhân vật cao ~72 px trên màn hình, đầu chiếm ~45% (chibi). **M�
 | `villager/leg` | 22×30 | 11×15 | (0.36, 0.1) hông | **Có — màu da** | Chân thẳng, bàn chân hướng sang phải. Code xoay quanh hông. |
 | `villager/shadow` | 64×20 | 32×10 | (0.5, 0.5) | Không | Bóng dưới chân. |
 
-Vị trí các khớp (hông, vai, cổ) nằm ở đầu `villager/villager_rig.gd` — nếu art thật tỉ lệ khác thì chỉnh ở đó. Bảng màu da/áo/tóc ở `villager/villager_palette.gd`.
+Vị trí các khớp (hông, vai, cổ) nằm ở đầu `villager/villager_rig.gd` — nếu art thật tỉ lệ khác thì chỉnh ở đó. Thổ dân lưu ngoại hình bằng **ID mảnh** (vd `hair_03`, `face_01`) và mã màu, nên vẽ thêm mảnh mới chỉ cần đặt đúng tên file rồi tăng số đếm (`HAIR_COUNT`…) trong `villager/villager_palette.gd`; bảng màu da/áo/tóc cũng ở đó.
 
-### Icon & hiệu ứng nhỏ — Đợt 1
+### Icon & hiệu ứng nhỏ — Đợt 1 / 1.5
 
 | Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
 |---|---|---|---|---|
@@ -120,19 +120,41 @@ Vị trí các khớp (hông, vai, cổ) nằm ở đầu `villager/villager_rig
 | `icons/love` | 48×48 | 24×24 | tâm | Trái tim. |
 | `icons/scared` | 48×48 | 24×24 | tâm | Dấu chấm than (Đợt 5). |
 | `icons/berry` | 48×48 | 24×24 | tâm | Quả mọng — icon "đang đi ăn" trên đầu, và quả cầm trên tay khi ăn. |
-| `icons/star` | 48×48 | 24×24 | tâm | Ngôi sao cạnh "việc giỏi nhất". |
+| `icons/star` | 48×48 | 24×24 | tâm | Ngôi sao (xem thêm cỡ nhỏ ở dưới). |
 | `icons/close` | 48×48 | 24×24 (nút 44×44) | tâm | Nút ✕ đóng bảng. |
 | `icons/mood_happy` · `mood_ok` · `mood_sad` | 48×48 | 26×26 | tâm | Mặt tâm trạng trong bảng thông tin. |
+| `icons/stat_health` | 48×48 | 22×22 | tâm | Chỉ số **Máu** ❤ (tim đỏ có dấu cộng). Dùng trong bảng thông tin và nhấp nháy trên đầu khi thấp. |
+| `icons/hunger` | 48×48 | 22×22 | tâm | Chỉ số **Đói** 🍖 (dùng chung với bong bóng "Đói quá!"). |
+| `icons/stat_energy` | 48×48 | 22×22 | tâm | Chỉ số **Thể lực** ⚡. |
+| `icons/stat_fun` | 48×48 | 22×22 | tâm | Chỉ số **Giải trí** 🎉 (pháo giấy). |
+| `icons/skill_chop` · `skill_mine` · `skill_gather` · `skill_hunt` · `skill_fish` · `skill_cook` · `skill_build` · `skill_smith` · `skill_fight` | 48×48 | 24×24 | tâm | Icon 9 loại việc/kỹ năng: rìu, cuốc, giỏ quả, giáo, cần câu, nồi, búa, đe, chùy xương. Dùng trong bảng thông tin (kèm sao cấp), sau này làm icon việc trên đầu. |
+| `icons/star` (nhỏ) | 48×48 | 10×10 | tâm | Mỗi sao = một cấp kỹ năng. Cũng dùng làm sao quay quanh đầu khi ngất. |
+| `icons/love` (nhỏ) | 48×48 | 14×14 | tâm | Tim cạnh kỹ năng = việc thích. |
 | `fx/zzz` | 32×32 | 8–18 | tâm | Một chữ Z bay lên khi ngủ. |
-| `fx/heart` | 32×32 | 16×16 | tâm | Tim bay lên khi tặng hoa. |
+| `fx/heart` | 32×32 | 16×16 | tâm | Tim bay lên khi tặng hoa / hẹn hò (Đợt 4). |
 | `ui/selection_ring` | 96×40 | 48×20 | tâm | Vòng vàng dưới chân thổ dân đang được chọn. |
 
 Bong bóng thoại là khung vẽ bằng code (không phải hình), chữ luôn là `Label`.
+
+### Lao động & tài nguyên — Đợt 2
+
+| Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
+|---|---|---|---|---|
+| `icons/res_wood` · `res_stone` · `res_meat` · `res_fish` · `res_meal` | 48×48 | 22–26 | tâm | Icon tài nguyên: bó gỗ, hai hòn đá, đùi thịt sống, con cá, bát món chín. Quả mọng dùng lại `icons/berry`. Dùng trên thanh HUD, số bay "+3 gỗ", **và giơ trên đầu khi khuân** (hiển thị ~26×26). |
+| `icons/angry` | 48×48 | 22–24 | tâm | 💢 đình công — bong bóng và icon trên đầu suốt lúc đình công. |
+| `icons/skill_*` (đã có) | 48×48 | 24×24 | tâm | Nay dùng thêm làm **icon việc trên đầu** và **đồ nghề cầm tay** (rìu, cuốc, cần câu, giáo, muôi nồi). Code xoay đồ nghề theo cánh tay, nghiêng thêm `TOOL_TILT` trong `villager/villager_rig.gd` — vẽ cán chéo từ dưới-trái lên trên-phải như hình tạm. |
+| `animals/boar` | 128×96 | 64×48 | (0.48, 0.92) chân | Lợn rừng, **quay mặt sang PHẢI** (code tự lật). Có bóng elip dưới chân. |
+| `animals/deer` | 112×128 | 56×64 | (0.45, 0.94) chân | Hươu nhỏ, quay sang phải. |
+| `fx/dust` | 32×32 | 6–14 | tâm | Một cụm bụi trắng mờ. Code tô màu (gỗ: nâu nhạt, đá: xám) và cho bay toả ra khi chặt/đập, khói "bụp" khi thú bị săn biến mất. |
+| `ui/speed_pause` · `speed_1` · `speed_2` · `speed_3` | 48×48 | ~32 trong nút 44×44 | tâm | Nút tốc độ: hai vạch, 1/2/3 tam giác. **Không vẽ chữ "×2"** — chỉ hình. Nền nút do code vẽ (vàng = đang chọn). |
+| `ui/target_ring` | 128×56 | 64×28 (× cỡ mục tiêu) | tâm | Vòng elip nét đứt vàng dưới chân mục tiêu đang rê chuột / kéo tới / được giao. Code phóng to theo cỡ vật và nhịp phập phồng. |
+| `ui/move_marker` | 64×64 | 32×32 | (0.375, 0.875) chân cột cờ | Lá cờ nhỏ cắm ở chỗ bảo thổ dân đi tới. |
+
+Đường chấm chấm tới nơi được giao, đường kéo khi kéo-thả và số "+3 gỗ" đều vẽ bằng code (không cần hình).
 
 ## Sẽ thêm ở các đợt sau
 
 Danh sách sẽ được bổ sung vào bảng trên khi làm tới (tên dự kiến theo `MVP_PROMPT.md` mục 7):
 
-- **Đợt 2:** thú (lợn rừng, hươu), icon tài nguyên, đồ khuân trên đầu.
-- **Đợt 3:** lều, bếp, kho, kho vũ khí, sân nhảy — mỗi cái 3 trạng thái: móng, hoàn thành, hư hại; icon nút tốc độ.
+- **Đợt 3:** lều, bếp, kho, kho vũ khí, sân nhảy — mỗi cái 3 trạng thái: móng, hoàn thành, hư hại.
 - **Đợt 5:** cannibal (mặt nạ xương, sơn chiến) và biến thể màu, chùy.

@@ -1,44 +1,31 @@
-[gd_resource type="Theme" format=3]
+[gd_resource type="Theme" format=3 uid="uid://cr5uharittvl1"]
 
-[ext_resource type="FontFile" path="res://assets/fonts/Nunito-Variable.ttf" id="1_font"]
+[ext_resource type="FontFile" uid="uid://bleci5t7pktru" path="res://assets/fonts/Nunito-Variable.ttf" id="1_font"]
 
-[sub_resource type="FontVariation" id="FontVariation_body"]
-base_font = ExtResource("1_font")
-variation_opentype = {
-2003265652: 650
-}
-
-[sub_resource type="FontVariation" id="FontVariation_title"]
-base_font = ExtResource("1_font")
-variation_opentype = {
-2003265652: 900
-}
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-content_margin_left = 16.0
-content_margin_top = 12.0
-content_margin_right = 16.0
-content_margin_bottom = 12.0
-bg_color = Color(1, 0.953, 0.878, 0.92)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.306, 0.204, 0.18, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0.243, 0.153, 0.137, 0.25)
-shadow_size = 4
-shadow_offset = Vector2(0, 3)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_disabled"]
 content_margin_left = 18.0
 content_margin_top = 8.0
 content_margin_right = 18.0
 content_margin_bottom = 10.0
-bg_color = Color(1, 0.718, 0.302, 1)
+bg_color = Color(0.843, 0.8, 0.737, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 5
+border_color = Color(0.553, 0.431, 0.388, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_focus"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+content_margin_left = 18.0
+content_margin_top = 8.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 0.8, 0.502, 1)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
@@ -49,12 +36,12 @@ corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
 content_margin_left = 18.0
 content_margin_top = 8.0
 content_margin_right = 18.0
 content_margin_bottom = 10.0
-bg_color = Color(1, 0.8, 0.502, 1)
+bg_color = Color(1, 0.718, 0.302, 1)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
@@ -81,32 +68,45 @@ corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_disabled"]
-content_margin_left = 18.0
-content_margin_top = 8.0
-content_margin_right = 18.0
-content_margin_bottom = 10.0
-bg_color = Color(0.843, 0.8, 0.737, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(1, 0.953, 0.878, 0.92)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
-border_width_bottom = 5
-border_color = Color(0.553, 0.431, 0.388, 1)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
+border_width_bottom = 3
+border_color = Color(0.306, 0.204, 0.18, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.243, 0.153, 0.137, 0.25)
+shadow_size = 4
+shadow_offset = Vector2(0, 3)
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_focus"]
+[sub_resource type="FontVariation" id="FontVariation_title"]
+base_font = ExtResource("1_font")
+variation_opentype = {
+2003265652: 900
+}
+
+[sub_resource type="FontVariation" id="FontVariation_body"]
+base_font = ExtResource("1_font")
+variation_opentype = {
+2003265652: 650
+}
 
 [resource]
 default_font = SubResource("FontVariation_body")
 default_font_size = 20
 Button/colors/font_color = Color(0.306, 0.204, 0.18, 1)
 Button/colors/font_disabled_color = Color(0.553, 0.431, 0.388, 1)
+Button/colors/font_focus_color = Color(0.306, 0.204, 0.18, 1)
 Button/colors/font_hover_color = Color(0.306, 0.204, 0.18, 1)
 Button/colors/font_pressed_color = Color(0.306, 0.204, 0.18, 1)
-Button/colors/font_focus_color = Color(0.306, 0.204, 0.18, 1)
 Button/styles/disabled = SubResource("StyleBoxFlat_button_disabled")
 Button/styles/focus = SubResource("StyleBoxEmpty_focus")
 Button/styles/hover = SubResource("StyleBoxFlat_button_hover")
@@ -114,11 +114,11 @@ Button/styles/normal = SubResource("StyleBoxFlat_button_normal")
 Button/styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 Label/colors/font_color = Color(0.306, 0.204, 0.18, 1)
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_panel")
+SmallLabel/base_type = &"Label"
+SmallLabel/font_sizes/font_size = 16
 TitleLabel/base_type = &"Label"
 TitleLabel/colors/font_color = Color(1, 0.718, 0.302, 1)
 TitleLabel/colors/font_outline_color = Color(0.306, 0.204, 0.18, 1)
 TitleLabel/constants/outline_size = 10
 TitleLabel/font_sizes/font_size = 40
 TitleLabel/fonts/font = SubResource("FontVariation_title")
-SmallLabel/base_type = &"Label"
-SmallLabel/font_sizes/font_size = 16

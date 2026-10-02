@@ -1,28 +1,31 @@
 class_name TaskSleep
 extends Task
-## Đi tới một chỗ trống quanh lửa trại, nằm ngủ tới khi lại sức rồi vươn vai dậy.
-## (Đợt 3 có lều thì ưu tiên ngủ trong lều.)
+## Ngủ. Hai kiểu:
+## - Bình thường (thể lực < 50%): đi tới chỗ ngủ (SleepSpot — ngủ đất cạnh lửa trại; Đợt 3
+##   là lều), nằm tới khi ngủ đủ rồi vươn vai dậy.
+## - Gục (thể lực = 0): ngã ra ngủ ngay tại chỗ tới khi hồi ENERGY_COLLAPSE_WAKE, rồi xong
+##   việc — bộ não thấy vẫn còn mệt sẽ cho đi tìm chỗ ngủ tử tế.
 
 enum Step { GO, SLEEP, WAKE }
 
 const WAKE_SECONDS: float = 1.3
 
-var _spot: Vector2i = World.INVALID_CELL
+var collapsed: bool = false
+var _spot: SleepSpot
 
 
-func _init() -> void:
+## `spot` = null thì ngủ tại chỗ (khi gục, hoặc khi không còn chỗ nào).
+func _init(spot: SleepSpot, is_collapse: bool = false) -> void:
+	_spot = spot
+	collapsed = is_collapse
 	kind = &"sleep"
 	priority = Priority.NEED
 
 
 func start() -> void:
-	_spot = world().finder.find_sleep_spot(villager)
-	if _spot == World.INVALID_CELL:
-		# Hết chỗ quanh lửa trại thì ngủ luôn tại chỗ — vẫn hơn đứng gật gù.
-		step = Step.GO
-		return
-	villager.move_to_cell(_spot)
 	step = Step.GO
+	if _spot != null and not collapsed:
+		villager.move_to_cell(_spot.cell)
 
 
 func tick(delta: float) -> Status:
@@ -31,13 +34,14 @@ func tick(delta: float) -> Status:
 			if villager.is_moving():
 				return Status.RUNNING
 			villager.rig.play(VillagerRig.ANIM_SLEEP)
+			villager.rig.squash(0.2 if collapsed else 0.1)
 			villager.state = Villager.State.SLEEPING
-			villager.overhead.set_sleeping(true)
+			villager.sleep_rate_multiplier = _spot.rate_multiplier if _spot != null else 1.0
 			step = Step.SLEEP
 		Step.SLEEP:
-			if villager.data.energy < Balance.ENERGY_WAKE:
+			var wake_at: float = Balance.ENERGY_COLLAPSE_WAKE if collapsed else Balance.ENERGY_WAKE
+			if villager.status.energy < wake_at:
 				return Status.RUNNING
-			villager.overhead.set_sleeping(false)
 			villager.state = Villager.State.IDLE
 			villager.rig.play(VillagerRig.ANIM_STRETCH)
 			timer = WAKE_SECONDS
@@ -50,8 +54,9 @@ func tick(delta: float) -> Status:
 
 
 func stop() -> void:
-	world().reservations.release(_spot, villager)
-	villager.overhead.set_sleeping(false)
+	villager.sleep_rate_multiplier = 1.0
+	if _spot != null:
+		world().reservations.release(_spot.reservation_key, villager)
 
 
 func is_asleep() -> bool:
@@ -59,4 +64,4 @@ func is_asleep() -> bool:
 
 
 func activity_key() -> String:
-	return "UI_ACTIVITY_SLEEP"
+	return "UI_ACTIVITY_COLLAPSE" if collapsed else "UI_ACTIVITY_SLEEP"

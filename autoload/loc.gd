@@ -15,6 +15,7 @@ const TRANSLATION_EXTENSION: String = ".translation"
 const LANGUAGE_NAME_KEY: StringName = &"UI_LANGUAGE_NAME"
 const PLURAL_ONE_SUFFIX: String = "_ONE"
 const PLURAL_OTHER_SUFFIX: String = "_OTHER"
+const KEY_ARG_SUFFIX: String = "_key"
 
 const THOUSANDS_SEPARATORS: Dictionary[String, String] = {"vi": ".", "en": ","}
 const DECIMAL_SEPARATORS: Dictionary[String, String] = {"vi": ",", "en": "."}
@@ -37,6 +38,9 @@ func _ready() -> void:
 
 
 ## Dịch một key. `args` thay vào chỗ giữ chỗ có tên: "{name} chào đời!".
+## Tham số tên kết thúc bằng `_key` là một key dịch khác, được dịch rồi mới thay vào chỗ
+## giữ chỗ không có đuôi: {"job_key": "JOB_CHOP"} → {job}. Nhờ vậy dữ liệu game (nhật ký,
+## thông báo) chỉ lưu key, đổi ngôn ngữ thì cả câu cũ cũng đổi theo.
 func t(key: String, args: Dictionary = {}) -> String:
 	var text: String = String(TranslationServer.translate(key))
 	if text == key and not _warned_keys.has(key):
@@ -44,7 +48,14 @@ func t(key: String, args: Dictionary = {}) -> String:
 		push_warning("Loc: thiếu key '%s' trong i18n/strings.csv" % key)
 	if args.is_empty():
 		return text
-	return text.format(args)
+	var resolved: Dictionary = {}
+	for arg_name: Variant in args:
+		var name_text: String = str(arg_name)
+		if name_text.ends_with(KEY_ARG_SUFFIX):
+			resolved[name_text.trim_suffix(KEY_ARG_SUFFIX)] = t(str(args[arg_name]))
+		else:
+			resolved[name_text] = args[arg_name]
+	return text.format(resolved)
 
 
 ## Câu có số đếm: dùng `KEY_ONE` khi n == 1, ngược lại `KEY_OTHER`.

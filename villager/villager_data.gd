@@ -1,40 +1,50 @@
 class_name VillagerData
-extends RefCounted
-## Dữ liệu thuần của một thổ dân — không có node, để lưu game và test dễ.
-## Chỉ lưu key/chỉ số (vd trait "LAZY", tóc số 3), không lưu chữ đã dịch.
+extends Resource
+## Toàn bộ thông tin để TẠO một thổ dân: ngoại hình, tên, giới tính, tính cách,
+## kỹ năng, việc thích, tuổi. Không chứa trạng thái lúc chơi (nhu cầu, vị trí, việc
+## đang làm — xem VillagerStatus và Villager).
+##
+## Mọi cách tạo thổ dân (ngẫu nhiên, em bé, sau này là trình tạo nhân vật của chế
+## độ Thần Linh) đều chỉ tạo ra một VillagerData rồi gọi Commands.spawn_villager().
+## Là Resource nên lưu được thành file .tres (vd mẫu nhân vật dựng sẵn).
 
 enum Gender { MALE, FEMALE }
-enum Stage { BABY, CHILD, ADULT }
+enum AgeStage { BABY, CHILD, ADULT }
 
-## Các việc có thể "giỏi nhất". Key dịch: JOB_<ID>.
-const JOBS: Array[StringName] = [&"CHOP", &"MINE", &"GATHER", &"HUNT", &"FISH", &"COOK", &"BUILD"]
-const MAX_NEED: float = 100.0
+## Ô ngoại hình lưu ID mảnh (vd "hair_03") — rig ghép thành key hình "villager/hair_03".
+## Lưu ID chứ không lưu đường dẫn ảnh, nên thay art thật vẫn hiển thị đúng.
+const PIECE_SLOTS: Array[String] = ["head", "face", "hair", "body", "accessory"]
+## Ô màu lưu mã màu "#RRGGBB" (để sau này chọn màu tự do được).
+const COLOR_SLOTS: Array[String] = ["skin", "fur", "hair_color"]
+## Mảnh mặc định khi thiếu (vd save cũ, dữ liệu tự tạo thiếu ô).
+const DEFAULT_APPEARANCE: Dictionary = {
+	"head": "head_01", "face": "face_01", "hair": "hair_01", "body": "body_01", "accessory": "",
+	"skin": "#F2C29B", "fur": "#A1887F", "hair_color": "#5D4037",
+}
 
-var id: int = 0
 ## Tên chọn lúc sinh ra, không đổi khi đổi ngôn ngữ.
-var display_name: String = ""
-var gender: Gender = Gender.MALE
-var stage: Stage = Stage.ADULT
-## Chỉ số hình/màu: head, hair, body, accessory (-1 = không có), skin, fur, hair_color.
-var appearance: Dictionary = {}
+@export var display_name: String = ""
+@export var gender: Gender = Gender.MALE
+@export var age_stage: AgeStage = AgeStage.ADULT
+## ID mảnh + mã màu, xem PIECE_SLOTS / COLOR_SLOTS. accessory = "" là không đeo gì.
+@export var appearance: Dictionary = DEFAULT_APPEARANCE.duplicate()
 ## Cao độ giọng lẩm bẩm riêng của mỗi người (dùng khi có âm thanh).
-var voice_pitch: float = 1.0
-var traits: Array[StringName] = []
-var best_job: StringName = &""
-var hunger: float = MAX_NEED
-var energy: float = MAX_NEED
-var fun: float = MAX_NEED
-var health: float = MAX_NEED
-var attack: float = 10.0
-
-
-## Tâm trạng 0..100 = trung bình có trọng số của ba nhu cầu.
-func mood() -> float:
-	return hunger * Balance.MOOD_WEIGHT_HUNGER + energy * Balance.MOOD_WEIGHT_ENERGY + fun * Balance.MOOD_WEIGHT_FUN
+@export var voice_pitch: float = 1.0
+@export var traits: Array[StringName] = []
+## Cấp khởi đầu 1–5 cho từng loại việc (xem data/skills.gd). Kinh nghiệm tích luỹ lúc chơi
+## và cấp đã lên lúc chơi nằm ở VillagerStatus (đọc cấp hiện tại qua Villager.skill_level()).
+@export var skills: Dictionary[StringName, int] = {}
+## Đúng một việc thích: làm việc này thì lên cấp nhanh hơn và giải trí giảm chậm hơn.
+@export var favorite_job: StringName = &""
 
 
 func is_adult() -> bool:
-	return stage == Stage.ADULT
+	return age_stage == AgeStage.ADULT
+
+
+## Lấy một ô ngoại hình, thiếu thì dùng mặc định.
+func look(slot: String) -> String:
+	return str(appearance.get(slot, DEFAULT_APPEARANCE.get(slot, "")))
 
 
 func to_dict() -> Dictionary:
@@ -42,39 +52,46 @@ func to_dict() -> Dictionary:
 	for trait_id: StringName in traits:
 		trait_names.append(String(trait_id))
 	return {
-		"id": id,
 		"name": display_name,
 		"gender": Gender.keys()[gender],
-		"stage": Stage.keys()[stage],
+		"age_stage": AgeStage.keys()[age_stage],
 		"appearance": appearance.duplicate(),
 		"voice_pitch": voice_pitch,
 		"traits": trait_names,
-		"best_job": String(best_job),
-		"hunger": hunger,
-		"energy": energy,
-		"fun": fun,
-		"health": health,
-		"attack": attack,
+		"skills": _skills_to_dict(),
+		"favorite_job": String(favorite_job),
 	}
 
 
-static func from_dict(data: Dictionary) -> VillagerData:
-	var villager: VillagerData = VillagerData.new()
-	villager.id = int(data.get("id", 0))
-	villager.display_name = str(data.get("name", ""))
-	villager.gender = Gender.get(str(data.get("gender", "MALE")), Gender.MALE)
-	villager.stage = Stage.get(str(data.get("stage", "ADULT")), Stage.ADULT)
-	# JSON đọc số thành float — ép lại về int cho chỉ số hình.
-	var look: Dictionary = data.get("appearance", {})
-	for key: String in look:
-		villager.appearance[key] = int(look[key])
-	villager.voice_pitch = float(data.get("voice_pitch", 1.0))
-	for trait_id: String in data.get("traits", []):
-		villager.traits.append(StringName(trait_id))
-	villager.best_job = StringName(str(data.get("best_job", "")))
-	villager.hunger = float(data.get("hunger", MAX_NEED))
-	villager.energy = float(data.get("energy", MAX_NEED))
-	villager.fun = float(data.get("fun", MAX_NEED))
-	villager.health = float(data.get("health", MAX_NEED))
-	villager.attack = float(data.get("attack", 10.0))
-	return villager
+static func from_dict(dict: Dictionary) -> VillagerData:
+	var data: VillagerData = VillagerData.new()
+	data.display_name = str(dict.get("name", ""))
+	data.gender = Gender.get(str(dict.get("gender", "MALE")), Gender.MALE) as Gender
+	data.age_stage = AgeStage.get(str(dict.get("age_stage", "ADULT")), AgeStage.ADULT) as AgeStage
+	var saved_look: Dictionary = dict.get("appearance", {})
+	for slot: String in DEFAULT_APPEARANCE:
+		data.appearance[slot] = str(saved_look.get(slot, DEFAULT_APPEARANCE[slot]))
+	data.voice_pitch = float(dict.get("voice_pitch", 1.0))
+	for trait_id: String in dict.get("traits", []):
+		data.traits.append(StringName(trait_id))
+	var saved_skills: Dictionary = dict.get("skills", {})
+	for skill_id: String in saved_skills:
+		data.skills[StringName(skill_id)] = int(saved_skills[skill_id])
+	data.favorite_job = StringName(str(dict.get("favorite_job", "")))
+	return data
+
+
+## Cấp KHỞI ĐẦU của một kỹ năng (chưa có thì coi như cấp thấp nhất). Cấp lúc chơi: VillagerStatus.skill_level().
+func skill_level(skill_id: StringName) -> int:
+	return clampi(skills.get(skill_id, Balance.SKILL_MIN_LEVEL), Balance.SKILL_MIN_LEVEL, Balance.SKILL_MAX_LEVEL)
+
+
+func is_favorite(skill_id: StringName) -> bool:
+	return skill_id != &"" and skill_id == favorite_job
+
+
+func _skills_to_dict() -> Dictionary:
+	var result: Dictionary = {}
+	for skill_id: StringName in skills:
+		result[String(skill_id)] = skills[skill_id]
+	return result

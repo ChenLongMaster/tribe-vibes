@@ -52,7 +52,7 @@ func tick(delta: float) -> Status:
 		return Status.RUNNING
 
 	villager.face_towards(other.position)
-	villager.data.fun = minf(villager.data.fun + Balance.FUN_CHAT * delta, VillagerData.MAX_NEED)
+	villager.status.add_fun(Balance.FUN_CHAT * delta)
 	if not _is_initiator:
 		return Status.RUNNING
 	# Người rủ "cầm nhịp" cho cả hai: đổi lượt nói và đếm giờ.
@@ -64,12 +64,12 @@ func tick(delta: float) -> Status:
 		var listener: Villager = session.other(speaker)
 		speaker.rig.play(VillagerRig.ANIM_TALK)
 		listener.rig.play(VillagerRig.ANIM_IDLE)
-		speaker.overhead.show_bubble(Loc.t("BUBBLE_GIBBERISH_%02d" % randi_range(1, GIBBERISH_COUNT)), "", TURN_SECONDS * 0.9)
+		speaker.say("BUBBLE_GIBBERISH_%02d" % randi_range(1, GIBBERISH_COUNT), {}, "", TURN_SECONDS * 0.9)
 		session.initiator_speaking = not session.initiator_speaking
 	if session.talk_left <= 0.0:
 		session.ended = true
 		if randf() < HAPPY_EMOTE_CHANCE:
-			villager.overhead.show_emote("icons/happy")
+			villager.emote("icons/happy")
 		return Status.DONE
 	return Status.RUNNING
 

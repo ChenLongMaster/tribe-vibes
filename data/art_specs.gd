@@ -34,6 +34,9 @@ const PIVOTS: Dictionary[String, Vector2] = {
 	"env/fish_jump": Vector2(0.5, 0.5),
 	"env/fish_shadow": Vector2(0.5, 0.5),
 	"fx/ember": Vector2(0.5, 0.5),
+	"animals/boar": Vector2(0.48, 0.92),
+	"animals/deer": Vector2(0.45, 0.94),
+	"ui/move_marker": Vector2(0.375, 0.875),
 }
 
 ## Neo chung cho cả nhóm hình cùng tiền tố (dùng khi không có trong PIVOTS).

@@ -1,39 +1,35 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://bmolm0vbbudla"]
 
-[ext_resource type="Script" path="res://world/world.gd" id="1_world"]
-[ext_resource type="Script" path="res://world/water_layer.gd" id="2_water"]
-[ext_resource type="Script" path="res://world/camera_controller.gd" id="3_camera"]
-[ext_resource type="Script" path="res://world/wind.gd" id="4_wind"]
-[ext_resource type="Script" path="res://world/water_life.gd" id="5_water_life"]
-[ext_resource type="Script" path="res://villager/villager_spawner.gd" id="6_spawner"]
-[ext_resource type="Script" path="res://world/selection_controller.gd" id="7_selection"]
+[ext_resource type="Script" uid="uid://btn1276pseuwn" path="res://world/world.gd" id="1_world"]
+[ext_resource type="Script" uid="uid://daho3wrstaygx" path="res://world/water_layer.gd" id="2_water"]
+[ext_resource type="Script" uid="uid://xpoex2clwxqn" path="res://world/camera_controller.gd" id="3_camera"]
+[ext_resource type="Script" uid="uid://b6j1c7qkoiwbq" path="res://world/wind.gd" id="4_wind"]
+[ext_resource type="Script" uid="uid://cl8n1lov8ag1h" path="res://world/water_life.gd" id="5_water_life"]
+[ext_resource type="Script" uid="uid://gpgwa24t1ll8" path="res://villager/villager_spawner.gd" id="6_spawner"]
 
-[node name="World" type="Node2D"]
+[node name="World" type="Node2D" unique_id=2048984574]
 script = ExtResource("1_world")
 
-[node name="Wind" type="Node" parent="."]
+[node name="Wind" type="Node" parent="." unique_id=1332014006]
 script = ExtResource("4_wind")
 
-[node name="Ground" type="TileMapLayer" parent="."]
+[node name="Ground" type="TileMapLayer" parent="." unique_id=633221732]
 
-[node name="Patches" type="Node2D" parent="."]
+[node name="Patches" type="Node2D" parent="." unique_id=1239327074]
 
-[node name="Water" type="TileMapLayer" parent="."]
+[node name="Water" type="TileMapLayer" parent="." unique_id=1242673916]
 script = ExtResource("2_water")
 
-[node name="WaterLife" type="Node2D" parent="."]
+[node name="WaterLife" type="Node2D" parent="." unique_id=1259102133]
 script = ExtResource("5_water_life")
 
-[node name="Decor" type="Node2D" parent="."]
+[node name="Decor" type="Node2D" parent="." unique_id=107503647]
 
-[node name="Entities" type="Node2D" parent="."]
+[node name="Entities" type="Node2D" parent="." unique_id=1834283693]
 y_sort_enabled = true
 
-[node name="Camera" type="Camera2D" parent="."]
+[node name="Camera" type="Camera2D" parent="." unique_id=2081786721]
 script = ExtResource("3_camera")
 
-[node name="VillagerSpawner" type="Node" parent="."]
+[node name="VillagerSpawner" type="Node" parent="." unique_id=90766465]
 script = ExtResource("6_spawner")
-
-[node name="SelectionController" type="Node" parent="."]
-script = ExtResource("7_selection")

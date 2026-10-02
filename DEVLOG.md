@@ -4,6 +4,138 @@ Mỗi đợt một mục: đã làm gì, chọn gì và vì sao. Mục mới nh�
 
 ---
 
+## Đợt 2 — Lao động & tài nguyên (2026-10-02)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit (chủ project tự commit).
+
+### Đã làm
+- **Giao việc** chỉ qua `NormalController` → `Commands.assign_job(villager_id, target)`. Chạm (hoặc kéo-thả thổ dân) vào cây → chặt, đá → đập, bụi quả → hái, chỗ câu cá → câu, lợn rừng/hươu → săn, lửa trại → nấu ăn. Chạm mặt đất trống → `Commands.move_villager()`: đi tới đó, đặt điểm neo mới, bỏ việc. Ra lệnh xong thì bỏ chọn.
+- **`Job` (việc được ghi nhớ) tách khỏi `Task` (lượt đang làm).** Bộ não bước 6 tạo lượt tiếp theo mỗi khi rảnh: làm → khuân về kho → làm tiếp. Đói/mệt/đình công chỉ thay Task, Job vẫn còn nên xong là tự quay lại. Đang khuân dở mà bị ngắt thì lượt sau khuân nốt (`TaskDeliver`). Thêm mức ưu tiên `WORK` (IDLE < WORK < NEED < SCRIPTED).
+- **Hết tài nguyên:** tìm cái tương tự gần nhất trong bán kính (8 ô; hái quả và săn 14 ô), bỏ qua cái người khác đã nhận. Không còn thì thôi việc, đứng chờ tại chỗ (điểm neo = chỗ đang đứng), bong bóng "Hết cây rồi!" / "Hết đá rồi!" / "Hết quả rồi!" / "Hết thú rồi!". Không tới được 3 lần liền → "Không tới được!".
+- **Dữ liệu:** `data/jobs.gd` (mỗi việc: mục tiêu, giây, sản lượng, hoạt họa, đồ nghề, bụi, chữ), `data/resources.gd` (gỗ, đá, quả, thịt sống, cá sống, món chín). Lửa trại có thêm cờ `material_storage` và `cook_station` — Đợt 3 chỉ cần gắn cờ cho Kho/Bếp.
+- **Tài nguyên trên map:** cây chặt 3 lượt thành gốc, ~3 ngày sau mọc lại; đá đập 4 lượt thì vỡ vụn biến mất (ô đó thành lối đi); vật rung lên mỗi nhát. Chỗ câu cá không cạn.
+- **Thú** (`world/animal.gd`): 4 con (lợn rừng, hươu) lang thang trên đồng cỏ, gặm cỏ; thợ săn tới gần thì giật mình đứng im (❗). Bị săn: ngất, sao quay, "bụp" biến mất → 3 thịt; 2 phút sau con mới xuất hiện.
+- **Nấu ăn ở lửa trại** (`TaskCook`): lấy 1 thịt/cá sống → 10 giây → 1 món chín. Chưa có gì thì đứng chờ cạnh lửa, thỉnh thoảng nhắc "Chưa có gì để nấu...". Dân đói ăn món chín trước (hồi 60 Đói + vui thêm), rồi tới quả; thịt/cá sống không ăn.
+- **Kỹ năng:** làm việc tích kinh nghiệm theo giây (việc thích ×2), đủ 90/180/300/480 thì lên cấp: bong bóng "Lên cấp!", sao bung ra, thông báo nổi. Cấp hiện tại nằm ở `VillagerStatus` (lưu được), `VillagerData.skills` chỉ còn là cấp khởi đầu. Cấp ảnh hưởng tốc độ làm qua `Task.work_speed()`.
+- **Đình công** (Giải trí = 0): quăng đồ nghề (đồ văng ra rơi xuống đất), dậm chân, 💢, thông báo "{tên} đình công!". Trong lúc đó 💢 luôn trên đầu, chỉ đứng chơi tại chỗ, giao việc thì nhớ nhưng nói "Không làm!". Giải trí hồi ≥ 40 thì "Làm tiếp thôi!" và quay lại việc.
+- **Lười** nghỉ tay giữa chừng (35% mỗi lượt, 4 giây, ngồi, "Nghỉ tí...") rồi tự làm tiếp.
+- **Hoạt họa mới:** chặt (giơ rìu ra sau đầu rồi bổ), đập đá (nện búa), câu cá, nấu (khuấy nồi), vung giáo, dậm chân đình công, khuân đồ (hai tay giơ đồ trên đầu, dùng chung với đi/đứng). Đồ nghề cầm tay dùng lại icon kỹ năng, xoay theo cánh tay. Thổ dân ưu tiên đứng bên trái/phải vật khi chặt/đập.
+- **Phản hồi:** icon việc trên đầu; đường chấm chấm chạy tới nơi được giao + vòng vàng dưới mục tiêu (cho người đang chọn và 3 giây sau mỗi lệnh); rê chuột lên mục tiêu khi đang chọn người → sáng vòng; kéo-thả có đường kéo; cờ nhỏ ở chỗ bảo đi tới; bong bóng "Ugh!" / "Đi đây!" / "Lát nữa nhé!" (đang ăn/ngủ); bụi khi chặt/đập; số bay "+3 gỗ" ở kho (`fx/fx_layer.gd`).
+- **HUD Normal:** thanh tài nguyên góc trên-phải (icon + số theo `Loc.number`, chỉ tính đồ đã vào kho, số nảy khi tăng, tooltip tên), "Ngày N", 4 nút tạm dừng/×1/×2/×3. Phím Space (tạm dừng ↔ chạy lại đúng tốc độ cũ), 1–3. Ra lệnh được cả khi đang tạm dừng.
+- **Thông báo nổi** (`ui/common/toast.tscn`) nghe `EventBus.village_event(key, args, icon)` — chỉ mang key, sẵn để làm nhật ký làng Đợt 4.
+- **Bảng thông tin:** thêm dòng "Việc được giao: …" (hoặc gợi ý cách giao việc / "Đang đình công"), sao kỹ năng cập nhật ngay khi lên cấp.
+- **Đồng hồ ngày** đơn giản trong `GameState` (4 phút một ngày, phát `day_changed`) — ánh sáng ngày đêm vẫn để Đợt 3.
+- **Hình mới:** `icons/res_wood`, `res_stone`, `res_meat`, `res_fish`, `res_meal`, `icons/angry`, `animals/boar`, `animals/deer`, `fx/dust`, `ui/speed_pause`, `speed_1..3`, `ui/target_ring`, `ui/move_marker` (ASSET_SPEC.md + `data/art_specs.gd`).
+- **Test:** 51 test (thêm `test_jobs.gd`, 11 test). Mô phỏng 5 phút: 3 chặt + 2 đập + 1 người không giao việc — gỗ/đá tăng mỗi phút (lần chạy gần nhất: gỗ 30 → 60 → 72 → 96 → 114, đá 8 → 14 → 18 → 22 → 30), watchdog im lặng, không ai bỏ việc, người rảnh không rời điểm neo. Thêm: ăn xong quay lại việc cũ, hết bụi thì dừng + bong bóng, đình công rồi làm lại, săn → nấu ra món chín, câu cá, controller chạm/kéo giao việc + đặt điểm neo, HUD + tạm dừng, tham số `*_key` được dịch. Soi cảnh báo strict: sạch.
+- Công cụ chụp màn hình thêm `--jobs` (giao 2 chặt, 1 đập, 1 hái ngay khi ra khỏi hang, chụp thêm `work.png`).
+
+### Quyết định
+- **Ra lệnh xong thì bỏ chọn** — tránh lỡ chạm mặt đất làm người đó bỏ việc. Đường chấm chấm vẫn hiện 3 giây để thấy họ đi đâu.
+- **Chạm mặt đất = bỏ việc** và đi tới đó.
+- **Đá vỡ hết thì biến mất**, cây thành gốc rồi mọc lại.
+- **Mỗi cây/đá/bụi/chỗ câu/con thú chỉ một người làm**; giao nhiều người vào cùng một cây thì người sau tự sang cây gần đó.
+- **Đầu bếp không có gì nấu thì đứng chờ** (mỗi lượt chờ 6 giây cho watchdog khỏi tưởng kẹt), không bỏ việc.
+- **Cấp kỹ năng chỉ tăng tốc độ**, không tăng sản lượng.
+- **Hái quả tìm bụi tương tự trong 14 ô** (không phải 8): bụi trên map cách nhau ~9–13 ô nên 8 ô làm người hái dừng sau đúng một bụi.
+- Quả hái về cất ở lửa trại → dân đói lấy ở đó trước (đúng như `StoredFoodSource` đã chuẩn bị).
+- Thú và đá vỡ **không bị xoá khỏi cây node** (chỉ ẩn) để Job/Reservations không bao giờ giữ node đã giải phóng. Thú dựng bằng code (`Animal.new()`), không cần `animal.tscn`.
+- `Loc.t`: tham số tên kết thúc `_key` là key dịch khác (`{"job_key": "JOB_CHOP"}` → `{job}`) — để thông báo/nhật ký chỉ lưu key. Thêm key `RES_<ID>_NOUN` (viết thường) để ghép vào câu.
+- Phím Space/1–3 do `NormalController` xử lý (chạy cả khi tạm dừng); nút bấm ở HUD; cả hai gọi `Commands`.
+
+### Còn biết
+- **Đình công khá thường** khi làm việc không thích liên tục: theo spec giải trí 100 → 0 trong 1 ngày làm việc (4 phút), nên một người làm miệt mài sẽ đình công sau chừng 5–6 phút chơi, và đứng chơi hồi lại 40 giải trí mất 1–4 phút (tán gẫu thì nhanh). Xem phần số nên chỉnh.
+- **Ngủ hơi thường** lúc mới làm việc: thể lực khởi đầu 60–100 mà làm việc hết sạch trong 1 ngày → vài phút đầu đã có người đi ngủ (đúng spec).
+- Thợ săn đứng chéo/dưới con thú lúc vung giáo (thú đứng sững trước khi người tới đúng bên cạnh) — trông vẫn ổn.
+- Thợ câu đứng trên bờ, chưa có dây câu/phao vẽ xuống nước.
+- Đầu bếp đứng sát lửa trại hơi chồng hình với ngọn lửa.
+- Khi 5 người cùng giao đồ ở lửa trại có lúc đứng chồng lên nhau một chút.
+- Đồ đang khuân dở mà người chơi bảo đi chỗ khác (chạm mặt đất) thì đồ đó mất.
+- Chưa có nút "thôi việc" trong bảng thông tin (chạm mặt đất là cách bỏ việc).
+- Bảng debug góc trên-trái vẫn hiện ở bản debug, nằm cạnh HUD.
+
+### Số nên tinh chỉnh (đề xuất)
+- `FUN_DECAY_WORK` (100/ngày) → thử 100 / 2 ngày nếu thấy đình công quá thường; hoặc tăng `FUN_RESTORE_IDLE` (0,15/giây) để hết giận nhanh hơn.
+- `ENERGY_DECAY_WORK` (100/ngày) → 100 / 1,5 ngày nếu thấy ngủ nhiều quá.
+- `SKILL_XP_TO_NEXT` = 90/180/300/480 giây làm việc: lên cấp 2 khá sớm (~1,5 phút, việc thích ~45 giây) cho người chơi thấy ngay; cấp 5 cần ~17 phút làm một việc.
+- `COOK_SECONDS_CAMPFIRE` = 10, `HUNT_SECONDS` = 4, `MEAT_PER_HUNT` = 3, `FISH_SECONDS` = 10: một thợ săn nuôi được ~1 đầu bếp; câu cá chậm hơn săn.
+- `ANIMAL_COUNT` = 4, `ANIMAL_RESPAWN_SECONDS` = 120.
+- `LAZY_BREAK_CHANCE` = 0,35.
+
+---
+
+## Đợt 1.5 — Tái cấu trúc đa chế độ + hành vi "nghe lời" (2026-10-01 → 10-02)
+
+**Trạng thái:** đã duyệt (chuyển sang Đợt 2).
+
+Gồm hai phần: (A) tái cấu trúc theo MVP_PROMPT mục 3.2 (2026-10-01), (B) áp dụng thiết kế mới chốt ngày 2026-10-02 sau khi chơi lại game gốc (thổ dân nghe lời, 4 chỉ số, kỹ năng + việc thích).
+
+### Phần B — Thiết kế mới (2026-10-02)
+
+**Tài liệu:** MVP_PROMPT.md viết lại các mục 2, 3.2, 4, 5.x, 6.x, 7, 8, 9.x, 10, 11, 12, 13, God mode; CLAUDE.md = bản copy y nguyên + phụ lục ghi chú kỹ thuật. Quyết định chốt thêm: ngày đêm chỉ để trang trí (ánh sáng đổi theo giờ, đổ bóng theo mặt trời — Đợt 3), dân số khởi đầu 4 / tối đa 50, hẹn hò tỉ lệ ~10% mỗi lần kiểm tra và có em bé ngay, việc thích chỉ thưởng không phạt.
+
+**Đã làm trong code:**
+- **Thổ dân nghe lời** (`villager_autonomy = OBEDIENT`): mỗi người có **điểm neo** (chỗ đứng sau khi ra khỏi hang). Rảnh thì chỉ làm hoạt cảnh trong bán kính `IDLE_RADIUS_CELLS` = 3 ô: dạo vài bước (`TaskStroll`, thay `TaskWander` đi khắp làng), ngồi, gãi, hái hoa dưới chân, tán gẫu với người đứng gần (`IDLE_CHAT_RANGE_CELLS` = 3). Ra xa (sau khi ăn/ngủ) thì tự đi về (`TaskReturn`).
+- **Chỉ tự rời chỗ khi:** Đói < 50 → đi ăn; Thể lực < 50% → đi ngủ. Bỏ "ăn vặt khi rảnh"; bỏ bước Lãng mạn mang hoa đi tặng (thành hoạt cảnh hẹn hò ở Đợt 4).
+- **Nguồn đồ ăn / chỗ ngủ cắm thêm được:** `FoodSource` (`BushFoodSource` hái quả, `StoredFoodSource` lấy đồ cất ở lửa trại — đang trống tới Đợt 2), `SleepSpot` (ngủ đất cạnh lửa trại ×1). `WorldFinder.find_food_for()` / `find_bed_for()` chọn nguồn; Đợt 3 chỉ cần thêm Bếp/Lều. Lửa trại có cờ `food_storage` trong `data/buildings.gd`.
+- **4 chỉ số dạng dữ liệu** (`data/needs.gd`): Máu, Đói, Thể lực, Giải trí — icon, màu, ngưỡng cảnh báo, tốc độ theo hoạt động (rảnh / làm việc / ngủ). `VillagerNeeds.step()` chạy theo `GameModeConfig.enabled_needs` (tắt chỉ số nào thì nó đứng yên và ẩn khỏi bảng). Luật dính nhau: việc nặng đói ×1.5, làm việc thích giải trí giảm ×0.25 (việc khác bình thường), Siêng năng giảm chậm hơn, Đói = 0 thì mất máu.
+- **Chạm đáy:** Thể lực = 0 → gục ngủ tại chỗ tới 30% rồi đi tìm chỗ ngủ (`TaskSleep` kiểu `collapsed`). Máu = 0 → ngất 20 giây, sao quay quanh đầu, tỉnh dậy với 20 máu + chút no rồi đi ăn ngay (`TaskKnockedOut`; độ khó Thường có thể chết — Đợt 5).
+- **Kỹ năng + việc thích** (`data/skills.gd`): 9 loại việc, cấp khởi đầu 1–2 ngẫu nhiên (+1 theo tính cách, tối đa 3), đúng một việc thích. Thay hoàn toàn `best_job`. `Task.work_speed()` tính theo cấp kỹ năng; hái quả nhanh hơn khi kỹ năng Hái lượm cao. Lên cấp: Đợt 2.
+- **`GameModeConfig`** thêm `villager_autonomy` (OBEDIENT / AUTONOMOUS) và `enabled_needs`; `GameState.get_mode()` trả luật mặc định = Normal khi chưa nạp chế độ (test). Bộ não đọc cờ autonomy, nhánh AUTONOMOUS để sẵn chỗ.
+- **Hiển thị:** bảng thông tin thay chữ bằng **icon + thanh nhỏ** cho 4 chỉ số (thanh đỏ khi dưới ngưỡng, tên nằm trong tooltip) và **lưới kỹ năng** (icon + sao cấp + tim việc thích). Trên đầu: icon chỉ số thấp nhấp nháy (ẩn khi đang ngủ/ngất), sao quay khi ngất.
+- **Khởi đầu 4 thổ dân** (2 nam, 2 nữ). Thể lực khởi đầu 60–100 để không ai vừa ra khỏi hang đã đi ngủ.
+- **Hình mới:** `icons/stat_health`, `stat_energy`, `stat_fun`, 9 `icons/skill_*`.
+- **Test:** 40 test. Mới: `test_needs.gd` (tốc độ theo hoạt động, việc nặng, việc thích không phạt, tắt chỉ số, đói mất máu, cờ chế độ, gục ngủ và ngất trong thế giới thật). Mô phỏng 5 phút: 4 người, rảnh thì không ai ra xa điểm neo, có tự đi ăn, không còn ăn vặt.
+
+**Quyết định:**
+- Điểm neo đặt ở ô thổ dân đi tới sau khi ra khỏi hang (quanh lửa trại); Đợt 2 chạm mặt đất trống → đặt điểm neo mới.
+- Icon cảnh báo trên đầu ẩn lúc đang ngủ/ngất (đã có chữ Z / sao) cho đỡ rối.
+- Ngưỡng nhấp nháy: Máu < 50, Đói < 50, Thể lực < 50, Giải trí < 20.
+- Đình công (giải trí = 0) chưa viết vì chưa có việc để bỏ — Đợt 2.
+
+**Còn biết:**
+- Làng "tĩnh" hơn cuối Đợt 1 — đúng thiết kế: chưa giao việc thì dân chỉ quanh quẩn lửa trại.
+- Hiếm khi thấy đi ngủ: đứng chơi gần như không mất thể lực. Sẽ thấy rõ khi có việc (Đợt 2).
+- Kho ở lửa trại còn trống nên dân đói vẫn đi hái bụi quả (có thể xa vùng dạo chơi) rồi tự quay về.
+
+### Phần A — Tái cấu trúc (2026-10-01)
+
+Chỉ tái cấu trúc theo MVP_PROMPT mục 3.2, không thêm tính năng. Game chạy y như cuối Đợt 1.
+
+### Rà soát (Bước 1) — các chỗ vi phạm đã tìm thấy
+- Lõi tự dịch chữ (`Loc.t` trong brain/task, 8 chỗ) và ra lệnh thẳng cho phần hiển thị bong bóng.
+- Chưa có API chung `Commands`; `World.spawn_villager` nhận vị trí pixel thay vì ô.
+- Chưa có tầng Controller: `SelectionController` nằm trong `world/` và tự nghe InputRouter.
+- Chưa có `GameModeConfig`; `main` gắn cứng mọi thứ, không qua cơ chế chọn chế độ.
+- `VillagerData` là RefCounted, ngoại hình lưu chỉ số, trộn lẫn trạng thái lúc chơi (nhu cầu), `id` do hàm random cấp.
+- UI chưa chia `ui/common/` – `ui/normal/`.
+
+### Đã sửa (Bước 2)
+- **`VillagerData` thành `Resource`** — chỉ còn "bản thiết kế": `display_name`, `gender`, `age_stage` (đổi tên từ `stage`), `appearance`, `voice_pitch`, `traits`, `best_job`. Ngoại hình lưu **ID mảnh** (`head_02`, `face_01`, `hair_03`, `body_01`, `accessory_02` hoặc `""`) + **mã màu** `#RRGGBB` cho da/áo/tóc.
+- **`VillagerStatus`** (mới) giữ trạng thái lúc chơi: No, Năng lượng, Vui, Máu, Sức đánh, `mood()`. Nhu cầu ban đầu do lõi đặt lúc spawn (RNG gieo theo seed map), không còn do hàm random.
+- **`VillagerFactory.create()`** chỉ trả về `VillagerData` (bỏ tham số id).
+- **`World.spawn_villager(data, cell, status = null)`** là cách duy nhất tạo thổ dân; lõi cấp `id`, có bảng tra `get_villager(id)`.
+- **Autoload `Commands`**: `spawn_villager(data, cell) -> id`, `get_villager(id)`, `set_game_speed(speed)`. Hoạt cảnh chui ra khỏi hang cũng đi qua `Commands.spawn_villager`.
+- **Lõi không tự dịch, không ra lệnh cho phần hiển thị**: brain/task gọi `villager.say(key, args, icon)`, `emote(icon)`, `show_heart()`; `Villager` phát signal, `Overhead` nghe rồi mới dịch. Icon việc trên đầu và chữ Z khi ngủ do `Overhead` tự đọc từ thổ dân. Bảng thông tin tự dịch `activity_key/args`.
+- **`GameModeConfig`** (`modes/game_mode_config.gd`) với 7 cờ theo spec + `id`, `name_key`, `starts_with_tribe`, `controller_scene`, `hud_scene`. **`modes/normal_mode.tres`** là chế độ Normal.
+- **`PlayerController`** (lớp gốc) + **`NormalController`** (`modes/controllers/`) — chuyển nguyên logic chọn/rê/nhấn giữ/huỷ từ `SelectionController` cũ (đã xoá).
+- **`main.gd` → `start_game(mode)`**: `GameState.new_game(mode)`, dựng World, gắn controller + HUD theo config, chạy hoạt cảnh mở đầu nếu `starts_with_tribe`. Có `--mode=<đường dẫn .tres>` trên dòng lệnh.
+- **UI**: `ui/common/` (bảng thông tin, bảng debug), `ui/normal/hud.tscn` (HUD Normal, đang trống — Đợt 2 thêm tài nguyên/tốc độ).
+- Hình mặt đổi tên `face_<kiểu>_<biểu cảm>` (vd `face_01_happy`) để `face` trong ngoại hình là một ID mảnh thật.
+- Save/load: chưa có lưu ván chơi (Đợt 3); `VillagerData.to_dict/from_dict` và `VillagerStatus.to_dict/from_dict` đã theo cấu trúc mới, có test đi qua JSON.
+- Test: 33 test (thêm `test_modes.gd`: cờ của Normal, khởi động nạp đúng controller + HUD, `Commands.spawn_villager` đúng ô / từ chối ô bị chặn; thêm test ngoại hình là ID mảnh + mã màu, VillagerStatus lưu/đọc). Test mô phỏng 5 phút vẫn qua.
+- Tài liệu: CLAUDE.md thêm mục kiến trúc + quy tắc không tự commit; ASSET_SPEC cập nhật tên file mặt.
+
+### Quyết định
+- Camera và bảng debug vẫn nghe thẳng InputRouter — kéo/zoom bản đồ giống nhau ở mọi chế độ.
+- Task vẫn gọi thẳng `villager.rig.play(...)` (hoạt họa là một phần của thổ dân); tách hết hoạt họa khỏi lõi vượt quá phạm vi "chỉ tái cấu trúc".
+- `starts_with_tribe` là cờ thêm ngoài 7 cờ bắt buộc, để chế độ Thần Linh có thể bắt đầu với map trống.
+
+### Còn biết
+- Cùng một seed giờ cho ngoại hình bộ lạc **khác** so với Đợt 1 (thứ tự bốc số ngẫu nhiên đổi vì thêm ô `face`). Hành vi không đổi.
+- Test `test_modes` cố ý tạo thổ dân trên ô bị chặn nên Output có một dòng WARNING "ô … bị chặn" — đúng như mong đợi.
+
+---
+
 ## Đợt 1 — Thổ dân sống động (2026-10-01)
 
 **Trạng thái:** đã duyệt (chuyển sang Đợt 1.5).

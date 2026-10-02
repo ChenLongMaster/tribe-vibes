@@ -23,6 +23,7 @@ GameState="*res://autoload/game_state.gd"
 Loc="*res://autoload/loc.gd"
 ArtLibrary="*res://autoload/art_library.gd"
 InputRouter="*res://autoload/input_router.gd"
+Commands="*res://autoload/commands.gd"
 
 [debug]
 

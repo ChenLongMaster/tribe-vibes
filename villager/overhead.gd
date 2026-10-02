@@ -3,8 +3,12 @@ extends Node2D
 ## Mọi thứ hiện trên đầu thổ dân: bong bóng thoại/cảm xúc, icon việc đang làm, tên,
 ## chữ Z khi ngủ, tim bay. Đây là kênh "phản hồi rõ ràng" để người chơi luôn biết
 ## thổ dân đang làm gì và vì sao.
+##
+## Chỉ NGHE thổ dân (signal + đọc trạng thái), tự dịch chữ bằng Loc — lõi mô phỏng
+## không cần biết chữ hiển thị ra sao.
 
 const BUBBLE_SECONDS: float = 2.6
+const EMOTE_SECONDS: float = 1.6
 const BUBBLE_FONT_SIZE: int = 14
 const BUBBLE_ICON_SIZE: float = 22.0
 const BUBBLE_GAP_ABOVE_NAME: float = 18.0
@@ -13,15 +17,24 @@ const ACTIVITY_BOB: float = 2.0
 const ZZZ_INTERVAL: float = 0.9
 const ZZZ_LIFE: float = 1.6
 const HEART_LIFE: float = 1.2
+const ALERT_OFFSET: Vector2 = Vector2(18, -4) # icon chỉ số thấp đứng lệch sang bên
+const ALERT_BLINK_SPEED: float = 6.0
+const KNOCKOUT_STAR_COUNT: int = 3
+const KNOCKOUT_STAR_RADIUS: Vector2 = Vector2(16, 6)
+const KNOCKOUT_STAR_SPEED: float = 3.0
+const KNOCKOUT_STAR_SCALE: float = 0.3
 
+var _villager: Villager
 var _bubble: PanelContainer
 var _bubble_icon: TextureRect
 var _bubble_label: Label
 var _bubble_time: float = 0.0
 var _activity: Sprite2D
 var _name_label: Label
-var _sleeping: bool = false
 var _zzz_timer: float = 0.0
+var _alert: Sprite2D
+var _alert_need: StringName = &""
+var _stars: Array[Sprite2D] = []
 var _time: float = 0.0
 
 
@@ -33,10 +46,47 @@ func _ready() -> void:
 	add_child(_name_label)
 	_bubble = _make_bubble()
 	add_child(_bubble)
+	_alert = Sprite2D.new()
+	_alert.visible = false
+	add_child(_alert)
+	for i: int in KNOCKOUT_STAR_COUNT:
+		var star: Sprite2D = Sprite2D.new()
+		ArtLibrary.setup_sprite(star, "icons/star")
+		star.scale *= KNOCKOUT_STAR_SCALE * 2.0
+		star.visible = false
+		add_child(star)
+		_stars.append(star)
+	_villager = get_parent() as Villager
+	if _villager != null:
+		_villager.speech_requested.connect(_on_speech_requested)
+		_villager.heart_requested.connect(_on_heart_requested)
+		_villager.task_changed.connect(_on_task_changed)
+		_name_label.text = _villager.data.display_name
 
 
-## Bong bóng có chữ và/hoặc icon. Chữ đã dịch sẵn (gọi Loc trước khi truyền vào).
-func show_bubble(text: String, icon_key: String = "", seconds: float = BUBBLE_SECONDS) -> void:
+func set_name_visible(on: bool) -> void:
+	_name_label.visible = on
+	_name_label.reset_size()
+
+
+func _on_speech_requested(key: String, args: Dictionary, icon_key: String, seconds: float) -> void:
+	var text: String = "" if key.is_empty() else Loc.t(key, args)
+	var default_seconds: float = EMOTE_SECONDS if key.is_empty() else BUBBLE_SECONDS
+	_show_bubble(text, icon_key, seconds if seconds > 0.0 else default_seconds)
+
+
+func _on_heart_requested() -> void:
+	_float_sprite("fx/heart", Vector2(0, 4), Vector2(0, -34), HEART_LIFE, 1.0)
+
+
+func _on_task_changed(villager: Villager) -> void:
+	var icon_key: String = villager.activity_icon()
+	_activity.visible = not icon_key.is_empty()
+	if _activity.visible:
+		ArtLibrary.setup_sprite(_activity, icon_key)
+
+
+func _show_bubble(text: String, icon_key: String, seconds: float) -> void:
 	_bubble_label.text = text
 	_bubble_label.visible = not text.is_empty()
 	_bubble_icon.visible = not icon_key.is_empty()
@@ -48,35 +98,6 @@ func show_bubble(text: String, icon_key: String = "", seconds: float = BUBBLE_SE
 	_bubble.scale = Vector2(0.6, 0.6)
 	var tween: Tween = _bubble.create_tween()
 	tween.tween_property(_bubble, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-
-
-## Bong bóng chỉ có icon cảm xúc (vui ♪, đói, buồn ngủ…).
-func show_emote(icon_key: String, seconds: float = 1.6) -> void:
-	show_bubble("", icon_key, seconds)
-
-
-func set_activity_icon(icon_key: String) -> void:
-	_activity.visible = not icon_key.is_empty()
-	if _activity.visible:
-		ArtLibrary.setup_sprite(_activity, icon_key)
-
-
-func set_display_name(text: String) -> void:
-	_name_label.text = text
-	_name_label.reset_size()
-
-
-func set_name_visible(on: bool) -> void:
-	_name_label.visible = on
-
-
-func set_sleeping(on: bool) -> void:
-	_sleeping = on
-	_zzz_timer = 0.0
-
-
-func pop_heart() -> void:
-	_float_sprite("fx/heart", Vector2(0, 4), Vector2(0, -34), HEART_LIFE, 1.0)
 
 
 func _process(delta: float) -> void:
@@ -93,11 +114,51 @@ func _process(delta: float) -> void:
 	_activity.position = Vector2(0, -6 - lift + sin(_time * 3.0) * ACTIVITY_BOB)
 	# Bong bóng đang hiện thì giấu icon việc cho đỡ rối.
 	_activity.modulate.a = 0.0 if _bubble.visible else 1.0
-	if _sleeping:
+	# Chữ Z bay lên khi đang ngủ — đọc thẳng trạng thái, lõi không phải báo riêng.
+	if _villager != null and _villager.state == Villager.State.SLEEPING:
 		_zzz_timer -= delta
 		if _zzz_timer <= 0.0:
 			_zzz_timer = ZZZ_INTERVAL
 			_float_sprite("fx/zzz", Vector2(10, 22), Vector2(26, -10), ZZZ_LIFE, 0.5, 1.1)
+	else:
+		_zzz_timer = 0.0
+	_update_alert(lift)
+	_update_stars()
+
+
+# Chỉ số dưới ngưỡng thì icon của nó nhấp nháy cạnh đầu (máu trước, rồi đói, thể lực…).
+func _update_alert(lift: float) -> void:
+	var need_id: StringName = _lowest_alert_need()
+	_alert.visible = need_id != &""
+	if not _alert.visible:
+		return
+	if need_id != _alert_need:
+		_alert_need = need_id
+		ArtLibrary.setup_sprite(_alert, NeedDefs.icon(need_id))
+	_alert.position = ALERT_OFFSET + Vector2(0, -lift)
+	_alert.modulate.a = 0.55 + 0.45 * sin(_time * ALERT_BLINK_SPEED)
+
+
+func _lowest_alert_need() -> StringName:
+	# Đang ngủ/ngất đã có chữ Z/sao, không nhấp nháy thêm cho rối.
+	if _villager == null or _villager.state in [Villager.State.SLEEPING, Villager.State.KNOCKED_OUT]:
+		return &""
+	var mode: GameModeConfig = GameState.get_mode()
+	for need_id: StringName in NeedDefs.ORDER:
+		if mode.need_enabled(need_id) and _villager.status.get_need(need_id) < NeedDefs.alert_below(need_id):
+			return need_id
+	return &""
+
+
+# Ngất thì vài ngôi sao quay quanh đầu.
+func _update_stars() -> void:
+	var dizzy: bool = _villager != null and _villager.state == Villager.State.KNOCKED_OUT
+	for i: int in _stars.size():
+		var star: Sprite2D = _stars[i]
+		star.visible = dizzy
+		if dizzy:
+			var angle: float = _time * KNOCKOUT_STAR_SPEED + TAU * i / _stars.size()
+			star.position = Vector2(cos(angle) * KNOCKOUT_STAR_RADIUS.x, sin(angle) * KNOCKOUT_STAR_RADIUS.y + 10.0)
 
 
 func _float_sprite(key: String, from: Vector2, to: Vector2, life: float, start_scale: float, end_scale: float = -1.0) -> void:

@@ -9,6 +9,8 @@ const DEFAULT_FRAME_FPS: float = 8.0
 ## Phập phồng nhẹ chồng lên các khung hình, để chuyển khung không bị khựng.
 const FLICKER_SPEED: float = 9.0
 const FLICKER_AMOUNT: float = 0.04
+## Phần hình nhô lên trên footprint vẫn tính là chạm trúng công trình.
+const HIT_EXTRA_HEIGHT: float = 40.0
 
 var building_id: StringName = &""
 var origin_cell: Vector2i = Vector2i.ZERO
@@ -53,6 +55,14 @@ func set_wind(wind: Wind) -> void:
 		_extra_sprite.material = wind.sway_material(Wind.Profile.FLAME)
 	if _fx != null and _fx.has_method("set_wind"):
 		_fx.call("set_wind", wind)
+
+
+## Chạm trúng công trình không: phủ footprint + phần thân nhô lên phía trên.
+func hit_test(world_point: Vector2) -> bool:
+	var size: Vector2 = Vector2(BuildingDefs.footprint(building_id)) * Balance.TILE_SIZE
+	var bottom: float = position.y + FOOT_INSET
+	var rect: Rect2 = Rect2(position.x - size.x * 0.5, bottom - size.y - HIT_EXTRA_HEIGHT, size.x, size.y + HIT_EXTRA_HEIGHT)
+	return rect.has_point(world_point)
 
 
 func footprint_cells() -> Array[Vector2i]:

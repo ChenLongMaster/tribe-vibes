@@ -8,6 +8,10 @@ class_name BuildingDefs
 ##   kèm extra_art_fps, extra_art_offset (lệch so với gốc), extra_art_sways (nghiêng theo gió).
 ## - fx_scene: scene hiệu ứng gắn kèm (vd tàn lửa), đặt lệch fx_offset so với gốc.
 ## - buildable: người chơi có xây được từ menu không.
+## - food_storage: nơi cất đồ ăn (quả, thịt, cá, món chín); dân đói đến đây lấy ăn (lửa trại; Đợt 3 Bếp).
+## - material_storage: nơi cất gỗ, đá (lửa trại; Đợt 3 Kho).
+## - cook_station: giao người vào đây để nấu thịt/cá sống thành món chín (lửa trại; Đợt 3 Bếp).
+## - cook_seconds: thời gian nấu một món ở đây (cấp 1).
 
 const DEFS: Dictionary[StringName, Dictionary] = {
 	&"cave": {
@@ -27,6 +31,12 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 		"extra_art_fps": 8.0,
 		"extra_art_offset": Vector2(0, -12),
 		"extra_art_sways": true,
+		# Kho + bếp tạm ban đầu: cất gỗ, đá, đồ ăn; dân đói đến đây ăn; nấu chậm.
+		"food_storage": true,
+		"material_storage": true,
+		# Bếp tạm: nấu chậm hơn bếp thật.
+		"cook_station": true,
+		"cook_seconds": Balance.COOK_SECONDS_CAMPFIRE,
 		"fx_scene": "res://fx/campfire_embers.tscn",
 		"fx_offset": Vector2(0, -38),
 		"buildable": false,

@@ -17,14 +17,13 @@ func start() -> void:
 	villager.rig.play(VillagerRig.ANIM_SIT)
 	villager.rig.squash(0.12)
 	timer = randf_range(Balance.IDLE_MIN_SECONDS + 1.0, Balance.IDLE_MAX_SECONDS)
-	if villager.data.energy < YAWN_IF_ENERGY_BELOW:
+	if villager.status.energy < YAWN_IF_ENERGY_BELOW:
 		_yawn_at = timer * 0.5
 
 
 func tick(delta: float) -> Status:
-	var data: VillagerData = villager.data
-	data.fun = minf(data.fun + Balance.FUN_SIT * delta, VillagerData.MAX_NEED)
-	data.energy = minf(data.energy + Balance.ENERGY_RESTORE_SIT * delta, VillagerData.MAX_NEED)
+	villager.status.add_fun(Balance.FUN_SIT * delta)
+	villager.status.add_energy(Balance.ENERGY_RESTORE_SIT * delta)
 	var before: float = timer
 	timer -= delta
 	if before > _yawn_at and timer <= _yawn_at:
