@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="256" viewBox="0 0 384 256">
+  <!-- Móng 3×2 ô (phủ đúng diện tích) -->
+  <rect x="10" y="10" width="364" height="236" rx="18" fill="#C8A27A"/>
+  <rect x="10" y="10" width="364" height="236" rx="18" fill="none" stroke="#A1887F" stroke-width="5" stroke-dasharray="16 12"/>
+  <path d="M50 89.6 L70 107.6" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M68 179.2 L88 193.2" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M114 89.6 L134 107.6" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M132 179.2 L152 193.2" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M178 89.6 L198 107.6" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M196 179.2 L216 193.2" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M242 89.6 L262 107.6" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M260 179.2 L280 193.2" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M306 89.6 L326 107.6" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M324 179.2 L344 193.2" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M22 14 L362 14 L362 226 L22 226 Z" fill="none" stroke="#FFF8E1" stroke-width="3"/>
+  <rect x="16" y="-8" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <rect x="356" y="-8" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <rect x="16" y="204" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <rect x="356" y="204" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="115.19999999999999" cy="140.8" rx="10" ry="7.0" fill="#9E9E9E" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="112.19999999999999" cy="138.3" rx="3.5" ry="2.0" fill="#BDBDBD"/>
+  <ellipse cx="276.48" cy="102.4" rx="8" ry="5.6" fill="#9E9E9E" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="274.08000000000004" cy="100.4" rx="2.8" ry="1.6" fill="#BDBDBD"/>
+</svg>

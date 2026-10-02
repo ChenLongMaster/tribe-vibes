@@ -1,7 +1,7 @@
 class_name TaskFetchTool
 extends Task
 ## Được giao việc cần đồ nghề (rìu, cuốc, giáo) mà trên tay chưa có: đi tới chỗ cất đồ nghề
-## (lò rèn — Đợt 3), cất lại món đang giữ (nếu có) rồi lấy món cần dùng. Lấy xong thì giữ
+## (lò rèn), cất lại món đang giữ (nếu có) rồi lấy món cần dùng. Lấy xong thì giữ
 ## luôn — làm việc khác không cần đồ nghề thì đeo sau lưng.
 ## Không kế thừa TaskWork: lượt này không làm hỏng Job nếu tới nơi mà món đã bị người khác
 ## lấy mất — lượt sau Job tự tìm chỗ khác hoặc dừng việc, giơ biển "thiếu đồ nghề".
@@ -50,7 +50,8 @@ func tick(delta: float) -> Status:
 			if not _rack.take_stock(_tool):
 				return Status.DONE
 			if villager.tool != &"":
-				_rack.add_stock(villager.tool)
+				# Trả món cũ dù lò đầy chỗ — đồ nghề không bao giờ bị mất.
+				_rack.add_stock(villager.tool, 1, true)
 			villager.set_tool(_tool)
 			villager.rig.squash(-0.12)
 			villager.emote(ToolDefs.icon(_tool))

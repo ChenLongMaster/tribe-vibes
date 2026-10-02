@@ -1,6 +1,6 @@
 class_name TaskCook
 extends TaskWork
-## Một lượt nấu ăn ở lửa trại (Đợt 3: bếp): lấy một phần thức ăn thô trong kho chung, nấu,
+## Một lượt nấu ăn ở lửa trại hoặc Bếp: lấy một phần thức ăn thô trong kho chung, nấu,
 ## ra một món chín cất ngay ở bếp (đồ RIÊNG của bếp, tối đa theo sức chứa — bày quanh bếp
 ## cho thấy). Chưa có gì để nấu thì đứng chờ cạnh bếp, thỉnh thoảng giơ biển đùi thịt gạch
 ## chéo; bếp đầy món chín thì đứng chờ người ăn bớt. Mỗi lượt chờ ngắn để watchdog không
@@ -46,7 +46,7 @@ func tick(delta: float) -> Status:
 			step = Step.WAIT
 		Step.WAIT:
 			if _try_take_raw():
-				begin_work(float(_station.def.get("cook_seconds", job.def()["seconds"])))
+				begin_work(float(_station.prop("cook_seconds", job.def()["seconds"])))
 				step = Step.COOK
 				villager.notify_task_changed()
 				return Status.RUNNING
@@ -73,6 +73,7 @@ func stop() -> void:
 	super.stop()
 	# Bị ngắt giữa chừng thì trả phần đồ thô lại kho, không làm mất.
 	if _raw != &"":
+		# Kho đầy thì vẫn trả (không làm mất phần đã lấy ra).
 		GameState.add_resource(ResourceDefs.FOOD, 1, _raw if _raw != ResourceDefs.FOOD else &"")
 		_raw = &""
 

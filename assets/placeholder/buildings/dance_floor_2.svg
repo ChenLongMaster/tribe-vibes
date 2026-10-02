@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="400" viewBox="0 0 384 400">
+  <!-- Sân nhảy cấp 2 (phẳng, đi lên được) -->
+  <ellipse cx="192" cy="270" rx="176" ry="112" fill="#BCAAA4" stroke="#4E342E" stroke-width="6"/>
+  <path d="M40 215.55554805944467 L40 324.4444519405553" stroke="#8D6E63" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M78 187.71779311267875 L78 352.28220688732125" stroke="#8D6E63" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M116 172.588247183531 L116 367.411752816469" stroke="#8D6E63" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M154 164.54734523638479 L154 375.4526547636152" stroke="#8D6E63" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M192 162.0 L192 378.0" stroke="#8D6E63" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M230 164.54734523638479 L230 375.4526547636152" stroke="#8D6E63" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M268 172.588247183531 L268 367.411752816469" stroke="#8D6E63" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M306 187.71779311267875 L306 352.28220688732125" stroke="#8D6E63" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M344 215.55554805944467 L344 324.4444519405553" stroke="#8D6E63" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M30 120 Q192 190 354 120" fill="none" stroke="#4E342E" stroke-width="4"/>
+  <path d="M48 135.9965706447188 L72 135.9965706447188 L60 159.9965706447188 Z" fill="#E57373" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M92 157.9429202865417 L116 157.9429202865417 L104 181.9429202865417 Z" fill="#FFD54F" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M136 171.11073007163543 L160 171.11073007163543 L148 195.11073007163543 Z" fill="#81C784" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M180 175.5 L204 175.5 L192 199.5 Z" fill="#64B5F6" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M224 171.11073007163543 L248 171.11073007163543 L236 195.11073007163543 Z" fill="#BA68C8" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M268 157.9429202865417 L292 157.9429202865417 L280 181.9429202865417 Z" fill="#FFB74D" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M312 135.9965706447188 L336 135.9965706447188 L324 159.9965706447188 Z" fill="#E57373" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="24" y="180" width="12" height="90" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="6"/>
+  <path d="M30 184 C21.6 178.0 24.0 166.0 30 157.6 C32.4 166.0 39.6 170.8 37.2 180.4 Z" fill="#FF8A65" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M30 181.6 C26.4 178.0 27.6 172.0 30.6 167.2 C32.4 173.2 34.8 175.6 33.6 180.4 Z" fill="#FFD54F"/>
+  <rect x="348" y="180" width="12" height="90" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="6"/>
+  <path d="M354 184 C345.6 178.0 348.0 166.0 354 157.6 C356.4 166.0 363.6 170.8 361.2 180.4 Z" fill="#FF8A65" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M354 181.6 C350.4 178.0 351.6 172.0 354.6 167.2 C356.4 173.2 358.8 175.6 357.6 180.4 Z" fill="#FFD54F"/>
+</svg>

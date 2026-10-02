@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" path="res://ui/common/debug_overlay.tscn" id="3_debug"]
 [ext_resource type="PackedScene" path="res://ui/common/villager_panel.tscn" id="4_panel"]
 [ext_resource type="PackedScene" path="res://ui/common/toast.tscn" id="5_toast"]
+[ext_resource type="Script" path="res://ui/common/building_panel.gd" id="6_building_panel"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -13,9 +14,14 @@ script = ExtResource("1_main")
 
 [node name="UI" type="CanvasLayer" parent="."]
 process_mode = 3
+layer = 10
 
 [node name="DebugOverlay" parent="UI" instance=ExtResource("3_debug")]
 
 [node name="VillagerPanel" parent="UI" instance=ExtResource("4_panel")]
+
+[node name="BuildingPanel" type="MarginContainer" parent="UI"]
+mouse_filter = 2
+script = ExtResource("6_building_panel")
 
 [node name="Toast" parent="UI" instance=ExtResource("5_toast")]

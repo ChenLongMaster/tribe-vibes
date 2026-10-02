@@ -45,6 +45,30 @@ const PIVOTS: Dictionary[String, Vector2] = {
 	"env/twigs": Vector2(0.5, 0.75),
 	"env/pebbles": Vector2(0.5, 0.75),
 	"env/cliff": Vector2(0.5, 0.97),
+	# Công trình Đợt 3: mép dưới hình = mép dưới diện tích, neo cách mép dưới 24 px (file 2×)
+	# = Building.FOOT_INSET. Neo y = (cao - 24) / cao.
+	"buildings/tent_1": Vector2(0.5, 0.92),
+	"buildings/tent_2": Vector2(0.5, 0.92),
+	"buildings/tent_3": Vector2(0.5, 0.92),
+	"buildings/kitchen_1": Vector2(0.5, 0.925),
+	"buildings/kitchen_2": Vector2(0.5, 0.925),
+	"buildings/kitchen_3": Vector2(0.5, 0.925),
+	"buildings/storage_1": Vector2(0.5, 0.9368),
+	"buildings/storage_2": Vector2(0.5, 0.9368),
+	"buildings/storage_3": Vector2(0.5, 0.9368),
+	"buildings/forge_1": Vector2(0.5, 0.925),
+	"buildings/forge_2": Vector2(0.5, 0.925),
+	"buildings/forge_3": Vector2(0.5, 0.925),
+	"buildings/dance_floor_1": Vector2(0.5, 0.94),
+	"buildings/dance_floor_2": Vector2(0.5, 0.94),
+	"buildings/dance_floor_3": Vector2(0.5, 0.94),
+	# Móng phủ đúng diện tích; Building đặt sprite móng ở mép dưới diện tích nên neo mép dưới.
+	"buildings/foundation_2x2": Vector2(0.5, 1.0),
+	"buildings/foundation_3x2": Vector2(0.5, 1.0),
+	"buildings/foundation_3x3": Vector2(0.5, 1.0),
+	# Mũ công trường vẽ trên khung đầu 80×80 như tóc, neo ở cổ.
+	"villager/hard_hat": Vector2(0.5, 0.9),
+	"fx/confetti": Vector2(0.5, 0.5),
 }
 
 ## Neo chung cho cả nhóm hình cùng tiền tố (dùng khi không có trong PIVOTS).

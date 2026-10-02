@@ -16,13 +16,23 @@ var _hud: Control
 
 func _ready() -> void:
 	Loc.language_changed.connect(_on_language_changed)
+	EventBus.day_changed.connect(_on_day_changed)
+	EventBus.load_requested.connect(_on_load_requested)
 	_update_window_title()
-	start_game(_mode_from_command_line())
+	# Vừa bấm "Tải": dựng lại cảnh từ ván đã đọc.
+	var save: Dictionary = SaveSystem.pending_load
+	SaveSystem.pending_load = {}
+	start_game(_mode_from_command_line(), save)
 
 
-func start_game(mode: GameModeConfig) -> void:
+## `save` = ván đã lưu để dựng lại (trống = ván mới).
+func start_game(mode: GameModeConfig, save: Dictionary = {}) -> void:
 	GameState.new_game(mode)
+	if not save.is_empty():
+		GameState.apply_dict(save.get("game", {}))
 	_world.build(GameState.world_seed)
+	if not save.is_empty():
+		SaveGame.restore(_world, save)
 	_controller = mode.controller_scene.instantiate() as PlayerController
 	add_child(_controller)
 	_controller.setup(_world, mode)
@@ -30,7 +40,7 @@ func start_game(mode: GameModeConfig) -> void:
 	_ui.add_child(_hud)
 	# HUD nằm dưới cùng lớp UI, để bảng thông tin dùng chung đè lên trên.
 	_ui.move_child(_hud, 0)
-	if mode.starts_with_tribe:
+	if mode.starts_with_tribe and save.is_empty():
 		_world.start_intro()
 
 
@@ -49,10 +59,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		var next: int = (languages.find(Loc.get_language()) + 1) % languages.size()
 		Loc.set_language(languages[next])
 		get_viewport().set_input_as_handled()
-	# F10: thêm rìu, cuốc, giáo vào lửa trại để thử (chưa có lò rèn).
-	if OS.is_debug_build() and event is InputEventKey and event.is_pressed() and not event.is_echo() 			and (event as InputEventKey).physical_keycode == KEY_F10:
-		Commands.debug_give_tools()
-		get_viewport().set_input_as_handled()
 
 
 func _mode_from_command_line() -> GameModeConfig:
@@ -63,6 +69,22 @@ func _mode_from_command_line() -> GameModeConfig:
 				return mode
 			push_warning("Không đọc được chế độ '%s', dùng chế độ Normal" % arg)
 	return DEFAULT_MODE
+
+
+# Tự lưu mỗi khi sang ngày mới.
+func _on_day_changed(_day: int) -> void:
+	Commands.save_game(true)
+
+
+# Tải ván đã lưu: đọc file rồi dựng lại cả cảnh (dọn sạch thế giới cũ, không sót tham chiếu).
+func _on_load_requested() -> void:
+	var save: Dictionary = SaveSystem.read_save()
+	if save.is_empty():
+		return
+	SaveSystem.pending_load = save
+	Engine.time_scale = 1.0
+	get_tree().paused = false
+	get_tree().reload_current_scene.call_deferred()
 
 
 func _on_language_changed(_code: String) -> void:

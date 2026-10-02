@@ -78,10 +78,11 @@ func has_path(from_cell: Vector2i, to_cell: Vector2i) -> bool:
 
 
 ## Loang từ `start`: trả về mảng 1 byte mỗi ô, 1 = đi tới được (đi 4 hướng).
-func flood_fill(start: Vector2i) -> PackedByteArray:
+## `extra_blocked` = coi thêm các ô này là bị chặn (thử trước khi đặt công trình).
+func flood_fill(start: Vector2i, extra_blocked: Dictionary[Vector2i, bool] = {}) -> PackedByteArray:
 	var reached: PackedByteArray = PackedByteArray()
 	reached.resize(size.x * size.y)
-	if is_blocked(start):
+	if is_blocked(start) or extra_blocked.has(start):
 		return reached
 	var queue: Array[Vector2i] = [start]
 	reached[_index(start)] = 1
@@ -91,7 +92,7 @@ func flood_fill(start: Vector2i) -> PackedByteArray:
 		head += 1
 		for offset: Vector2i in NEIGHBORS_4:
 			var next: Vector2i = cell + offset
-			if in_bounds(next) and not is_blocked(next) and reached[_index(next)] == 0:
+			if in_bounds(next) and not is_blocked(next) and not extra_blocked.has(next) and reached[_index(next)] == 0:
 				reached[_index(next)] = 1
 				queue.append(next)
 	return reached

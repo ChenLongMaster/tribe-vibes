@@ -1,7 +1,7 @@
 class_name FxLayer
 extends Node2D
 ## Hiệu ứng "juice" vẽ đè lên thế giới, dùng chung mọi chế độ: bụi khi chặt/đập, làn khói
-## "bụp", số bay "+3 gỗ" khi đồ vào kho, sao bung ra khi lên cấp. Chỉ NGHE EventBus — lõi
+## "bụp", số bay "+3 gỗ" khi đồ vào kho, sao bung ra khi lên cấp, pháo giấy khi xây xong. Chỉ NGHE EventBus — lõi
 ## mô phỏng không biết hiệu ứng trông thế nào.
 
 const DUST_KEY: String = "fx/dust"
@@ -21,12 +21,19 @@ const LEVEL_STAR_COUNT: int = 7
 const LEVEL_STAR_DISTANCE: float = 38.0
 const LEVEL_LIFE: float = 0.9
 const LEVEL_LIFT: Vector2 = Vector2(0, -60)
+const CONFETTI_COUNT: int = 26
+const CONFETTI_LIFE: float = 1.6
+const CONFETTI_COLORS: Array[Color] = [
+	Color("#E57373"), Color("#FFD54F"), Color("#81C784"), Color("#64B5F6"), Color("#BA68C8"), Color("#FFB74D"),
+]
 
 
 func _ready() -> void:
 	EventBus.work_impact.connect(_on_work_impact)
 	EventBus.resource_delivered.connect(_on_resource_delivered)
 	EventBus.skill_leveled_up.connect(_on_skill_leveled_up)
+	EventBus.building_completed.connect(_on_building_completed)
+	EventBus.building_placed.connect(_on_building_placed)
 
 
 func _on_work_impact(pos: Vector2, kind: StringName) -> void:
@@ -101,3 +108,33 @@ func _on_skill_leveled_up(villager: Node, _skill: StringName, _level: int) -> vo
 		tween.tween_property(star, "rotation", PI, LEVEL_LIFE)
 		tween.tween_property(star, "modulate:a", 0.0, LEVEL_LIFE * 0.5).set_delay(LEVEL_LIFE * 0.5)
 		tween.finished.connect(star.queue_free)
+
+
+func _on_building_placed(building: Node) -> void:
+	var node: Node2D = building as Node2D
+	if node != null and (node as Building).is_foundation():
+		_on_work_impact(node.position, JobDefs.IMPACT_POOF)
+
+
+# Xây xong / lên cấp: "bụp" khói + pháo giấy bắn lên rồi rơi lả tả.
+func _on_building_completed(building: Node, _level: int) -> void:
+	var node: Node2D = building as Node2D
+	if node == null:
+		return
+	_on_work_impact(node.position, JobDefs.IMPACT_POOF)
+	var center: Vector2 = node.position + Vector2(0, -60)
+	for i: int in CONFETTI_COUNT:
+		var piece: Sprite2D = Sprite2D.new()
+		ArtLibrary.setup_sprite(piece, "fx/confetti")
+		piece.modulate = CONFETTI_COLORS[i % CONFETTI_COLORS.size()]
+		piece.position = center
+		piece.rotation = randf() * TAU
+		add_child(piece)
+		var peak: Vector2 = center + Vector2(randf_range(-110.0, 110.0), randf_range(-120.0, -50.0))
+		var land: Vector2 = peak + Vector2(randf_range(-30.0, 30.0), randf_range(90.0, 150.0))
+		var tween: Tween = piece.create_tween().set_parallel(true)
+		tween.tween_property(piece, "position", peak, CONFETTI_LIFE * 0.3).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+		tween.chain().tween_property(piece, "position", land, CONFETTI_LIFE * 0.7).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+		tween.parallel().tween_property(piece, "rotation", piece.rotation + randf_range(-8.0, 8.0), CONFETTI_LIFE * 0.7)
+		tween.parallel().tween_property(piece, "modulate:a", 0.0, CONFETTI_LIFE * 0.3).set_delay(CONFETTI_LIFE * 0.4)
+		tween.chain().tween_callback(piece.queue_free)

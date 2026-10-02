@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Móng 2×2 ô (phủ đúng diện tích) -->
+  <rect x="10" y="10" width="236" height="236" rx="18" fill="#C8A27A"/>
+  <rect x="10" y="10" width="236" height="236" rx="18" fill="none" stroke="#A1887F" stroke-width="5" stroke-dasharray="16 12"/>
+  <path d="M50 89.6 L70 107.6" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M68 179.2 L88 193.2" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M114 89.6 L134 107.6" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M132 179.2 L152 193.2" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M178 89.6 L198 107.6" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M196 179.2 L216 193.2" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M22 14 L234 14 L234 226 L22 226 Z" fill="none" stroke="#FFF8E1" stroke-width="3"/>
+  <rect x="16" y="-8" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <rect x="228" y="-8" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <rect x="16" y="204" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <rect x="228" y="204" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="76.8" cy="140.8" rx="10" ry="7.0" fill="#9E9E9E" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="73.8" cy="138.3" rx="3.5" ry="2.0" fill="#BDBDBD"/>
+  <ellipse cx="184.32" cy="102.4" rx="8" ry="5.6" fill="#9E9E9E" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="181.92" cy="100.4" rx="2.8" ry="1.6" fill="#BDBDBD"/>
+</svg>

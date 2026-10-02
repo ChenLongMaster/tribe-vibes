@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- Mặt trời (đồng hồ mặt trời) -->
+  <path d="M39 24 L45 24" stroke="#FFB300" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M9 24 L3 24" stroke="#FFB300" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M24 39 L24 45" stroke="#FFB300" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M24 9 L24 3" stroke="#FFB300" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M34.5 34.5 L38.7 38.7" stroke="#FFB300" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M13.5 34.5 L9.3 38.7" stroke="#FFB300" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M34.5 13.5 L38.7 9.3" stroke="#FFB300" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M13.5 13.5 L9.3 9.3" stroke="#FFB300" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <circle cx="24" cy="24" r="11" fill="#FFD54F" stroke="#4E342E" stroke-width="3.5"/>
+</svg>

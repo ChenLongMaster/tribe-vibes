@@ -34,5 +34,31 @@ signal skill_leveled_up(villager: Node, skill: StringName, level: int)
 ## Chuyện đáng kể trong làng — thông báo nổi (và sau này nhật ký làng) hiển thị.
 ## Chỉ mang key dịch + tham số; tham số tên `*_key` là key dịch (xem Loc.t).
 signal village_event(key: String, args: Dictionary, icon_key: String)
+## Sức chứa chung của một loại tài nguyên đổi (xây/nâng cấp kho, bếp). -1 = không giới hạn.
+signal storage_capacity_changed(resource_id: StringName, capacity: int)
+
+# --- Công trình (Đợt 3) ---
+## Vừa đặt móng (hoặc dựng công trình khi tải game).
+signal building_placed(building: Node)
+## Xây xong cấp 1 hoặc nâng cấp xong (`level` = cấp mới) — pháo giấy, thông báo.
+signal building_completed(building: Node, level: int)
+## Móng bị huỷ.
+signal building_removed(building: Node)
+## Công trình được chọn (null = bỏ chọn) — bảng công trình nghe signal này.
+signal building_selected(building: Node)
+
+# --- Chế độ đặt công trình (UI ↔ controller) ---
+## Người chơi chọn một công trình trong menu xây.
+signal placement_requested(building_id: StringName)
+## Controller báo đang đặt hay thôi: HUD hiện thanh xác nhận/huỷ (✓ chỉ cần trên cảm ứng).
+signal placement_state_changed(active: bool, building_id: StringName, can_confirm: bool)
+signal placement_confirm_requested
+signal placement_cancel_requested
+
+# --- Lưu game ---
+## Vừa lưu xong (`auto` = tự lưu đầu ngày).
+signal game_saved(auto: bool)
+## Người chơi muốn tải ván đã lưu — main dựng lại cả cảnh.
+signal load_requested
 
 @warning_ignore_restore("unused_signal")

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="384" viewBox="0 0 384 384">
+  <!-- Móng 3×3 ô (phủ đúng diện tích) -->
+  <rect x="10" y="10" width="364" height="364" rx="18" fill="#C8A27A"/>
+  <rect x="10" y="10" width="364" height="364" rx="18" fill="none" stroke="#A1887F" stroke-width="5" stroke-dasharray="16 12"/>
+  <path d="M50 134.39999999999998 L70 152.39999999999998" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M68 268.79999999999995 L88 282.79999999999995" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M114 134.39999999999998 L134 152.39999999999998" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M132 268.79999999999995 L152 282.79999999999995" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M178 134.39999999999998 L198 152.39999999999998" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M196 268.79999999999995 L216 282.79999999999995" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M242 134.39999999999998 L262 152.39999999999998" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M260 268.79999999999995 L280 282.79999999999995" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M306 134.39999999999998 L326 152.39999999999998" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M324 268.79999999999995 L344 282.79999999999995" stroke="#B08B66" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M22 14 L362 14 L362 354 L22 354 Z" fill="none" stroke="#FFF8E1" stroke-width="3"/>
+  <rect x="16" y="-8" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <rect x="356" y="-8" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <rect x="16" y="332" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <rect x="356" y="332" width="12" height="34" rx="4" fill="#8D6E63" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="115.19999999999999" cy="211.20000000000002" rx="10" ry="7.0" fill="#9E9E9E" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="112.19999999999999" cy="208.70000000000002" rx="3.5" ry="2.0" fill="#BDBDBD"/>
+  <ellipse cx="276.48" cy="153.60000000000002" rx="8" ry="5.6" fill="#9E9E9E" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="274.08000000000004" cy="151.60000000000002" rx="2.8" ry="1.6" fill="#BDBDBD"/>
+</svg>

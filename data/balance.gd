@@ -80,8 +80,27 @@ const FISH_PER_CATCH: int = 1
 const HUNT_SECONDS: float = 4.0 # đứng cạnh con thú vung giáo bao lâu thì nó ngất
 const MEAT_PER_HUNT: int = 4 # vác nguyên con thú về = chừng này phần thức ăn
 const HUNT_PICKUP_SECONDS: float = 1.0 # thú ngất (sao quay) một chút rồi mới bị vác lên vai
-const COOK_SECONDS_CAMPFIRE: float = 10.0 # nấu một món ở lửa trại (bếp Đợt 3 nhanh hơn)
-const CAMPFIRE_MEAL_CAPACITY: int = 4 # lửa trại cất tối đa chừng này món chín (bếp Đợt 3 theo cấp)
+const COOK_SECONDS_CAMPFIRE: float = 10.0 # nấu một món ở lửa trại (bếp tạm, chậm)
+const COOK_SECONDS_KITCHEN: float = 5.0 # nấu một món ở Bếp (mỗi đầu bếp nấu riêng một nồi)
+const CAMPFIRE_MEAL_CAPACITY: int = 4 # lửa trại chỉ cất chừng này món chín (Bếp cất nhiều hơn, theo cấp)
+const CAMPFIRE_COOKS: int = 1 # lửa trại chỉ một người nấu
+
+# --- Kho ---
+## Hang đá là kho tạm lúc đầu: cất được ít thôi, đủ để người mới không bị kẹt nhưng muốn
+## phát triển thì phải xây Kho (gỗ, đá) và Bếp (thức ăn). Sức chứa của Kho/Bếp ở data/buildings.gd.
+const CAVE_WOOD_CAPACITY: int = 30
+const CAVE_STONE_CAPACITY: int = 30
+const CAVE_FOOD_CAPACITY: int = 15
+
+# --- Xây dựng ---
+## Mỗi chuyến thợ xây khuân từ kho ra công trường tối đa chừng này.
+const BUILD_CARRY: Dictionary[StringName, int] = {&"wood": 10, &"stone": 5}
+const BUILD_WAIT_SECONDS: float = 5.0 # kho thiếu vật liệu: đứng chờ trước công trình rồi thử lại
+const BUILD_SEARCH_RADIUS_CELLS: float = 10.0 # xây xong thì tìm công trình dở khác trong bán kính này
+
+# --- Lò rèn ---
+const FORGE_SECONDS: float = 12.0 # rèn một món ở cấp 1 (chia theo kỹ năng Rèn)
+const FORGE_MAX_ORDER: int = 9 # đặt rèn tối đa chừng này món mỗi loại
 
 # --- Thú để săn ---
 const ANIMAL_COUNT: int = 4 # số thú lang thang trên đồng cỏ cùng lúc
@@ -96,6 +115,15 @@ const ANIMAL_RESPAWN_SECONDS: float = 120.0 # bị săn xong bao lâu thì có c
 const MAX_GAME_SPEED: int = 3
 const START_HOUR_FRACTION: float = 0.25 # ván mới bắt đầu lúc sáng (0 = nửa đêm, 0.5 = trưa)
 const DAY_LENGTH_SECONDS: float = 240.0 # một ngày trong game = 4 phút thật
+## Mặt trời mọc / lặn (tỉ lệ của ngày): ngày 3 phút, đêm 1 phút.
+const SUNRISE: float = 0.125
+const SUNSET: float = 0.875
+## Bóng đổ: dài nhất lúc mặt trời sát chân trời (tính theo chiều cao vật), ngắn nhất lúc trưa.
+const SHADOW_LENGTH_MAX: float = 3.0
+const SHADOW_LENGTH_MIN: float = 0.3
+const SHADOW_ALPHA: float = 0.26 # độ đậm của bóng giữa trưa
+## Bóng ép dẹt theo góc nhìn 3/4 (chiều dọc màn hình ngắn hơn).
+const SHADOW_DEPTH_SQUASH: float = 0.45
 
 # --- Thổ dân: dân số ---
 const START_VILLAGERS: int = 4 # nửa nam nửa nữ

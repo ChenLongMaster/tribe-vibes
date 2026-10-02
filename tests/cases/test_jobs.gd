@@ -72,6 +72,8 @@ func test_skill_xp_and_favorite() -> void:
 func test_three_choppers_two_miners() -> void:
 	var world: World = await _make_world(42)
 	var villagers: Array[Villager] = _spawn(world, 6)
+	# Hang đá chỉ chứa 30 gỗ / 30 đá — có sẵn một Kho cấp 3 để đo sản lượng 5 phút.
+	check(_add_built(world, BuildingDefs.STORAGE, 3, 7) != null, "Có chỗ dựng Kho")
 	Commands.debug_give_tools(3)
 	var tree: ResourceNode = _nearest(world, MapData.KIND_TREE)
 	var rock: ResourceNode = _nearest(world, MapData.KIND_ROCK)
@@ -307,11 +309,11 @@ func test_tools_needed_and_kept() -> void:
 	check(not Commands.assign_job(worker.id, world.animals[0]), "Chưa có giáo thì không săn được")
 
 	Commands.debug_give_tools(1)
-	var campfire: Building = _campfire(world)
+	var rack: Building = _building(world, BuildingDefs.CAVE)
 	check(Commands.assign_job(worker.id, tree), "Có rìu trong kho thì giao được")
 	await _simulate(40.0, func(_elapsed: float) -> bool: return worker.tool == ToolDefs.AXE)
 	check_eq(worker.tool, ToolDefs.AXE, "Tự đi lấy rìu")
-	check_eq(campfire.stock_of(ToolDefs.AXE), 0, "Rìu ra khỏi kho")
+	check_eq(rack.stock_of(ToolDefs.AXE), 0, "Rìu ra khỏi kho")
 
 	# Nhặt đá cuội không cần đồ nghề: giữ rìu (đeo sau lưng), cầm xô.
 	world.nature.spawn_pebble()
@@ -321,13 +323,13 @@ func test_tools_needed_and_kept() -> void:
 		check(Commands.assign_job(worker.id, pebble), "Nhặt đá cuội bằng tay")
 		await _simulate(40.0, func(_elapsed: float) -> bool: return worker.task is TaskHarvest)
 		check_eq(worker.tool, ToolDefs.AXE, "Nhặt đá cuội vẫn giữ rìu")
-		check_eq(campfire.stock_of(ToolDefs.AXE), 0, "Không cất rìu khi làm việc tay không")
+		check_eq(rack.stock_of(ToolDefs.AXE), 0, "Không cất rìu khi làm việc tay không")
 
 	# Sang việc cần món khác: về kho đổi rìu lấy cuốc.
 	check(Commands.assign_job(worker.id, _nearest(world, MapData.KIND_ROCK)), "Giao đập đá tảng")
 	await _simulate(60.0, func(_elapsed: float) -> bool: return worker.tool == ToolDefs.PICKAXE)
 	check_eq(worker.tool, ToolDefs.PICKAXE, "Đổi lấy cuốc")
-	check_eq(campfire.stock_of(ToolDefs.AXE), 1, "Rìu được cất lại")
+	check_eq(rack.stock_of(ToolDefs.AXE), 1, "Rìu được cất lại")
 	await _free_world(world)
 
 
@@ -491,9 +493,28 @@ func _nearest(world: World, kind: StringName) -> ResourceNode:
 
 
 func _campfire(world: World) -> Building:
+	return _building(world, BuildingDefs.CAMPFIRE)
+
+
+func _building(world: World, building_id: StringName) -> Building:
 	for building: Building in world.buildings:
-		if building.building_id == &"campfire":
+		if building.building_id == building_id:
 			return building
+	return null
+
+
+## Dựng sẵn một công trình đã xây xong (cấp `level`) ở chỗ trống cách lửa trại ít nhất
+## `min_radius` ô (để khỏi chắn đường dạo chơi của người đứng quanh lửa trại).
+func _add_built(world: World, building_id: StringName, level: int, min_radius: int = 3) -> Building:
+	var center: Vector2i = world.map_data.campfire_cell
+	for radius: int in range(min_radius, 16):
+		for y: int in range(-radius, radius + 1):
+			for x: int in range(-radius, radius + 1):
+				var origin: Vector2i = center + Vector2i(x, y)
+				if world.placer.can_place(building_id, origin):
+					var building: Building = world.placer.place(building_id, origin, level)
+					world.refresh_storage_capacity()
+					return building
 	return null
 
 

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="300" viewBox="0 0 256 300">
+  <!-- Lều ngủ cấp 1 -->
+  <ellipse cx="128" cy="284" rx="118" ry="14" fill="#3E2723" opacity="0.18"/>
+  <path d="M118 70 L128 126" stroke="#6D4C41" stroke-width="12" stroke-linecap="round" fill="none"/>
+  <path d="M118 70 L128 126" stroke="#8D6E63" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M140 72 L128 126" stroke="#6D4C41" stroke-width="12" stroke-linecap="round" fill="none"/>
+  <path d="M140 72 L128 126" stroke="#8D6E63" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M16 272 Q70 186 128 96 Q186 186 240 272 Z" fill="#BCAAA4" stroke="#4E342E" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M100 272 Q112 200 128 182 Q144 200 156 272 Z" fill="#4E342E" stroke="#4E342E" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M128 182 Q120 214 96 236 L100 272 Q108 220 128 182 Z" fill="#BCAAA4" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M30 270 L226 270" stroke="#4E342E" stroke-width="6" stroke-linecap="round" fill="none"/>
+</svg>

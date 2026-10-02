@@ -1,8 +1,9 @@
 class_name TaskSleep
 extends Task
 ## Ngủ. Hai kiểu:
-## - Bình thường (thể lực < 50%): đi tới chỗ ngủ (SleepSpot — ngủ đất cạnh lửa trại; Đợt 3
-##   là lều), nằm tới khi ngủ đủ rồi vươn vai dậy.
+## - Bình thường (thể lực < 50%): đi tới chỗ ngủ (SleepSpot): lều còn chỗ thì chui vào trong
+##   lều (ẩn đi, lều bay Zzz, hồi nhanh theo cấp lều); không thì ngủ đất cạnh lửa trại. Ngủ đủ
+##   thì chui ra, vươn vai dậy.
 ## - Gục (thể lực = 0): ngã ra ngủ ngay tại chỗ tới khi hồi ENERGY_COLLAPSE_WAKE, rồi xong
 ##   việc — bộ não thấy vẫn còn mệt sẽ cho đi tìm chỗ ngủ tử tế.
 
@@ -33,6 +34,13 @@ func tick(delta: float) -> Status:
 		Step.GO:
 			if villager.is_moving():
 				return Status.RUNNING
+			if _spot != null and _spot.tent != null and not collapsed:
+				if not _spot.tent.is_built():
+					return Status.FAILED
+				villager.face_towards(_spot.tent.position)
+				villager.set_inside(_spot.tent)
+				_spot.tent.add_sleeper(villager)
+				_spot.tent.wiggle()
 			villager.rig.play(VillagerRig.ANIM_SLEEP)
 			villager.rig.squash(0.2 if collapsed else 0.1)
 			villager.state = Villager.State.SLEEPING
@@ -43,6 +51,7 @@ func tick(delta: float) -> Status:
 			if villager.status.energy < wake_at:
 				return Status.RUNNING
 			villager.state = Villager.State.IDLE
+			_leave_tent()
 			villager.rig.play(VillagerRig.ANIM_STRETCH)
 			timer = WAKE_SECONDS
 			step = Step.WAKE
@@ -55,8 +64,18 @@ func tick(delta: float) -> Status:
 
 func stop() -> void:
 	villager.sleep_rate_multiplier = 1.0
+	_leave_tent()
 	if _spot != null:
 		world().reservations.release(_spot.reservation_key, villager)
+
+
+func _leave_tent() -> void:
+	if villager.inside == null:
+		return
+	var tent: Building = villager.inside
+	tent.remove_sleeper(villager)
+	tent.wiggle()
+	villager.set_inside(null)
 
 
 func is_asleep() -> bool:
@@ -64,4 +83,8 @@ func is_asleep() -> bool:
 
 
 func activity_key() -> String:
-	return "UI_ACTIVITY_COLLAPSE" if collapsed else "UI_ACTIVITY_SLEEP"
+	if collapsed:
+		return "UI_ACTIVITY_COLLAPSE"
+	if _spot != null and _spot.tent != null:
+		return "UI_ACTIVITY_SLEEP_TENT"
+	return "UI_ACTIVITY_SLEEP"

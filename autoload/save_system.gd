@@ -7,7 +7,12 @@ const SAVE_PATH: String = "user://save.json"
 const SETTINGS_PATH: String = "user://settings.cfg"
 const SETTINGS_SECTION: String = "settings"
 ## Tăng số này mỗi khi đổi cấu trúc save, để còn chuyển đổi save cũ.
-const SAVE_VERSION: int = 1
+const SAVE_VERSION: int = 2
+
+## Đường dẫn file ván chơi — test đổi sang file khác để không đè lên ván thật.
+var save_path: String = SAVE_PATH
+## Ván vừa đọc để main dựng lại cảnh từ đó (dùng một lần rồi xoá).
+var pending_load: Dictionary = {}
 
 var _settings: ConfigFile
 
@@ -25,14 +30,14 @@ func set_setting(key: String, value: Variant) -> void:
 
 
 func has_save() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
+	return FileAccess.file_exists(save_path)
 
 
 ## Ghi một ván chơi. `data` chỉ chứa kiểu JSON được (số, chữ, mảng, dictionary).
 func write_save(data: Dictionary) -> bool:
 	var payload: Dictionary = data.duplicate()
 	payload["version"] = SAVE_VERSION
-	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var file: FileAccess = FileAccess.open(save_path, FileAccess.WRITE)
 	if file == null:
 		push_warning("SaveSystem: không mở được file save (%s)" % error_string(FileAccess.get_open_error()))
 		return false
@@ -44,7 +49,7 @@ func write_save(data: Dictionary) -> bool:
 func read_save() -> Dictionary:
 	if not has_save():
 		return {}
-	var text: String = FileAccess.get_file_as_string(SAVE_PATH)
+	var text: String = FileAccess.get_file_as_string(save_path)
 	var parsed: Variant = JSON.parse_string(text)
 	if not parsed is Dictionary:
 		push_warning("SaveSystem: file save hỏng, bỏ qua")

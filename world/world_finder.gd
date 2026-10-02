@@ -4,8 +4,8 @@ extends RefCounted
 ## chỗ dạo chơi quanh điểm neo, bông hoa, bạn tán gẫu… Tách khỏi World để World chỉ
 ## lo dựng và giữ thế giới.
 ##
-## Đồ ăn và chỗ ngủ đi qua FoodSource / SleepSpot: Đợt 3 thêm Bếp, Lều chỉ cần thêm
-## nguồn vào find_food_for() / find_bed_for(), các Task không phải sửa.
+## Đồ ăn và chỗ ngủ đi qua FoodSource / SleepSpot: các Task không cần biết là lửa trại, Bếp,
+## hang đá hay Lều.
 
 const IDLE_ATTEMPTS: int = 12
 const FREE_CELL_ATTEMPTS: int = 24
@@ -29,32 +29,57 @@ func _init(world: World) -> void:
 
 # --- Đồ ăn & chỗ ngủ ---
 
-## Chỗ ăn cho thổ dân đang đói: chỉ ăn đồ đã cất ở bếp (lửa trại; Đợt 3 Bếp) — không tự
-## đi hái quả ăn, vì thổ dân nghe lời: muốn có đồ ăn thì người chơi giao người đi kiếm.
-## Trả về null nếu bếp hết đồ (thổ dân sẽ ngồi dỗi cho người chơi thấy).
+## Chỗ ăn cho thổ dân đang đói: chỉ ăn đồ đã cất (món chín ở lửa trại / Bếp, thức ăn thô ở
+## hang đá / Bếp) — không tự đi hái quả ăn, vì thổ dân nghe lời: muốn có đồ ăn thì người chơi
+## giao người đi kiếm. Có món chín thì đi tới đó trước. Trả về null nếu hết đồ ăn (thổ dân sẽ
+## ngồi dỗi cho người chơi thấy).
 func find_food_for(villager: Villager) -> FoodSource:
 	var candidates: Array[FoodSource] = []
 	for building: Building in _world.buildings:
-		if building.def.get("food_storage", false):
+		if building.is_built() and (building.accepts(ResourceDefs.FOOD) or building.stock_capacity(ResourceDefs.MEAL) > 0):
 			candidates.append(StoredFoodSource.new(building))
 	candidates.sort_custom(func(a: FoodSource, b: FoodSource) -> bool:
 		if a.priority() != b.priority():
 			return a.priority() < b.priority()
 		return a.target.position.distance_squared_to(villager.position) < b.target.position.distance_squared_to(villager.position))
 	for source: FoodSource in candidates:
-		if source.is_available(villager) and find_stand_cell(source.target_cell, villager) != World.INVALID_CELL:
+		if source.is_available(villager) and find_building_stand_cell(source.target as Building, villager) != World.INVALID_CELL:
 			return source
 	return null
 
 
-## Chỗ ngủ cho thổ dân mệt. Chưa có lều nên là ngủ đất quanh lửa trại (Đợt 3: lều còn
-## chỗ trước, hết lều mới ngủ đất). Đặt chỗ luôn để hai người không nằm đè lên nhau.
+## Chỗ ngủ cho thổ dân mệt: lều gần nhất còn chỗ trước, hết lều mới ngủ đất quanh lửa trại.
+## Đặt chỗ luôn để hai người không nằm đè lên nhau.
 func find_bed_for(villager: Villager) -> SleepSpot:
+	var tent_spot: SleepSpot = find_tent_bed(villager)
+	if tent_spot != null:
+		return tent_spot
 	var cell: Vector2i = _find_ground_spot(villager)
 	if cell == World.INVALID_CELL:
 		return null
 	_world.reservations.reserve(cell, villager)
 	return SleepSpot.new(cell, 1.0, cell)
+
+
+## Một chỗ trong lều (lều gần nhất còn chỗ; `only` = chỉ xét lều này). null nếu hết chỗ.
+func find_tent_bed(villager: Villager, only: Building = null) -> SleepSpot:
+	var tents: Array[Building] = []
+	for building: Building in _world.buildings:
+		if building.sleep_slots() > 0 and (only == null or building == only):
+			tents.append(building)
+	tents.sort_custom(func(a: Building, b: Building) -> bool:
+		return a.position.distance_squared_to(villager.position) < b.position.distance_squared_to(villager.position))
+	for tent: Building in tents:
+		for slot: int in tent.sleep_slots():
+			var key: Array = [tent, slot]
+			if _world.reservations.is_taken_by_other(key, villager):
+				continue
+			var door: Vector2i = find_building_stand_cell(tent, villager)
+			if door == World.INVALID_CELL:
+				break
+			_world.reservations.reserve(key, villager)
+			return SleepSpot.new(door, float(tent.prop("sleep_rate", 1.0)), key, tent)
+	return null
 
 
 # --- Việc được giao & kho ---
@@ -75,17 +100,16 @@ func find_job_target(job_id: StringName, around: Vector2i, villager: Villager, s
 		JobDefs.TARGET_ANIMAL:
 			for animal: Animal in _world.animals:
 				candidates.append(animal)
-		JobDefs.TARGET_COOK_STATION:
+		JobDefs.TARGET_COOK_STATION, JobDefs.TARGET_CONSTRUCTION, JobDefs.TARGET_FORGE:
 			for building: Building in _world.buildings:
-				if building.def.get("cook_station", false):
-					candidates.append(building)
+				candidates.append(building)
 		_:
 			for node: ResourceNode in _world.resource_nodes:
 				if node.kind == def["target"]:
 					candidates.append(node)
 	var nearby: Array[Node2D] = []
 	for node: Node2D in candidates:
-		if skip.has(node) or not Job.is_workable(node, villager):
+		if skip.has(node) or not Job.is_workable(node, villager, job_id):
 			continue
 		if Vector2(Job.target_cell(node) - around).length() <= radius:
 			nearby.append(node)
@@ -97,7 +121,7 @@ func find_job_target(job_id: StringName, around: Vector2i, villager: Villager, s
 	return null
 
 
-## Chỗ cất đồ nghề gần nhất còn món `tool` (lò rèn — Đợt 3) mà đi tới được. null nếu hết.
+## Chỗ cất đồ nghề gần nhất còn món `tool` (lò rèn) mà đi tới được. null nếu hết.
 func find_tool(tool: StringName, villager: Villager) -> Building:
 	var best: Building = null
 	var best_distance: float = INF
@@ -119,13 +143,13 @@ func has_tool_in_stock(tool: StringName) -> bool:
 	return false
 
 
-## Công trình gần nhất nhận cất loại tài nguyên này (lửa trại; Đợt 3 Kho, Bếp).
+## Công trình gần nhất nhận cất loại tài nguyên này (hang đá, Kho, Bếp). Kho chung là một
+## khối (sức chứa cộng dồn) nên cất ở đâu cũng được — chọn chỗ gần nhất cho đỡ đi xa.
 func find_storage_for(resource_id: StringName, villager: Villager) -> Building:
-	var flag: String = ResourceDefs.storage_flag(resource_id)
 	var best: Building = null
 	var best_distance: float = INF
 	for building: Building in _world.buildings:
-		if not building.def.get(flag, false):
+		if not building.accepts(resource_id):
 			continue
 		var distance: float = building.position.distance_squared_to(villager.position)
 		if distance < best_distance:
@@ -135,14 +159,18 @@ func find_storage_for(resource_id: StringName, villager: Villager) -> Building:
 
 
 ## Ô trống sát mép một công trình (mọi cỡ) mà thổ dân đi tới được, gần thổ dân nhất.
-func find_building_stand_cell(building: Building, villager: Villager) -> Vector2i:
+## `free_only` = bỏ qua ô người khác đã giữ chỗ đứng (nhiều thợ xây quanh một công trình).
+func find_building_stand_cell(building: Building, villager: Villager, free_only: bool = false) -> Vector2i:
 	var footprint: Array[Vector2i] = building.footprint_cells()
 	var options: Array[Vector2i] = []
 	for cell: Vector2i in footprint:
 		for offset: Vector2i in WorldGrid.NEIGHBORS_8:
 			var around: Vector2i = cell + offset
-			if not footprint.has(around) and not options.has(around) and not _world.grid.is_blocked(around):
-				options.append(around)
+			if footprint.has(around) or options.has(around) or _world.grid.is_blocked(around):
+				continue
+			if free_only and _world.reservations.is_taken_by_other([&"stand", around], villager):
+				continue
+			options.append(around)
 	return _closest_reachable(options, villager)
 
 

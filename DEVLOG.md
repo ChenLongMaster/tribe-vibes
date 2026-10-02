@@ -4,6 +4,78 @@ Mỗi đợt một mục: đã làm gì, chọn gì và vì sao. Mục mới nh�
 
 ---
 
+## Đợt 3 — Xây dựng, nâng cấp, ngày đêm & lưu game (2026-10-02)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.
+
+### Đã làm
+**1. Xây dựng cơ bản**
+- **Nút Xây** (cái búa, góc dưới-phải) mở menu 5 công trình (hình, tên, một dòng giải thích, giá cấp 1, diện tích). Chọn một cái → **bóng mờ đúng diện tích** (ô xanh/đỏ + hình công trình mờ). Chuột: bóng đi theo con trỏ, click là đặt. Cảm ứng: chạm để dời bóng, chạm lại đúng chỗ hoặc bấm ✓ để đặt. Thanh gợi ý dưới màn hình có nút ✕ (Esc / chuột phải cũng huỷ). Đặt xong mở luôn bảng của móng + thông báo "Đã đặt móng…".
+- **Luật đặt** (`world/building_placer.gd`): trong map, không nước / cây / đá / công trình khác; củi, đá cuội nằm đó thì dọn đi; thú đứng đó thì chờ; người đứng đó thì nhảy sang ô bên. **Không chặn lối:** mọi ô đang đi tới được phải vẫn đi tới được (không quây kín vùng nào) và mọi công trình vẫn có lối vào.
+- **Thợ xây** (`TaskBuild`): chạm/kéo thổ dân vào móng → **đội mũ công trường**, ra kho gần nhất lấy một chuyến (10 gỗ hoặc 5 đá, khúc gỗ / xô đá trên đầu), khuân đổ vào công trường, lặp lại tới khi **đủ vật liệu mới gõ búa**. Tối đa max(1, số ô ÷ 2) thợ, mỗi thợ một chỗ đứng quanh công trình; hứa trước phần đang khuân để không khuân thừa. Kho hết loại cần thì đứng trước công trình **cắm biển gỗ/đá ✕**, chờ rồi thử lại (không bỏ việc). Xây xong mà gần đó không còn công trình dở → **nhảy cẫng ăn mừng**, bỏ mũ. Bị ngắt giữa đường thì vật liệu đang khuân được cất lại kho.
+- **Hiệu ứng:** móng (nền đất + cọc + dây), hình công trình mờ **mọc dần từ dưới lên** theo tiến độ (shader `fx/build_reveal.gdshader`), **hai thanh tiến độ** trên đầu (vật liệu, gõ búa), xong thì **nảy "bụp" + khói + pháo giấy** + thông báo. Đang nâng cấp thì cắm giàn giáo.
+- **Bảng công trình** (`ui/common/building_panel.gd`, chạm công trình khi không chọn thổ dân): hình, tên, sao cấp, mô tả / trạng thái, vật liệu đã khuân / cần + 2 thanh tiến độ + số thợ, người phụ trách (hoặc cảnh báo + gợi ý cách giao), chỗ ngủ + ai đang ngủ, chỗ cất góp cho làng, món chín, đơn rèn, nút **Nâng lên cấp N** (kèm giá) và **Huỷ móng / Huỷ nâng cấp** (trả lại vật liệu đã khuân tới). Chỉ dựng lại phần nào thật sự đổi để không nuốt mất cú bấm.
+- **Nâng cấp 3 cấp:** thành công trường, cần thợ xây khuân vật liệu như xây mới; **trong lúc đó vẫn hoạt động ở cấp cũ** (đầu bếp / thợ rèn làm tiếp). Chạm công trình đang nâng cấp = giao việc xây.
+
+**2. Công trình chức năng**
+- **Hang đá = kho tạm** (theo ý bạn): 30 gỗ, 30 đá, 15 thức ăn thô. **Lửa trại chỉ cất món chín** (4), một người nấu.
+- **Kho chung có sức chứa** cộng dồn (`GameState.capacity/room`, World tính từ hang đá + Kho + Bếp). HUD hiện "đang có /sức chứa", đầy thì chữ đỏ, tooltip nhắc xây Kho/Bếp. Kho đầy: khuân về được phần nào hay phần đó, cắm biển **cái kho ✕** rồi thôi việc (lượt sau không làm nữa).
+- **Lều:** 2 / 3 / 4 chỗ, hồi sức ×1.5 / ×2 / ×2.5. Mệt thì tự tìm lều gần nhất còn chỗ, **chui vào trong** (ẩn, lều rung nhẹ, bay Zzz), ngủ đủ chui ra vươn vai; hết chỗ thì ngủ đất cạnh lửa trại như cũ. Thả thổ dân vào lều = đi ngủ ngay (việc đang giao vẫn nhớ); lều đầy thì cắm biển Zzz ✕.
+- **Bếp:** cất thêm 30 / 60 / 120 thức ăn thô, đầu bếp 1 / 2 / 3, nấu 5 giây một món (mỗi đầu bếp một nồi), món chín cất tại bếp 6 / 10 / 16 bát (bày quanh bếp). Dân đói tới chỗ có món chín trước, hết thì ăn đồ thô ở Bếp / hang đá.
+- **Kho:** cộng 100 / 200 / 400 gỗ và đá.
+- **Lò rèn:** thợ rèn 1 / 2 / 3; bảng −/+ đặt số rìu / cuốc / giáo còn muốn rèn (tối đa 9), thợ rèn làm lần lượt từng loại, lấy vật liệu từ kho lúc bắt đầu mỗi món (thiếu thì cắm biển gỗ/đá ✕), rèn xong "bụp" + món đó dựng cạnh lò đúng số lượng (rìu trái, cuốc giữa, giáo phải). Thổ dân lấy / đổi đồ nghề ở lò rèn như mục 9.4; món cũ luôn được trả lại (kể cả lò đầy). **Bỏ phím F10** (`Commands.debug_give_tools()` chỉ còn cho test / công cụ).
+- **Sân nhảy:** xây / nâng cấp được, **đi lên được** (không chặn đường); thả thổ dân vào thì lên đứng chơi trên sân (disco để Đợt 4).
+- **Thiếu người phụ trách:** Bếp / Lò rèn đã xây mà không ai phụ trách thì ngừng + **icon cảnh báo trên mái** + dòng đỏ trong bảng. Chạm công trình sản xuất đã đủ người thì thổ dân cắm biển icon việc ✕.
+- Hình tạm mới: 15 hình công trình (5 × 3 cấp), 3 cỡ móng, mũ công trường, icon cảnh báo / kho / nâng cấp / ✓ / lưu / tải, mặt trời / mặt trăng, pháo giấy — sinh bằng `tools/gen_building_art.py`.
+
+**3. Ngày đêm & lưu game**
+- **Ánh sáng** đổi liên tục theo giờ (`world/day_night.gd`, CanvasModulate + dải màu: bình minh hồng → trưa trắng → chiều vàng → hoàng hôn đỏ cam → đêm xanh tím). Mặt trời mọc 0.125, lặn 0.875 (ngày 3 phút, đêm 1 phút).
+- **Bóng đổ theo mặt trời** cho cây, đá, bụi, củi, công trình, thổ dân, thú (`world/shadow_layer.gd`): sáng bóng dài về tây, trưa ngắn sau chân, chiều dài về đông, đêm tắt. Vật đứng yên dùng chung một shader chiếu bóng (đổi giờ = đặt một tham số); thổ dân / thú chép từng mảnh của khung cutout sang node bóng. Không Light2D.
+- **Ánh lửa ban đêm** ở lửa trại, bếp, lò rèn (sprite cộng sáng, lập loè, trên CanvasLayer riêng không bị làm tối). **Đồng hồ mặt trời** nhỏ cạnh chữ "Ngày N".
+- **Lưu / tải** (`world/save_game.gd`, `user://save.json`): seed + ngày giờ + kho chung; trạng thái từng cây / đá / bụi / củi / đá cuội; mọi công trình (cấp, lượt xây dở + vật liệu đã đổ, đồ riêng, đơn rèn); thổ dân (dữ liệu, chỉ số, kỹ năng, **đồ nghề đang giữ**, vị trí, điểm neo, **việc đang nhớ**). **Tự lưu đầu mỗi ngày**; nút Lưu / Tải trên HUD (Tải phải bấm 2 lần trong 3 giây — "Chắc chưa?"). Tải = dựng lại cả cảnh.
+
+**Khác**
+- HUD gọn lại: lưu / tải xuống hàng dưới. Bảng debug góc trên-trái tự ẩn sau 8 giây (hiện lại khi bấm F9).
+- Lớp UI chính chuyển lên CanvasLayer `layer = 10` (trên ánh lửa).
+- Test: 69 test (thêm `test_buildings.gd`, 13 test: luật đặt, thợ xây khuân rồi mới xây + mũ + ăn mừng, chờ vật liệu, huỷ móng trả vật liệu, nâng cấp vẫn chạy cấp cũ, lều 2 chỗ + ngủ đất khi hết chỗ, bếp nấu + ăn ở bếp + cảnh báo thiếu người, sức chứa kho + biển kho đầy, lò rèn rèn rìu rồi người khác lấy dùng, ngày đêm + bóng, lưu/tải đủ thứ, controller đặt móng + chọn công trình). Test cũ: thêm Kho cấp 3 vào bài 3 chặt 2 đập (hang chỉ chứa 30). Soi cảnh báo strict: sạch (test + chạy game). Kiểm tra thêm luồng Lưu → Tải thật (dựng lại cảnh) bằng script tạm: giữ đúng seed, kho, thổ dân.
+- Công cụ chụp màn hình thêm `--buildings`, `--ui`, `--times`.
+
+### Quyết định
+- **Hang đá là kho tạm, lửa trại chỉ cất món chín** (bạn chốt). Kho chung cộng dồn sức chứa, khuân về chỗ gần nhất (không tách kho từng nơi — đỡ rối cho người chơi casual).
+- **Kho đầy thì thôi việc + biển cái kho ✕** (không đứng chờ): người chơi thấy ngay vì sao, và không có ai đứng ôm khúc gỗ mãi.
+- **Chỉ huỷ được móng / lượt nâng cấp đang dở**, trả lại hết vật liệu đã khuân tới; công trình xong thì không phá / dời (MVP).
+- **Ngủ trong lều = chui vào lều** (ẩn đi, lều bay Zzz, chạm lều để xem ai đang ngủ).
+- **Ván mới tay trắng**, Lò rèn cấp 1 rẻ (15 gỗ 10 đá): 2–3 người nhặt củi + đá cuội vài phút là xây được rồi rèn rìu.
+- **Vật liệu không trừ lúc đặt móng** — thợ xây khuân từ kho tới, nên luôn đặt được trước rồi kiếm vật liệu sau.
+- Lửa trại tối đa 1 người nấu (một nồi); thả người thứ hai thì họ cắm biển.
+- Thợ rèn trừ đơn ngay khi bắt đầu một món (hai thợ không rèn trùng); bị ngắt thì trả đơn + vật liệu.
+- Bếp / lò rèn đang nâng cấp vẫn nấu / rèn; chạm vào lúc đó là giao việc xây.
+- Sân nhảy đi lên được; thả thổ dân vào thì đứng chơi trên sân (chưa có disco).
+- Cảnh báo thiếu người đặt **trên mái** chứ không lơ lửng phía trên (công trình đứng sát nhau thì dễ tưởng là của công trình phía sau).
+- Tải game dựng lại cả cảnh (reload) thay vì xoá từng thứ — chắc chắn không sót tham chiếu cũ.
+
+### Còn biết
+- **Ván mới chưa tự tải ván đã lưu** — mở game là ván mới, bấm nút Tải để chơi tiếp (màn hình bắt đầu ở Đợt 6).
+- Thú không được lưu (tải lại thì đàn thú mới); việc đang làm dở (một lượt) cũng không lưu — tải xong thổ dân làm lượt mới của việc đang nhớ.
+- Bóng đổ của các vật chồng lên nhau thì đậm hơn một chút (không gộp bóng).
+- Ban đêm bong bóng / số bay "+10 gỗ" cũng tối theo (nằm trong thế giới).
+- Bóng mờ khi đặt nhà lúc đầu đặt giữa màn hình; trên cảm ứng phải chạm để dời.
+- Thổ dân đang ngủ trong lều không chạm được (chạm lều để xem tên).
+- Huỷ móng khi thợ đang xây thì thợ cắm biển "búa ✕" (giống "hết việc xây").
+- Công trình hư hại (cannibal) để Đợt 5.
+- Thanh HUD khá dài: ở màn hình hẹp có thể chạm cạnh trái (chưa có setting "Cỡ giao diện").
+
+### Số nên tinh chỉnh (đề xuất, ở `data/buildings.gd`, `data/tools.gd`, `data/balance.gd`)
+- **Hang đá** 30 gỗ / 30 đá / 15 thức ăn. Nếu thấy người mới bị đầy kho quá sớm → 50 / 50 / 20.
+- **Chi phí** cấp 1 → 2 → 3: Lều 20g → 40g 15đ → 60g 40đ; Bếp 25g 10đ → 40g 25đ → 60g 50đ; Kho 30g 10đ → 60g 30đ → 120g 60đ; Lò rèn 15g 10đ → 40g 30đ → 70g 60đ; Sân nhảy 20g 10đ → 40g 25đ → 60g 45đ. (Mỗi cây = 30 gỗ, mỗi đá tảng = 16 đá.)
+- **Thời gian xây** (1 thợ cấp 1): Lều 20/30/45 giây, Bếp 25/35/50, Kho 30/45/60, Lò rèn 25/40/55, Sân nhảy 20/30/45. Mỗi chuyến khuân 10 gỗ / 5 đá (`BUILD_CARRY`).
+- **Rèn:** rìu 4g 2đ, cuốc 3g 4đ, giáo 5g 1đ; 12 giây / món (`FORGE_SECONDS`). Lò chứa mỗi món 2 / 4 / 6.
+- **Bếp:** món chín 6 / 10 / 16, thức ăn thô +30 / +60 / +120, nấu 5 giây (`COOK_SECONDS_KITCHEN`).
+- **Lều:** 2 / 3 / 4 chỗ, hồi ×1.5 / ×2 / ×2.5.
+- **Bóng:** dài nhất 3× (`SHADOW_LENGTH_MAX`), ngắn nhất 0.3×, độ đậm 0.26 (`SHADOW_ALPHA`), ép dẹt 0.45 (`SHADOW_DEPTH_SQUASH`). Ánh sáng: các mốc màu ở `DayNight.LIGHT_KEYS`.
+
+---
+
 ## Đợt 2.2 — Gộp tài nguyên, đồ nghề, củi & đá cuội (2026-10-02)
 
 **Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.

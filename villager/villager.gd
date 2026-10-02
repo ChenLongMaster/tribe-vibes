@@ -59,6 +59,8 @@ var sleep_rate_multiplier: float = 1.0
 var job: Job
 ## Đang đình công: từ chối mọi việc, chỉ đứng chơi tới khi giải trí hồi lại.
 var on_strike: bool = false
+## Đang ở trong công trình nào (ngủ trong lều) — null = ở ngoài.
+var inside: Building
 ## Đồ nghề đang giữ (lưu trong VillagerStatus). Đổi bằng set_tool().
 var tool: StringName:
 	get:
@@ -147,7 +149,7 @@ func start_task(new_task: Task) -> void:
 	if task != null:
 		task.villager = self
 		task.start()
-	task_changed.emit(self)
+	notify_task_changed()
 
 
 ## Key dịch + tham số mô tả việc đang làm — UI tự dịch khi hiển thị.
@@ -177,7 +179,34 @@ func skill_level(skill: StringName) -> int:
 
 ## Báo phần hiển thị (icon trên đầu…) rằng việc đang làm vừa đổi bước.
 func notify_task_changed() -> void:
+	_refresh_gear()
 	task_changed.emit(self)
+
+
+## Nhảy nhẹ sang chỗ khác (vd vừa có móng nhà đặt đè lên chỗ đang đứng).
+## Vị trí đổi ngay (lõi coi như đã ở chỗ mới), chỉ hình nhảy theo cho mượt.
+func hop_to(point: Vector2) -> void:
+	stop_moving()
+	var offset: Vector2 = position - point
+	position = point
+	anchor_cell = WorldGrid.world_to_cell(point)
+	rig.position = offset
+	rig.create_tween().tween_property(rig, "position", Vector2.ZERO, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	rig.squash(-0.2)
+
+
+## Chui vào trong công trình (ngủ trong lều): ẩn hẳn, không chạm được; null = chui ra.
+func set_inside(building: Building) -> void:
+	inside = building
+	visible = building == null
+	if building == null:
+		rig.squash(-0.15)
+
+
+# Thợ xây đội mũ công trường suốt lúc còn nhận việc xây.
+func _refresh_gear() -> void:
+	if rig != null:
+		rig.set_hard_hat(job != null and job.job_id == JobDefs.BUILD)
 
 
 # --- Lệnh của người chơi (chỉ Commands gọi) ---
@@ -220,6 +249,18 @@ func order_move(cell: Vector2i) -> void:
 	_acknowledge()
 
 
+## Đi ngủ ngay ở chỗ này (người chơi thả vào lều). Việc đang giao vẫn nhớ, ngủ dậy làm tiếp.
+func order_sleep(spot: SleepSpot) -> void:
+	lower_sign()
+	if task != null and task.priority >= Task.Priority.NEED:
+		world.reservations.release(spot.reservation_key, self)
+		think("icons/sleepy")
+		notify_task_changed()
+		return
+	start_task(TaskSleep.new(spot))
+	_acknowledge()
+
+
 ## "Ugh!" không lời: nhún một cái, mặt tươi lên.
 func _acknowledge() -> void:
 	rig.squash(-0.15)
@@ -227,16 +268,20 @@ func _acknowledge() -> void:
 
 
 ## Thôi việc đang giao: đứng chờ lệnh ngay tại chỗ. Hết thứ để làm thì giơ biển vẽ việc đó
-## gạch chéo ("Hết cây rồi!"), thiếu đồ nghề thì vẽ món đó gạch chéo; không tới được thì
-## nghĩ dấu "?".
+## gạch chéo ("Hết cây rồi!"), thiếu đồ nghề thì vẽ món đó gạch chéo, kho đầy thì vẽ cái kho
+## gạch chéo; không tới được thì nghĩ dấu "?". Xây xong công trình thì ăn mừng.
 func stop_job() -> void:
 	if job == null:
 		return
 	var icon_key: String = job.stop_sign_icon()
 	var gave_up: bool = job.gave_up()
+	var celebrate: bool = job.finished_building
 	job = null
 	anchor_cell = world.cell_of(self)
-	if gave_up:
+	if celebrate:
+		# Xây xong rồi, không còn công trình dở nào gần đây: ăn mừng, không giơ biển.
+		start_task(TaskCelebrate.new())
+	elif gave_up:
 		think("icons/question")
 	else:
 		hold_sign(icon_key, true)
@@ -389,6 +434,8 @@ func _update_movement(delta: float) -> void:
 # --- Chọn / xem thông tin ---
 
 func hit_test(world_point: Vector2) -> bool:
+	if not visible:
+		return false
 	return (position + PICK_CENTER * scale).distance_to(world_point) <= PICK_RADIUS * scale.y
 
 

@@ -11,6 +11,11 @@ extends Node
 ##                quanh người đầu tiên
 ##   --hungry     ra khỏi hang xong thì dọn sạch bếp, cho cả làng đói (người đầu đói lả) để
 ##                chụp cảnh ngồi dỗi + bong bóng nghĩ + giơ biển; chụp thêm hungry.png
+##   --buildings  dựng sẵn lều cấp 1/2/3, lò rèn bày đồ, bếp, kho, sân nhảy, một móng bếp có thợ
+##                xây đang khuân/gõ; chụp thêm buildings.png, levels.png, forge.png, construction.png
+##   --ui         (cùng --buildings) chụp bảng công trình (lò rèn, móng), menu xây, bóng mờ khi
+##                đặt nhà: panel_forge.png, panel_site.png, build_menu.png, placing.png
+##   --times      chụp làng lúc sáng / trưa / hoàng hôn / đêm: morning.png, day.png, sunset.png, night.png
 
 const MAIN_SCENE: PackedScene = preload("res://main.tscn")
 const SETTLE_FRAMES: int = 30
@@ -23,6 +28,9 @@ func _ready() -> void:
 	var select_first: bool = false
 	var give_jobs: bool = false
 	var make_hungry: bool = false
+	var with_buildings: bool = false
+	var with_times: bool = false
+	var with_ui: bool = false
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
@@ -39,6 +47,12 @@ func _ready() -> void:
 			give_jobs = true
 		elif arg == "--hungry":
 			make_hungry = true
+		elif arg == "--buildings":
+			with_buildings = true
+		elif arg == "--times":
+			with_times = true
+		elif arg == "--ui":
+			with_ui = true
 	var main: Node = MAIN_SCENE.instantiate()
 	add_child(main)
 	var world: World = main.get_node("World")
@@ -46,13 +60,17 @@ func _ready() -> void:
 	var village: Vector2 = camera.position
 
 	Engine.time_scale = speed
-	if give_jobs or make_hungry:
+	if give_jobs or make_hungry or with_buildings:
 		while world.villagers.size() < Balance.START_VILLAGERS or _anyone_emerging(world):
 			await get_tree().process_frame
 	if give_jobs:
 		_give_jobs(world)
 	if make_hungry:
 		_make_hungry(world)
+	var site: Building = null
+	var spots: Dictionary = {}
+	if with_buildings:
+		site = _build_village(world, spots)
 	var waited: float = 0.0
 	while waited < wait_seconds:
 		await get_tree().process_frame
@@ -73,7 +91,82 @@ func _ready() -> void:
 		if world.villagers.size() >= 4:
 			await _shot(camera, world.villagers[2].position + Vector2(0, -30), 2.0, out_dir.path_join("sign_planted.png"))
 			await _shot(camera, world.villagers[3].position + Vector2(0, -40), 2.0, out_dir.path_join("carcass.png"))
+	if with_buildings:
+		await _shot(camera, village + Vector2(0, 40), 0.55, out_dir.path_join("buildings.png"))
+		if spots.has("tents"):
+			await _shot(camera, spots["tents"], 0.9, out_dir.path_join("levels.png"))
+		if spots.has("forge"):
+			await _shot(camera, spots["forge"], 1.6, out_dir.path_join("forge.png"))
+		if site != null:
+			await _shot(camera, site.position + Vector2(0, -40), 1.5, out_dir.path_join("construction.png"))
+	if with_buildings and with_ui:
+		var controller: NormalController = main.get_controller() as NormalController
+		if spots.has("forge_building"):
+			controller.select_building(spots["forge_building"])
+			await _shot(camera, (spots["forge_building"] as Building).position + Vector2(-220, -60), 1.2, out_dir.path_join("panel_forge.png"))
+		if site != null:
+			controller.select_building(site)
+			await _shot(camera, site.position + Vector2(-220, -60), 1.2, out_dir.path_join("panel_site.png"))
+		controller.deselect()
+		(main.get_hud().call("get_build_menu") as BuildMenu).visible = true
+		await _shot(camera, village, 1.0, out_dir.path_join("build_menu.png"))
+		(main.get_hud().call("get_build_menu") as BuildMenu).visible = false
+		controller.begin_placement(BuildingDefs.STORAGE)
+		await _shot(camera, village + Vector2(0, 60), 1.0, out_dir.path_join("placing.png"))
+		controller.cancel_placement()
+	if with_times:
+		for entry: Array in [[0.2, "morning.png"], [0.5, "day.png"], [0.84, "sunset.png"], [0.97, "night.png"]]:
+			GameState.time_of_day = entry[0]
+			await _shot(camera, village + Vector2(0, 40), 0.7, out_dir.path_join(entry[1]))
 	get_tree().quit()
+
+
+# Dựng sẵn một làng có đủ công trình để soi hình (đi qua placer như người chơi đặt móng,
+# rồi cho xây xong luôn). Trả về móng bếp đang có thợ xây.
+func _build_village(world: World, spots: Dictionary) -> Building:
+	GameState.set_capacity(ResourceDefs.WOOD, 500)
+	GameState.set_capacity(ResourceDefs.STONE, 500)
+	GameState.add_resource(ResourceDefs.WOOD, 200)
+	GameState.add_resource(ResourceDefs.STONE, 120)
+	var tents: Array[Building] = []
+	for level: int in [1, 2, 3]:
+		var tent: Building = _place(world, BuildingDefs.TENT, level)
+		if tent != null:
+			tents.append(tent)
+	if not tents.is_empty():
+		spots["tents"] = tents[1 if tents.size() > 1 else 0].position + Vector2(0, -40)
+	var forge: Building = _place(world, BuildingDefs.FORGE, 2)
+	if forge != null:
+		forge.add_stock(ToolDefs.AXE, 2)
+		forge.add_stock(ToolDefs.PICKAXE, 3)
+		forge.add_stock(ToolDefs.SPEAR, 2)
+		spots["forge"] = forge.position + Vector2(0, -40)
+		spots["forge_building"] = forge
+		forge.set_order(ToolDefs.SPEAR, 2)
+	var kitchen: Building = _place(world, BuildingDefs.KITCHEN, 1)
+	if kitchen != null:
+		kitchen.add_stock(ResourceDefs.MEAL, 4)
+	_place(world, BuildingDefs.STORAGE, 1)
+	_place(world, BuildingDefs.DANCE_FLOOR, 2)
+	var site: Building = _place(world, BuildingDefs.KITCHEN, 0)
+	if site != null:
+		for i: int in mini(2, world.villagers.size()):
+			Commands.assign_job(world.villagers[i].id, site)
+	return site
+
+
+func _place(world: World, building_id: StringName, level: int) -> Building:
+	var center: Vector2i = world.map_data.campfire_cell
+	for radius: int in range(3, 16):
+		for y: int in range(-radius, radius + 1):
+			for x: int in range(-radius, radius + 1):
+				var origin: Vector2i = center + Vector2i(x, y)
+				if world.placer.can_place(building_id, origin):
+					var building: Building = world.placer.place(building_id, origin, level)
+					world.refresh_storage_capacity()
+					world.day_night.refresh_glows()
+					return building
+	return null
 
 
 func _shot(camera: CameraController, focus: Vector2, zoom_level: float, path: String) -> void:

@@ -79,7 +79,7 @@ Ví dụ `water_03` = hai ô trên là nước (bờ nằm ngang ở giữa hìn
 
 | Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
 |---|---|---|---|---|
-| `buildings/cave` | 384×320 | 192×160 | (0.5, 0.95) | Hang xuất phát, chiếm **3×2 ô**. Cửa hang ở giữa mép dưới (thổ dân chui ra ở đó). Phần trên cao hơn footprint là "lưng" hang. |
+| `buildings/cave` | 384×320 | 192×160 | (0.5, 0.95) | Hang xuất phát, chiếm **3×2 ô** — cũng là **kho tạm** lúc đầu (Đợt 3). Cửa hang ở giữa mép dưới (thổ dân chui ra ở đó). Phần trên cao hơn footprint là "lưng" hang. |
 | `buildings/campfire` | 128×112 | 64×56 | (0.5, 0.85) | Lửa trại (đá + củi, **không** có ngọn lửa). Chiếm 1 ô. |
 | `buildings/campfire_flame_01` … `04` | 80×104 | 40×52 | (0.5, 1.0) | 4 khung hình ngọn lửa, chạy 8 hình/giây theo thứ tự 01→04. Vẽ chồng lên lửa trại, lệch `(0, -12)` px. Giữ chân lửa cùng một chỗ ở mọi khung, chỉ đổi phần ngọn. Muốn nhiều khung hơn: thêm file và thêm key vào `extra_art_frames` trong `data/buildings.gd`. |
 
@@ -182,9 +182,48 @@ Bong bóng nói là khung vẽ bằng code (không phải hình) chứa 1–2 ic
 | `icons/question` | 48×48 | ~26×26 | tâm | Dấu "?" — mây nghĩ khi không tới được chỗ làm; cũng là một "từ" khi tán gẫu. |
 | `icons/dots` | 48×48 | ~26×26 | tâm | Ba chấm "…" — mây nghĩ "lát nữa nhé" (bảo đi đâu khi đang ăn/ngủ). |
 
+### Công trình xây được — Đợt 3
+
+Quy ước chung cho hình công trình (để art thật thay vào là khớp lưới):
+
+- **Rộng** = số ô ngang × 128 px (file 2×). **Mép dưới hình = mép dưới diện tích** công trình (hàng ô dưới cùng). Phần nhô lên (mái, ống khói, cờ) cứ vẽ cao lên trên, chiều cao tuỳ ý.
+- **Neo** đặt cách mép dưới **24 px** (= `Building.FOOT_INSET` ×2) ở giữa chiều ngang: neo y = (cao − 24) ÷ cao. Đổi chiều cao hình thì sửa số neo trong `data/art_specs.gd`.
+- Mỗi cấp một hình riêng, cấp sau to / đẹp hơn rõ rệt (người chơi nhìn là biết cấp mấy). Không cần vẽ hình "đang xây": game vẽ hình cấp kế tiếp **mờ, nhạt màu, mọc dần từ dưới lên** trên tấm móng; đang nâng cấp thì giữ hình cấp cũ và tự vẽ giàn giáo + thanh tiến độ bằng code.
+- **Không vẽ** đồ riêng (bát món chín, rìu/cuốc/giáo bày quanh lò) và icon cảnh báo vào hình — code đặt sprite riêng theo số lượng thật (chỗ đặt trong `stock_display` của `data/buildings.gd`).
+- Hình **hư hại** để Đợt 5.
+- Hình tạm sinh bằng `tools/gen_building_art.py` (Python, chỉ là công cụ — game không cần).
+
+| Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
+|---|---|---|---|---|
+| `buildings/tent_1` · `_2` · `_3` | 256×300 | 128×150 (phủ 2×2 ô) | (0.5, 0.92) | Lều ngủ: cấp 1 lều da trơn nhỏ; cấp 2 to hơn, vá màu, vòng đá quanh chân; cấp 3 lều vẽ hoa văn, lông chim trên đỉnh. Cửa lều tối ở giữa mép dưới (thổ dân đứng trước cửa rồi "chui vào"). |
+| `buildings/kitchen_1` · `_2` · `_3` | 256×320 | 128×160 (2×2) | (0.5, 0.925) | Bếp: mái tranh trên 4 cột, bếp đá + nồi bốc hơi; cấp 2 thêm kệ hũ; cấp 3 thêm lò nướng đá có ống khói. Chừa chỗ trống hai bên chân để code bày bát món chín. |
+| `buildings/storage_1` · `_2` · `_3` | 384×380 | 192×190 (3×3) | (0.5, 0.9368) | Kho: cấp 1 mái che dựa + đống gỗ, đống đá; cấp 2 nhà vách gỗ cửa lớn; cấp 3 nhà kho to, nền đá, cửa đôi. |
+| `buildings/forge_1` · `_2` · `_3` | 384×320 | 192×160 (3×2) | (0.5, 0.925) | Lò rèn: lò đá vòm bên trái (miệng lò đỏ rực), đe đá ở giữa; cấp 2 thêm mái + ống bễ; cấp 3 ống khói cao + cờ. **Chừa trống phần trước-trái, giữa và phải** để code dựng rìu (trái), cuốc (giữa), giáo (phải). |
+| `buildings/dance_floor_1` · `_2` · `_3` | 384×400 | 192×200 (3×3) | (0.5, 0.94) | Sân nhảy **phẳng, đi lên được** (thổ dân đứng trên): cấp 1 sân đất viền đá + 2 đuốc; cấp 2 sàn gỗ + dây cờ; cấp 3 sàn đá ô màu + trống + 4 đuốc. Giữ phần giữa sân trống, ít chi tiết. |
+| `buildings/foundation_2x2` | 256×256 | 128×128 | (0.5, 1.0) | Móng: nền đất nện + cọc 4 góc + dây căng, phủ **đúng** diện tích. Code đặt ở mép dưới diện tích. |
+| `buildings/foundation_3x2` | 384×256 | 192×128 | (0.5, 1.0) | Móng 3×2 (lò rèn). |
+| `buildings/foundation_3x3` | 384×384 | 192×192 | (0.5, 1.0) | Móng 3×3 (kho, sân nhảy). |
+| `villager/hard_hat` | 80×80 | 40×40 | (0.5, 0.9) như tóc | Mũ công trường vàng của thợ xây, vẽ trên cùng khung đầu 80×80 với tóc (đội trùm lên tóc). |
+
+Ánh lửa ban đêm (lửa trại, bếp, lò rèn) là hình tròn mờ **do code tạo** (GradientTexture2D), không cần file.
+
+### Icon & HUD — Đợt 3
+
+| Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
+|---|---|---|---|---|
+| `icons/warning` | 48×48 | ~24×24 | tâm | Tam giác vàng có dấu "!" — trên mái công trình sản xuất thiếu người phụ trách; trong bảng công trình. |
+| `icons/storage` | 48×48 | ~26×26 | tâm | Cái kho nhỏ (mái + vách + khúc gỗ, hòn đá) — vẽ trên tấm biển (gạch chéo) khi **kho đầy**. |
+| `icons/upgrade` | 48×48 | ~24×24 | tâm | Mũi tên xanh lên — nút nâng cấp. |
+| `icons/check` | 48×48 | ~30×30 | tâm | Dấu ✓ trong vòng xanh — nút xác nhận đặt công trình (cảm ứng). |
+| `icons/save` · `icons/load` | 48×48 | ~30×30 | tâm | Nút lưu / tải ván. Không vẽ chữ. |
+| `ui/sun` · `ui/moon` | 48×48 | 18×18 | tâm | Mặt trời / mặt trăng chạy trên cung của đồng hồ mặt trời (HUD). |
+| `fx/confetti` | 16×24 | 8×12 | tâm | Mảnh pháo giấy **trắng** (code tô màu) khi xây xong / lên cấp. |
+| `icons/skill_build` (đã có) | | | | Cũng là nút **Xây** trên HUD, búa trên tay thợ xây, icon thanh tiến độ gõ búa. |
+| `icons/skill_smith` (đã có) | | | | Búa trên tay thợ rèn. |
+
 ## Sẽ thêm ở các đợt sau
 
 Danh sách sẽ được bổ sung vào bảng trên khi làm tới (tên dự kiến theo `GAME_DESIGN.md` mục 7):
 
-- **Đợt 3:** lều, bếp, kho, kho vũ khí, sân nhảy — mỗi cái 3 trạng thái: móng, hoàn thành, hư hại.
-- **Đợt 5:** cannibal (mặt nạ xương, sơn chiến) và biến thể màu, chùy.
+- **Đợt 4:** hoạt cảnh disco, nhật ký làng.
+- **Đợt 5:** công trình **hư hại** (mỗi công trình × 3 cấp), cannibal (mặt nạ xương, sơn chiến) và biến thể màu, chùy.

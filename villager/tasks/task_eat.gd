@@ -1,6 +1,7 @@
 class_name TaskEat
 extends Task
-## Đói thì đi ăn: vừa đi tới bếp (lửa trại; Đợt 3 Bếp) vừa nghĩ tới đồ ăn, lấy một phần
+## Đói thì đi ăn: vừa đi tới bếp (lửa trại, Bếp, hay hang đá cất thức ăn thô) vừa nghĩ tới
+## đồ ăn, lấy một phần
 ## rồi ăn tại chỗ. Ăn xong no căng, vui lên chút và đỡ mệt chút. Không quan tâm nguồn là
 ## gì — FoodSource lo phần đó.
 
@@ -23,7 +24,11 @@ func start() -> void:
 		fail()
 		return
 	_source.reserve(villager, world().reservations)
-	var stand: Vector2i = world().finder.find_stand_cell(_source.target_cell, villager)
+	var stand: Vector2i = World.INVALID_CELL
+	if _source.target is Building:
+		stand = world().finder.find_building_stand_cell(_source.target as Building, villager)
+	else:
+		stand = world().finder.find_stand_cell(_source.target_cell, villager)
 	if stand == World.INVALID_CELL or not villager.move_to_cell(stand):
 		fail()
 		return

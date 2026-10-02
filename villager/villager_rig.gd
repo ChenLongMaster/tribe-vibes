@@ -28,6 +28,8 @@ const ANIM_COOK: StringName = &"cook"
 const ANIM_ATTACK: StringName = &"attack"
 const ANIM_STRIKE: StringName = &"strike"
 const ANIM_POUT: StringName = &"pout"
+## Gõ búa (xây nhà, rèn): nhịp nhanh, nhẹ hơn đập đá.
+const ANIM_HAMMER: StringName = &"hammer"
 
 ## Thư mục mảnh trong ArtLibrary — ID mảnh ghép sau thành key hình, vd "villager/hair_03".
 const PIECE_DIR: String = "villager/"
@@ -62,6 +64,9 @@ const SIGN_PLANTED_POS: Vector2 = Vector2(21, 3)
 const SIGN_PLANTED_ARM: float = -1.25
 const SIGN_ICON_POS: Vector2 = Vector2(0, -31)
 const SIGN_ICON_SCALE: float = 1.1
+## Mũ công trường của thợ xây: đội trên tóc (toạ độ trong khung đầu, gốc ở cổ).
+const HAT_POS: Vector2 = Vector2.ZERO
+const HAT_KEY: String = "villager/hard_hat"
 ## Đồ nghề đeo sau lưng khi không dùng (giáo, rìu, cuốc), xiên chéo qua lưng.
 const BACK_ITEM_POS: Vector2 = Vector2(-7, -21)
 const BACK_ITEM_ROTATION: float = -0.5
@@ -80,6 +85,7 @@ const TOOL_TILT: float = 0.6
 const CHOP_PERIOD: float = 0.9
 const MINE_PERIOD: float = 0.8
 const ATTACK_PERIOD: float = 0.55
+const HAMMER_PERIOD: float = 0.6
 const THROW_SECONDS: float = 0.7
 
 const BLINK_MIN: float = 2.0 # giây
@@ -117,6 +123,7 @@ var _head_sprite: Sprite2D
 var _face: Sprite2D
 var _hair: Sprite2D
 var _accessory: Sprite2D
+var _hat: Sprite2D
 var _held_item: Sprite2D
 var _held_is_tool: bool = false
 var _held_key: String = ""
@@ -213,6 +220,34 @@ func set_back_item(key: String) -> void:
 	if not key.is_empty():
 		ArtLibrary.setup_sprite(_back_item, key)
 		_back_item.scale *= HELD_ITEM_SCALE
+
+
+## Đội / bỏ mũ công trường (thợ xây).
+func set_hard_hat(on: bool) -> void:
+	if _hat.visible == on:
+		return
+	_hat.visible = on
+	if on:
+		ArtLibrary.setup_sprite(_hat, HAT_KEY)
+		_hat.position = HAT_POS
+
+
+func has_hard_hat() -> bool:
+	return _hat.visible
+
+
+## Các mảnh đổ bóng theo mặt trời (không tính bóng elip dưới chân).
+func shadow_sources() -> Array[Sprite2D]:
+	var result: Array[Sprite2D] = []
+	_collect_sprites(_flip, result)
+	return result
+
+
+func _collect_sprites(node: Node, result: Array[Sprite2D]) -> void:
+	for child: Node in node.get_children():
+		if child is Sprite2D:
+			result.append(child as Sprite2D)
+		_collect_sprites(child, result)
 
 
 ## Giơ một món đồ trên đầu để khuân (key hình), "" để đặt xuống. Hai tay giơ lên đỡ.
@@ -433,6 +468,13 @@ func _animate(t: float) -> void:
 			_arm_back.rotation = _arm_front.rotation + 0.25
 			_pose.rotation = lerpf(0.22, -0.05, pound)
 			_pose.position.y = lerpf(1.5, -1.0, pound)
+		ANIM_HAMMER:
+			# Gõ búa lách cách: tay giơ ngang đầu rồi gõ xuống, người hơi khom.
+			var tap: float = _swing(t, HAMMER_PERIOD)
+			_arm_front.rotation = lerpf(-0.9, -2.4, tap)
+			_arm_back.rotation = -0.6
+			_pose.rotation = lerpf(0.16, 0.04, tap)
+			_head.rotation = 0.1
 		ANIM_ATTACK:
 			# Vung giáo nhanh, chồm người tới.
 			var jab: float = _swing(t, ATTACK_PERIOD)
@@ -569,6 +611,8 @@ func _build_nodes() -> void:
 	_face = _add_sprite(_head, Vector2.ZERO)
 	_hair = _add_sprite(_head, Vector2.ZERO)
 	_accessory = _add_sprite(_head, Vector2.ZERO)
+	_hat = _add_sprite(_head, HAT_POS)
+	_hat.visible = false
 	_arm_front = _add_sprite(_pose, SHOULDER_FRONT)
 	_held_item = _add_sprite(_pose, SHOULDER_FRONT)
 	_held_item.visible = false

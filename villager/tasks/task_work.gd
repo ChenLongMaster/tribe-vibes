@@ -5,7 +5,8 @@ extends Task
 ##   mỗi nhát thì vật rung + tung bụi, Lười thì nghỉ tay giữa chừng rồi tự làm tiếp.
 ## - Cầm đúng đồ trên tay (rìu, giỏ, xô, cần câu…) từ lúc đi tới chỗ làm.
 ## - Khuân MÓN về kho gần nhất (giơ trên đầu: khúc gỗ, giỏ quả, xác thú…), tới nơi quy ra
-##   tài nguyên chung, số bay "+10 gỗ".
+##   tài nguyên chung, số bay "+10 gỗ". Kho chung đầy thì phần dư không vào được — thổ dân
+##   cắm biển vẽ cái kho gạch chéo (lượt sau Job tự dừng việc).
 ## Bị ngắt lúc đang khuân thì món được ghi vào Job để lượt sau khuân nốt.
 
 enum CarryStep { NONE, GO, DROP }
@@ -175,9 +176,12 @@ func _deliver() -> void:
 	var resource: StringName = ResourceDefs.item_resource(_carry_item)
 	var amount: int = ResourceDefs.item_value(_carry_item, _carry_count)
 	# Thức ăn nhớ là quả / cá / thịt để lúc lấy ra ăn cầm đúng món.
-	GameState.add_resource(resource, amount, _carry_item if ResourceDefs.is_food(resource) else &"")
+	var stored: int = GameState.add_resource(resource, amount, _carry_item if ResourceDefs.is_food(resource) else &"")
 	var drop_at: Vector2 = _storage.position if _storage != null else villager.position
-	EventBus.resource_delivered.emit(resource, amount, drop_at + FLOAT_TEXT_LIFT)
+	if stored > 0:
+		EventBus.resource_delivered.emit(resource, stored, drop_at + FLOAT_TEXT_LIFT)
+	if stored < amount:
+		villager.hold_sign(Job.STORAGE_FULL_ICON, true)
 	job.carried_item = &""
 	job.carried_count = 0
 	villager.rig.set_carry_item("")

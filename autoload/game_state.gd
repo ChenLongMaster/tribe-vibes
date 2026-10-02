@@ -20,6 +20,8 @@ var _resources: Dictionary[StringName, int] = {}
 ## Trong một tài nguyên chung có bao nhiêu phần là món nào (thức ăn: quả / cá / thịt) — người
 ## chơi chỉ thấy tổng, còn thổ dân lấy ra ăn thì cầm đúng món trên tay.
 var _items: Dictionary[StringName, Dictionary] = {}
+## Sức chứa chung mỗi loại tài nguyên (World tính từ hang đá, Kho, Bếp). Chưa có = không giới hạn.
+var _capacity: Dictionary[StringName, int] = {}
 var _next_villager_id: int = 1
 ## Tốc độ trước khi tạm dừng — bấm Space lần nữa thì chạy lại đúng tốc độ đó.
 var _speed_before_pause: int = 1
@@ -35,6 +37,7 @@ func new_game(game_mode: GameModeConfig, chosen_difficulty: Difficulty = Difficu
 	time_of_day = Balance.START_HOUR_FRACTION
 	_resources.clear()
 	_items.clear()
+	_capacity.clear()
 	add_resource(ResourceDefs.FOOD, Balance.START_FOOD, ResourceDefs.ITEM_BERRIES)
 	_next_villager_id = 1
 	_speed_before_pause = 1
@@ -56,14 +59,37 @@ func get_amount(resource_id: StringName) -> int:
 	return _resources.get(resource_id, 0)
 
 
-## Cất thêm `amount` vào kho. `item` = món cụ thể (vd quả, cá) nếu muốn nhớ để vẽ cho đúng.
-func add_resource(resource_id: StringName, amount: int, item: StringName = &"") -> void:
+## Cất thêm `amount` vào kho (không vượt sức chứa). `item` = món cụ thể (vd quả, cá) nếu
+## muốn nhớ để vẽ cho đúng. Trả về số đã cất được — kho đầy thì phần dư không vào được.
+func add_resource(resource_id: StringName, amount: int, item: StringName = &"") -> int:
+	amount = mini(amount, room(resource_id))
 	if amount <= 0:
-		return
+		return 0
 	if item != &"":
 		var items: Dictionary = _items.get_or_add(resource_id, {})
 		items[item] = int(items.get(item, 0)) + amount
 	_set_amount(resource_id, get_amount(resource_id) + amount)
+	return amount
+
+
+## Sức chứa chung (-1 = không giới hạn).
+func capacity(resource_id: StringName) -> int:
+	return _capacity.get(resource_id, -1)
+
+
+## Còn cất thêm được bao nhiêu.
+func room(resource_id: StringName) -> int:
+	var cap: int = capacity(resource_id)
+	if cap < 0:
+		return 1 << 30
+	return maxi(0, cap - get_amount(resource_id))
+
+
+func set_capacity(resource_id: StringName, cap: int) -> void:
+	if _capacity.get(resource_id, -2) == cap:
+		return
+	_capacity[resource_id] = cap
+	EventBus.storage_capacity_changed.emit(resource_id, cap)
 
 
 ## Lấy `amount` ra khỏi kho nếu đủ. Trả về false (và không lấy gì) nếu không đủ.
@@ -139,6 +165,53 @@ func next_villager_id() -> int:
 	var id: int = _next_villager_id
 	_next_villager_id += 1
 	return id
+
+
+## Để lưu game: những gì của ván chơi không nằm trong thế giới (seed, ngày giờ, kho chung…).
+func to_dict() -> Dictionary:
+	var resources: Dictionary = {}
+	for resource_id: StringName in _resources:
+		resources[String(resource_id)] = _resources[resource_id]
+	var items: Dictionary = {}
+	for resource_id: StringName in _items:
+		var inner: Dictionary = {}
+		for item: StringName in _items[resource_id]:
+			inner[String(item)] = _items[resource_id][item]
+		items[String(resource_id)] = inner
+	return {
+		"seed": world_seed, "difficulty": Difficulty.keys()[difficulty], "day": day,
+		"time_of_day": time_of_day, "resources": resources, "items": items,
+		"next_villager_id": _next_villager_id,
+	}
+
+
+## Áp ván đã lưu (gọi sau new_game, trước khi dựng thế giới — vì seed quyết định map).
+## Kho chung nạp sau, khi thế giới đã tính xong sức chứa: xem apply_saved_resources().
+func apply_dict(dict: Dictionary) -> void:
+	world_seed = int(dict.get("seed", world_seed))
+	difficulty = Difficulty.get(str(dict.get("difficulty", "EASY")), Difficulty.EASY) as Difficulty
+	day = int(dict.get("day", 1))
+	time_of_day = float(dict.get("time_of_day", Balance.START_HOUR_FRACTION))
+	_next_villager_id = int(dict.get("next_villager_id", 1))
+
+
+func apply_saved_resources(dict: Dictionary) -> void:
+	_resources.clear()
+	_items.clear()
+	var resources: Dictionary = dict.get("resources", {})
+	for resource_id: String in resources:
+		_set_amount(StringName(resource_id), int(resources[resource_id]))
+	var items: Dictionary = dict.get("items", {})
+	for resource_id: String in items:
+		var inner: Dictionary = {}
+		for item: String in items[resource_id]:
+			inner[StringName(item)] = int(items[resource_id][item])
+		_items[StringName(resource_id)] = inner
+
+
+## Mã số kế tiếp phải lớn hơn mọi mã đã dùng (sau khi tải game).
+func reserve_villager_id(used_id: int) -> void:
+	_next_villager_id = maxi(_next_villager_id, used_id + 1)
 
 
 ## Chế độ đang chơi; chưa nạp chế độ nào (vd trong test) thì dùng luật mặc định = Normal.

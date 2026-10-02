@@ -2,24 +2,33 @@ class_name NormalController
 extends PlayerController
 ## Controller của chế độ Normal (Bộ Lạc). Diễn giải lệnh chung từ InputRouter:
 ## - Chạm thổ dân → chọn (mở bảng thông tin). Rê chuột / nhấn giữ → hiện tên.
-## - Đang chọn mà chạm cây, đá, bụi quả, chỗ câu cá, thú, lửa trại → Commands.assign_job().
+## - Đang chọn mà chạm cây, đá, bụi quả, chỗ câu cá, thú, công trình (móng → xây, bếp → nấu,
+##   lò rèn → rèn, lều → ngủ…) → Commands.assign_job().
 ##   Chạm mặt đất trống → Commands.move_villager() (đi tới đó, đặt điểm neo mới).
 ##   Ra lệnh xong thì bỏ chọn — để lỡ chạm nhầm mặt đất không làm người đó bỏ việc.
 ## - Kéo từ một thổ dân rồi thả vào mục tiêu → như trên (kéo-thả giao việc).
+## - Không chọn ai mà chạm công trình → chọn công trình (mở bảng công trình).
+## - Chọn công trình trong menu xây → chế độ đặt: bóng mờ đúng diện tích đi theo con trỏ
+##   (xanh/đỏ); chuột: click để đặt; cảm ứng: chạm để dời bóng, chạm lại đúng chỗ hoặc bấm ✓
+##   để đặt. Esc / chuột phải / ✕ để thôi.
 ## - Chạm chỗ không làm gì được / Esc / chuột phải / nút ✕ → bỏ chọn.
 ## - Space, phím 1–3 → tạm dừng / tốc độ.
 ## Mọi thay đổi thật đều đi qua Commands; phản hồi hình ảnh (đường chấm chấm, vòng mục
-## tiêu, đường kéo) nằm ở CommandFeedback.
+## tiêu, đường kéo, bóng mờ công trình) nằm ở CommandFeedback / PlacementGhost.
 
 const LONG_PRESS_NAME_SECONDS: float = 2.0
 const SPEED_ACTIONS: Dictionary[StringName, int] = {&"speed_1": 1, &"speed_2": 2, &"speed_3": 3}
 
 var selected: Villager
+var selected_building: Building
+## Công trình đang chọn chỗ đặt (&"" = không đặt gì).
+var placing: StringName = &""
 var _hovered: Villager
 var _long_press_shown: Villager
 var _long_press_timer: float = 0.0
 var _dragging: Villager
 var _feedback: CommandFeedback
+var _ghost: PlacementGhost
 
 
 func _ready() -> void:
@@ -33,12 +42,18 @@ func _ready() -> void:
 	InputRouter.drag_assign_moved.connect(_on_drag_moved)
 	InputRouter.drag_assign_ended.connect(_on_drag_ended)
 	EventBus.deselect_requested.connect(deselect)
+	EventBus.placement_requested.connect(begin_placement)
+	EventBus.placement_confirm_requested.connect(confirm_placement)
+	EventBus.placement_cancel_requested.connect(cancel_placement)
+	EventBus.building_removed.connect(_on_building_removed)
 
 
 func setup(owner_world: World, game_mode: GameModeConfig) -> void:
 	super(owner_world, game_mode)
 	_feedback = CommandFeedback.new()
 	world.add_overlay(_feedback, true)
+	_ghost = PlacementGhost.new()
+	world.add_overlay(_ghost, false)
 	if mode.allow_direct_commands:
 		# Kéo bắt đầu từ một thổ dân thì là kéo-giao-việc, không phải kéo bản đồ.
 		InputRouter.drag_picker = _pick_villager_node
@@ -50,6 +65,8 @@ func _exit_tree() -> void:
 
 
 func select(villager: Villager) -> void:
+	if villager != null:
+		select_building(null)
 	if selected == villager:
 		return
 	if is_instance_valid(selected):
@@ -65,6 +82,79 @@ func select(villager: Villager) -> void:
 
 func deselect() -> void:
 	select(null)
+	select_building(null)
+
+
+func select_building(building: Building) -> void:
+	if selected_building == building:
+		return
+	if building != null:
+		select(null)
+	selected_building = building
+	if building != null:
+		building.wiggle()
+	EventBus.building_selected.emit(building)
+
+
+# --- Đặt công trình ---
+
+func begin_placement(building_id: StringName) -> void:
+	if not mode.allow_direct_commands or not BuildingDefs.is_buildable(building_id):
+		return
+	deselect()
+	placing = building_id
+	_ghost.show_for(building_id)
+	# Chưa biết ngón tay ở đâu: đặt sẵn bóng mờ giữa màn hình cho người chơi thấy.
+	var center: Vector2 = InputRouter.screen_to_world(get_viewport().get_visible_rect().size * 0.5)
+	_move_ghost(center)
+	_emit_placement_state()
+
+
+func confirm_placement() -> void:
+	if placing == &"" or not _ghost.visible:
+		return
+	var origin: Vector2i = _ghost.origin
+	if not Commands.can_place_building(placing, origin):
+		_ghost.shake()
+		return
+	var uid: int = Commands.place_building(placing, origin)
+	cancel_placement()
+	if uid != Commands.INVALID_ID:
+		select_building(Commands.get_building(uid))
+
+
+func cancel_placement() -> void:
+	if placing == &"":
+		return
+	placing = &""
+	_ghost.hide_ghost()
+	_emit_placement_state()
+
+
+func _emit_placement_state() -> void:
+	EventBus.placement_state_changed.emit(placing != &"", placing, InputRouter.mode == InputRouter.Mode.TOUCH)
+
+
+# Bóng mờ canh giữa điểm chạm / con trỏ.
+func _move_ghost(point: Vector2) -> void:
+	var footprint: Vector2i = BuildingDefs.footprint(placing)
+	var cell: Vector2i = WorldGrid.world_to_cell(point)
+	var origin: Vector2i = cell - Vector2i(floori((footprint.x - 1) / 2.0), floori((footprint.y - 1) / 2.0))
+	_ghost.set_origin(origin, Commands.can_place_building(placing, origin))
+
+
+func _on_placement_tap(point: Vector2) -> void:
+	var before: Vector2i = _ghost.origin
+	var was_visible: bool = _ghost.visible
+	_move_ghost(point)
+	# Chuột: click là đặt luôn. Cảm ứng: chạm lần đầu để dời bóng, chạm lại đúng chỗ thì đặt.
+	if InputRouter.mode == InputRouter.Mode.MOUSE or (was_visible and before == _ghost.origin):
+		confirm_placement()
+
+
+func _on_building_removed(building: Node) -> void:
+	if building == selected_building:
+		select_building(null)
 
 
 func _process(delta: float) -> void:
@@ -88,12 +178,20 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_tapped(screen_pos: Vector2) -> void:
 	var point: Vector2 = InputRouter.screen_to_world(screen_pos)
+	if placing != &"":
+		_on_placement_tap(point)
+		return
 	var villager: Villager = _pick(screen_pos)
 	if villager != null:
 		select(villager)
 		return
-	if is_instance_valid(selected) and _command(selected, point):
+	if is_instance_valid(selected):
+		_command(selected, point)
 		deselect()
+		return
+	var building: Building = world.pick_building(point)
+	if building != null and building != selected_building:
+		select_building(building)
 		return
 	deselect()
 
@@ -116,6 +214,9 @@ func _command(villager: Villager, point: Vector2) -> bool:
 
 
 func _on_hovered(screen_pos: Vector2) -> void:
+	if placing != &"":
+		_move_ghost(InputRouter.screen_to_world(screen_pos))
+		return
 	var villager: Villager = _pick(screen_pos)
 	if villager != _hovered:
 		if is_instance_valid(_hovered):
@@ -140,6 +241,9 @@ func _on_long_pressed(screen_pos: Vector2) -> void:
 
 
 func _on_cancel() -> void:
+	if placing != &"":
+		cancel_placement()
+		return
 	if _dragging != null:
 		_dragging = null
 		_feedback.end_drag()

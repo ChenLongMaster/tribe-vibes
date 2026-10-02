@@ -135,6 +135,49 @@ func take_berries() -> int:
 	return harvest(Balance.BUSH_BERRIES_PER_PICK)
 
 
+## Dọn đi củi / đá cuội nằm trên đất (vd chỗ đó vừa đặt móng nhà).
+func clear_away() -> void:
+	if not is_loose() or is_cleared:
+		return
+	uses_left = 0
+	is_cleared = true
+	visible = false
+	cleared.emit(self)
+
+
+## Để lưu game: trạng thái lúc chơi của node này.
+func to_dict() -> Dictionary:
+	var jitter: Vector2 = position - WorldGrid.cell_to_world(cell) - FOOT_OFFSET
+	return {
+		"kind": String(kind), "cell": [cell.x, cell.y], "variant": variant, "jitter": [jitter.x, jitter.y],
+		"uses": uses_left, "cleared": is_cleared, "stump_age": stump_age, "regrow": _regrow_left,
+	}
+
+
+## Áp trạng thái đã lưu (cùng loại). Trả về false nếu khác loại.
+func apply_dict(dict: Dictionary) -> bool:
+	if StringName(str(dict.get("kind", ""))) != kind:
+		return false
+	var saved_cell: Array = dict.get("cell", [cell.x, cell.y])
+	var jitter: Array = dict.get("jitter", [0.0, 0.0])
+	setup(kind, Vector2i(int(saved_cell[0]), int(saved_cell[1])), int(dict.get("variant", variant)),
+			Vector2(float(jitter[0]), float(jitter[1])))
+	uses_left = int(dict.get("uses", uses_left))
+	is_cleared = bool(dict.get("cleared", false))
+	stump_age = float(dict.get("stump_age", 0.0))
+	_regrow_left = float(dict.get("regrow", 0.0))
+	visible = not is_cleared
+	scale = Vector2.ONE
+	if is_node_ready():
+		_refresh_visual()
+	set_process((kind == MapData.KIND_TREE or kind == MapData.KIND_BUSH) and is_depleted())
+	return true
+
+
+func shadow_sprite() -> Sprite2D:
+	return _sprite
+
+
 ## Rung nhẹ khi bị chặt/đập trúng.
 func shake() -> void:
 	var tween: Tween = _sprite.create_tween()

@@ -66,6 +66,11 @@ func _ready() -> void:
 	_graze()
 
 
+## Hình đổ bóng theo mặt trời (ShadowLayer).
+func shadow_sources() -> Array[Sprite2D]:
+	return [_sprite]
+
+
 ## Còn săn được không (đang lang thang, chưa bị săn).
 func is_huntable() -> bool:
 	return state == State.GRAZE or state == State.WALK or state == State.ALERT
