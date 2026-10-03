@@ -4,6 +4,126 @@ Mỗi đợt một mục: đã làm gì, chọn gì và vì sao. Mục mới nh�
 
 ---
 
+## Đợt C.3 — Tài nguyên kiểu RTS: mỏ có lượng, nhiều người làm chung (2026-10-03)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.
+
+### Đã làm
+- **Mỗi chỗ tài nguyên là một mỏ có lượng** (`ResourceNode.amount / capacity`, tính bằng món): bụi quả to 30 thức ăn, bãi sỏi 20 đá, đống củi 15 gỗ, đá tảng 16 đá, cây 3 khúc gỗ. **Nhiều người làm chung** (bụi 3, sỏi / củi / đá tảng 2, cây 1): Reservations nhận `capacity`, mỗi người một chỗ đứng quanh mỏ (`claim_stand`, ô đã có người bị phạt khi chọn chỗ). Thổ dân **làm liền ở cùng mỏ** tới đầy giỏ / bó / xô rồi mới khuân về (hái quả giờ cũng theo mẻ: 3 nắm = 6 thức ăn).
+- **Hình theo lượng còn lại** > 50% / 20–50% / < 20% (`_100/_50/_20`): bụi quả (9 / 4 / 2 chùm quả + bụi trụi), bãi sỏi (18 / 9 / 4 viên), đống củi (12 / 6 / 3 cành), đá tảng to / nhỏ (nguyên → sứt mẻ → mẩu nhỏ). Hình tạm sinh bằng `tools/gen_resource_art.py`; bỏ hình cũ `rock_big/small`, `bush_berries`, `twigs`, `pebbles`.
+- **Thanh lượng chỉ trong bảng thông tin** (click vào vật): thanh xanh / vàng / đỏ + "Còn X/Y" (quy ra tài nguyên chung). Không vẽ gì trên map.
+- **Bãi sỏi, đống củi sinh cùng map** (`_place_piles`): bãi sỏi cạnh bãi đá tảng (chân vách được cộng điểm), đống củi cạnh cây trưởng thành ở rừng rậm; 2 cái gần làng mỗi loại. Đi qua được (`MapData.LOOSE_KINDS`). Lúc mở ván mỗi mỏ lượng ngẫu nhiên (đá tảng 30–100%, còn lại 50–100%).
+- **Bụi quả to**, mỗi vạt 2–3 bụi sát nhau. Hái trụi thì **60 ngày** sau mới đầy lại (`BUSH_REGROW_DAYS`).
+- **Cây lớn dần**: `growth` 0 → 1 trong 2 ngày, cây non vẽ nhỏ (40% → 100%), chưa chặt được; ~12% cây lúc mở ván là cây non (nhiều ở bìa rừng); gốc mọc lại thành cây non.
+- **NatureSpawner viết lại**: cây trưởng thành rụng 3 gỗ ~10 giây một lần vào đống củi cạnh nó (chưa có thì đống mới, tối đa 30 đống; cây trong rừng rậm hay rụng hơn); vách đá lở ~45 giây một lần ở chân vách phía trước: 40% một tảng đá (khi ít hơn lúc đầu), còn lại 8 sỏi dồn vào bãi gần đó (chưa có thì bãi mới, tối đa 30 bãi), có bụi đá.
+- Chữ: "đá cuội" → "sỏi" (bãi sỏi, xô sỏi, nhặt sỏi), "củi khô" → "đống củi", bảng thông tin có dòng cây non / bụi chờ ra quả (tính theo ngày khi còn lâu).
+- `SaveGame.VERSION` = 6. Công cụ chụp màn hình thêm `resources.png`, `panel_pebbles.png`, `panel_twigs.png`; sơ đồ map tô màu bãi sỏi / đống củi.
+- Test: thêm `test_resource_patches` (hình theo lượng, bụi trụi chờ 60 ngày, 3 người hái chung một bụi mỗi người một chỗ, bãi sỏi hết thì biến mất, cây non chưa chặt, vách lở ra sỏi ở chân vách); sửa các test dùng cơ chế cũ. 77/77, soi cảnh báo strict sạch.
+
+### Quyết định
+- Bụi quả hồi **60 ngày tính từ lúc hái trụi** (mỗi bụi một đồng hồ), không phải cả map cùng đầy một lúc.
+- Hái quả thêm mẻ 3 nắm (trước khuân 2 quả mỗi chuyến) để đỡ chạy đi chạy về — đúng tinh thần "đỡ hỗn loạn".
+- Thanh lượng tính theo tài nguyên chung (cây: "Còn 20/30" gỗ thay vì "2/3 khúc").
+
+### Còn biết
+- 60 ngày = 4 tiếng chơi thật (một ngày 4 phút) — gần như mỗi bụi chỉ hái được một lần mỗi buổi chơi; thức ăn lâu dài phải trông vào câu cá, săn thú.
+- Dòng "Mỗi lượt (~3 giây): 2 thức ăn" trong bảng thông tin là một nắm, chưa nói rõ "3 nắm mới khuân về".
+- Đống củi / bãi sỏi trên nền cỏ vẫn hơi nhỏ khi thu nhỏ hết cỡ.
+
+### Số nên tinh chỉnh (`data/balance.gd`)
+- Lượng / người: `BUSH_FOOD` 30 / `BUSH_WORKERS` 3, `PEBBLE_PATCH_STONE` 20, `TWIG_PILE_WOOD` 15 / `PILE_WORKERS` 2, `ROCK_STONE` 16 / `ROCK_WORKERS` 2.
+- `BUSH_REGROW_DAYS` 60, `GATHER_PICK_BATCH` 3, `LOOSE_PICK_BATCH` 3.
+- `TREE_GROW_SECONDS` 2 ngày, `YOUNG_TREE_CHANCE` 0,12, `YOUNG_TREE_SCALE` 0,4.
+- `PEBBLE_PATCHES` 22, `TWIG_PILES` 20, `STARTER_PILES` 2, `TWIG_DROP_SECONDS` 10 / `TWIG_DROP_AMOUNT` 3 / `TWIG_PILE_MAX` 30, `CLIFF_SLIDE_SECONDS` 45 / `CLIFF_SLIDE_BOULDER_CHANCE` 0,4 / `CLIFF_SLIDE_PEBBLES` 8 / `PEBBLE_PATCH_MAX` 30.
+- `RESOURCE_STAGE_HALF/LOW` 0,5 / 0,2, `START_AMOUNT_MIN` 0,5, `ROCK_START_AMOUNT_MIN` 0,3.
+
+---
+
+## Đợt C.2 — Vách đá thành bức vách liền, đá chỉ ở chân vách (2026-10-03)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.
+
+### Đã làm
+- **Vách đá vẽ bằng code thành một bức vách liền** (`world/cliff_ridge.gd`), bỏ 4 hình khối `env/cliff_rock_0N` (và phần sinh hình trong `tools/gen_building_art.py`). Mỗi dãy: mặt đứng cao 92 px quay về phía người nhìn (tối dần xuống chân, vân nứt dọc), mặt trên co lại một nửa bề dày ô (nhìn xiên — vách trông dựng đứng, không thành cao nguyên), mép đỉnh lởm chởm, vài búi rêu và vệt đá, đá vụn dưới chân; viền chỉ ở mép ngoài nên không còn thấy từng khối. Hai đầu dãy thấp dần; chỗ chân vách dịch hàng thì đường biên uốn mượt.
+- Mỗi cột ô vách là một node trong Entities (gốc ở chân vách) để y-sort: ai đi phía sau vách bị che, ai đứng trước vách vẽ đè lên vách. Bóng cả dãy là một đa giác ở ShadowLayer (quét theo chiều cao vách, cùng màu với bóng khác), chỉ vẽ lại khi mặt trời đổi đủ nhiều.
+- **Dãy vách chạy ngang là chính** (mặt đứng quay về phía người nhìn mới ra "bức vách"): đi từng cột sang trái / phải, chân vách trôi lên / xuống dần theo một hướng nghiêng, dày 1–2 ô; dài 8–16 cột (trước 6–14 ô). Mỗi cột là một đoạn ô liền, cột cạnh nhau luôn chạm cạnh (không có khe chéo).
+- **Bãi đá tảng chỉ ở chân vách phía trước** (3 hàng dưới chân: 85% / 40% / 16%), không còn ở phía sau. Đá tảng mới cũng chỉ lăn ra phía trước. Đá tảng / đá cuội / củi không rơi vào ô ngay sau lưng vách (`_behind_cliff`). **Đá cuội ưu tiên bãi đá chân vách** (cộng điểm `CLIFF_FOOT_BONUS` khi chọn nguồn).
+- `SaveGame.VERSION` = 5. Công cụ chụp màn hình chụp thêm `cliff_far.png`.
+- Test: đếm node theo cột vách + kiểm tra mỗi cột là đoạn liền; test 3 thợ chặt + 2 thợ đập đá dựng thêm một Kho cạnh bãi đá chân vách (bãi giờ xa làng) và cho phép một phút sản lượng đứng yên (cả nhóm đi ăn / ngủ). Sửa 3 test thỉnh thoảng trượt do may rủi: tán gẫu (ai bắt chuyện trước cũng được, chờ 4 phút), gục ngủ / ngất (chờ tới khi dậy, giới hạn rộng hơn), chạm chọn thổ dân (chọn người không bị ai đứng chồng). Chạy cả bộ 3 lần liền: 76/76.
+
+### Còn biết
+- Dãy vách chéo nhiều bậc thì mặt đứng thành bậc thang (mỗi cột lệch một hàng) — trông như vách gãy khúc, chấp nhận được.
+- Vách không còn là file hình nên muốn thay art thật phải sửa code vẽ (ghi trong ASSET_SPEC).
+- Bãi đá chân vách nằm xa làng: khai thác đá lâu dài nên xây thêm Kho gần đó.
+
+### Số nên tinh chỉnh
+- `cliff_ridge.gd`: `FACE_HEIGHT` = 92, `TOP_DEPTH_SCALE` = 0,5, `PEAK_HEIGHT` = 14, `END_TAPER` = 56, các màu `TOP_*` / `FACE_*`.
+- `balance.gd`: `CLIFF_RIDGE_MIN/MAX_LENGTH` = 8/16, `CLIFF_TURN_CHANCE` = 0,35, `CLIFF_THICK_CHANCE` = 0,6, `RIDGE_SCREE_NEAR/FAR` = 0,85/0,4.
+- `nature_spawner.gd`: `CLIFF_FOOT_BONUS` = 5.
+
+---
+
+## Đợt C.1 — Tài nguyên trông tự nhiên hơn (2026-10-03)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.
+
+### Đã làm
+- **Bãi đá tảng liền dọc chân vách** (`_place_ridge_scree`): chọn một đoạn 55–85% dãy vách; ô sát vách 85% có đá (đá to nhiều), ô cách 2 ô 40% (đá nhỏ nhiều), hai đầu đoạn thưa dần, phía trước vách (nam) nhiều hơn phía sau; tối đa 16 tảng mỗi dãy. Không đặt trong 2 ô quanh dãy khác để giữ lối đi.
+- **Bãi đá lẻ gom chặt**: ô gần tâm được chọn trước (cộng chút ngẫu nhiên cho hình méo), đá to ở giữa.
+- **Rừng méo tự nhiên**: mỗi cánh rừng ghép 1 khối chính + 0–3 khối phụ, bìa gợn theo nhiễu, cây lẻ lấn ra ngoài bìa (tới 1,6 lần bán kính). Loại cây theo **mảng** nhiễu thấp tần (mảng thông, mảng cây lá tròn). Thêm 14 lùm 1–3 cây lẻ trên bãi cỏ.
+- Cây và đá tảng **lệch nhẹ khỏi tâm ô** (cây ±14/±9 px, đá ±9/±6 px) — lưu trong `MapData.objects[i].jitter`.
+- **Đá cuội nhiều hơn và gom đám**: mở ván 60 viên (trước 16), tối đa 100 (trước 30), lăn thêm ~8 giây. **Củi** mở ván 30, tối đa 50. Món mới 65% rơi cạnh món cùng loại có sẵn (vẫn phải trong 2,3 ô quanh đá tảng / 1,5 ô quanh cây); còn lại rơi quanh nguồn nằm trong cụm dày nhất trong 5 nguồn bốc ngẫu nhiên → dồn về bãi đá lớn / rừng rậm. **Rải sẵn 8 củi + 8 đá cuội quanh cụm gần làng** (vì cụm nhỏ ít được chọn) để ván mới tay trắng vẫn có đồ nhặt gần nhà.
+- `SaveGame.VERSION` = 4 (map sinh khác → save của Đợt C bị từ chối).
+- Test `test_three_choppers_two_miners` giờ giao đá ở bãi chân vách: bãi gần làng chỉ có 6 tảng, 2 người đập hết đúng trong 5 phút rồi (đúng luật) cắm biển "hết đá".
+
+### Còn biết
+- Mỗi ô chỉ một đám củi / đá cuội nên bãi đá cuội vẫn hơi thưa khi nhìn gần; muốn dày hơn thì cần hình "đống đá cuội" nhiều viên hơn.
+- Bãi đá gần làng (6 tảng ≈ 96 đá) cạn sau vài phút đập — sau đó phải đi xa tới chân vách.
+
+### Số nên tinh chỉnh
+- `RIDGE_SCREE_NEAR/FAR` = 0,85/0,4, `RIDGE_SCREE_SPAN_MIN/MAX` = 0,55/0,85, `RIDGE_BOULDERS_MAX` = 16.
+- `FOREST_BLOBS_MAX` = 3, `FOREST_EDGE_WOBBLE` = 0,3, `FOREST_STRAY_CHANCE` = 0,06, `LONE_COPSES` = 14, `TREE_JITTER` / `ROCK_JITTER`.
+- `PEBBLE_START/MAX` = 60/100, `PEBBLE_SPAWN_SECONDS` = 8, `TWIG_START/MAX` = 30/50, `LOOSE_CLUMP_CHANCE` = 0,65, `PEBBLE_FIELD_RADIUS` = 2,3, `STARTER_LOOSE` = 8.
+
+---
+
+## Đợt C — Map rộng kiểu RTS, tài nguyên theo cụm, dãy vách đá (2026-10-03)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.
+
+### Đã làm
+- **Map 96×72 ô** (gấp 4 diện tích). Mở game nhìn xa hơn (zoom 0.8), thu nhỏ được tới 0.35.
+- **Bộ sinh map viết lại theo kiểu RTS** (`world/map_generator.gd`):
+  - Rừng thành **11 cánh rừng** (8 cánh dồn về phía rừng, 3 cánh lẻ): lõi dày, bìa thưa, nhiễu tạo khoảng trống và lối đi.
+  - **6 dãy vách đá** (5 dãy phía bãi đá, 1 dãy chỗ khác): đi ngoằn ngoèo 6–14 ô, dày 1–2 ô, cách nhau ít nhất 3 ô nên luôn có lối đi; dưới chân mỗi dãy 3–6 đá tảng. Thêm 4 bãi đá tảng lẻ.
+  - Bụi quả mọc thành **vạt** 3–5 bụi: một vạt gần làng, một vạt trong đồng cỏ, 6 vạt rải quanh map.
+  - **Gần làng có sẵn một cụm nhỏ mỗi loại**: lùm cây (cách làng 8–11 ô về phía rừng), 6 đá tảng (về phía bãi đá), một vạt bụi quả.
+  - Hồ lớn hơn, 7 chỗ câu cá; đồng cỏ rộng hơn, 8 con thú. Củi / đá cuội tối đa 40 / 30.
+- **Vách đá giờ là địa hình**, không còn là "công trình" 3×2: `MapData.cliffs` = các ô vách (chặn đường). Mỗi ô một **khối vách** (`env/cliff_rock_01..04`, chọn ngẫu nhiên theo ô, có lật ngang) rộng gần 2 ô nên các khối chồng lên nhau thành bức vách liền: đỉnh lởm chởm sáng, mặt đứng có vân dọc, phía phải tối, rêu trên đỉnh. Nằm trong lớp Entities (người đi sau vách bị che), có bóng đổ theo mặt trời. Đá tảng mới lăn ra sát chân dãy vách.
+- **Save cũ không tải được nữa** (map sinh khác hẳn): `SaveGame.VERSION` = 3, bấm Tải ván cũ thì báo "Ván lưu từ bản cũ…".
+- Công cụ mới `tools/map_preview.tscn`: vẽ sơ đồ toàn map ra PNG (mỗi ô một ô màu). Công cụ chụp màn hình chụp thêm `cliff.png`.
+- **Tốc độ** (máy này, tắt vsync, camera trượt): zoom 0.8 ~440 khung/giây (~810 lệnh vẽ), thu nhỏ hết cỡ 0.35 ~200 khung/giây (~3.000 lệnh vẽ).
+- Test: 76 test (thêm: map đúng cỡ, có vách đá chặn đường, gần làng đủ cụm cây/đá/bụi, cây mọc thành cụm). Sửa test cũ theo map mới. Soi cảnh báo strict: sạch.
+
+### Quyết định
+- Giữ "rừng một phía, đá phía đối diện, hồ trên/dưới, đồng cỏ phía còn lại" nhưng rải thêm vài cánh rừng / dãy vách ở chỗ khác cho map đỡ đơn điệu.
+- Cây, đá kẹt không tới được vẫn bị bỏ khi sinh map (lõi rừng quá dày) — vì vậy mật độ lõi rừng giữ ≤ 0,45.
+- Vách đá không chạm/chọn được (không có bảng thông tin), con trỏ hiện ✕ khi đang chọn người.
+
+### Còn biết
+- Khối vách đá vẫn có viền riêng từng khối nên dãy vách nhìn hơi thành "cột" khi chạy dọc; art thật nên vẽ liền mạch hơn.
+- Thu nhỏ hết cỡ có ~3.000 lệnh vẽ — máy yếu / bản Web có thể chậm; cần đo trên điện thoại ở Đợt 6.
+- Map rộng nên thổ dân đi xa hơn tới cụm giàu; cụm gần làng sẽ cạn sau vài phút (đúng tinh thần RTS).
+
+### Số nên tinh chỉnh
+- `MAP_WIDTH/HEIGHT` = 96/72, `CAMERA_ZOOM_DEFAULT` = 0,8, `CAMERA_ZOOM_MIN` = 0,35.
+- Rừng: `FOREST_CLUSTERS` = 11, `FOREST_RADIUS_MIN/MAX` = 4,5/9, `FOREST_CORE_DENSITY` = 0,65, `FOREST_MAX_DENSITY` = 0,45.
+- Vách: `CLIFF_RIDGE_COUNT` = 6, dài 6–14, `CLIFF_THICK_CHANCE` = 0,6, `CLIFF_RIDGE_GAP` = 3.
+- Đá: `ROCK_FIELD_COUNT` = 4 (4–7 tảng), `STARTER_ROCKS` = 6, `RIDGE_BOULDERS_MIN/MAX` = 3/6.
+- Bụi: `BERRY_GROVES` = 6 (3–5 bụi). Thú: `ANIMAL_COUNT` = 8.
+
+---
+
 ## Đợt B — Điều khiển chuột kiểu AoE, khung chọn nhiều người, con trỏ đổi hình (2026-10-03)
 
 **Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.

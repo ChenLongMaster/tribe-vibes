@@ -61,10 +61,10 @@ Ví dụ `water_03` = hai ô trên là nước (bờ nằm ngang ở giữa hìn
 | `env/tree_01` | 192×256 | 96×128 | (0.5, 0.92) | Cây tán tròn. Neo ở gốc thân. Chặn 1 ô. |
 | `env/tree_02` | 176×272 | 88×136 | (0.5, 0.93) | Cây lá kim (nhiều hơn ở sâu trong rừng). |
 | `env/tree_stump` | 96×72 | 48×36 | (0.5, 0.8) | Gốc cây sau khi chặt hết (Đợt 2). |
-| `env/rock_big` | 160×128 | 80×64 | (0.5, 0.88) | Tảng đá lớn. |
-| `env/rock_small` | 112×88 | 56×44 | (0.5, 0.86) | Tảng đá nhỏ (vẫn cần cuốc như đá to). |
-| `env/bush_berries` | 128×112 | 64×56 | (0.5, 0.9) | Bụi có quả mọng. |
-| `env/bush_empty` | 128×112 | 64×56 | (0.5, 0.9) | Cùng bụi, đã hái hết quả — **giữ nguyên dáng** với bản có quả. |
+| `env/rock_big_100` / `_50` / `_20` | 160×128 | 80×64 | (0.5, 0.88) | Tảng đá lớn theo lượng còn lại: > 50% nguyên vẹn; 20–50% nhỏ lại, sứt mẻ, vài mảnh vụn dưới chân; < 20% chỉ còn mẩu nhỏ + đá vụn. **Cùng khung hình, cùng chân** để đổi hình không bị nhảy. |
+| `env/rock_small_100` / `_50` / `_20` | 112×88 | 56×44 | (0.5, 0.88) | Tảng đá nhỏ, 3 mức như trên (vẫn cần cuốc như đá to). |
+| `env/bush_100` / `_50` / `_20` | 192×160 | 96×80 (rộng ~1,5 ô) | (0.5, 0.91) | **Bụi quả to** sum suê, quả mọc thành chùm 3 quả: đầy (9 chùm) / còn nửa (4 chùm) / còn ít (2 chùm). Giữ nguyên dáng tán lá giữa các mức. |
+| `env/bush_empty` | 192×160 | 96×80 | (0.5, 0.91) | Cùng bụi, đã hái trụi (chờ 60 ngày ra quả lại) — chỉ còn cuống. |
 | `env/flower_01` … `03` | 48×56 | 24×28 | (0.5, 0.95) | Hoa trang trí (hồng, vàng, tím). Không chặn đường. |
 | `env/grass_tuft_01` … `02` | 64×48 | 32×24 | (0.5, 0.95) | Khóm cỏ trang trí. |
 | `env/fish_spot` | 128×128 | 64×64 | (0.5, 0.5) | Chỗ câu cá: bọt nước + bóng đàn cá mờ. Đặt giữa một ô nước sát bờ. Vòng gợn và cá nhảy do code thêm. |
@@ -163,14 +163,14 @@ Bong bóng nói là khung vẽ bằng code (không phải hình) chứa 1–2 ic
 |---|---|---|---|---|
 | `props/basket` | 48×48 | ~17×17 | (0.5, 0.15) quai | Giỏ đan rỗng, **xách thõng** dưới bàn tay lúc đi hái quả (không xoay theo tay). |
 | `props/basket_berries` | 48×48 | ~26×26 | tâm | Giỏ đầy quả — giơ trên đầu khi khuân về. |
-| `props/bucket` | 48×48 | ~17×17 | (0.5, 0.15) quai | Xô gỗ rỗng, xách thõng lúc nhặt đá cuội. Cũng là icon việc "nhặt đá cuội" trên đầu. |
-| `props/bucket_pebbles` | 48×48 | ~26×26 | tâm | Xô đầy đá cuội — giơ trên đầu khi khuân về. |
+| `props/bucket` | 48×48 | ~17×17 | (0.5, 0.15) quai | Xô gỗ rỗng, xách thõng lúc nhặt sỏi. Cũng là icon việc "nhặt sỏi" trên đầu. |
+| `props/bucket_pebbles` | 48×48 | ~26×26 | tâm | Xô đầy sỏi — giơ trên đầu khi khuân về. |
 | `props/log` | 72×36 | ~40×20 | tâm | Khúc gỗ (= 10 gỗ) — giơ trên đầu khi khuân về. |
 | `props/twig_bundle` | 48×40 | ~26×22 | tâm | Bó củi buộc dây — giơ trên đầu khi khuân; icon việc "nhặt củi". |
 | `props/fishing_rod` | 48×48 | ~17×17 | tâm | Cần câu, **vẽ chéo từ dưới-trái lên trên-phải**, đầu cần ở góc trên-phải (16, −18 px so với tâm — `ROD_TIP_TEXTURE_OFFSET`). Dây câu + phao do code vẽ. |
-| `env/twigs` | 64×40 | 32×20 | (0.5, 0.75) | Củi rơi trên đất dưới tán cây. Không chặn đường. |
-| `env/pebbles` | 64×40 | 32×20 | (0.5, 0.75) | Đá cuội quanh đá tảng. Không chặn đường. |
-| `env/cliff` | 384×320 | 192×160 (phủ 3×2 ô) | (0.5, 0.97) chân vách | Vách đá lớn — một phần của map, không khai thác được. Đá tảng thỉnh thoảng lăn ra sát chân vách. |
+| `env/twigs_100` / `_50` / `_20` | 160×96 | 80×48 (rộng hơn 1 ô) | (0.5, 0.73) | **Đống củi** dưới tán cây: nhiều cành khô bắt chéo (12 / 6 / 3 cành), vài lá xanh. Không chặn đường. |
+| `env/pebbles_100` / `_50` / `_20` | 160×96 | 80×48 | (0.5, 0.65) | **Bãi sỏi** cạnh đá tảng / chân vách: nền sỏi vụn + nhiều viên đá cuội to nhỏ (18 / 9 / 4 viên, nhặt dần từ rìa vào). Không chặn đường. |
+| (vách đá) | — | — | — | **Vẽ bằng code, không có file hình** (`world/cliff_ridge.gd`): mỗi dãy vách là một bức vách liền — mặt trên lởm chởm có rêu, mặt đứng có vân nứt dọc, đá vụn dưới chân, viền nâu đậm chỉ ở mép ngoài. Màu sắc là các hằng `TOP_*`, `FACE_*`, `CRACK`, `MOSS*` ở đầu file. Muốn dùng art thật sau này thì nên vẽ dạng **dải lặp ngang** (texture mặt đứng + texture mặt trên) để dán theo đường biên, không vẽ từng khối. |
 | `animals/boar` · `animals/deer` (đã có) | | ×0.7 | | Dùng lại làm **xác thú vác chổng vó trên đầu** (code lật dọc) — vẽ thú quay sang phải, chân ở mép dưới. |
 
 Đồ nghề rèn (rìu, cuốc, giáo) dùng lại `icons/skill_chop` · `skill_mine` · `skill_hunt`: cầm tay khi làm, **đeo xiên sau lưng** khi không dùng, vẽ trên tấm biển khi thiếu.

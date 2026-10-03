@@ -81,6 +81,10 @@ func _on_load_requested() -> void:
 	var save: Dictionary = SaveSystem.read_save()
 	if save.is_empty():
 		return
+	if not SaveGame.is_compatible(save):
+		# Map sinh theo cách cũ — dựng lại sẽ sai chỗ cây, đá, nhà.
+		EventBus.village_event.emit("TOAST_SAVE_OLD", {}, "icons/load")
+		return
 	SaveSystem.pending_load = save
 	Engine.time_scale = 1.0
 	get_tree().paused = false

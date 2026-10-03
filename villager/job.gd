@@ -89,7 +89,7 @@ static func is_workable(node: Node2D, villager: Villager, for_job: StringName = 
 		return building_has_room(node as Building, villager, for_job)
 	if node is ResourceNode:
 		var resource: ResourceNode = node as ResourceNode
-		return resource.visible and resource.can_harvest() and not villager.world.reservations.is_taken_by_other(resource, villager)
+		return resource.visible and resource.can_harvest() 				and not villager.world.reservations.is_taken_by_other(resource, villager, resource.max_workers())
 	if node is Animal:
 		var animal: Animal = node as Animal
 		return animal.is_huntable() and not villager.world.reservations.is_taken_by_other(animal, villager)

@@ -92,6 +92,43 @@ func test_no_overlaps() -> void:
 				check(not on_water, "Seed %d: %s mọc dưới nước" % [seed_value, object["kind"]])
 
 
+## Map rộng kiểu RTS: có dãy vách đá (không đi qua được, có đá tảng dưới chân), gần làng có
+## sẵn một cụm nhỏ mỗi loại tài nguyên, cây mọc thành cụm chứ không rải đều.
+func test_rts_layout() -> void:
+	for seed_value: int in SEEDS:
+		var data: MapData = MapGenerator.new().generate(seed_value)
+		check_eq(data.size, Vector2i(Balance.MAP_WIDTH, Balance.MAP_HEIGHT), "Seed %d: cỡ map" % seed_value)
+		check(data.cliffs.size() >= Balance.CLIFF_RIDGE_MIN_LENGTH * 3, "Seed %d: ít vách đá quá (%d ô)" % [seed_value, data.cliffs.size()])
+		var grid: WorldGrid = data.make_grid()
+		var blocked: bool = true
+		for cell: Vector2i in data.cliffs:
+			blocked = blocked and grid.is_blocked(cell)
+		check(blocked, "Seed %d: vách đá phải chặn đường" % seed_value)
+		var center: Vector2 = Vector2(data.village_center)
+		# Gần làng đủ mỗi thứ một cụm nhỏ (bụi quả giờ là bụi to, 2–3 bụi một vạt).
+		var wanted: Dictionary[StringName, int] = {
+			MapData.KIND_TREE: 3, MapData.KIND_ROCK: 3, MapData.KIND_BUSH: Balance.BERRY_GROVE_MIN,
+			MapData.KIND_PEBBLES: 1, MapData.KIND_TWIGS: 1,
+		}
+		for kind: StringName in wanted:
+			var near: int = 0
+			for object: Dictionary in data.objects_of_kind(kind):
+				if Vector2(object["cell"]).distance_to(center) <= 13.0:
+					near += 1
+			check(near >= wanted[kind], "Seed %d: gần làng thiếu cụm %s (%d)" % [seed_value, kind, near])
+		# Cây mọc thành cụm: phần lớn cây có cây khác ngay sát bên.
+		var trees: Dictionary[Vector2i, bool] = {}
+		for object: Dictionary in data.objects_of_kind(MapData.KIND_TREE):
+			trees[object["cell"]] = true
+		var clustered: int = 0
+		for cell: Vector2i in trees:
+			for offset: Vector2i in WorldGrid.NEIGHBORS_8:
+				if trees.has(cell + offset):
+					clustered += 1
+					break
+		check(clustered >= trees.size() * 0.8, "Seed %d: cây rải lẻ tẻ quá (%d/%d có cây bên cạnh)" % [seed_value, clustered, trees.size()])
+
+
 func _average_x(objects: Array[Dictionary]) -> float:
 	if objects.is_empty():
 		return 0.0

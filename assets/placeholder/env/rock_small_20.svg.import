@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c368tetmxrbc2"
-path="res://.godot/imported/pebbles.svg-63bcdabf3ce4766bc311a03bc3cb7787.ctex"
+uid="uid://du88jrkmco4fp"
+path="res://.godot/imported/rock_small_20.svg-840a112aa85ed1e89624689b146ebd9d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/placeholder/env/pebbles.svg"
-dest_files=["res://.godot/imported/pebbles.svg-63bcdabf3ce4766bc311a03bc3cb7787.ctex"]
+source_file="res://assets/placeholder/env/rock_small_20.svg"
+dest_files=["res://.godot/imported/rock_small_20.svg-840a112aa85ed1e89624689b146ebd9d.ctex"]
 
 [params]
 

@@ -290,7 +290,7 @@ func test_save_and_load_roundtrip() -> void:
 	check_eq(GameState.world_seed, 77, "Đúng seed")
 	check(absf(GameState.time_of_day - 0.6) < 0.01, "Đúng giờ trong ngày")
 	check_eq(GameState.get_amount(ResourceDefs.WOOD), wood, "Đúng số gỗ trong kho")
-	check_eq(loaded.resource_nodes[tree_index].uses_left, Balance.TREE_USES - 1, "Cây đã chặt bớt vẫn nhớ")
+	check_eq(loaded.resource_nodes[tree_index].amount, Balance.TREE_USES - 1, "Cây đã chặt bớt vẫn nhớ")
 	var loaded_tent: Building = loaded.building_at_cell(tent_cell)
 	check(loaded_tent != null and loaded_tent.is_foundation(), "Móng lều còn đó")
 	if loaded_tent != null:

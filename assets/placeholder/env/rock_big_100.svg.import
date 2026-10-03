@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjyb1vdqbhhm"
-path="res://.godot/imported/twigs.svg-e1e8c7986e38290f5b937c783481858d.ctex"
+uid="uid://bpohx375j3ncv"
+path="res://.godot/imported/rock_big_100.svg-47d839660be72e55fde8bb48806c696b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/placeholder/env/twigs.svg"
-dest_files=["res://.godot/imported/twigs.svg-e1e8c7986e38290f5b937c783481858d.ctex"]
+source_file="res://assets/placeholder/env/rock_big_100.svg"
+dest_files=["res://.godot/imported/rock_big_100.svg-47d839660be72e55fde8bb48806c696b.ctex"]
 
 [params]
 

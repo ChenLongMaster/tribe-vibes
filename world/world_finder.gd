@@ -15,6 +15,8 @@ const CHATTABLE_KINDS: Array[StringName] = [&"fidget", &"sit", &"scratch"]
 const JOB_TARGET_PATH_CHECKS: int = 6
 ## Đứng ngay trên/dưới vật bị tính xa thêm chừng này px (ưu tiên đứng hai bên).
 const SIDE_PREFERENCE_PX: float = 160.0
+## Ô đã có người khác đứng làm cùng mỏ: coi như xa thêm chừng này px (tránh đứng chồng nhau).
+const SHARED_STAND_PENALTY_PX: float = 4000.0
 
 var _world: World
 var _flowers: Array[Dictionary] = []
@@ -235,17 +237,20 @@ func find_chat_partner(villager: Villager) -> Villager:
 ## Ô trống cạnh `target_cell` (8 hướng) mà thổ dân đi tới được, gần thổ dân nhất.
 ## `prefer_sides` = ưu tiên đứng bên trái/phải (để vung rìu, cuốc vào vật trông cho đúng —
 ## đứng ngay trên/dưới thì người bị cây che hoặc vung vào khoảng không).
-func find_stand_cell(target_cell: Vector2i, villager: Villager, prefer_sides: bool = false) -> Vector2i:
+## `avoid` = ô người khác đang đứng làm cùng mỏ (chỉ chọn khi không còn ô nào khác).
+func find_stand_cell(target_cell: Vector2i, villager: Villager, prefer_sides: bool = false,
+		avoid: Array[Vector2i] = []) -> Vector2i:
 	var options: Array[Vector2i] = []
 	for offset: Vector2i in WorldGrid.NEIGHBORS_8:
 		var cell: Vector2i = target_cell + offset
 		if not _world.grid.is_blocked(cell):
 			options.append(cell)
 	var penalty: Dictionary[Vector2i, float] = {}
-	if prefer_sides:
-		for cell: Vector2i in options:
-			if cell.x == target_cell.x:
-				penalty[cell] = SIDE_PREFERENCE_PX
+	for cell: Vector2i in options:
+		if prefer_sides and cell.x == target_cell.x:
+			penalty[cell] = SIDE_PREFERENCE_PX
+		if avoid.has(cell):
+			penalty[cell] = penalty.get(cell, 0.0) + SHARED_STAND_PENALTY_PX
 	return _closest_reachable(options, villager, penalty)
 
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://kts865ch8g2s"
-path="res://.godot/imported/cliff.svg-9060027fb13025480ed5c6832fc9e22e.ctex"
+uid="uid://bpd5sc7ekut4l"
+path="res://.godot/imported/twigs_20.svg-4b4c67dabb956996b2e4131dd3452db3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/placeholder/env/cliff.svg"
-dest_files=["res://.godot/imported/cliff.svg-9060027fb13025480ed5c6832fc9e22e.ctex"]
+source_file="res://assets/placeholder/env/twigs_20.svg"
+dest_files=["res://.godot/imported/twigs_20.svg-4b4c67dabb956996b2e4131dd3452db3.ctex"]
 
 [params]
 

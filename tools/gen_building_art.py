@@ -322,6 +322,31 @@ def icons():
     write("fx/confetti", svg(16, 24, rect(2, 2, 12, 20, "#FFFFFF", 3, 0), "Mảnh pháo giấy (tô màu bằng code)"))
 
 
+# --- Dãy vách đá: khối đá chồng lên nhau (mỗi ô một khối, to hơn ô để liền thành dãy) ---
+
+import math
+import random
+
+
+def boulder_path(cx, cy, rx, ry, rng, points=11):
+    """Đường viền tròn méo mó của một tảng đá (đáy phẳng hơn)."""
+    pts = []
+    for i in range(points):
+        a = math.tau * i / points - math.pi / 2
+        k = rng.uniform(0.82, 1.08)
+        x = cx + math.cos(a) * rx * k
+        y = cy + math.sin(a) * ry * k
+        if math.sin(a) > 0.3:
+            y = min(y, cy + ry * 0.92)
+        pts.append((x, y))
+    d = f"M{(pts[0][0] + pts[-1][0]) / 2:.1f} {(pts[0][1] + pts[-1][1]) / 2:.1f}"
+    for i in range(points):
+        p0 = pts[i]
+        p1 = pts[(i + 1) % points]
+        d += f" Q{p0[0]:.1f} {p0[1]:.1f} {(p0[0] + p1[0]) / 2:.1f} {(p0[1] + p1[1]) / 2:.1f}"
+    return d + " Z"
+
+
 def main():
     for level in (1, 2, 3):
         write(f"buildings/tent_{level}", tent(level))

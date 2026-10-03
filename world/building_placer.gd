@@ -64,7 +64,7 @@ func _keeps_paths(cells: Array[Vector2i]) -> bool:
 	if not _any_neighbor_reached(cells, reached):
 		return false
 	for building: Building in _world.buildings:
-		if building.building_id == BuildingDefs.CLIFF or building.is_walkable():
+		if building.is_walkable():
 			continue
 		if not _any_neighbor_reached(building.footprint_cells(), reached):
 			return false

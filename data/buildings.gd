@@ -27,7 +27,6 @@ class_name BuildingDefs
 ##   sleep_rate, cook_seconds, dancers.
 ## Đọc thuộc tính theo cấp hiện tại qua Building.prop().
 
-const CLIFF: StringName = &"cliff"
 const CAVE: StringName = &"cave"
 const CAMPFIRE: StringName = &"campfire"
 const TENT: StringName = &"tent"
@@ -47,14 +46,6 @@ const MEAL_SLOTS_KITCHEN: Array[Vector2] = [
 ]
 
 const DEFS: Dictionary[StringName, Dictionary] = {
-	# Vách đá lớn: một phần của map, không khai thác được; thỉnh thoảng lăn ra đá tảng.
-	CLIFF: {
-		"name_key": "BUILDING_CLIFF_NAME",
-		"footprint": Vector2i(3, 2),
-		"art": "env/cliff",
-		"buildable": false,
-		"selectable": false,
-	},
 	# Hang đá: kho tạm lúc đầu — cất gỗ, đá, thức ăn thô nhưng ít thôi. Muốn cất nhiều thì
 	# xây Kho (gỗ, đá) và Bếp (thức ăn).
 	CAVE: {

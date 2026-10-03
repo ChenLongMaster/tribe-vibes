@@ -1,8 +1,9 @@
 extends MarginContainer
 ## Bảng thông tin khi chạm vào một vật thể (không chọn thổ dân): cây, gốc cây, đá tảng, đá nhỏ,
-## bụi quả, củi, đá cuội, chỗ câu cá, con thú. Cho biết: là gì, làm ra gì (mỗi lượt bao nhiêu),
-## còn mấy lượt, có cần đồ nghề không (làng có chưa), đang mọc lại / hết chưa, ai đang làm, và
-## cách giao việc. Chỉ ĐỌC — không nút bấm nào đổi gì. Nằm góc dưới-trái như các bảng khác
+## bụi quả, đống củi, bãi sỏi, chỗ câu cá, con thú. Cho biết: là gì, làm ra gì (mỗi lượt bao
+## nhiêu), còn bao nhiêu (thanh lượng — chỉ hiện ở đây, không vẽ trên map), cây non còn bao
+## lâu, có cần đồ nghề không (làng có chưa), đang mọc lại / hết chưa, ai đang làm, và cách giao
+## việc. Chỉ ĐỌC — không nút bấm nào đổi gì. Nằm góc dưới-trái như các bảng khác
 ## (không bao giờ mở cùng lúc), tự giãn theo độ dài chữ.
 
 const REFRESH_SECONDS: float = 0.4
@@ -13,6 +14,12 @@ const CLOSE_BUTTON_SIZE: float = 44.0
 const INFO_MIN_WIDTH: float = 300.0
 const WARNING_COLOR: Color = Color("#C62828")
 const HINT_COLOR: Color = Color("#6D4C41")
+const AMOUNT_BAR_WIDTH: float = 150.0
+const AMOUNT_BAR_HEIGHT: float = 14.0
+const AMOUNT_BAR_BACK: Color = Color("#EFE6D6")
+const AMOUNT_FULL: Color = Color("#7CB342")
+const AMOUNT_HALF: Color = Color("#FFB300")
+const AMOUNT_LOW: Color = Color("#E53935")
 const ANIMAL_NAME_KEYS: Dictionary[StringName, String] = {&"boar": "ANIMAL_BOAR_NAME", &"deer": "ANIMAL_DEER_NAME"}
 
 var _target: Node2D
@@ -78,24 +85,77 @@ func _show_resource(node: ResourceNode) -> void:
 	_thumb.texture = ArtLibrary.get_texture(node.art_key())
 	var key: String = _resource_key(node)
 	_name_label.text = Loc.t(key + "_NAME")
-	_desc_label.text = Loc.t(key + "_DESC")
+	_desc_label.text = Loc.t(key + "_DESC", {"days": Loc.number(roundi(Balance.BUSH_REGROW_DAYS))})
 	var job_id: StringName = JobDefs.job_for_target(node)
 	if node.kind == MapData.KIND_TREE and node.is_depleted():
 		_body.add_child(_icon_text("icons/question", Loc.t("UI_OBJECT_STUMP")))
 		return
 	_add_gives(job_id)
-	match node.kind:
-		MapData.KIND_FISH_SPOT:
-			_body.add_child(_icon_text("icons/res_fish", Loc.t("UI_OBJECT_ENDLESS")))
-		MapData.KIND_TREE, MapData.KIND_ROCK, MapData.KIND_BUSH:
-			_body.add_child(_icon_text("icons/star", Loc.t("UI_OBJECT_USES", {
-				"left": Loc.number(node.uses_left), "max": Loc.number(node.max_uses())})))
+	if node.kind == MapData.KIND_FISH_SPOT:
+		_body.add_child(_icon_text("icons/res_fish", Loc.t("UI_OBJECT_ENDLESS")))
+	else:
+		_body.add_child(_amount_bar(node, job_id))
 	if node.kind == MapData.KIND_BUSH and node.is_depleted():
-		_body.add_child(_warning(Loc.t("UI_OBJECT_REGROW", {"seconds": Loc.number(ceili(node.regrow_seconds_left()))})))
+		_body.add_child(_warning(Loc.t("UI_OBJECT_REGROW", {"time": _time_text(node.regrow_seconds_left())})))
+	if not node.is_mature():
+		_body.add_child(_warning(Loc.t("UI_OBJECT_YOUNG_TREE", {"time": _time_text(node.grow_seconds_left())}), "icons/res_wood"))
 	_add_tool(job_id)
 	_add_workers(node)
-	if not (node.kind == MapData.KIND_BUSH and node.is_depleted()):
+	if node.can_harvest():
 		_body.add_child(_hint(job_id))
+
+
+# "Thanh máu" của mỏ: còn bao nhiêu (quy ra tài nguyên chung) trên bao nhiêu khi đầy.
+func _amount_bar(node: ResourceNode, job_id: StringName) -> Control:
+	var item: StringName = JobDefs.get_def(job_id).get("item", &"")
+	var left: int = ResourceDefs.item_value(item, node.amount) if item != &"" else node.amount
+	var most: int = ResourceDefs.item_value(item, node.capacity) if item != &"" else node.capacity
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var icon: TextureRect = TextureRect.new()
+	icon.texture = ArtLibrary.get_texture(ResourceDefs.icon(ResourceDefs.item_resource(item)) if item != &"" else "icons/star")
+	icon.custom_minimum_size = Vector2(ICON_SIZE, ICON_SIZE)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(icon)
+	var bar: ProgressBar = ProgressBar.new()
+	bar.show_percentage = false
+	bar.max_value = maxf(1.0, most)
+	bar.value = left
+	bar.custom_minimum_size = Vector2(AMOUNT_BAR_WIDTH, AMOUNT_BAR_HEIGHT)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var back: StyleBoxFlat = StyleBoxFlat.new()
+	back.bg_color = AMOUNT_BAR_BACK
+	back.border_color = Color("#4E342E")
+	back.set_border_width_all(2)
+	back.set_corner_radius_all(6)
+	var fill: StyleBoxFlat = StyleBoxFlat.new()
+	fill.bg_color = _amount_color(node.fraction())
+	fill.set_corner_radius_all(6)
+	bar.add_theme_stylebox_override("background", back)
+	bar.add_theme_stylebox_override("fill", fill)
+	row.add_child(bar)
+	var label: Label = Label.new()
+	label.text = Loc.t("UI_OBJECT_AMOUNT", {"left": Loc.number(left), "max": Loc.number(most)})
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(label)
+	return row
+
+
+func _amount_color(fraction: float) -> Color:
+	if fraction > Balance.RESOURCE_STAGE_HALF:
+		return AMOUNT_FULL
+	if fraction > Balance.RESOURCE_STAGE_LOW:
+		return AMOUNT_HALF
+	return AMOUNT_LOW
+
+
+# "3 ngày" khi còn lâu, "45 giây" khi sắp tới.
+func _time_text(seconds: float) -> String:
+	if seconds >= Balance.DAY_LENGTH_SECONDS:
+		return Loc.t("UI_TIME_DAYS", {"count": Loc.number(ceili(seconds / Balance.DAY_LENGTH_SECONDS))})
+	return Loc.t("UI_TIME_SECONDS", {"count": Loc.number(ceili(seconds))})
 
 
 func _show_animal(animal: Animal) -> void:

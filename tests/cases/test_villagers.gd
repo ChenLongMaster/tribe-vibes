@@ -127,7 +127,13 @@ func test_village_lives_for_five_minutes() -> void:
 	print("        (hoạt động đã thấy: %s)" % ", ".join(PackedStringArray(activities.keys())))
 
 	# Chạm vào một thổ dân thì chọn được người đó.
+	# Lấy người không bị ai đứng chồng lên (chồng nhau thì người đứng trước được chọn — đúng luật).
 	var first: Villager = world.villagers[0]
+	for candidate: Villager in world.villagers:
+		var point: Vector2 = candidate.position + Villager.PICK_CENTER
+		if world.villagers.all(func(other: Villager) -> bool: return other == candidate or not other.hit_test(point)):
+			first = candidate
+			break
 	check(world.pick_villager(first.position + Villager.PICK_CENTER) == first, "Chạm vào thổ dân phải chọn đúng người")
 	check(world.pick_villager(first.position + Vector2(300, 300)) != first, "Chạm chỗ trống không chọn ai")
 
@@ -198,13 +204,15 @@ func test_idle_stays_put_then_gets_bored() -> void:
 	var state: Dictionary = {"chat": false, "moved": false}
 	elapsed = 0.0
 	Engine.time_scale = SIM_TIME_SCALE
-	while elapsed < 120.0 and not state["chat"]:
+	# Chọn trò ngẫu nhiên nên phải chờ đủ lâu (tán gẫu chỉ là một trong nhiều trò).
+	while elapsed < 240.0 and not state["chat"]:
 		await host.get_tree().process_frame
 		elapsed += host.get_process_delta_time()
 		for one: Villager in [villager, friend]:
 			one.status.hunger = 100.0
 			one.status.energy = 100.0
-		if villager.task is TaskChat:
+		# Ai bắt chuyện trước cũng được.
+		if villager.task is TaskChat or friend.task is TaskChat:
 			state["chat"] = true
 			state["moved"] = world.cell_of(villager) != cell or world.cell_of(friend) != neighbor
 	Engine.time_scale = 1.0

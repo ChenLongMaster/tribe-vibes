@@ -7,7 +7,7 @@ class_name JobDefs
 ##   &"forge" (lò rèn)).
 ## - seconds: thời gian làm một lượt ở cấp 1 (chia cho tốc độ làm việc).
 ## - item / amount: làm xong một lượt ra món gì, bao nhiêu (ResourceDefs.ITEMS), rồi khuân về kho.
-## - batch: nhặt đủ chừng này món (từ các mục tiêu sát nhau) rồi mới khuân về một thể.
+## - batch: làm liền ở mỏ (hết thì sang mỏ sát bên) cho đủ chừng này món rồi mới khuân về một thể.
 ## - tool_item: đồ nghề BẮT BUỘC (ToolDefs); không có thì không làm được việc này.
 ## - held: hình cầm trên tay lúc làm (giỏ, xô, cần câu… — "" = tay không). Việc cần
 ##   đồ nghề thì cầm chính món đó. held_tilts: false = xách thõng (giỏ, xô), không xoay
@@ -18,7 +18,7 @@ class_name JobDefs
 ## - activity_key: chữ "đang làm gì" trong bảng thông tin.
 ## - search_radius: hết mục tiêu thì tìm cái tương tự trong bán kính này (ô).
 ## - fallback_job: làng chưa có đồ nghề cho việc này thì làm việc tay không này với mục tiêu
-##   nằm sát bên (vd chưa có cuốc → nhặt đá cuội quanh tảng đá), trong TOOL_FALLBACK_RADIUS_CELLS.
+##   nằm sát bên (vd chưa có cuốc → nhặt sỏi ở bãi sỏi cạnh tảng đá), trong TOOL_FALLBACK_RADIUS_CELLS.
 
 const CHOP: StringName = &"chop"
 const MINE: StringName = &"mine"
@@ -75,6 +75,7 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 		"seconds": Balance.PICK_SECONDS,
 		"item": ResourceDefs.ITEM_BERRIES,
 		"amount": Balance.BUSH_BERRIES_PER_PICK,
+		"batch": Balance.BUSH_BERRIES_PER_PICK * Balance.GATHER_PICK_BATCH,
 		"held": "props/basket",
 		"held_tilts": false,
 		"cursor": "icons/res_food",

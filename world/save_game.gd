@@ -12,7 +12,14 @@ class_name SaveGame
 ## Thú không lưu (đàn thú lang thang mới). Việc đang làm dở (Task) không lưu — tải xong
 ## thổ dân tự làm tiếp lượt mới của việc đang nhớ.
 
-const VERSION: int = 2
+## Tăng khi cách sinh map đổi (map dựng lại từ seed phải ra đúng map cũ) hoặc cấu trúc save đổi.
+## v3: map 96×72, tài nguyên theo cụm, dãy vách đá.
+const VERSION: int = 6
+
+
+## Ván lưu này còn dựng lại được không (cùng phiên bản cách sinh map).
+static func is_compatible(save: Dictionary) -> bool:
+	return int(save.get("format", 0)) == VERSION
 
 
 static func capture(world: World) -> Dictionary:

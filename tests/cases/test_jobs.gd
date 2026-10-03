@@ -38,7 +38,7 @@ func test_job_defs_complete() -> void:
 		check(not Loc.plural(ResourceDefs.count_key(resource_id), 3).contains("RES_"), "Thiếu số nhiều %s" % resource_id)
 	for key: String in ["animals/boar", "animals/deer", "icons/angry", "fx/dust", "ui/target_ring", "ui/move_marker",
 			"props/sign", "ui/thought_bubble", "icons/cross", "icons/question", "icons/dots",
-			"env/twigs", "env/pebbles", "env/cliff", "icons/res_meal",
+			"env/twigs_100", "env/pebbles_20", "env/bush_50", "env/rock_small_20", "icons/res_meal",
 			"ui/speed_pause", "ui/speed_1", "ui/speed_2", "ui/speed_3"]:
 		check(ArtLibrary.has_texture(key), "Thiếu hình %s" % key)
 
@@ -76,7 +76,10 @@ func test_three_choppers_two_miners() -> void:
 	check(_add_built(world, BuildingDefs.STORAGE, 3, 7) != null, "Có chỗ dựng Kho")
 	Commands.debug_give_tools(3)
 	var tree: ResourceNode = _nearest(world, MapData.KIND_TREE)
-	var rock: ResourceNode = _nearest_rock(world)
+	# Bãi đá gần làng chỉ có vài tảng (2 người đập hết trong ~5 phút) — đo ở bãi đá chân vách,
+	# có thêm một Kho ngay cạnh (như người chơi thật sẽ làm khi khai thác xa làng).
+	var rock: ResourceNode = _nearest_scree_rock(world)
+	check(_add_built(world, BuildingDefs.STORAGE, 1, 3, rock.cell) != null, "Có chỗ dựng Kho cạnh bãi đá")
 	for i: int in 3:
 		check(Commands.assign_job(villagers[i].id, tree), "Giao chặt cây cho người %d" % i)
 	for i: int in range(3, 5):
@@ -114,11 +117,14 @@ func test_three_choppers_two_miners() -> void:
 	Engine.time_scale = 1.0
 
 	print("        (gỗ/đá mỗi phút: %s; việc đã thấy: %s)" % [str(samples), ", ".join(PackedStringArray(kinds.keys()))])
+	# Tăng đều mỗi phút — cho phép một phút đứng yên (cả nhóm cùng đi ăn / ngủ, bãi đá xa làng).
 	var previous: Vector2i = Vector2i.ZERO
+	var stalls: Vector2i = Vector2i.ZERO
 	for sample: Vector2i in samples:
-		check(sample.x > previous.x, "Gỗ phải tăng mỗi phút: %s" % str(samples))
-		check(sample.y > previous.y, "Đá phải tăng mỗi phút: %s" % str(samples))
+		stalls += Vector2i(1 if sample.x <= previous.x else 0, 1 if sample.y <= previous.y else 0)
 		previous = sample
+	check(stalls.x <= 1, "Gỗ phải tăng đều mỗi phút: %s" % str(samples))
+	check(stalls.y <= 1, "Đá phải tăng đều mỗi phút: %s" % str(samples))
 	check_eq(Villager.watchdog_alerts, 0, "Watchdog báo có người đứng đơ")
 	for i: int in 5:
 		var villager: Villager = villagers[i]
@@ -161,10 +167,11 @@ func test_job_stops_when_nothing_left() -> void:
 	var worker: Villager = _spawn(world, 1)[0]
 	_fill_needs(worker)
 	var bush: ResourceNode = _nearest(world, MapData.KIND_BUSH)
-	# Hái sạch mọi bụi khác: hái xong bụi này là hết quả quanh đó.
+	# Hái sạch mọi bụi khác, bụi này chỉ để lại ít quả: hái xong là hết quả quanh đó.
 	for node: ResourceNode in world.resource_nodes:
 		if node.kind == MapData.KIND_BUSH and node != bush:
-			node.take_berries()
+			node.harvest(node.amount)
+	bush.harvest(bush.amount - 4)
 	var berries_before: int = GameState.item_amount(ResourceDefs.FOOD, ResourceDefs.ITEM_BERRIES)
 	Commands.assign_job(worker.id, bush)
 	await _simulate(90.0, func(_elapsed: float) -> bool: return worker.job == null)
@@ -315,10 +322,9 @@ func test_tools_needed_and_kept() -> void:
 	check_eq(worker.tool, ToolDefs.AXE, "Tự đi lấy rìu")
 	check_eq(rack.stock_of(ToolDefs.AXE), 0, "Rìu ra khỏi kho")
 
-	# Nhặt đá cuội không cần đồ nghề: giữ rìu (đeo sau lưng), cầm xô.
-	world.nature.spawn_pebble()
+	# Nhặt sỏi không cần đồ nghề: giữ rìu (đeo sau lưng), cầm xô.
 	var pebble: ResourceNode = _nearest(world, MapData.KIND_PEBBLES)
-	check(pebble != null, "Có đá cuội trên map")
+	check(pebble != null, "Có bãi sỏi trên map")
 	if pebble != null:
 		check(Commands.assign_job(worker.id, pebble), "Nhặt đá cuội bằng tay")
 		await _simulate(40.0, func(_elapsed: float) -> bool: return worker.task is TaskHarvest)
@@ -359,6 +365,70 @@ func test_no_pickaxe_picks_pebbles_beside_rock() -> void:
 	await _free_world(world)
 
 
+## Mỏ tài nguyên: nhiều người làm chung một mỏ, hình đổi theo lượng còn lại, hết thì biến mất
+## (sỏi, củi) / trụi chờ mùa sau (bụi quả); cây non chưa chặt được; vách đá lở ra sỏi ở chân vách.
+func test_resource_patches() -> void:
+	var world: World = await _make_world(42)
+	var bush: ResourceNode = _nearest(world, MapData.KIND_BUSH)
+	bush.amount = bush.capacity
+	bush.harvest(0)
+	check_eq(bush.art_key(), "env/bush_100", "Bụi đầy quả")
+	bush.harvest(bush.capacity - int(bush.capacity * 0.4))
+	check_eq(bush.art_key(), "env/bush_50", "Còn 40% thì hình vừa")
+	bush.harvest(bush.amount - 2)
+	check_eq(bush.art_key(), "env/bush_20", "Còn ít thì hình ít")
+	bush.harvest(bush.amount)
+	check(bush.is_depleted() and bush.art_key() == "env/bush_empty", "Hái trụi thì bụi trụi")
+	check(absf(bush.regrow_seconds_left() - Balance.BUSH_REGROW_SECONDS) < 1.0, "Trụi thì chờ %d ngày" % Balance.BUSH_REGROW_DAYS)
+	check(not bush.is_cleared, "Bụi trụi vẫn còn đó")
+
+	var workers: Array[Villager] = _spawn(world, 3)
+	var full_bush: ResourceNode = null
+	for node: ResourceNode in world.resource_nodes:
+		if node.kind == MapData.KIND_BUSH and node.can_harvest() and node != bush:
+			full_bush = node
+			break
+	full_bush.amount = full_bush.capacity
+	for worker: Villager in workers:
+		_fill_needs(worker)
+		check(Commands.assign_job(worker.id, full_bush), "Giao hái cùng một bụi")
+	await _simulate(30.0, func(_elapsed: float) -> bool:
+		return workers.all(func(worker: Villager) -> bool: return worker.task is TaskHarvest and worker.task.step == TaskHarvest.Step.WORK))
+	check(workers.all(func(worker: Villager) -> bool: return worker.job != null and worker.job.target == full_bush),
+			"Ba người cùng hái một bụi to (không ai bị đẩy sang bụi khác)")
+	var cells: Dictionary[Vector2i, bool] = {}
+	for worker: Villager in workers:
+		cells[world.cell_of(worker)] = true
+	check_eq(cells.size(), workers.size(), "Mỗi người đứng một chỗ quanh bụi")
+
+	var pile: ResourceNode = _nearest(world, MapData.KIND_PEBBLES)
+	pile.harvest(pile.amount)
+	check(pile.is_cleared, "Bãi sỏi nhặt hết thì biến mất")
+
+	var young: ResourceNode = _nearest(world, MapData.KIND_TREE)
+	young.growth = 0.3
+	check(not young.can_harvest(), "Cây non chưa chặt được")
+	young.growth = 1.0
+	check(young.can_harvest(), "Cây lớn hẳn thì chặt được")
+
+	var feet: Dictionary[Vector2i, bool] = {}
+	for cell: Vector2i in world.map_data.cliffs:
+		feet[cell] = true
+	var before: int = _count_active(world, MapData.KIND_PEBBLES)
+	for i: int in 3:
+		world.nature.spawn_pebble()
+	var near_foot: int = 0
+	for node: ResourceNode in world.resource_nodes:
+		if node.kind != MapData.KIND_PEBBLES or node.is_cleared:
+			continue
+		for row: int in range(1, 3):
+			for dx: int in range(-1, 2):
+				if feet.has(node.cell - Vector2i(dx, row)):
+					near_foot += 1
+	check(near_foot > 0 and _count_active(world, MapData.KIND_PEBBLES) >= before, "Vách đá lở ra sỏi ở chân vách")
+	await _free_world(world)
+
+
 func _free_neighbor(world: World, cell: Vector2i) -> Vector2i:
 	for offset: Vector2i in WorldGrid.NEIGHBORS_8:
 		if not world.grid.is_blocked(cell + offset):
@@ -375,6 +445,10 @@ func test_loose_pickup_and_nature() -> void:
 	check(_count_active(world, MapData.KIND_PEBBLES) > 0, "Có đá cuội quanh đá tảng lúc đầu")
 	check(not world.map_data.cliffs.is_empty(), "Có vách đá")
 	var twig: ResourceNode = _nearest(world, MapData.KIND_TWIGS)
+	# Đặt thêm vài bó sát bên cho chắc có đủ một mẻ (củi rơi ngẫu nhiên khắp map).
+	for offset: Vector2i in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]:
+		if not world.grid.is_blocked(twig.cell + offset):
+			world.place_resource(MapData.KIND_TWIGS, twig.cell + offset, 0)
 	var wood_before: int = GameState.get_amount(ResourceDefs.WOOD)
 	var delivered: Array[int] = []
 	var on_delivered: Callable = func(resource_id: StringName, amount: int, _pos: Vector2) -> void:
@@ -389,9 +463,11 @@ func test_loose_pickup_and_nature() -> void:
 	check_eq(ResourceDefs.item_value(ResourceDefs.ITEM_LOG, 1), 10, "1 khúc gỗ = 10 gỗ")
 
 	# Thiên nhiên có giới hạn: không mọc quá số tối đa.
-	for i: int in Balance.TWIG_MAX * 2:
+	for i: int in Balance.TWIG_PILE_MAX * 4:
 		world.nature.spawn_twig()
-	check(_count_active(world, MapData.KIND_TWIGS) <= Balance.TWIG_MAX, "Củi không mọc tràn map")
+		world.nature.spawn_pebble()
+	check(_count_active(world, MapData.KIND_TWIGS) <= Balance.TWIG_PILE_MAX, "Đống củi không mọc tràn map")
+	check(_count_active(world, MapData.KIND_PEBBLES) <= Balance.PEBBLE_PATCH_MAX, "Bãi sỏi không mọc tràn map")
 	var boulders: int = _count_active(world, MapData.KIND_ROCK)
 	check(not world.nature.spawn_boulder(), "Đá tảng đủ số lúc đầu thì vách đá không lăn thêm")
 	check_eq(_count_active(world, MapData.KIND_ROCK), boulders, "Số đá tảng giữ nguyên")
@@ -546,6 +622,24 @@ func _nearest_rock(world: World) -> ResourceNode:
 	return _nearest(world, MapData.KIND_ROCK)
 
 
+## Đá tảng gần làng nhất nằm trong bãi đá chân vách (sát một ô vách đá).
+func _nearest_scree_rock(world: World) -> ResourceNode:
+	var cliffs: Dictionary[Vector2i, bool] = {}
+	for cell: Vector2i in world.map_data.cliffs:
+		cliffs[cell] = true
+	var best: ResourceNode = null
+	var center: Vector2 = Vector2(world.map_data.village_center)
+	for node: ResourceNode in world.resource_nodes:
+		if node.kind != MapData.KIND_ROCK or node.is_cleared:
+			continue
+		var at_cliff: bool = false
+		for offset: Vector2i in WorldGrid.NEIGHBORS_8:
+			at_cliff = at_cliff or cliffs.has(node.cell + offset)
+		if at_cliff and (best == null or Vector2(node.cell).distance_to(center) < Vector2(best.cell).distance_to(center)):
+			best = node
+	return best
+
+
 func _campfire(world: World) -> Building:
 	return _building(world, BuildingDefs.CAMPFIRE)
 
@@ -559,8 +653,9 @@ func _building(world: World, building_id: StringName) -> Building:
 
 ## Dựng sẵn một công trình đã xây xong (cấp `level`) ở chỗ trống cách lửa trại ít nhất
 ## `min_radius` ô (để khỏi chắn đường dạo chơi của người đứng quanh lửa trại).
-func _add_built(world: World, building_id: StringName, level: int, min_radius: int = 3) -> Building:
-	var center: Vector2i = world.map_data.campfire_cell
+func _add_built(world: World, building_id: StringName, level: int, min_radius: int = 3,
+		near: Vector2i = Vector2i(-1, -1)) -> Building:
+	var center: Vector2i = world.map_data.campfire_cell if near == Vector2i(-1, -1) else near
 	for radius: int in range(min_radius, 16):
 		for y: int in range(-radius, radius + 1):
 			for x: int in range(-radius, radius + 1):

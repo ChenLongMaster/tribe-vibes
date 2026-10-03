@@ -21,7 +21,7 @@ func _ready() -> void:
 func setup(map_rect: Rect2, focus: Vector2) -> void:
 	_map_rect = map_rect
 	position = focus
-	_target_zoom = clampf(1.0, _min_zoom(), Balance.CAMERA_ZOOM_MAX)
+	_target_zoom = clampf(Balance.CAMERA_ZOOM_DEFAULT, _min_zoom(), Balance.CAMERA_ZOOM_MAX)
 	zoom = Vector2(_target_zoom, _target_zoom)
 	_clamp_position()
 

@@ -30,6 +30,8 @@ var villagers: Array[Villager] = []
 var resource_nodes: Array[ResourceNode] = []
 var buildings: Array[Building] = []
 var animals: Array[Animal] = []
+## Các dãy vách đá (hình dạng để vẽ, xem CliffRidge).
+var cliff_ridges: Array[CliffRidge] = []
 var nature: NatureSpawner
 var placer: BuildingPlacer
 var shadows: ShadowLayer
@@ -78,6 +80,7 @@ func build(seed_value: int) -> void:
 	_build_patches()
 	_build_decor()
 	_spawn_buildings()
+	_spawn_cliffs()
 	_spawn_objects()
 	_spawn_animals(seed_value + ANIMAL_SEED_SALT)
 	nature = NatureSpawner.new()
@@ -260,14 +263,14 @@ func pick_job_target(world_point: Vector2) -> Node2D:
 ## hết cùng loại nếu có — node không bao giờ bị xoá. Đá tảng chặn ô; củi, đá cuội thì không.
 ## `reuse = false` để luôn tạo node mới (khi tải game, giữ đúng thứ tự node đã lưu).
 func place_resource(kind: StringName, cell: Vector2i, variant: int, jitter: Vector2 = Vector2.ZERO,
-		reuse: bool = true) -> ResourceNode:
+		reuse: bool = true, start_amount: int = -1) -> ResourceNode:
 	for node: ResourceNode in resource_nodes:
 		if reuse and node.kind == kind and node.is_cleared:
-			node.place_again(cell, variant, jitter)
+			node.place_again(cell, variant, jitter, start_amount)
 			_block_if_solid(node)
 			return node
 	var fresh: ResourceNode = RESOURCE_NODE_SCENE.instantiate()
-	fresh.setup(kind, cell, variant, jitter)
+	fresh.setup(kind, cell, variant, jitter, start_amount)
 	_entities.add_child(fresh)
 	fresh.set_wind(_wind)
 	resource_nodes.append(fresh)
@@ -326,10 +329,28 @@ func _spawn_buildings() -> void:
 		add_building(entry["id"], entry["cell"])
 
 
+# Dãy vách đá vẽ bằng code thành bức vách liền (CliffRidge). Mỗi cột ô một node trong Entities
+# (gốc ở chân vách) để y-sort với thổ dân: người đi sau vách bị che. Bóng cả dãy ở ShadowLayer.
+# Không chạm / chọn được.
+func _spawn_cliffs() -> void:
+	cliff_ridges = CliffRidge.group(map_data.cliffs)
+	for ridge: CliffRidge in cliff_ridges:
+		for column: int in range(ridge.first_column, ridge.last_column + 1):
+			if not ridge.columns.has(column):
+				continue
+			var slice: Node2D = Node2D.new()
+			slice.name = "Cliff"
+			slice.position = ridge.slice_origin(column)
+			slice.draw.connect(ridge.draw_slice.bind(slice, column))
+			_entities.add_child(slice)
+	shadows.add_walls(cliff_ridges)
+
+
 func _spawn_objects() -> void:
 	for entry: Dictionary in map_data.objects:
 		var node: ResourceNode = RESOURCE_NODE_SCENE.instantiate()
-		node.setup(entry["kind"], entry["cell"], entry["variant"])
+		node.setup(entry["kind"], entry["cell"], entry["variant"], entry.get("jitter", Vector2.ZERO), entry.get("amount", -1))
+		node.growth = entry.get("growth", 1.0)
 		_entities.add_child(node)
 		node.set_wind(_wind)
 		resource_nodes.append(node)

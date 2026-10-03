@@ -11,6 +11,8 @@ extends Node2D
 
 const PROJECT_SHADER: Shader = preload("res://fx/shadow_project.gdshader")
 const FLAT_SHADER: Shader = preload("res://fx/shadow_flat.gdshader")
+## Màu bóng — khớp `shadow_color` trong fx/shadow_project.gdshader.
+const SHADOW_COLOR: Color = Color(0.16, 0.1, 0.2)
 ## Vật đứng yên hiếm khi đổi hình — đồng bộ thưa cho đỡ tốn.
 const STATIC_SYNC_SECONDS: float = 0.2
 
@@ -24,6 +26,11 @@ var _static: Array[Dictionary] = []
 ## {caster: Node2D, sources: Array[Sprite2D], holder: Node2D, shadows: Array[Sprite2D]}
 var _dynamic: Array[Dictionary] = []
 var _static_timer: float = 0.0
+## Dãy vách đá: bóng vẽ bằng đa giác (CliffRidge.draw_shadow), chỉ vẽ lại khi mặt trời đổi đủ nhiều.
+var _walls: Array[CliffRidge] = []
+var _wall_node: Node2D
+var _wall_vec: Vector2 = Vector2.INF
+var _wall_alpha: float = -1.0
 
 
 func _init() -> void:
@@ -42,6 +49,29 @@ func set_sun(vec: Vector2, alpha: float) -> void:
 	project_material.set_shader_parameter("shadow_alpha", alpha)
 	flat_material.set_shader_parameter("shadow_alpha", alpha)
 	visible = alpha > 0.005
+	if _wall_node != null and ((vec - _wall_vec).length() * CliffRidge.FACE_HEIGHT > 1.5 or absf(alpha - _wall_alpha) > 0.01):
+		_wall_vec = vec
+		_wall_alpha = alpha
+		_wall_node.queue_redraw()
+
+
+## Bóng của các dãy vách đá.
+func add_walls(ridges: Array[CliffRidge]) -> void:
+	_walls.append_array(ridges)
+	if _wall_node == null:
+		_wall_node = Node2D.new()
+		_wall_node.name = "CliffShadows"
+		_wall_node.draw.connect(_draw_walls)
+		add_child(_wall_node)
+	_wall_vec = shadow_vec
+	_wall_alpha = shadow_alpha
+	_wall_node.queue_redraw()
+
+
+func _draw_walls() -> void:
+	var color: Color = Color(SHADOW_COLOR, shadow_alpha)
+	for ridge: CliffRidge in _walls:
+		ridge.draw_shadow(_wall_node, shadow_vec, color)
 
 
 ## Vật đứng yên đổ bóng theo hình `source` (con của `caster`, gốc hình = chân).
@@ -102,8 +132,12 @@ func _sync_static(entry: Dictionary) -> void:
 	shadow.centered = source.centered
 	shadow.offset = source.offset
 	shadow.flip_h = source.flip_h
-	shadow.scale = source.scale * caster.scale
-	shadow.position = caster.position + source.position * caster.scale
+	if source == caster:
+		shadow.scale = source.scale
+		shadow.position = caster.position
+	else:
+		shadow.scale = source.scale * caster.scale
+		shadow.position = caster.position + source.position * caster.scale
 
 
 func _sync_dynamic(entry: Dictionary, projection: Transform2D) -> void:

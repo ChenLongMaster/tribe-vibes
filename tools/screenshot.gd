@@ -90,6 +90,14 @@ func _ready() -> void:
 	await _shot(camera, village, 0.1, out_dir.path_join("overview.png"))
 	await _shot(camera, village + Vector2(0, 60), 2.0, out_dir.path_join("close_zoom_2.png"))
 	await _shot(camera, _lake_center(world.map_data), 1.0, out_dir.path_join("lake.png"))
+	# Bãi sỏi + bãi đá gần làng nhất (mỏ tài nguyên theo lượng).
+	var patch: ResourceNode = _nearest_node(world, MapData.KIND_PEBBLES)
+	if patch != null:
+		await _shot(camera, patch.position, 1.4, out_dir.path_join("resources.png"))
+	if not world.map_data.cliffs.is_empty():
+		await _shot(camera, WorldGrid.cell_to_world(world.map_data.cliffs[world.map_data.cliffs.size() / 2]), 1.0, out_dir.path_join("cliff.png"))
+		# Thu nhỏ hết cỡ ở phía bãi đá để thấy cả mấy dãy vách.
+		await _shot(camera, WorldGrid.cell_to_world(world.map_data.cliffs[world.map_data.cliffs.size() / 2]), 0.1, out_dir.path_join("cliff_far.png"))
 	if give_jobs and not world.villagers.is_empty():
 		await _shot(camera, world.villagers[0].position, 1.4, out_dir.path_join("work.png"))
 	if make_hungry and not world.villagers.is_empty():
@@ -114,7 +122,8 @@ func _ready() -> void:
 			controller.select_building(site)
 			await _shot(camera, site.position + Vector2(-220, -60), 1.2, out_dir.path_join("panel_site.png"))
 		controller.deselect()
-		for entry: Array in [[MapData.KIND_BUSH, "panel_bush.png"], [MapData.KIND_TREE, "panel_tree.png"], [MapData.KIND_ROCK, "panel_rock.png"]]:
+		for entry: Array in [[MapData.KIND_BUSH, "panel_bush.png"], [MapData.KIND_TREE, "panel_tree.png"],
+				[MapData.KIND_ROCK, "panel_rock.png"], [MapData.KIND_PEBBLES, "panel_pebbles.png"], [MapData.KIND_TWIGS, "panel_twigs.png"]]:
 			var node: ResourceNode = _nearest_node(world, entry[0])
 			if node != null:
 				controller.select_object(node)
@@ -199,7 +208,7 @@ func _anyone_emerging(world: World) -> bool:
 	return false
 
 
-# Giao việc qua Commands như người chơi: chặt cây, câu cá, nhặt đá cuội, hái quả (gần lửa trại nhất).
+# Giao việc qua Commands như người chơi: chặt cây, câu cá, nhặt sỏi, hái quả (gần lửa trại nhất).
 func _give_jobs(world: World) -> void:
 	Commands.debug_give_tools()
 	var kinds: Array[StringName] = [MapData.KIND_TREE, MapData.KIND_FISH_SPOT, MapData.KIND_PEBBLES, MapData.KIND_BUSH]

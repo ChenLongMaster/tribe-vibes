@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="128" viewBox="0 0 160 128">
+  <!-- Tảng đá lớn (cần cuốc) — còn 50% -->
+  <ellipse cx="80.0" cy="112" rx="64.0" ry="10.2" fill="#3E2723" opacity="0.18"/>
+  <g transform="translate(16.0 22.8) scale(0.8)">
+    <path d="M22 100 C10 80 18 50 44 38 C58 18 96 14 116 30 C140 38 152 66 144 92 C140 108 120 114 80 114 C50 114 30 112 22 100 Z" fill="#9E9E9E" stroke="#4E342E" stroke-width="7.5" stroke-linejoin="round"/>
+    <path d="M46 46 C60 30 92 26 108 38 C96 40 70 44 58 60 C52 56 48 52 46 46 Z" fill="#BDBDBD"/>
+    <path d="M99 38 l22 8 l-6 20 Z" fill="#757575"/>
+    <path d="M72 58 l13 13 l-8 15" fill="none" stroke="#616161" stroke-width="5.0" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <ellipse cx="22.4" cy="110.0" rx="4.2" ry="3.0" fill="#9E9E9E" stroke="#4E342E" stroke-width="2.5"/>
+  <ellipse cx="134.4" cy="110.0" rx="5.6" ry="4.0" fill="#9E9E9E" stroke="#4E342E" stroke-width="2.5"/>
+</svg>

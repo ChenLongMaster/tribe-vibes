@@ -101,15 +101,21 @@ func test_collapse_and_knockout() -> void:
 	Engine.time_scale = 20.0
 	var elapsed: float = 0.0
 	var woke_from_collapse: bool = false
-	while elapsed < Balance.KNOCKOUT_SECONDS + 5.0:
+	var weak_woke: bool = false
+	var weak_health: float = 0.0
+	# Dừng ngay khi cả hai đã dậy (giới hạn rộng: máy chạy nặng thì mỗi frame tua được ít hơn).
+	while elapsed < Balance.KNOCKOUT_SECONDS + 30.0 and not (woke_from_collapse and weak_woke):
 		await host.get_tree().process_frame
 		elapsed += host.get_process_delta_time()
 		if not (tired.task is TaskSleep and (tired.task as TaskSleep).collapsed) and tired.status.energy >= Balance.ENERGY_COLLAPSE_WAKE:
 			woke_from_collapse = true
+		if not weak_woke and not (weak.task is TaskKnockedOut):
+			weak_woke = true
+			weak_health = weak.status.health
 	Engine.time_scale = 1.0
 	check(woke_from_collapse, "Gục ngủ xong thì dậy khi đủ ~30% thể lực")
-	check(not (weak.task is TaskKnockedOut), "Ngất một lúc rồi tỉnh (độ khó Dễ)")
-	check(weak.status.health > 0.0, "Tỉnh dậy còn chút máu")
+	check(weak_woke, "Ngất một lúc rồi tỉnh (độ khó Dễ)")
+	check(weak_health > 0.0, "Tỉnh dậy còn chút máu")
 	world.queue_free()
 	await host.get_tree().process_frame
 

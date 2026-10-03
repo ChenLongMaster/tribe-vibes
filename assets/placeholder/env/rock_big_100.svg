@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="128" viewBox="0 0 160 128">
+  <!-- Tảng đá lớn (cần cuốc) — còn 100% -->
+  <ellipse cx="80.0" cy="112" rx="64.0" ry="10.2" fill="#3E2723" opacity="0.18"/>
+  <g transform="translate(0.0 0.0) scale(1.0)">
+    <path d="M22 100 C10 80 18 50 44 38 C58 18 96 14 116 30 C140 38 152 66 144 92 C140 108 120 114 80 114 C50 114 30 112 22 100 Z" fill="#9E9E9E" stroke="#4E342E" stroke-width="6.0" stroke-linejoin="round"/>
+    <path d="M46 46 C60 30 92 26 108 38 C96 40 70 44 58 60 C52 56 48 52 46 46 Z" fill="#BDBDBD"/>
+  </g>
+</svg>

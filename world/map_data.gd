@@ -6,14 +6,16 @@ extends RefCounted
 enum Edge { NORTH, SOUTH, EAST, WEST }
 
 const KIND_TREE: StringName = &"tree"
-## Đá tảng (cần cuốc). Đá cuội nhặt tay là KIND_PEBBLES.
+## Đá tảng (cần cuốc). Sỏi nhặt tay là KIND_PEBBLES.
 const KIND_ROCK: StringName = &"rock"
 const KIND_BUSH: StringName = &"bush"
 const KIND_FISH_SPOT: StringName = &"fish_spot"
-## Đồ nằm lẫn trên mặt đất, nhặt tay, không chặn đường. Không sinh cùng map mà rơi ra dần
-## lúc chơi (NatureSpawner): củi dưới tán cây, đá cuội quanh đá tảng.
+## Đống củi (dưới tán cây) và bãi sỏi (cạnh đá tảng, chân vách): nằm trên mặt đất, nhặt tay,
+## không chặn đường. Có sẵn lúc sinh map; lúc chơi cây rụng thêm củi, vách đá lở thêm sỏi
+## (NatureSpawner).
 const KIND_TWIGS: StringName = &"twigs"
 const KIND_PEBBLES: StringName = &"pebbles"
+const LOOSE_KINDS: Array[StringName] = [KIND_TWIGS, KIND_PEBBLES]
 
 const DECOR_FLOWER: StringName = &"flower"
 const DECOR_TUFT: StringName = &"grass_tuft"
@@ -48,7 +50,7 @@ var lake_side: Edge = Edge.NORTH
 ## Cạnh map mà cannibal kéo đến (Đợt 5).
 var raid_side: Edge = Edge.SOUTH
 var meadow_rect: Rect2i = Rect2i()
-## Ô gốc (trên-trái) của các vách đá — đá tảng mới lăn ra quanh đây.
+## Các ô thuộc dãy vách đá (địa hình, không đi qua được) — đá tảng mới lăn ra quanh đây.
 var cliffs: Array[Vector2i] = []
 
 
@@ -88,9 +90,12 @@ func blocked_cells() -> Array[Vector2i]:
 			if water[y * size.x + x] == 1:
 				cells.append(Vector2i(x, y))
 	for object: Dictionary in objects:
-		cells.append(object["cell"])
+		# Bãi sỏi, đống củi nằm trên đất — đi qua được.
+		if not LOOSE_KINDS.has(object["kind"]):
+			cells.append(object["cell"])
 	for building: Dictionary in buildings:
 		cells.append_array(BuildingDefs.footprint_cells(building["id"], building["cell"]))
+	cells.append_array(cliffs)
 	return cells
 
 
@@ -106,5 +111,5 @@ func make_grid() -> WorldGrid:
 func fingerprint() -> String:
 	return var_to_str([
 		size, water, ground_variant, objects, buildings, decor, patches,
-		cave_cell, campfire_cell, forest_side, lake_side, raid_side, meadow_rect,
+		cave_cell, campfire_cell, forest_side, lake_side, raid_side, meadow_rect, cliffs,
 	])
