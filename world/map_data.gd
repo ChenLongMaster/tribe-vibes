@@ -17,8 +17,18 @@ const KIND_TWIGS: StringName = &"twigs"
 const KIND_PEBBLES: StringName = &"pebbles"
 const LOOSE_KINDS: Array[StringName] = [KIND_TWIGS, KIND_PEBBLES]
 
+## Cây cỏ trang trí — tên trùng tiền tố hình (env/<kind>_0N).
 const DECOR_FLOWER: StringName = &"flower"
 const DECOR_TUFT: StringName = &"grass_tuft"
+const DECOR_TALL_GRASS: StringName = &"tall_grass"
+const DECOR_FERN: StringName = &"fern"
+const DECOR_SHRUB: StringName = &"shrub"
+const DECOR_REEDS: StringName = &"reeds"
+const DECOR_MUSHROOM: StringName = &"mushroom"
+## Số biến thể hình của mỗi loại trang trí.
+const DECOR_VARIANTS: Dictionary[StringName, int] = {
+	DECOR_FLOWER: 3, DECOR_TUFT: 2, DECOR_TALL_GRASS: 2, DECOR_FERN: 2, DECOR_SHRUB: 2, DECOR_REEDS: 1, DECOR_MUSHROOM: 1,
+}
 const PATCH_DIRT: StringName = &"dirt_patch"
 const PATCH_GRASS: StringName = &"grass_patch"
 
@@ -34,8 +44,10 @@ var ground_variant: PackedByteArray = PackedByteArray()
 var objects: Array[Dictionary] = []
 ## {id: StringName, cell: Vector2i} — cell là ô trên-trái của công trình.
 var buildings: Array[Dictionary] = []
-## Trang trí không chặn đường: {kind: StringName, pos: Vector2, variant: int}
+## Trang trí không chặn đường: {kind: StringName, pos: Vector2, variant: int, scale: float}
 var decor: Array[Dictionary] = []
+## Lối mòn có sẵn lúc mở ván (từ làng ra các cụm gần làng).
+var trails: Array[Vector2i] = []
 ## Mảng đất lớn nằm dưới mọi thứ: {kind: StringName, pos: Vector2, variant: int}
 var patches: Array[Dictionary] = []
 
@@ -111,5 +123,5 @@ func make_grid() -> WorldGrid:
 func fingerprint() -> String:
 	return var_to_str([
 		size, water, ground_variant, objects, buildings, decor, patches,
-		cave_cell, campfire_cell, forest_side, lake_side, raid_side, meadow_rect, cliffs,
+		cave_cell, campfire_cell, forest_side, lake_side, raid_side, meadow_rect, cliffs, trails,
 	])

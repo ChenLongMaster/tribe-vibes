@@ -17,8 +17,9 @@ const NATURE_SEED_SALT: int = 32452843
 const GROUND_KEY_FORMAT: String = "ground/grass_%02d"
 const DIRT_PATCH_KEY_FORMAT: String = "ground/dirt_patch_%02d"
 const GRASS_PATCH_KEY_FORMAT: String = "ground/grass_patch_%02d"
-const FLOWER_KEY_FORMAT: String = "env/flower_%02d"
-const TUFT_KEY_FORMAT: String = "env/grass_tuft_%02d"
+const DECOR_KEY_FORMAT: String = "env/%s_%02d"
+## Công trình nằm trong sân làng chung (không có sân / vòng đá riêng).
+const VILLAGE_BUILDINGS: Array[StringName] = [&"cave", &"campfire"]
 ## Cập nhật người phụ trách công trình (để hiện cảnh báo thiếu người) mỗi chừng này giây.
 const STAFF_REFRESH_SECONDS: float = 0.5
 
@@ -44,6 +45,14 @@ var _next_building_uid: int = 1
 var _staff_timer: float = 0.0
 ## RNG riêng cho nhu cầu ban đầu lúc spawn — gieo theo seed map để lặp lại được.
 var _spawn_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## Đất trơ: sân + đường mòn (GroundMask). Độ mòn từng ô, và mức sàn của lối mòn có sẵn.
+var _ground_mask: GroundMask
+var _decor_layer: DecorLayer
+var _yards_node: Node2D
+var _yard_rings: Dictionary[Building, YardRing] = {}
+var _wear: PackedFloat32Array = PackedFloat32Array()
+var _wear_floor: PackedFloat32Array = PackedFloat32Array()
+var _wear_timer: float = 0.0
 
 @onready var _ground: TileMapLayer = $Ground
 @onready var _patches: Node2D = $Patches
@@ -78,6 +87,7 @@ func build(seed_value: int) -> void:
 	_water.material = _wind.water_material()
 	_water_life.setup(map_data, _wind)
 	_build_patches()
+	_build_ground_mask(seed_value)
 	_build_decor()
 	_spawn_buildings()
 	_spawn_cliffs()
@@ -87,6 +97,8 @@ func build(seed_value: int) -> void:
 	add_child(nature)
 	nature.setup(self, seed_value + NATURE_SEED_SALT)
 	refresh_storage_capacity()
+	refresh_yards()
+	_ground_mask.flush()
 	day_night = DayNight.new()
 	add_child(day_night)
 	day_night.setup(self)
@@ -151,6 +163,8 @@ func add_building(building_id: StringName, cell: Vector2i, level: int = 1, uid: 
 		if not building.is_walkable():
 			grid.set_blocked(footprint_cell, true)
 	shadows.add_static(building, building.shadow_sprite())
+	if _ground_mask != null and not VILLAGE_BUILDINGS.has(building_id):
+		_add_yard(building)
 	EventBus.building_placed.emit(building)
 	return building
 
@@ -167,6 +181,7 @@ func remove_building(building: Building) -> void:
 			grid.set_blocked(footprint_cell, false)
 	building.visible = false
 	refresh_storage_capacity()
+	refresh_yards()
 	EventBus.building_removed.emit(building)
 
 
@@ -199,6 +214,10 @@ func refresh_storage_capacity() -> void:
 
 
 func _process(delta: float) -> void:
+	_wear_timer -= delta
+	if _wear_timer <= 0.0 and not _wear.is_empty():
+		_wear_timer = Balance.WEAR_DECAY_SECONDS
+		_decay_wear()
 	_staff_timer -= delta
 	if _staff_timer > 0.0:
 		return
@@ -317,10 +336,156 @@ func _build_patches() -> void:
 
 
 func _build_decor() -> void:
-	for item: Dictionary in map_data.decor:
-		var key_format: String = FLOWER_KEY_FORMAT if item["kind"] == MapData.DECOR_FLOWER else TUFT_KEY_FORMAT
-		var sprite: Sprite2D = _add_sprite(_decor, key_format % (int(item["variant"]) + 1), item["pos"])
-		sprite.material = _wind.sway_material(Wind.Profile.GRASS)
+	_decor_layer = DecorLayer.new()
+	_decor_layer.name = "Plants"
+	_decor.add_child(_decor_layer)
+	_decor_layer.build(map_data.decor, func(item: Dictionary) -> String:
+		return DECOR_KEY_FORMAT % [String(item["kind"]), int(item["variant"]) + 1], _wind.sway_material(Wind.Profile.GRASS))
+	# Vòng đá quanh sân nằm trên cây cỏ, dưới thổ dân.
+	_yards_node = Node2D.new()
+	_yards_node.name = "YardRings"
+	_decor.add_child(_yards_node)
+
+
+## Ô này có cây cỏ trang trí đã bị giấu (sân công trình đè lên) không — hoa ở đó không hái được.
+func is_decor_hidden(cell: Vector2i) -> bool:
+	return _decor_layer != null and _decor_layer.is_hidden(cell)
+
+
+# --- Đất trơ: sân + đường mòn ---
+
+func _build_ground_mask(seed_value: int) -> void:
+	_ground_mask = GroundMask.new()
+	_ground_mask.name = "GroundMask"
+	add_child(_ground_mask)
+	move_child(_ground_mask, _patches.get_index() + 1)
+	_ground_mask.setup(map_data.size, seed_value)
+	_wear.resize(map_data.size.x * map_data.size.y)
+	_wear.fill(0.0)
+	_wear_floor.resize(_wear.size())
+	_wear_floor.fill(0.0)
+	for cell: Vector2i in map_data.trails:
+		var index: int = map_data.index(cell)
+		_wear[index] = Balance.TRAIL_WEAR
+		_wear_floor[index] = Balance.TRAIL_FLOOR
+		_ground_mask.set_wear(cell, Balance.TRAIL_WEAR)
+
+
+## Thổ dân vừa bước vào ô này: cỏ mòn thêm một chút (đi nhiều thành đường đất).
+func trample(cell: Vector2i) -> void:
+	if not grid.in_bounds(cell):
+		return
+	var index: int = map_data.index(cell)
+	if _wear[index] >= 1.0:
+		return
+	_wear[index] = minf(_wear[index] + Balance.WEAR_PER_STEP, 1.0)
+	_ground_mask.set_wear(cell, _wear[index])
+
+
+func _cell_of_index(index: int) -> Vector2i:
+	return Vector2i(index % map_data.size.x, floori(float(index) / map_data.size.x))
+
+
+func wear_at(cell: Vector2i) -> float:
+	return _wear[map_data.index(cell)] if grid.in_bounds(cell) else 0.0
+
+
+# Bỏ không thì cỏ mọc lại dần (lối mòn có sẵn không mờ dưới mức sàn).
+func _decay_wear() -> void:
+	for index: int in _wear.size():
+		var value: float = _wear[index]
+		if value <= _wear_floor[index]:
+			continue
+		var faded: float = maxf(value * Balance.WEAR_DECAY, _wear_floor[index])
+		if faded < 0.05:
+			faded = 0.0
+		_wear[index] = faded
+		_ground_mask.set_wear(_cell_of_index(index), faded)
+
+
+## Để lưu game: các ô đã mòn (thưa — chỉ ô có mòn) dạng [chỉ số, phần trăm].
+func wear_to_save() -> Array:
+	var saved: Array = []
+	for index: int in _wear.size():
+		if _wear[index] > 0.0:
+			saved.append([index, roundi(_wear[index] * 100.0)])
+	return saved
+
+
+func apply_saved_wear(saved: Array) -> void:
+	for index: int in _wear.size():
+		_wear[index] = _wear_floor[index]
+	for entry: Variant in saved:
+		var pair: Array = entry
+		var index: int = int(pair[0])
+		if index >= 0 and index < _wear.size():
+			_wear[index] = maxf(float(pair[1]) / 100.0, _wear_floor[index])
+	for index: int in _wear.size():
+		_ground_mask.set_wear(_cell_of_index(index), _wear[index])
+	_ground_mask.flush()
+
+
+## Vẽ lại sân: sân làng quanh hang + lửa trại, và sân + vòng đá quanh mỗi công trình (kể cả
+## móng). Cây cỏ trang trí trong sân bị giấu.
+func refresh_yards() -> void:
+	_ground_mask.clear_yards()
+	var center: Vector2 = (Vector2(map_data.cave_entrance_cell) + Vector2(map_data.campfire_cell)) * 0.5
+	var reach: int = ceili(Balance.VILLAGE_YARD_RADIUS) + 1
+	for y: int in range(floori(center.y) - reach, ceili(center.y) + reach + 1):
+		for x: int in range(floori(center.x) - reach, ceili(center.x) + reach + 1):
+			var distance: float = Vector2(x, y).distance_to(center)
+			var value: float = clampf(1.0 - (distance - Balance.VILLAGE_YARD_RADIUS + 1.0) * 0.5, 0.0, 1.0)
+			if value > 0.0:
+				_ground_mask.set_yard(Vector2i(x, y), value)
+	for building: Building in buildings:
+		if VILLAGE_BUILDINGS.has(building.building_id) or building.demolished:
+			continue
+		_add_yard(building)
+	for building: Building in _yard_rings.keys():
+		if not buildings.has(building):
+			_yard_rings[building].queue_free()
+			_yard_rings.erase(building)
+	_update_ring_overlaps()
+
+
+# Hai sân chồng nhau thì thành một sân chung: vòng đá của nhà này bỏ đoạn nằm trong sân nhà kia
+# (và trong sân làng).
+func _update_ring_overlaps() -> void:
+	var village: Vector2 = (Vector2(map_data.cave_entrance_cell) + Vector2(map_data.campfire_cell)) * 0.5
+	var village_rect: Rect2 = Rect2(WorldGrid.cell_to_world(Vector2i(village.round())), Vector2.ZERO) 			.grow((Balance.VILLAGE_YARD_RADIUS - 0.5) * Balance.TILE_SIZE)
+	for building: Building in _yard_rings:
+		var rects: Array[Rect2] = [village_rect]
+		for other: Building in _yard_rings:
+			if other != building:
+				rects.append(_yard_rect(other).grow(-Balance.TILE_SIZE * 0.2))
+		_yard_rings[building].set_excluded(rects)
+
+
+func _yard_rect(building: Building) -> Rect2:
+	var size: Vector2i = BuildingDefs.footprint(building.building_id)
+	return Rect2(Vector2(building.origin_cell * Balance.TILE_SIZE), Vector2(size * Balance.TILE_SIZE)) 			.grow(Balance.YARD_MARGIN_CELLS * Balance.TILE_SIZE)
+
+
+func _add_yard(building: Building) -> void:
+	var cells: Array[Vector2i] = building.footprint_cells()
+	var covered: Array[Vector2i] = []
+	var origin: Vector2i = building.origin_cell
+	var size: Vector2i = BuildingDefs.footprint(building.building_id)
+	for y: int in range(-1, size.y + 1):
+		for x: int in range(-1, size.x + 1):
+			var cell: Vector2i = origin + Vector2i(x, y)
+			var inside: bool = cells.has(cell)
+			var corner: bool = (x == -1 or x == size.x) and (y == -1 or y == size.y)
+			var value: float = 1.0 if inside else (0.45 if corner else 0.68)
+			_ground_mask.set_yard(cell, maxf(_ground_mask.yard_at(cell), value))
+			covered.append(cell)
+	_decor_layer.hide_cells(covered)
+	if not _yard_rings.has(building):
+		var ring: YardRing = YardRing.new()
+		ring.setup(_yard_rect(building), building.uid * 7919)
+		_yards_node.add_child(ring)
+		_yard_rings[building] = ring
+		_update_ring_overlaps()
 
 
 # Công trình có sẵn trên map (hang, lửa trại, vách đá).

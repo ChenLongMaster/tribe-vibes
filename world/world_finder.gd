@@ -206,7 +206,8 @@ func is_in_idle_area(villager: Villager, cell: Vector2i) -> bool:
 func find_flower_near(villager: Villager) -> Dictionary:
 	var nearby: Array[Dictionary] = []
 	for flower: Dictionary in _flowers:
-		if is_in_idle_area(villager, WorldGrid.world_to_cell(flower["pos"])):
+		var cell: Vector2i = WorldGrid.world_to_cell(flower["pos"])
+		if is_in_idle_area(villager, cell) and not _world.is_decor_hidden(cell):
 			nearby.append(flower)
 	if nearby.is_empty():
 		return {}

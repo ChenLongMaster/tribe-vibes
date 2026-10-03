@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="64" viewBox="0 0 96 64">
+  <!-- Bụi lá trang trí — không quả, không chạm được -->
+  <g fill="#4F7A2A">
+    <circle cx="36" cy="40" r="23"/>
+    <circle cx="60" cy="42" r="23"/>
+    <circle cx="48" cy="32" r="19"/>
+  </g>
+  <g fill="#5F8C33">
+    <circle cx="36" cy="40" r="20"/>
+    <circle cx="60" cy="42" r="20"/>
+    <circle cx="48" cy="32" r="16"/>
+  </g>
+  <g fill="#76A143">
+    <circle cx="32" cy="35" r="11.0"/>
+    <circle cx="56" cy="37" r="11.0"/>
+    <circle cx="44" cy="27" r="8.8"/>
+  </g>
+  <path d="M28.7 39.7 l4 -3" stroke="#4F7A2A" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M50.3 53.1 l4 -3" stroke="#4F7A2A" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M68.7 48.1 l4 -3" stroke="#4F7A2A" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M60.8 30.4 l4 -3" stroke="#4F7A2A" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M74.8 38.1 l4 -3" stroke="#4F7A2A" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

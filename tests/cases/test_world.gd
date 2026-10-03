@@ -48,3 +48,50 @@ func test_art_lookup() -> void:
 	check(ArtLibrary.has_texture("env/tree_01"), "Hình tạm của cây phải có")
 	for mask: int in range(1, 16):
 		check(ArtLibrary.has_texture(WaterLayer.TILE_KEY_FORMAT % mask), "Thiếu hình nước %d" % mask)
+
+
+## Cảm giác Prehistoric Tribes: người nhỏ so với nhà, sân đất + vòng đá quanh công trình (cây
+## cỏ trong sân bị giấu), cây cỏ trang trí phủ map, lối mòn có sẵn, đi nhiều thì cỏ mòn thành đường.
+func test_prehistoric_look() -> void:
+	GameState.new_game(load("res://modes/normal_mode.tres"))
+	var world: World = WORLD_SCENE.instantiate()
+	host.add_child(world)
+	world.build(42)
+	await host.get_tree().process_frame
+	var data: MapData = world.map_data
+	check(data.decor.size() > data.size.x * data.size.y * 0.25, "Cây cỏ trang trí phủ khắp map (%d)" % data.decor.size())
+	check(not data.trails.is_empty(), "Có lối mòn từ làng ra các cụm gần làng")
+	check(world.wear_at(data.trails[0]) >= Balance.TRAIL_FLOOR, "Lối mòn có sẵn đã mòn")
+
+	var cell: Vector2i = world.finder.find_free_cell_near(data.campfire_cell, 2.0, 4.0)
+	var villager: Villager = world.spawn_villager(VillagerFactory.create(RandomNumberGenerator.new(), VillagerData.Gender.MALE, "vi"), cell)
+	await host.get_tree().process_frame
+	check(absf(villager.scale.x - Balance.VILLAGER_SCALE) < 0.01, "Thổ dân thu nhỏ so với nhà")
+	check(villager.hit_test(villager.position + Villager.PICK_CENTER * villager.scale + Vector2(Balance.MIN_PICK_RADIUS - 2.0, 0)),
+			"Vùng chạm vẫn đủ to cho điện thoại")
+
+	# Đặt một cái lều ở bãi trống có cây cỏ: thành sân, cây cỏ trong sân bị giấu.
+	var origin: Vector2i = World.INVALID_CELL
+	for decor: Dictionary in data.decor:
+		var candidate: Vector2i = WorldGrid.world_to_cell(decor["pos"])
+		if world.placer.can_place(BuildingDefs.TENT, candidate):
+			origin = candidate
+			break
+	check(origin != World.INVALID_CELL, "Có chỗ đặt lều trên bãi cỏ")
+	var tent: Building = world.placer.place(BuildingDefs.TENT, origin)
+	check(world.is_decor_hidden(origin), "Cây cỏ trong sân bị giấu")
+	check(world.is_decor_hidden(origin + Vector2i(-1, 0)), "Sân rộng hơn chân lều một vòng")
+
+	# Giẫm qua lại một ô thì mòn dần; lưu / tải giữ nguyên đường mòn.
+	var path_cell: Vector2i = origin + Vector2i(4, 4)
+	for i: int in 10:
+		world.trample(path_cell)
+	check(world.wear_at(path_cell) >= Balance.WEAR_PER_STEP * 9.5, "Đi qua nhiều thì mòn thành đường")
+	var saved: Array = world.wear_to_save()
+	world.apply_saved_wear([])
+	check(world.wear_at(path_cell) < 0.01, "Xoá mòn (trừ lối mòn có sẵn)")
+	world.apply_saved_wear(saved)
+	check(world.wear_at(path_cell) >= Balance.WEAR_PER_STEP * 9.5, "Tải lại thì đường mòn còn nguyên")
+	check(tent != null, "Đặt được lều")
+	world.queue_free()
+	await host.get_tree().process_frame

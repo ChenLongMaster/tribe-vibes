@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="64" viewBox="0 0 96 64">
+  <!-- Bụi lá trang trí — không quả, không chạm được -->
+  <g fill="#4F7A2A">
+    <circle cx="30" cy="42" r="21"/>
+    <circle cx="52" cy="36" r="25"/>
+    <circle cx="72" cy="44" r="20"/>
+    <circle cx="48" cy="50" r="21"/>
+  </g>
+  <g fill="#5F8C33">
+    <circle cx="30" cy="42" r="18"/>
+    <circle cx="52" cy="36" r="22"/>
+    <circle cx="72" cy="44" r="17"/>
+    <circle cx="48" cy="50" r="18"/>
+  </g>
+  <g fill="#76A143">
+    <circle cx="26" cy="37" r="9.9"/>
+    <circle cx="48" cy="31" r="12.1"/>
+    <circle cx="68" cy="39" r="9.4"/>
+    <circle cx="44" cy="45" r="9.9"/>
+  </g>
+  <path d="M42.9 32.5 l4 -3" stroke="#4F7A2A" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M30.0 51.6 l4 -3" stroke="#4F7A2A" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M54.7 45.3 l4 -3" stroke="#4F7A2A" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M53.2 36.7 l4 -3" stroke="#4F7A2A" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M63.9 42.1 l4 -3" stroke="#4F7A2A" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

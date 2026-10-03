@@ -48,6 +48,7 @@ func generate(seed_value: int) -> MapData:
 	_remove_unreachable_objects()
 	_place_piles()
 	_place_fishing_spots()
+	_place_trails()
 	_pick_ground_variants()
 	_place_patches()
 	_scatter_decor()
@@ -629,9 +630,7 @@ func _place_patches() -> void:
 	for i: int in Balance.GRASS_PATCH_COUNT:
 		var pos: Vector2 = Vector2(_rng.randf() * map_pixels.x, _rng.randf() * map_pixels.y)
 		_data.patches.append({"kind": MapData.PATCH_GRASS, "pos": pos, "variant": _rng.randi_range(0, 1)})
-	# Bãi đất lớn giữa hang và lửa trại — "sân làng".
-	var village_pos: Vector2 = WorldGrid.cell_to_world(_data.campfire_cell) + Vector2(0, -24)
-	_data.patches.append({"kind": MapData.PATCH_DIRT, "pos": village_pos, "variant": 0})
+	# Sân làng giữa hang và lửa trại do GroundMask vẽ (World.refresh_yards), không còn là một mảng.
 	var center: Vector2 = Vector2(_data.village_center)
 	var placed: int = 0
 	var attempts: int = 0
@@ -646,26 +645,101 @@ func _place_patches() -> void:
 		placed += 1
 
 
+# Cây cỏ trang trí phủ kín map (kiểu Prehistoric Tribes), rậm thưa theo nhiễu: gần rừng nhiều
+# dương xỉ, bụi lá, nấm; ven hồ lau sậy; chỗ trống cỏ cao, khóm cỏ, hoa; đồng cỏ chủ yếu hoa.
+# Không đặt trên vật thể, nước, sân làng, lối mòn.
 func _scatter_decor() -> void:
-	var campfire: Vector2 = Vector2(_data.campfire_cell)
+	var trees: Dictionary[Vector2i, bool] = _cells_of_kind(MapData.KIND_TREE)
+	var trail_cells: Dictionary[Vector2i, bool] = {}
+	for cell: Vector2i in _data.trails:
+		trail_cells[cell] = true
+	var village: Vector2 = _village_yard_center()
 	for y: int in _data.size.y:
 		for x: int in _data.size.x:
 			var cell: Vector2i = Vector2i(x, y)
 			var roll: float = _rng.randf()
-			var jitter: Vector2 = Vector2(_rng.randf_range(-22, 22), _rng.randf_range(-18, 22))
-			var variant_roll: float = _rng.randf()
-			if _occupied[_data.index(cell)] == 1 or Vector2(cell).distance_to(campfire) < 3.0:
+			if _occupied[_data.index(cell)] == 1 or trail_cells.has(cell):
 				continue
-			var flower_chance: float = Balance.DECOR_FLOWER_CHANCE
-			var tuft_chance: float = Balance.DECOR_TUFT_CHANCE
-			if _data.meadow_rect.has_point(cell):
-				flower_chance = Balance.MEADOW_FLOWER_CHANCE
-				tuft_chance = Balance.MEADOW_TUFT_CHANCE
-			var pos: Vector2 = WorldGrid.cell_to_world(cell) + jitter
-			if roll < flower_chance:
-				_data.decor.append({"kind": MapData.DECOR_FLOWER, "pos": pos, "variant": int(variant_roll * 3.0)})
-			elif roll < flower_chance + tuft_chance:
-				_data.decor.append({"kind": MapData.DECOR_TUFT, "pos": pos, "variant": int(variant_roll * 2.0)})
+			if Vector2(cell).distance_to(village) < Balance.VILLAGE_DECOR_CLEAR:
+				continue
+			var near_tree: int = _count_cells_near(cell, trees, 1)
+			var near_water: bool = false
+			for offset: Vector2i in WorldGrid.NEIGHBORS_8:
+				near_water = near_water or _data.is_water(cell + offset)
+			# Nhiễu đẩy về hai đầu (smoothstep) để cây cỏ mọc thành đám rậm xen bãi trống, không rải đều.
+			var lush: float = smoothstep(0.35, 0.65, _noise.get_noise_2d(x * 2.1 + 500.0, y * 2.1) * 0.9 + 0.5)
+			lush = clampf(lush + near_tree * 0.12 + (0.3 if near_water else 0.0), 0.0, 1.0)
+			var expected: float = lerpf(Balance.DECOR_SPARSE, Balance.DECOR_DENSITY, lush)
+			var in_meadow: bool = _data.meadow_rect.has_point(cell)
+			if in_meadow:
+				expected = Balance.MEADOW_DECOR
+			var count: int = floori(expected) + (1 if roll < expected - floori(expected) else 0)
+			for i: int in count:
+				var pos: Vector2 = WorldGrid.cell_to_world(cell) + Vector2(_rng.randf_range(-26, 26), _rng.randf_range(-22, 24))
+				var kind: StringName = _decor_kind(in_meadow, near_water, near_tree > 0)
+				_data.decor.append({"kind": kind, "pos": pos, "variant": _rng.randi_range(0, MapData.DECOR_VARIANTS[kind] - 1),
+						"scale": _rng.randf_range(0.85, 1.15)})
+
+
+func _decor_kind(in_meadow: bool, near_water: bool, near_tree: bool) -> StringName:
+	var weights: Dictionary[StringName, float]
+	if in_meadow:
+		weights = {MapData.DECOR_FLOWER: 0.45, MapData.DECOR_TUFT: 0.35, MapData.DECOR_TALL_GRASS: 0.2}
+	elif near_water:
+		weights = {MapData.DECOR_REEDS: 0.55, MapData.DECOR_TALL_GRASS: 0.3, MapData.DECOR_TUFT: 0.15}
+	elif near_tree:
+		weights = {MapData.DECOR_FERN: 0.38, MapData.DECOR_SHRUB: 0.18, MapData.DECOR_MUSHROOM: 0.08,
+				MapData.DECOR_TALL_GRASS: 0.2, MapData.DECOR_TUFT: 0.1, MapData.DECOR_FLOWER: 0.06}
+	else:
+		weights = {MapData.DECOR_TALL_GRASS: 0.32, MapData.DECOR_TUFT: 0.34, MapData.DECOR_SHRUB: 0.16,
+				MapData.DECOR_FERN: 0.12, MapData.DECOR_FLOWER: 0.06}
+	var roll: float = _rng.randf()
+	for kind: StringName in weights:
+		roll -= weights[kind]
+		if roll <= 0.0:
+			return kind
+	return MapData.DECOR_TUFT
+
+
+## Giữa hang và lửa trại — tâm sân làng (tính bằng ô, có thể lẻ).
+func _village_yard_center() -> Vector2:
+	return (Vector2(_data.cave_entrance_cell) + Vector2(_data.campfire_cell)) * 0.5
+
+
+# --- Lối mòn có sẵn ---
+
+# Lối mòn từ sân làng ra từng loại tài nguyên gần làng nhất (cây, đá tảng, bụi quả, bãi sỏi,
+# đống củi, chỗ câu cá) — như người trong làng đã đi lại nhiều năm. Đi theo đường tìm được trên
+# lưới nên không xuyên qua cây, đá.
+func _place_trails() -> void:
+	var grid: WorldGrid = _data.make_grid()
+	var village: Vector2 = _village_yard_center()
+	var seen: Dictionary[Vector2i, bool] = {}
+	for kind: StringName in [MapData.KIND_TREE, MapData.KIND_ROCK, MapData.KIND_BUSH, MapData.KIND_PEBBLES,
+			MapData.KIND_TWIGS, MapData.KIND_FISH_SPOT]:
+		var nearest: Vector2i = Vector2i(-1, -1)
+		for object: Dictionary in _data.objects_of_kind(kind):
+			var cell: Vector2i = object["cell"]
+			if nearest == Vector2i(-1, -1) or Vector2(cell).distance_to(village) < Vector2(nearest).distance_to(village):
+				nearest = cell
+		if nearest == Vector2i(-1, -1):
+			continue
+		var goal: Vector2i = _walkable_beside(grid, nearest)
+		if goal == Vector2i(-1, -1):
+			continue
+		for cell: Vector2i in grid.astar.get_id_path(_data.cave_entrance_cell, goal, true):
+			if Vector2(cell).distance_to(village) > Balance.VILLAGE_YARD_RADIUS - 0.5 and not seen.has(cell):
+				seen[cell] = true
+				_data.trails.append(cell)
+
+
+func _walkable_beside(grid: WorldGrid, cell: Vector2i) -> Vector2i:
+	if not grid.is_blocked(cell):
+		return cell
+	for offset: Vector2i in WorldGrid.NEIGHBORS_8:
+		if grid.in_bounds(cell + offset) and not grid.is_blocked(cell + offset):
+			return cell + offset
+	return Vector2i(-1, -1)
 
 
 func _can_place_nature(cell: Vector2i) -> bool:

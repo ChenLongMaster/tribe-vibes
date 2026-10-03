@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="80" viewBox="0 0 72 80">
+  <!-- Cỏ cao trang trí (không chạm được) -->
+  <g stroke="#4F7A2A" stroke-width="2.2" stroke-linejoin="round">
+    <path d="M10.2 78 Q16.3 36.9 21.1 16.9 Q17.6 46.9 18.2 78 Z" fill="#7DA544"/>
+    <path d="M16.2 78 Q19.2 40.2 17.0 20.2 Q21.5 50.2 24.2 78 Z" fill="#6E9B3A"/>
+    <path d="M23.7 78 Q25.3 49.5 19.7 29.5 Q28.1 59.5 31.7 78 Z" fill="#88AE4C"/>
+    <path d="M30.8 78 Q33.9 34.5 31.8 14.5 Q36.2 44.5 38.8 78 Z" fill="#7DA544"/>
+    <path d="M40.0 78 Q44.6 36.6 46.2 16.6 Q46.4 46.6 48.0 78 Z" fill="#6E9B3A"/>
+    <path d="M44.7 78 Q48.4 44.6 47.6 24.6 Q50.5 54.6 52.7 78 Z" fill="#88AE4C"/>
+    <path d="M50.7 78 Q54.1 38.7 52.8 18.7 Q56.3 48.7 58.7 78 Z" fill="#7DA544"/>
+  </g>
+</svg>

@@ -72,12 +72,32 @@ const FISHING_SPOT_COUNT: int = 7
 const FISHING_SPOT_MIN_SPACING: float = 3.0 # ô
 const MEADOW_HALF_WIDTH: int = 16 # ô
 const MEADOW_DEPTH: int = 14 # ô
-const DECOR_TUFT_CHANCE: float = 0.12
-const DECOR_FLOWER_CHANCE: float = 0.04
-const MEADOW_TUFT_CHANCE: float = 0.15
-const MEADOW_FLOWER_CHANCE: float = 0.25
+## Cây cỏ trang trí phủ kín map (kiểu Prehistoric Tribes): số cây cỏ trung bình mỗi ô, từ chỗ
+## thưa nhất tới chỗ rậm nhất (theo nhiễu; gần rừng, ven hồ rậm hơn). Không chạm được.
+const DECOR_SPARSE: float = 0.12
+const DECOR_DENSITY: float = 1.8
+const MEADOW_DECOR: float = 0.8 # đồng cỏ: chủ yếu hoa và khóm cỏ
+const VILLAGE_DECOR_CLEAR: float = 3.0 # sân làng quanh hang + lửa trại trống cây cỏ
 const DIRT_PATCH_COUNT: int = 6
 const GRASS_PATCH_COUNT: int = 120 # mảng cỏ sáng/tối trang trí nền
+
+# --- Cảm giác Prehistoric Tribes: tỉ lệ, sân, đường mòn ---
+const VILLAGER_SCALE: float = 0.65 # thổ dân nhỏ so với nhà và map (người lớn; em bé, trẻ con nhỏ hơn nữa)
+const ANIMAL_SCALE: float = 0.7
+## Bong bóng / icon trên đầu và tấm biển không nhỏ theo người (cho dễ đọc).
+const OVERHEAD_SCALE: float = 1.3
+const SIGN_SCALE: float = 1.35
+const MIN_PICK_RADIUS: float = 24.0 # px — vùng chạm thổ dân vẫn tối thiểu ~48 px cho điện thoại
+## Sân đất quanh mỗi công trình rộng thêm chừng này ô mỗi phía; sân làng quanh hang + lửa trại.
+const YARD_MARGIN_CELLS: float = 0.75
+const VILLAGE_YARD_RADIUS: float = 3.4
+## Đường mòn: mỗi lần thổ dân bước vào một ô thì ô đó mòn thêm; bỏ không thì cỏ mọc lại dần.
+const WEAR_PER_STEP: float = 0.05
+const WEAR_DECAY_SECONDS: float = 10.0
+const WEAR_DECAY: float = 0.985 # mỗi lần nhân chừng này (~8 phút bỏ không thì mất dấu)
+## Lối mòn có sẵn lúc mở ván (làng → các cụm gần làng): mức mòn, và không mờ dưới mức sàn.
+const TRAIL_WEAR: float = 0.6
+const TRAIL_FLOOR: float = 0.5
 
 # --- Camera ---
 const CAMERA_ZOOM_MIN: float = 0.35 # nhìn rộng kiểu AoE

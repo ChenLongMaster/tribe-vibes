@@ -14,7 +14,7 @@ class_name SaveGame
 
 ## Tăng khi cách sinh map đổi (map dựng lại từ seed phải ra đúng map cũ) hoặc cấu trúc save đổi.
 ## v3: map 96×72, tài nguyên theo cụm, dãy vách đá.
-const VERSION: int = 6
+const VERSION: int = 7
 
 
 ## Ván lưu này còn dựng lại được không (cùng phiên bản cách sinh map).
@@ -39,7 +39,8 @@ static func capture(world: World) -> Dictionary:
 			"anchor": [villager.anchor_cell.x, villager.anchor_cell.y],
 			"job": villager.job.to_dict() if villager.job != null else {},
 		})
-	return {"format": VERSION, "game": GameState.to_dict(), "nodes": nodes, "buildings": buildings, "villagers": villagers}
+	return {"format": VERSION, "game": GameState.to_dict(), "nodes": nodes, "buildings": buildings, "villagers": villagers,
+			"wear": world.wear_to_save()}
 
 
 ## Áp ván đã lưu lên thế giới vừa dựng từ cùng seed (World.build đã chạy, chưa có thổ dân).
@@ -47,6 +48,8 @@ static func restore(world: World, save: Dictionary) -> void:
 	_restore_nodes(world, save.get("nodes", []))
 	_restore_buildings(world, save.get("buildings", []))
 	world.refresh_storage_capacity()
+	world.refresh_yards()
+	world.apply_saved_wear(save.get("wear", []))
 	GameState.apply_saved_resources(save.get("game", {}))
 	_restore_villagers(world, save.get("villagers", []))
 	world.refresh_staff()

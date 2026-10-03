@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="96" viewBox="0 0 64 96">
+  <!-- Lau sậy ven hồ (trang trí) -->
+  <path d="M14.5 94 L16.9 25.4" stroke="#4F7A2A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M14.5 94 L18.0 25.4" stroke="#88AE4C" stroke-width="2.4" stroke-linecap="round"/>
+  <ellipse cx="14.5" cy="31.4" rx="3.5" ry="8" fill="#8D6E63" stroke="#5D4037" stroke-width="1.8"/>
+  <path d="M22.0 94 L18.2 28.6" stroke="#4F7A2A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M22.0 94 L21.7 28.6" stroke="#88AE4C" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M29.8 94 L33.0 23.7" stroke="#4F7A2A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M29.8 94 L26.7 23.7" stroke="#88AE4C" stroke-width="2.4" stroke-linecap="round"/>
+  <ellipse cx="29.8" cy="29.7" rx="3.5" ry="8" fill="#8D6E63" stroke="#5D4037" stroke-width="1.8"/>
+  <path d="M34.9 94 L35.2 16.4" stroke="#4F7A2A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M34.9 94 L35.5 16.4" stroke="#88AE4C" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M40.1 94 L38.3 15.9" stroke="#4F7A2A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M40.1 94 L43.4 15.9" stroke="#88AE4C" stroke-width="2.4" stroke-linecap="round"/>
+  <ellipse cx="40.1" cy="21.9" rx="3.5" ry="8" fill="#8D6E63" stroke="#5D4037" stroke-width="1.8"/>
+  <path d="M50.1 94 L52.4 14.9" stroke="#4F7A2A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M50.1 94 L47.2 14.9" stroke="#88AE4C" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

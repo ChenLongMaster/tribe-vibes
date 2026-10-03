@@ -3,7 +3,7 @@
 > **Tên game: Tribe Vibes** (tiếng Việt: **Bộ Lạc Chill**). Tên chỉ được khai báo ở **hai chỗ**: `application/config/name = "Tribe Vibes"` trong `project.godot`, và key dịch `GAME_TITLE` trong `i18n/strings.csv` (cột `vi` = `Bộ Lạc Chill`, cột `en` = `Tribe Vibes`). Không viết cứng tên game ở bất kỳ chỗ nào khác (màn hình bắt đầu, tiêu đề cửa sổ, tên file save…), để sau này đổi tên hay thêm phụ đề chỉ cần sửa hai chỗ đó.
 
 > Tài liệu thiết kế game (trước đây tên `MVP_PROMPT.md`): luật chơi, hành vi thổ dân, tài nguyên, công trình, các đợt làm việc của một game colony-sim tiền sử lấy cảm hứng từ **Prehistoric Tribes** (Gear Games / THQ Wireless, 2008). Đây là **nguồn chính** — mọi quyết định thiết kế mới ghi vào đây.
-> Đặt file ở thư mục gốc project. `CLAUDE.md` là bản copy y nguyên của file này (cộng phụ lục ghi chú kỹ thuật cho Claude ở cuối) để Claude Code tự đọc mỗi phiên.
+> Đặt file ở thư mục gốc project. `CLAUDE.md` và `AGENTS.md` là bản copy y nguyên của file này (cộng phụ lục ghi chú kỹ thuật ở cuối) để Claude Code / Codex tự đọc mỗi phiên — sửa file này thì copy lại sang cả hai.
 
 > **Cập nhật thiết kế 2026-10-02** (sau khi chơi lại game gốc): thổ dân **nghe lời** — rảnh thì chỉ dạo quanh chỗ đứng, chỉ tự rời chỗ khi đói, mệt hoặc muốn tìm bạn đời; 4 chỉ số hiển thị bằng icon; kỹ năng theo từng việc + một việc thích; tìm bạn đời qua tặng hoa; công trình có diện tích, 3 cấp, nhiều thợ xây và người phụ trách. Các quyết định này ưu tiên hơn mọi spec cũ.
 
@@ -22,6 +22,8 @@
 > **Cập nhật 2026-10-03 (lần 4) — map kiểu RTS:** map **96×72 ô** (gấp 4), nhìn xa hơn; tài nguyên dồn thành **cụm** (cánh rừng, vạt bụi quả, bãi đá), gần làng có sẵn một cụm nhỏ mỗi loại; **vách đá thành dãy địa hình dài** không đi qua được, bãi đá tảng dưới chân (mục 9.1). Vách đá **vẽ thành một bức vách liền** (mặt trên lởm chởm, mặt đứng quay về phía người nhìn), dãy chạy **ngang** là chính; đá tảng và đá cuội **chỉ nằm ở chân vách phía trước** như đá lở ngoài thực tế. Bố cục **trông tự nhiên**: bãi đá tảng liền dọc chân vách (sát vách dày, đá to; xa vách thưa), đá cuội nhiều hơn và gom thành đám quanh bãi đá; rừng méo, có mảng thông riêng, cây lẻ lấn ra ngoài bìa và lùm cây lẻ trên bãi cỏ; củi gom thành đám dưới tán rừng; cây, đá lệch nhẹ khỏi tâm ô cho đỡ thẳng hàng.
 
 > **Cập nhật 2026-10-03 (lần 5) — tài nguyên kiểu RTS:** mỗi chỗ tài nguyên là **một mỏ có lượng** ("thanh máu", **chỉ hiện trong bảng thông tin** khi click vào, không vẽ trên map), **nhiều người làm chung** một mỏ: **bụi quả to** (30 thức ăn, 3 người), **bãi sỏi** (20 đá, 2 người) thay cho từng viên đá cuội, **đống củi** (15 gỗ, 2 người) thay cho từng bó, đá tảng (16 đá, 2 người). Hình đổi theo lượng còn lại: **> 50% / 20–50% / < 20%** (nhỏ dần tới hết). Bãi sỏi và đá tảng mới do **vách đá lở** ra ở chân vách; củi do **cây trưởng thành rụng cành**; **cây lớn dần** từ cây non (cây non chưa chặt được); **bụi quả hái trụi thì 60 ngày sau mới đầy lại**. Lúc mở ván mỗi mỏ có lượng ngẫu nhiên (to nhỏ không đều) (mục 9.1, 9.2).
+
+> **Cập nhật 2026-10-03 (lần 6) — cảm giác Prehistoric Tribes:** giữ góc nhìn **2D nghiêng 3/4, lưới ô vuông** (game gốc cũng vậy — **không isometric**, không 3D, cho nhẹ máy). Cảm giác game gốc đến từ tỉ lệ và mật độ: **thổ dân nhỏ** (65% cỡ cũ) so với nhà và map; **mỗi công trình có sân đất + vòng đá thấp**, nhà sát nhau thì gộp thành một khu chung; **cây cỏ trang trí phủ kín map** thành từng đám rậm (dương xỉ, cỏ cao, bụi lá, lau sậy ven hồ, nấm dưới tán, hoa) — chỉ để nhìn, màu chìm, viền xanh, không chạm được, khác hẳn mỏ tài nguyên; **sân làng** đất quanh hang + lửa trại; **lối mòn** có sẵn từ làng ra các cụm gần làng, và **chỗ nào thổ dân đi nhiều thì cỏ mòn thành đường đất** (bỏ không thì mọc lại dần) (mục 6.1, 7, 9.1).
 
 ---
 
@@ -166,7 +168,7 @@ Simulation Core     → world, villager, AI, nhu cầu, kỹ năng, tài nguyên
 ```
 res://
 ├─ project.godot
-├─ GAME_DESIGN.md / CLAUDE.md / DEVLOG.md / ASSET_SPEC.md
+├─ GAME_DESIGN.md / CLAUDE.md / AGENTS.md / DEVLOG.md / ASSET_SPEC.md
 ├─ autoload/
 │  ├─ game_state.gd      # tài nguyên, dân số, ngày giờ, tốc độ game, độ khó, chế độ đang chơi
 │  ├─ event_bus.gd       # signal toàn cục (villager_born, raid_started, resource_changed…)
@@ -343,7 +345,7 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 ### 6.1 Khung cutout
 
 - Mỗi thổ dân là một `Node2D` gồm các `Sprite2D` con, thứ tự vẽ từ sau ra trước: (tấm biển), `leg_back`, `arm_back`, `back_item` (đồ nghề đeo sau lưng), `body`, `leg_front`, `head`, `face`, `hair`, `accessory`, `arm_front`, `held_item`, `carry_item` (đồ khuân trên đầu).
-- Tỉ lệ **chibi**: đầu chiếm khoảng 45% chiều cao. Cả nhân vật cao khoảng **72 px** ở độ phân giải gốc.
+- Tỉ lệ **chibi**: đầu chiếm khoảng 45% chiều cao. Bộ khung vẽ cao khoảng 72 px, nhưng trong thế giới thổ dân **thu nhỏ còn 65%** (~47 px, `VILLAGER_SCALE`) để người nhỏ so với nhà và map như Prehistoric Tribes; bong bóng, icon trên đầu và tấm biển không nhỏ theo (cho dễ đọc); vùng chạm vẫn tối thiểu ~48 px. Thú cũng thu nhỏ (`ANIMAL_SCALE`).
 - **Animation chủ yếu tạo bằng code** (tween, sin/cos), không vẽ từng frame:
   - Đi: thân nảy lên xuống, chân và tay đưa qua lại, nghiêng nhẹ theo hướng đi.
   - Đứng yên: thở (thân phồng xẹp 2–3%), **chớp mắt** ngẫu nhiên (đổi texture mặt).
@@ -386,6 +388,7 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 ## 7. Hình tạm (placeholder) & quy cách asset
 
 - Claude **tự vẽ toàn bộ hình tạm bằng SVG** trong `assets/placeholder/`. Hình phải dễ thương, không được là ô vuông xám: viền nâu đậm 3 px, màu ấm, bo tròn.
+- **Góc vẽ (chốt 2026-10-03, theo Prehistoric Tribes):** góc **3/4 nhìn từ trên cao khoảng 50–60°, không xoay** — thấy rõ **mặt trên / mái** (chiếm phần lớn hình), **mặt trước thấp** và co lại, chân vật là **mảng phẳng nằm trên đất** khớp ô lưới. **Không isometric** (không xoay 45°, không thấy 2 mặt tường), **không 3D**, giữ lưới ô vuông 64 px. Thổ dân chibi nhìn hơi từ trên xuống (thấy nhiều đỉnh tóc), mặt vẫn quay ra trước cho đọc được biểu cảm. Icon giao diện giữ kiểu phẳng như cũ. (Hình tạm hiện tại vẫn gần nhìn ngang — sẽ vẽ lại dần theo góc này: thử lều + một bộ thổ dân trước, duyệt rồi mới làm hết.)
 - **Bảng màu gợi ý:** cỏ `#8BC34A`/`#7CB342`, đất `#C8A27A`, nước `#4FC3F7`, gỗ `#8D6E63`, đá `#9E9E9E`, viền `#4E342E`, da thổ dân `#F2C29B`/`#D9A066`/`#A9714B`, áo lông `#A1887F`/`#FFB74D`/`#E57373`.
 - Bộ phận thổ dân, mỗi loại vài biến thể để ghép ngẫu nhiên:
   - `villager/head_01..03.svg`
@@ -394,7 +397,8 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
   - `villager/body_01..03` (áo lông)
   - `villager/arm.svg`, `villager/leg.svg`
   - `villager/accessory_01..03`
-- Môi trường: cây (2 loại), gốc cây, đá tảng (2 cỡ), (vách đá vẽ bằng code — mục 9.1), **đống củi**, **bãi sỏi**, bụi quả to (mỗi mỏ 3 hình theo lượng: 100 / 50 / 20%; bụi quả thêm hình trụi), hoa, cỏ trang trí, ô nước, hang đá xuất phát, lửa trại.
+- Môi trường: cây (2 loại), gốc cây, đá tảng (2 cỡ), (vách đá vẽ bằng code — mục 9.1), **đống củi**, **bãi sỏi**, bụi quả to (mỗi mỏ 3 hình theo lượng: 100 / 50 / 20%; bụi quả thêm hình trụi), ô nước, hang đá xuất phát, lửa trại.
+- **Cây cỏ trang trí** (phủ kín map, không chạm được): hoa, khóm cỏ, cỏ cao, dương xỉ, bụi lá (không quả), lau sậy, nấm. Vẽ **màu xanh chìm, viền xanh đậm** (không viền nâu đậm như mỏ tài nguyên, không quả, không đá) để mắt phân biệt ngay đâu là đồ trang trí, đâu là thứ giao việc được. Sân đất, đường mòn và vòng đá quanh sân vẽ bằng code.
 - Đồ cầm tay & đồ khuân: giỏ (rỗng / đầy quả), xô (rỗng / đầy sỏi), cần câu, khúc gỗ, bó củi, tấm biển (mặt để trống). Rìu, cuốc, giáo dùng chung hình với icon kỹ năng.
 - Công trình: lều ngủ, bếp, kho, lò rèn, sân nhảy. Mỗi cái **3 cấp** (hình riêng mỗi cấp); **móng** dùng chung theo diện tích (2×2, 3×2, 3×3) — lúc đang xây, game vẽ hình cấp 1 mờ mờ mọc dần lên trên móng; nâng cấp thì vẫn hình cấp cũ + giàn giáo vẽ bằng code. Hình **hư hại** để Đợt 5. Hình phủ đúng **diện tích** của công trình (mục 9.3).
 - Thú: lợn rừng, hươu nhỏ. Kẻ thù: cannibal (mặt nạ xương, sơn chiến), kèm biến thể màu.
@@ -443,6 +447,10 @@ Chuột theo kiểu **Age of Empires** (trái chọn, phải ra lệnh); cảm �
 
 ### 9.1 Map
 
+- **Cảm giác Prehistoric Tribes** (góc nhìn 2D nghiêng 3/4 như game gốc, không isometric):
+  - **Cây cỏ trang trí phủ kín map** thành đám rậm xen bãi trống (theo nhiễu): gần rừng nhiều dương xỉ, bụi lá, nấm; ven hồ lau sậy; chỗ trống cỏ cao, khóm cỏ; đồng cỏ chủ yếu hoa. Không đặt trên sân làng, lối mòn, vật thể.
+  - **Sân làng**: đất trơ quanh hang + lửa trại. **Mỗi công trình (kể cả móng) có sân đất** rộng hơn chân nhà một vòng, viền **vòng đá thấp** có chừa lối vào ở cạnh trước; nhà sát nhau thì sân gộp làm một, không có hàng đá chắn giữa. Cây cỏ trong sân bị dọn đi.
+  - **Lối mòn**: lúc mở ván có sẵn lối đất từ sân làng ra từng loại tài nguyên gần làng nhất. Lúc chơi, ô nào thổ dân đi qua nhiều thì **cỏ mòn thành đường đất**; bỏ không ~8 phút thì cỏ mọc lại (lối có sẵn không mất hẳn). Đường mòn được lưu cùng ván.
 - Map rộng kiểu RTS: **96×72 ô** (gấp 4 diện tích bản đầu), mở game nhìn hơi xa (zoom 0.8), thu nhỏ được tới 0.35 để thấy rộng như Age of Empires. Sinh ngẫu nhiên theo seed nhưng luôn đảm bảo:
   - Hang đá xuất phát và lửa trại ở giữa. **Quanh làng có sẵn một cụm nhỏ mỗi loại**: một lùm cây, một bãi đá tảng nhỏ, một vạt bụi quả — đủ để bắt đầu; cụm lớn, giàu hơn nằm xa.
   - **Tài nguyên dồn thành cụm** (không rải đều): rừng thành **từng cánh rừng** đặc ở lõi, thưa ở bìa, có khoảng trống và lối đi — phần lớn dồn về một phía, vài cánh lẻ chỗ khác.
@@ -658,6 +666,8 @@ Mỗi đợt kết thúc bằng một bản **chơi được**, và có tiêu ch
 |---|---|
 | Một ngày trong game | 4 phút thật (ngày 3 phút, đêm 1 phút) |
 | Map | 96×72 ô (64 px), zoom mặc định 0.8, xa nhất 0.35; 11 cánh rừng, 6 dãy vách đá (dài 8–16 ô, mặt đứng cao 92 px), 4 bãi đá lẻ, 6+2 vạt bụi quả, 7 chỗ câu cá, 8 con thú |
+| Tỉ lệ & sân | Thổ dân 65% (`VILLAGER_SCALE`), thú 70%; bong bóng / icon trên đầu ×1.3, tấm biển ×1.35 (bù lại cho dễ đọc); sân công trình rộng thêm ~0,75 ô mỗi phía, sân làng bán kính 3,4 ô |
+| Cây cỏ trang trí & đường mòn | 0,12–1,8 cây cỏ mỗi ô (đám rậm / bãi trống), đồng cỏ 0,8; mỗi bước mòn 5% (~20 lượt đi qua thành đường), cứ 10 giây ×0,985 (bỏ ~8 phút thì mất); lối có sẵn 60%, không mờ dưới 50% |
 | Tốc độ đi | 90 px/giây (×1.3 khi chạy trốn) |
 | Rảnh | Đứng yên tại điểm neo; 30 giây (`IDLE_BORED_SECONDS`) mới chán; hái hoa trong 3 ô (`IDLE_RADIUS_CELLS`) rồi quay về; ngủ gật 8–15 giây; tán gẫu với người trong 1,6 ô |
 | Bán kính tìm tài nguyên tương tự khi hết | khoảng 8 ô quanh chỗ làm cũ (`JOB_SEARCH_RADIUS_CELLS`) |

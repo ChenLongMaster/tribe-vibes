@@ -1,3 +1,5 @@
+> **File cho Codex.** Đây là bản copy y nguyên của `CLAUDE.md` (hướng dẫn cho Claude Code) để Codex đọc mỗi phiên — nội dung và quy tắc giống hệt. Nguồn chính là `GAME_DESIGN.md`: sửa thiết kế ở đó trước, rồi copy sang **cả `CLAUDE.md` lẫn `AGENTS.md`** (mỗi file giữ phần phụ lục ghi chú kỹ thuật ở cuối). **Không tự `git commit` / `git push`.**
+
 # GAME_DESIGN — Tribe Vibes (Bộ Lạc Chill)
 
 > **Tên game: Tribe Vibes** (tiếng Việt: **Bộ Lạc Chill**). Tên chỉ được khai báo ở **hai chỗ**: `application/config/name = "Tribe Vibes"` trong `project.godot`, và key dịch `GAME_TITLE` trong `i18n/strings.csv` (cột `vi` = `Bộ Lạc Chill`, cột `en` = `Tribe Vibes`). Không viết cứng tên game ở bất kỳ chỗ nào khác (màn hình bắt đầu, tiêu đề cửa sổ, tên file save…), để sau này đổi tên hay thêm phụ đề chỉ cần sửa hai chỗ đó.

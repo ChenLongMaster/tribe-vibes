@@ -4,6 +4,50 @@ Mỗi đợt một mục: đã làm gì, chọn gì và vì sao. Mục mới nh�
 
 ---
 
+## Sau Đợt D — Chốt góc vẽ, chuẩn bị giao Codex vẽ lại hình (2026-10-03)
+
+**Trạng thái:** chỉ tài liệu, chưa vẽ lại gì — chưa commit.
+
+- **Chốt góc vẽ** (GAME_DESIGN mục 7, ASSET_SPEC): 3/4 nhìn từ trên cao ~50–60°, không xoay, như Prehistoric Tribes; không isometric, không 3D. Hình tạm hiện tại còn gần nhìn ngang → vẽ lại dần: thử **lều 3 cấp + móng 2x2 + một bộ thổ dân** (head_01, face_01_*, hair_01, body_01, arm, leg) trước, duyệt xong mới vẽ hết (công trình, thổ dân, thú, mỏ tài nguyên, cây cỏ trang trí, đồ cầm tay, vách đá chỉnh `FACE_HEIGHT` / `TOP_DEPTH_SCALE`).
+- **Thêm `AGENTS.md`** (bản copy của CLAUDE.md cho Codex, thêm một dòng đầu). Từ giờ sửa GAME_DESIGN.md thì copy sang cả CLAUDE.md lẫn AGENTS.md.
+- Việc vẽ lại giao cho Codex (gợi ý: GPT-6.1 Sol, mức suy nghĩ High), theo 2 prompt: làm thử → làm hết. Chỉ đụng hình (SVG, script sinh hình, `art_specs.gd`, ASSET_SPEC, hằng vị trí bộ khung thổ dân nếu cần), không đụng lõi game.
+- Sau phần hình: quay lại kế hoạch chính, **Đợt 4 — tìm bạn đời & dân số**. Hoạt cảnh mới viết thành chuỗi trạng thái có tên để sau này đổi đồ hoạ (kể cả nếu có lúc chuyển 3D) chỉ phải làm lại phần diễn.
+
+---
+
+## Đợt D — Cảm giác Prehistoric Tribes (hướng A: giữ 2D) (2026-10-03)
+
+**Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.
+
+### Bàn trước khi làm
+- So với AoE: AoE là **isometric** (ô thoi, nhà nhìn chéo thấy 2 mặt tường), lính nhỏ, đông, hình dựng từ 3D 8 hướng. Game mình và **Prehistoric Tribes đều là 2D nghiêng 3/4, ô vuông** — không cần isometric hay 3D. Cảm giác "RimWorld" chủ yếu do **người to, cảnh thưa, nhà không có sân**. Chốt: giữ 2D (nhẹ máy), làm theo cảm giác Prehistoric Tribes. (3D low-poly để ngỏ cho sau MVP nếu cần.)
+
+### Đã làm
+- **Thổ dân nhỏ lại** còn 65% (`VILLAGER_SCALE`, nhân vào `age_scale`), thú 70% (`ANIMAL_SCALE`). Bong bóng / icon trên đầu ×1,3 và tấm biển ×1,35 để không nhỏ theo; vùng chạm tối thiểu bán kính 24 px.
+- **Sân đất + vòng đá quanh mỗi công trình** (kể cả móng): sân rộng hơn chân nhà một vòng (góc bo), vòng đá thấp (`world/yard_ring.gd`, vẽ bằng code) chừa lối vào ở cạnh trước; nhà sát nhau thì gộp thành một khu, đá nằm trong sân nhà khác bị bỏ. Cây cỏ trong sân bị giấu. Huỷ móng thì sân mất.
+- **Sân làng** đất quanh hang + lửa trại (thay mảng đất "sân làng" cũ).
+- **Cây cỏ trang trí phủ kín map**: thêm dương xỉ, cỏ cao, bụi lá (không quả), lau sậy ven hồ, nấm dưới tán (`tools/gen_decor_art.py`) cùng hoa, khóm cỏ cũ. Rậm thưa theo nhiễu (đám rậm xen bãi trống), gần rừng / ven hồ rậm hơn. Vẽ **màu chìm, viền xanh** để khác hẳn mỏ tài nguyên. Hơn 4.000 cây cỏ vẽ bằng `DecorLayer` (MultiMesh, mỗi loại hình một lệnh vẽ), lay theo gió.
+- **Lối mòn có sẵn** từ sân làng ra cây, đá tảng, bụi quả, bãi sỏi, đống củi, chỗ câu cá gần làng nhất (theo đường đi trên lưới).
+- **Đường mòn tự hình thành**: mỗi lần thổ dân bước sang ô mới thì ô đó mòn thêm 5%; khoảng 20 lượt đi qua thành đường đất rõ; bỏ không ~8 phút thì cỏ mọc lại. Lưu cùng ván (`SaveGame.VERSION` = 7).
+- **Một lớp đất trơ cho cả map** (`GroundMask` + `fx/ground_mask.gdshader`): ảnh nhỏ mỗi ô một điểm ảnh, phóng to + nhiễu thành mảng đất mép lởm chởm — sân và đường mòn chỉ tốn một lệnh vẽ.
+- Hoa bị sân đè thì không còn để hái.
+- Test: thêm `test_prehistoric_look` (cây cỏ phủ map, lối mòn có sẵn, người nhỏ mà vùng chạm đủ to, đặt lều thì có sân và cây cỏ bị dọn, giẫm nhiều thì mòn, lưu / tải giữ đường mòn). 78/78, soi cảnh báo strict sạch.
+- **Tốc độ** (máy này, tắt vsync): zoom 1 ~500 khung/giây (~1.050 lệnh vẽ), zoom 0,8 ~394 (~1.120), thu nhỏ hết cỡ ~164 (~3.380). Chậm hơn Đợt C khoảng 10–20%.
+
+### Còn biết
+- Thổ dân nhỏ thì khó nhìn nét mặt / đồ cầm tay hơn khi nhìn xa; có thể cần zoom mặc định gần hơn (`CAMERA_ZOOM_DEFAULT`).
+- Vòng đá là đá rời vẽ bằng code, chưa phải hàng rào / tường đá như game gốc.
+- Cây cỏ trang trí không đổ bóng; bị nhà đè thì giấu hẳn (huỷ móng không hiện lại).
+- Đường mòn chỉ tính theo ô nên thẳng góc ở chỗ rẽ (nhờ nhoè + nhiễu nên đỡ thấy).
+
+### Số nên tinh chỉnh (`data/balance.gd`)
+- `VILLAGER_SCALE` 0,65, `ANIMAL_SCALE` 0,7, `OVERHEAD_SCALE` 1,3, `SIGN_SCALE` 1,35, `MIN_PICK_RADIUS` 24.
+- `DECOR_SPARSE` / `DECOR_DENSITY` 0,12 / 1,8, `MEADOW_DECOR` 0,8, `VILLAGE_DECOR_CLEAR` 3.
+- `YARD_MARGIN_CELLS` 0,75, `VILLAGE_YARD_RADIUS` 3,4.
+- `WEAR_PER_STEP` 0,05, `WEAR_DECAY_SECONDS` 10 / `WEAR_DECAY` 0,985, `TRAIL_WEAR` 0,6, `TRAIL_FLOOR` 0,5.
+
+---
+
 ## Đợt C.3 — Tài nguyên kiểu RTS: mỏ có lượng, nhiều người làm chung (2026-10-03)
 
 **Trạng thái:** xong, chờ chạy thử và duyệt — chưa commit.

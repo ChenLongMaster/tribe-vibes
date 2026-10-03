@@ -80,6 +80,8 @@ var _task_time: float = 0.0
 var _watchdog_warned: bool = false
 var _stuck_time: float = 0.0
 var _last_position: Vector2 = Vector2.ZERO
+## Ô vừa giẫm lên (mỗi lần sang ô mới thì cỏ ở đó mòn thêm — World.trample).
+var _trample_cell: Vector2i = Vector2i(-1, -1)
 
 @onready var rig: VillagerRig = $Rig
 @onready var overhead: Overhead = $Overhead
@@ -104,13 +106,16 @@ func _ready() -> void:
 	rig.setup(data)
 	rig.set_back_item(ToolDefs.icon(status.tool))
 	scale = age_scale()
+	# Bong bóng, icon trên đầu không nhỏ theo người cho dễ đọc.
+	overhead.scale = Vector2.ONE * Balance.OVERHEAD_SCALE
 	ArtLibrary.setup_sprite(_selection_ring, "ui/selection_ring")
 	_selection_ring.visible = false
 	_last_position = position
 
 
+## Cỡ vẽ: người nhỏ so với nhà và map (Balance.VILLAGER_SCALE), em bé / trẻ con nhỏ hơn nữa.
 func age_scale() -> Vector2:
-	var factor: float = AGE_SCALES.get(data.age_stage, 1.0)
+	var factor: float = AGE_SCALES.get(data.age_stage, 1.0) * Balance.VILLAGER_SCALE
 	return Vector2(factor, factor)
 
 
@@ -134,6 +139,11 @@ func _process(delta: float) -> void:
 		var task_status: Task.Status = task.tick(delta)
 		if task_status != Task.Status.RUNNING:
 			_finish_task(task_status)
+	if _moving:
+		var cell: Vector2i = WorldGrid.world_to_cell(position)
+		if cell != _trample_cell:
+			_trample_cell = cell
+			world.trample(cell)
 	rig.set_mood_face(status.mood() >= Balance.MOOD_SAD)
 	overhead.position = OVERHEAD_LYING * Vector2(rig.facing, 1) if rig.is_lying() else OVERHEAD_STANDING
 	if rig.is_sign_raised():
@@ -447,7 +457,7 @@ func _update_movement(delta: float) -> void:
 func hit_test(world_point: Vector2) -> bool:
 	if not visible:
 		return false
-	return (position + PICK_CENTER * scale).distance_to(world_point) <= PICK_RADIUS * scale.y
+	return (position + PICK_CENTER * scale).distance_to(world_point) <= maxf(PICK_RADIUS * scale.y, Balance.MIN_PICK_RADIUS)
 
 
 func set_selected(on: bool) -> void:

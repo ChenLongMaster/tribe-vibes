@@ -2,6 +2,8 @@
 
 Tài liệu này liệt kê **mọi** file hình game đang dùng, để bạn vẽ art thật thay cho hình tạm mà **không phải sửa code**.
 
+> **Góc vẽ (chốt 2026-10-03):** góc 3/4 nhìn từ trên cao khoảng 50–60°, không xoay, kiểu Prehistoric Tribes — thấy rõ mặt trên / mái, mặt trước thấp, chân vật là mảng phẳng trên đất. Không isometric, không 3D, lưới ô vuông 64 px. Khi vẽ lại một hình: giữ nguyên tên file, kích thước khung, điểm neo (đổi thì sửa cả `data/art_specs.gd`); công trình phủ đúng diện tích; các mức của cùng một mỏ giữ cùng khung và cùng chân. Chi tiết: GAME_DESIGN mục 7.
+
 ## Cách thay art
 
 1. Vẽ hình, xuất **PNG** (nền trong suốt). WebP hoặc SVG cũng được.
@@ -67,6 +69,13 @@ Ví dụ `water_03` = hai ô trên là nước (bờ nằm ngang ở giữa hìn
 | `env/bush_empty` | 192×160 | 96×80 | (0.5, 0.91) | Cùng bụi, đã hái trụi (chờ 60 ngày ra quả lại) — chỉ còn cuống. |
 | `env/flower_01` … `03` | 48×56 | 24×28 | (0.5, 0.95) | Hoa trang trí (hồng, vàng, tím). Không chặn đường. |
 | `env/grass_tuft_01` … `02` | 64×48 | 32×24 | (0.5, 0.95) | Khóm cỏ trang trí. |
+| `env/tall_grass_01` … `02` | 72×80 | 36×40 | (0.5, 0.97) | Cỏ cao trang trí (bản 02 có bông cỏ lau khô). |
+| `env/fern_01` … `02` | 96×72 | 48×36 | (0.5, 0.92) | Dương xỉ trang trí, nhiều dưới tán rừng. |
+| `env/shrub_01` … `02` | 96×64 | 48×32 | (0.5, 0.92) | Bụi lá trang trí — **không có quả** (để khỏi lẫn với bụi quả). |
+| `env/reeds_01` | 64×96 | 32×48 | (0.5, 0.97) | Lau sậy ven hồ. |
+| `env/mushroom_01` | 40×36 | 20×18 | (0.5, 0.94) | Nấm nhỏ dưới tán cây. |
+
+**Quy tắc cây cỏ trang trí** (mọi hình `env/` ở trên trừ mỏ tài nguyên): chỉ để nhìn, phủ kín map, nên vẽ **màu xanh chìm, viền xanh đậm** (`#4F7A2A`), không viền nâu đậm `#4E342E`, không quả, không đá — để người chơi nhìn là biết không phải thứ giao việc được (mỏ tài nguyên mới có viền nâu đậm và màu nổi). Game vẽ chúng hàng loạt (MultiMesh), lật ngang ngẫu nhiên, to nhỏ ±15%, lay theo gió. Sân đất, đường mòn, vòng đá quanh sân vẽ bằng code (không có file hình).
 | `env/fish_spot` | 128×128 | 64×64 | (0.5, 0.5) | Chỗ câu cá: bọt nước + bóng đàn cá mờ. Đặt giữa một ô nước sát bờ. Vòng gợn và cá nhảy do code thêm. |
 | `env/ripple_ring` | 128×64 | 64×32 | (0.5, 0.5) | Vòng gợn trắng (elip) — code phóng to dần và làm mờ ở chỗ câu cá. |
 | `env/fish_jump` | 72×40 | 36×20 | (0.5, 0.5) | Cá nhìn ngang, **đầu quay sang phải**. Code cho nhảy theo cung và lật hướng. |

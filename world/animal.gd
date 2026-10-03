@@ -45,6 +45,8 @@ func setup(world: World, animal_species: StringName, cell: Vector2i) -> void:
 
 func _ready() -> void:
 	_body = Node2D.new()
+	# Thú nhỏ so với map như thổ dân (Balance.ANIMAL_SCALE).
+	_body.scale = Vector2.ONE * Balance.ANIMAL_SCALE
 	add_child(_body)
 	_sprite = Sprite2D.new()
 	ArtLibrary.setup_sprite(_sprite, art_key())
@@ -232,4 +234,4 @@ func _set_facing(direction: float) -> void:
 	if absf(direction) < 0.01:
 		return
 	_facing = signf(direction)
-	_body.scale.x = _facing
+	_body.scale.x = _facing * Balance.ANIMAL_SCALE

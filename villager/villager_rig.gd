@@ -641,6 +641,8 @@ func _build_nodes() -> void:
 	# Biển vẽ ĐÈ LÊN người (thêm sau cùng): tay, đầu, đồ cầm không che mất hình trên biển —
 	# biển là để người chơi đọc.
 	_sign = Node2D.new()
+	# Biển to hơn người một chút (người đã thu nhỏ) cho dễ đọc hình trên biển.
+	_sign.scale = Vector2.ONE * Balance.SIGN_SCALE
 	_sign.visible = false
 	_flip.add_child(_sign)
 	ArtLibrary.setup_sprite(_add_sprite(_sign, Vector2.ZERO), "props/sign")
