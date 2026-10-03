@@ -2,7 +2,13 @@
 
 Tài liệu này liệt kê **mọi** file hình game đang dùng, để bạn vẽ art thật thay cho hình tạm mà **không phải sửa code**.
 
-> **Góc vẽ (chốt 2026-10-03):** góc 3/4 nhìn từ trên cao khoảng 50–60°, không xoay, kiểu Prehistoric Tribes — thấy rõ mặt trên / mái, mặt trước thấp, chân vật là mảng phẳng trên đất. Không isometric, không 3D, lưới ô vuông 64 px. Khi vẽ lại một hình: giữ nguyên tên file, kích thước khung, điểm neo (đổi thì sửa cả `data/art_specs.gd`); công trình phủ đúng diện tích; các mức của cùng một mỏ giữ cùng khung và cùng chân. Chi tiết: GAME_DESIGN mục 7.
+> **Phong cách đã chốt 2026-10-04:** tiền sử thô mộc, thủ công, hơi ngố nhưng dễ thương, gần cảm giác Prehistoric Tribes; thêm nét Việt nhẹ qua tre/mây/cỏ/rơm, đồ đất và hoa văn Lạc Việt cách điệu. Chất liệu có nếp, khâu, sờn và nút buộc; màu ấm, viền nâu #4E342E, dáng mềm/bo tròn. Lấy cảm hứng, không chép hình gốc hay ép tái dựng lịch sử. Chi tiết: GAME_DESIGN mục 7.
+
+> **Góc vẽ:** 2D 3/4 nhìn từ trên **và chếch một bên**, mái/mặt trên và chiều sâu ngang cùng rõ; mặt cửa xiên theo khối. Lều hướng trước-phải. Cảm giác khoảng 45–60°, hình đã duyệt là chuẩn, không ép isometric chuẩn; giữ camera/map và lưới vuông 64 px. Tránh cửa nhìn thẳng, mái phẳng chính diện hoặc chỉ nghiêng theo chiều cao. Công trình có chân/nền trải đúng footprint. Thổ dân chibi từ hơi trên cao, giữ biểu cảm đọc được; icon UI phẳng.
+
+> **Ba cấp lều đã duyệt:** đều da thú thuôn nhọn phủ cỏ/rơm, khung tre/mây; cấp 1 nhỏ/cũ rách/vá/cỏ thưa, cấp 2 lớn hơn/lành/gọn, cấp 3 lớn nhất/cỏ rơm trang trí/chim Lạc-mặt trời-răng cưa. Không biến lều thành nhà sàn. Thân 76%/89%/100% quanh cùng chân (128,276), chung khung 256×300 và sân/footprint 2×2. Các cấp cần khác rõ bằng cỡ/dáng/độ hoàn thiện trước chi tiết nhỏ. Rách của cấp 1 chỉ là art, không phải hư hại gameplay.
+
+> **Chuẩn tham chiếu:** `build/art-review/2026-10-04/tents-v7/after/footprint.png`, `levels.png`, `village_zoom_1.png`. Art mới dùng cùng nét/màu/góc và chất thủ công; vật liệu theo chức năng, không bắt mọi công trình dùng da hoặc mái thuyền. Những hình khác chưa vẽ lại; tài liệu này không mở thêm phạm vi. Giữ tên file, khung/neo (đổi thì sửa cả ArtSpecs), vẽ 2×/hiển thị ×0.5, không vẽ chữ.
 
 ## Cách thay art
 
@@ -101,23 +107,26 @@ Ví dụ `water_03` = hai ô trên là nước (bờ nằm ngang ở giữa hìn
 ### Thổ dân (`villager/`) — Đợt 1
 
 Thổ dân ghép từ nhiều mảnh, code tự xoay/nảy để hoạt họa (không cần vẽ từng frame).
-Cả nhân vật cao ~72 px trên màn hình, đầu chiếm ~45% (chibi). **Mọi mảnh vẽ nhìn nghiêng 3/4 quay sang PHẢI** — code tự lật khi đi sang trái.
+Cả bộ khung cũ cao ~72 px; bộ thử góc cao ngày 2026-10-03 cao ~62 px trước khi nhân `VILLAGER_SCALE` 0,65 (~40 px trong thế giới). **Mặt quay ra trước, hơi hướng sang PHẢI** — code tự lật khi đi sang trái. Bộ thử có đỉnh tóc rộng, mặt thấp và vai nhìn từ trên, thân/chân co ngắn. Các hình head_02–03, hair_02–05, body_02–03 giữ nguyên.
 
-**Bốn lớp đầu** (đầu, mặt, tóc, phụ kiện) vẽ trên **cùng một khung 80×80**, chồng khít lên nhau, neo chung ở **cổ** `(0.5, 0.9)` — tức điểm (40, 72) trong ảnh. Vẽ đầu tròn khoảng tâm (40, 40), bán kính ~29.
+**Bốn lớp đầu** (đầu, mặt, tóc, phụ kiện) vẽ trên **cùng một khung 80×80**, chồng khít lên nhau, neo chung ở **cổ** `(0.5, 0.9)` — tức điểm (40, 72) trong ảnh. Bộ 01: đầu rộng khoảng 60 px, cao khoảng 58 px, cằm ở y≈68; tóc phủ đỉnh từ y≈3 đến y≈43, cổ nối xuống điểm neo.
 
 | Key | Cỡ file (2×) | Hiển thị | Neo | Tô màu bằng code? | Ghi chú |
 |---|---|---|---|---|---|
 | `villager/head_01` … `03` | 80×80 | 40×40 | (0.5, 0.9) cổ | **Có — màu da** | Đầu + tai phía sau. Vẽ trắng/xám rất nhạt, viền nâu. |
-| `villager/face_01_happy` | 80×80 | 40×40 | (0.5, 0.9) | Không | Bộ mặt số 01, biểu cảm vui. Mắt nằm khoảng (40, 42) và (58, 42). |
+| `villager/face_01_happy` | 80×80 | 40×40 | (0.5, 0.9) | Không | Bộ mặt số 01, biểu cảm vui. Mắt nằm khoảng (40, 47) và (58, 47), miệng y≈60; phần mặt thấp hơn để thấy nhiều đỉnh đầu. |
 | `villager/face_01_sad` · `face_01_blink` · `face_01_sleep` · `face_01_surprised` | 80×80 | 40×40 | (0.5, 0.9) | Không | Buồn · chớp mắt (cũng dùng khi gãi, dụi mắt) · ngủ · ngạc nhiên/ngáp. **Mỗi bộ mặt phải đủ 5 biểu cảm.** Thêm kiểu mặt mới = vẽ bộ `face_02_*` rồi tăng `FACE_COUNT` trong `villager/villager_palette.gd`. |
 | `villager/hair_01` … `05` | 80×80 | 40×40 | (0.5, 0.9) | **Có — màu tóc** | 01 tóc dựng, 02 búi, 03 tóc dài, 04 đuôi ngựa, 05 chỏm tóc. Vẽ trắng/xám nhạt. |
 | `villager/accessory_01` … `03` | 80×80 | 40×40 | (0.5, 0.9) | Không | 01 xương cài tóc, 02 lông chim, 03 bông hoa. |
-| `villager/body_01` … `03` | 56×48 | 28×24 | (0.5, 1.0) mép dưới vạt áo | **Có — màu áo lông** | Áo lông từ cổ xuống hông. Đốm/hoạ tiết vẽ xám đậm hơn nền một chút. |
-| `villager/arm` | 16×32 | 8×16 | (0.5, 0.1) vai | **Có — màu da** | Tay buông thẳng xuống, bàn tay tròn ở dưới. Code xoay quanh vai. |
-| `villager/leg` | 22×30 | 11×15 | (0.36, 0.1) hông | **Có — màu da** | Chân thẳng, bàn chân hướng sang phải. Code xoay quanh hông. |
+| `villager/body_01` | 56×40 | 28×20 | (0.5, 1.0) mép dưới vạt áo | **Có — màu áo lông** | Bộ thử: vai elip có mặt trên, vạt áo ngắn. Đốm/hoạ tiết xám đậm hơn nền. |
+| `villager/body_02` · `03` | 56×48 | 28×24 | (0.5, 1.0) mép dưới vạt áo | **Có — màu áo lông** | Giữ hình cũ, vẫn ghép được với khớp mới. |
+| `villager/arm` | 16×28 | 8×14 | (0.5, 0.1) vai | **Có — màu da** | Tay co ngắn, thấy mặt trên vai/bàn tay; xoay quanh (8, 2.8) trong file. Khoảng cách tới bàn tay trong rig = 11 px hiển thị. |
+| `villager/leg` | 22×26 | 11×13 | (0.36, 0.1) hông | **Có — màu da** | Chân co ngắn, bàn chân hướng sang phải, thấy mặt trên; xoay quanh (7.92, 2.6) trong file. |
 | `villager/shadow` | 64×20 | 32×10 | (0.5, 0.5) | Không | Bóng dưới chân. |
 
 Vị trí các khớp (hông, vai, cổ) nằm ở đầu `villager/villager_rig.gd` — nếu art thật tỉ lệ khác thì chỉnh ở đó. Thổ dân lưu ngoại hình bằng **ID mảnh** (vd `hair_03`, `face_01`) và mã màu, nên vẽ thêm mảnh mới chỉ cần đặt đúng tên file rồi tăng số đếm (`HAIR_COUNT`…) trong `villager/villager_palette.gd`; bảng màu da/áo/tóc cũng ở đó.
+
+Khớp của bản thử (px hiển thị, gốc ở chân): hông sau/trước (-4, -12)/(5, -12), vai sau/trước (-9, -25)/(9, -25), cổ (0, -27), đáy áo (0, -9). Đồ khuân neo y=-57 (bù khoảng trống trong hình đồ để nằm sát tóc), biển giơ y=-46, đồ sau lưng (-7, -19). Các điểm neo tỉ lệ trong `data/art_specs.gd` giữ nguyên; chỉ khung body_01/arm/leg đổi như bảng trên.
 
 ### Icon & hiệu ứng nhỏ — Đợt 1 / 1.5
 
@@ -207,17 +216,19 @@ Quy ước chung cho hình công trình (để art thật thay vào là khớp l
 
 | Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
 |---|---|---|---|---|
-| `buildings/tent_1` · `_2` · `_3` | 256×300 | 128×150 (phủ 2×2 ô) | (0.5, 0.92) | Lều ngủ: cấp 1 lều da trơn nhỏ; cấp 2 to hơn, vá màu, vòng đá quanh chân; cấp 3 lều vẽ hoa văn, lông chim trên đỉnh. Cửa lều tối ở giữa mép dưới (thổ dân đứng trước cửa rồi "chui vào"). |
+| `buildings/tent_1` · `_2` · `_3` | 256×300 | 128×150 (phủ 2×2 ô) | (0.5, 0.92) | Cả ba là lều da phủ cỏ/rơm, cửa chếch phải. Thân 76%/89%/100% quanh chân (128,276), sân đất cố định 2×2. Cấp 1 nhỏ, da nâu cũ rách, miếng vá, mép sờn, cỏ thưa. Cấp 2 lớn hơn, da lành sáng, mái cỏ ngay ngắn. Cấp 3 lớn nhất, mái cỏ dày, tua rơm cửa, chim Lạc/mặt trời/dải răng cưa màu đất-đồng trên da. |
 | `buildings/kitchen_1` · `_2` · `_3` | 256×320 | 128×160 (2×2) | (0.5, 0.925) | Bếp: mái tranh trên 4 cột, bếp đá + nồi bốc hơi; cấp 2 thêm kệ hũ; cấp 3 thêm lò nướng đá có ống khói. Chừa chỗ trống hai bên chân để code bày bát món chín. |
 | `buildings/storage_1` · `_2` · `_3` | 384×380 | 192×190 (3×3) | (0.5, 0.9368) | Kho: cấp 1 mái che dựa + đống gỗ, đống đá; cấp 2 nhà vách gỗ cửa lớn; cấp 3 nhà kho to, nền đá, cửa đôi. |
 | `buildings/forge_1` · `_2` · `_3` | 384×320 | 192×160 (3×2) | (0.5, 0.925) | Lò rèn: lò đá vòm bên trái (miệng lò đỏ rực), đe đá ở giữa; cấp 2 thêm mái + ống bễ; cấp 3 ống khói cao + cờ. **Chừa trống phần trước-trái, giữa và phải** để code dựng rìu (trái), cuốc (giữa), giáo (phải). |
 | `buildings/dance_floor_1` · `_2` · `_3` | 384×400 | 192×200 (3×3) | (0.5, 0.94) | Sân nhảy **phẳng, đi lên được** (thổ dân đứng trên): cấp 1 sân đất viền đá + 2 đuốc; cấp 2 sàn gỗ + dây cờ; cấp 3 sàn đá ô màu + trống + 4 đuốc. Giữ phần giữa sân trống, ít chi tiết. |
-| `buildings/foundation_2x2` | 256×256 | 128×128 | (0.5, 1.0) | Móng: nền đất nện + cọc 4 góc + dây căng, phủ **đúng** diện tích. Code đặt ở mép dưới diện tích. |
+| `buildings/foundation_2x2` | 256×256 | 128×128 | (0.5, 1.0) | Bộ thử: nền đất vuông bo góc phủ đúng 2×2 ô, dây căng, cọc thấp có mặt trên elip; cọc sau nằm trọn khung. Code đặt ở mép dưới diện tích. |
 | `buildings/foundation_3x2` | 384×256 | 192×128 | (0.5, 1.0) | Móng 3×2 (lò rèn). |
 | `buildings/foundation_3x3` | 384×384 | 192×192 | (0.5, 1.0) | Móng 3×3 (kho, sân nhảy). |
 | `villager/hard_hat` | 80×80 | 40×40 | (0.5, 0.9) như tóc | Mũ công trường vàng của thợ xây, vẽ trên cùng khung đầu 80×80 với tóc (đội trùm lên tóc). |
 
 Ánh lửa ban đêm (lửa trại, bếp, lò rèn) là hình tròn mờ **do code tạo** (GradientTexture2D), không cần file.
+
+**Soát góc lều (bản phân cấp 2026-10-04):** khung 256×300, sân/footprint `x=0..256, y=44..300` giữ nguyên. Nhóm thân và phụ kiện thu quanh `(128,276)` với tỉ lệ `0.76/0.89/1.0`; khung PNG/SVG và neo không đổi. Cấp 1 mép da sờn, lỗ rách nhỏ và vá; cấp 2 bỏ lỗ rách/vá thô, cỏ phủ gọn; cấp 3 chóp cỏ rộng hơn tới y≈162, tua rơm buộc cửa, chim Lạc/mặt trời/dải răng cưa đủ lớn để đọc. Chóp sau-trái, cửa trước-phải, chân elip vẫn giữ cảm giác góc cao. Không đổi camera/renderer, core, móng hay thổ dân.
 
 ### Icon & HUD — Đợt 3
 

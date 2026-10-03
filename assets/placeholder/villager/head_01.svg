@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
-  <g fill="#F5F5F5" stroke="#4E342E" stroke-width="5">
-    <circle cx="14" cy="45" r="7"/>
-    <circle cx="40" cy="40" r="29"/>
-  </g>
+  <!-- Cổ giữ neo (40,72); đỉnh đầu rộng, cằm co khi nhìn từ trên. -->
+  <path d="M34 62 L34 72 Q40 75 46 72 L46 62" fill="#EEEEEE" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="13" cy="47" rx="7" ry="6" fill="#EEEEEE" stroke="#4E342E" stroke-width="4"/>
+  <path d="M11 36 C11 18 24 10 40 10 C58 10 70 22 70 39 C70 57 57 68 42 68 C26 68 12 56 11 36 Z" fill="#F5F5F5" stroke="#4E342E" stroke-width="5"/>
+  <path d="M18 38 C18 21 31 16 45 17" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M17 55 Q41 71 62 55 Q54 67 42 68 Q26 66 17 55" fill="#E0E0E0"/>
 </svg>

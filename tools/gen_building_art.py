@@ -2,6 +2,7 @@
 # Chạy lại khi muốn chỉnh màu / chi tiết: python tools/gen_building_art.py
 # Quy ước (khớp ASSET_SPEC.md + data/art_specs.gd): vẽ 2×; rộng = số ô ngang × 128; mép dưới
 # hình = mép dưới diện tích công trình; điểm neo cách mép dưới 24 px (= Building.FOOT_INSET ×2).
+import math
 import os
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "assets", "placeholder")
@@ -65,34 +66,104 @@ def flame(x, y, s=1.0):
 # --- Lều ngủ (2×2: 256 × 300) ---
 
 def tent(level):
-    w, h = 256, 300
-    hide = ["#BCAAA4", "#D7A86E", "#E8B07A"][level - 1]
-    b = shadow(128, 284, 118, 14)
-    if level >= 2:
-        b += stones([(26, 278, 12), (62, 286, 11), (100, 290, 10), (156, 290, 10), (194, 286, 11), (230, 278, 12)])
-    top = [96, 70, 44][level - 1]
-    # Cọc chĩa lên khỏi đỉnh lều.
-    b += line(118, top - 26, 128, top + 30, "#6D4C41", 12) + line(118, top - 26, 128, top + 30, "#8D6E63", 6)
-    b += line(140, top - 24, 128, top + 30, "#6D4C41", 12) + line(140, top - 24, 128, top + 30, "#8D6E63", 6)
-    b += path(f"M16 272 Q70 {top + 90} 128 {top} Q186 {top + 90} 240 272 Z", hide)
-    # Sọc / mảng vá.
-    if level >= 2:
-        b += path(f"M44 230 Q86 {top + 110} 128 {top + 40} Q170 {top + 110} 212 230", "none", 0,
-                  f' stroke="#A1887F" stroke-width="10" stroke-linecap="round"')
-        b += path("M58 196 l24 -6 l6 22 l-24 6 Z", "#FFB74D", 4)
-        b += path("M176 206 l22 4 l-4 22 l-22 -4 Z", "#E57373", 4)
-    if level >= 3:
-        for i, c in enumerate(["#E57373", "#FFD54F", "#81C784", "#64B5F6"]):
-            x = 64 + i * 42
-            b += path(f"M{x} 248 l10 -14 l10 14 Z", c, 3)
-        # Lông chim cắm trên đỉnh.
-        b += path(f"M120 {top - 20} C108 {top - 52} 118 {top - 70} 126 {top - 74} C128 {top - 54} 130 {top - 36} 124 {top - 20} Z", "#FFF8E1", 4)
-        b += path(f"M136 {top - 18} C150 {top - 46} 148 {top - 62} 142 {top - 70} C136 {top - 50} 132 {top - 34} 132 {top - 18} Z", "#E57373", 4)
-    # Cửa lều tối, mép vén lên.
-    b += path("M100 272 Q112 200 128 182 Q144 200 156 272 Z", "#4E342E", 5)
-    b += path("M128 182 Q120 214 96 236 L100 272 Q108 220 128 182 Z", hide, 4)
-    b += line(30, 270, 226, 270, LINE, 6)
-    return svg(w, h, b, f"Lều ngủ cấp {level}")
+    # Góp ý mới ưu tiên da thú + ít rơm, dáng thuôn nhọn; giữ cửa trước-phải.
+    tip_y = (76, 69, 61)[level-1]
+    skin = ("#B69A76", "#DDC099", "#E4C8A1")[level-1]
+    front = ("#A88B69", "#C9AA82", "#D2B489")[level-1]
+    ground = rect(5,47,246,249,"#C8A27A",24,0)
+    ground += rect(12,54,232,235,"#B99A72",19,0)
+    b = ""
+    # Nền elip sâu đọc thành chân lều nằm trên đất, không phải đường mép trước.
+    b += ellipse(128,247,112,43,"#AA8E69",0)
+    for x,y in ((28,249),(65,278),(219,266),(235,229)):
+        b += ellipse(x,y,9 if level>1 else 6,5,"#C4BDAA",2)
+    # Hai đầu tre ngắn/dây mây thay chùm cọc dài hoặc biểu tượng văn hoá khác.
+    b += line(109,tip_y+8,100,tip_y-19,"#4E342E",7)
+    b += line(110,tip_y+5,118,tip_y-26,"#4E342E",7)
+    b += line(108,tip_y+6,101,tip_y-17,"#C6A46B",3)
+    b += line(111,tip_y+4,117,tip_y-24,"#C6A46B",3)
+    outline=f"M110 {tip_y} C82 111 43 161 18 240 Q16 257 42 267 C107 309 212 290 238 253 Q244 245 235 227 C213 161 154 106 110 {tip_y} Z"
+    if level == 1:
+        outline = f"M110 {tip_y} C82 111 43 161 18 240 Q16 257 42 267 L54 260 L57 278 L80 281 L88 271 L95 287 Q160 301 213 276 L208 267 L224 269 L238 253 Q244 245 235 227 C213 161 154 106 110 {tip_y} Z"
+    b += path(outline,skin,6)
+    b += path(f"M110 {tip_y} C151 117 189 181 238 253 C211 282 183 288 145 290 C139 208 128 132 110 {tip_y} Z",front,0)
+    # Nếp da ôm khối và đường ghép xiên thể hiện mặt bên, tránh mặt cửa chính diện.
+    b += path("M85 123 C63 166 43 207 35 243","none",0,
+              ' stroke="#EDDBC0" stroke-width="7" stroke-linecap="round"')
+    b += path("M123 126 C136 164 144 209 145 285","none",0,
+              ' stroke="#967452" stroke-width="3" stroke-linecap="round"')
+    for y in range(145,270,22):
+        x=129+(y-145)*0.12
+        b += line(round(x-4,1),y,round(x+7,1),y-3,"#775A3F",2)
+    b += path("M53 261 Q91 278 131 281","none",0,
+              ' stroke="#AF8B65" stroke-width="3" stroke-linecap="round"')
+    # Cửa quay chếch phải: chân cửa xiên lên bên phải, khe mở nằm trong lớp da.
+    b += path("M158 279 L157 238 Q159 215 181 207 Q203 201 208 229 L218 261 Q194 275 158 279 Z",LINE,3)
+    b += path("M181 202 Q149 213 145 266 L159 277 Q166 250 167 233 Q167 215 181 202 Z","#E9D2AE",3)
+    b += path("M181 202 Q215 211 223 256 L211 266 Q209 239 200 222 Q193 211 181 202 Z","#B28D65",3)
+    b += line(149,253,164,248,"#6D5737",3)
+    b += line(206,244,219,239,"#6D5737",3)
+    b += path("M159 280 Q184 280 216 263","none",0,
+              ' stroke="#DEBF8F" stroke-width="6" stroke-linecap="round"')
+    if level==1:
+        # Mảnh da vá và nút khâu thô giúp chất liệu đọc rõ khi zoom gần.
+        b += path("M62 194 Q80 190 95 198 L99 226 Q80 240 59 227 Z","#C1A078",3)
+        for x,y in ((64,202),(63,218),(77,231),(92,224),(94,206),(77,195)):
+            b += line(x-3,y-2,x+3,y+2,"#806045",2)
+    if level == 1:
+        b += path("M66 159 L78 167 L69 175 L74 184 L60 178 L55 168 Z","#6F573F",2)
+        b += path("M101 239 L117 244 L112 256 L98 251 Z","#6F573F",2)
+        b += path("M75 166 L85 162 L80 181 L72 175 Z","#C8AB84",2)
+        b += path("M45 240 Q60 230 64 244","none",0,' stroke="#8A6B4C" stroke-width="4" stroke-linecap="round"')
+    if level==3:
+        # Chim Lạc/mặt trời cách điệu và dải răng cưa, vẽ màu đất/đồng trên da.
+        b += path("M48 181 Q68 190 83 183 L95 174 L107 176 L98 180 L93 190 Q73 205 56 191 L44 190","none",0,
+                  ' stroke="#A46F3F" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"')
+        b += path("M65 188 L55 170 L81 184 L67 184 Z","#BD8950",2)
+        b += line(79,193,77,202,"#A46F3F",2)
+        for x in range(47,127,14):
+            y=260+(x-47)*0.16
+            b += path(f"M{x} {y:.1f} l6 -6 l6 8","none",0,' stroke="#AC7B43" stroke-width="3" stroke-linejoin="round"')
+        # Mặt trời đủ lớn để nhìn khi thu nhỏ, cùng tông hoa văn trên da.
+        for i in range(12):
+            angle=i*math.tau/12
+            b += line(round(87+math.cos(angle)*12,1),round(221+math.sin(angle)*10,1),
+                      round(87+math.cos(angle)*18,1),round(221+math.sin(angle)*16,1),"#996B38",2.5)
+        b += ellipse(87,221,9,8,"#C49450",2)
+        b += ellipse(87,221,4,3,"#E9C583",0)
+    # Chỉ phủ rơm ở chóp; phần lớn thân vẫn là da thú. Mép bó rơm tơi, không mái nhà.
+    cap=f"M110 {tip_y-3} Q92 99 68 128 L83 122 L90 137 L101 130 L110 142 L123 132 L139 146 L146 132 L163 139 Q138 95 110 {tip_y-3} Z"
+    if level == 1:
+        cap=f"M110 {tip_y-3} Q92 99 77 120 L92 114 L89 131 L106 122 L116 136 L125 122 L145 132 Q133 96 110 {tip_y-3} Z"
+    elif level == 3:
+        cap=f"M110 {tip_y-3} Q87 96 56 143 L74 136 L79 151 L91 142 L99 158 L111 145 L127 161 L137 148 L151 162 L158 147 L177 155 Q141 96 110 {tip_y-3} Z"
+    b += path(cap,("#A5A36A","#AAB779","#B1BA76")[level-1],3)
+    tufts = [(77,124),(89,129),(101,133),(112,134),(124,126),(138,137),(150,130)]
+    if level == 1:
+        tufts = [(87,117),(99,123),(114,129),(129,120),(140,127)]
+    elif level == 3:
+        tufts = [(68,140),(82,145),(94,151),(108,144),(123,154),(139,149),(152,155),(164,146)]
+    for x,y in tufts:
+        b += path(f"M110 {tip_y+6} Q{(110+x)/2:.1f} 104 {x} {y}","none",0,
+                  ' stroke="#E7CD87" stroke-width="2.5" stroke-linecap="round"')
+    b += path("M91 110 Q112 121 133 112","none",0,
+              ' stroke="#8E7246" stroke-width="4" stroke-linecap="round"')
+    b += line(112,115,110,132,"#8E7246",3)
+    b += line(112,115,121,131,"#8E7246",3)
+    if level == 3:
+        # Bó rơm trang trí ở hai bên cửa, khác rõ cấp thấp khi nhìn xa.
+        for cx,cy in ((140,252),(225,237)):
+            b += path(f"M{cx} {cy-22} q-6 12 -9 26 l8 -5 l5 6 l4 -6 l5 1 Z","#CDAE68",2)
+            b += line(cx,cy-20,cx-2,cy+2,"#F0D594",2)
+            b += line(cx-6,cy-9,cx+4,cy-9,"#886B42",2)
+    # Dây neo nhẹ và cọc tre, chân lều bám đất thay sàn/cột nhà.
+    for x,y,tx,ty in ((24,265,49,222),(232,271,215,230)):
+        b += line(x,y-9,tx,ty,"#CBB58A",3)
+        b += line(x,y+3,x,y-12,"#70583F",5)
+    # Thu nhỏ quanh cùng chân/neo, sân và diện tích gameplay vẫn 2×2.
+    size = (0.76, 0.89, 1.0)[level-1]
+    b = ground + f'<g transform="translate(128 276) scale({size}) translate(-128 -276)">{b}</g>'
+    return svg(256,300,b,f"Lều da/cỏ cấp {level}: cỡ {size}, cửa phải, cũ rách → lành → hoa văn Lạc Việt")
 
 
 # --- Bếp (2×2: 256 × 320) ---
@@ -274,6 +345,22 @@ def dance_floor(level):
 
 def foundation(cols, rows):
     w, h = cols * 128, rows * 128
+    if (cols, rows) == (2, 2):
+        # Nền giữ vuông theo lưới; mặt trên cọc hiện rõ, không cắt mất cọc phía sau.
+        b = rect(4, 4, 248, 248, "#C8A27A", 20, 0)
+        b += rect(11, 11, 234, 234, "#D4B28A", 16, 0)
+        b += path("M18 237 Q128 246 238 237", "none", 0,
+                  ' stroke="#B08B66" stroke-width="5" stroke-linecap="round"')
+        for x, y in [(58, 74), (143, 57), (178, 111), (66, 157), (150, 194)]:
+            b += line(x, y, x + 22, y + 3, "#B08B66", 4)
+            b += line(x + 7, y + 10, x + 25, y + 12, "#B08B66", 3)
+        b += path("M23 21 L233 21 L233 226 L23 226 Z", "none", 0,
+                  ' stroke="#FFF8E1" stroke-width="3" stroke-linejoin="round"')
+        b += stones([(79, 117, 9), (186, 166, 8)])
+        for x, y in [(23, 39), (233, 39), (23, 244), (233, 244)]:
+            b += rect(x - 7, y - 27, 14, 28, "#8D6E63", 4, 4)
+            b += ellipse(x, y - 27, 7, 4, "#BCAAA4", 3)
+        return svg(w, h, b, "Móng 2×2: nền vuông nhìn từ trên, cọc thấp có mặt trên")
     b = rect(10, 10, w - 20, h - 20, "#C8A27A", 18, 0)
     b += f'  <rect x="10" y="10" width="{w - 20}" height="{h - 20}" rx="18" fill="none" stroke="#A1887F" stroke-width="5" stroke-dasharray="16 12"/>\n'
     # Vạch đất cào.

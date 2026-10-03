@@ -91,6 +91,8 @@ const PIVOTS: Dictionary[String, Vector2] = {
 
 ## Neo chung cho cả nhóm hình cùng tiền tố (dùng khi không có trong PIVOTS).
 ## Các lớp đầu (đầu, mặt, tóc, phụ kiện) vẽ trên cùng một khung 80×80, neo ở cổ.
+## Bộ thử góc cao: body_01 56×40, arm 16×28, leg 22×26; giữ neo tỉ lệ,
+## vị trí khớp và đồ khuân được chỉnh trong VillagerRig để ghép cả mảnh cũ.
 const PREFIX_PIVOTS: Dictionary[String, Vector2] = {
 	"villager/head_": Vector2(0.5, 0.9),
 	"villager/face_": Vector2(0.5, 0.9),

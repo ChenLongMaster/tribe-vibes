@@ -4,6 +4,199 @@ Mỗi đợt một mục: đã làm gì, chọn gì và vì sao. Mục mới nh�
 
 ---
 
+## Chốt và đồng bộ phong cách nghệ thuật — Prehistoric Tribes gợi nét Việt (2026-10-04)
+
+**Trạng thái:** chỉ tài liệu theo yêu cầu; không vẽ thêm, không đổi code/core, không commit/push.
+
+- Đã hiểu và ghi hướng chung: tiền sử thô mộc/thủ công/hơi ngố dễ thương; màu ấm, viền nâu, dáng mềm; góc 2D từ trên đồng thời chếch bên, chiều sâu ngang và cửa xiên, lều trước-phải, lưới/camera giữ nguyên.
+- Nét Việt là gợi nhẹ bằng tre/mây/cỏ/rơm/đồ đất và hoa văn Lạc Việt, không ép phân cấp thành thời kỳ lịch sử hoặc mọi nhà thành mái thuyền/nhà sàn. Lều da thú/cỏ đã được duyệt; ba cấp khác bằng cỡ, độ hoàn thiện và trang trí, giữ cùng khung/neo/footprint. Vẻ rách của cấp 1 chỉ là art, không thêm luật hư hại.
+- Sửa nguồn chính GAME_DESIGN mục 7, thay mô tả góc/vật liệu/phân cấp cũ mâu thuẫn; copy thiết kế sang CLAUDE/AGENTS, giữ nguyên dòng đầu Codex và phụ lục từng file. ASSET_SPEC thống nhất cùng hướng, dẫn bộ ảnh tents-v7 làm chuẩn; DEVLOG cũ giữ làm lịch sử.
+- Cách xem: đọc GAME_DESIGN mục 7/đầu ASSET_SPEC và mở `build/art-review/2026-10-04/tents-v7/after/footprint.png`, `levels.png`, `village_zoom_1.png`. Không cần chạy game cho thay đổi này; không sinh asset mới.
+- Kiểm tra: đối chiếu phần thiết kế của hai bản hướng dẫn với nguồn chính, phụ lục không đổi; rà mô tả cũ và diff whitespace; hash SVG/generator/ArtSpecs/rig không đổi. Không chạy lại test game vì chỉ sửa Markdown.
+- Còn biết: công trình khác chưa được vẽ lại/duyệt dáng cuối; vật liệu của chúng là gợi ý. Số art có thể tinh chỉnh ở đợt sau: thân lều 76%/89%/100%, lượng cỏ, độ rõ hoa văn; chưa chỉnh số lần này.
+
+---
+
+## Phân biệt ba cấp lều da/cỏ — Nhỏ cũ → lớn gọn → trang trí Lạc Việt (2026-10-04)
+
+**Trạng thái:** xong hình thử theo hướng đã thống nhất, chờ duyệt phân cấp; không commit/push, dừng ở ba lều.
+
+### Đã làm & quyết định
+- Cả ba dùng da thú và phủ cỏ/rơm, giữ dáng thuôn nhọn/cửa chếch phải đã được người dùng đồng ý. Cỡ nhóm thân/phụ kiện quanh chân (128,276) là 76%/89%/100%; sân, khung 256×300, neo và footprint 2×2 cố định. Cấp 1 nhỏ nhưng diện tích xây gameplay vẫn bằng cấp 2/3.
+- Cấp 1 da nâu cũ, mép sờn/răng rách, lỗ rách và miếng vá thô, bó cỏ thưa. Cấp 2 da sáng lành, bỏ rách/vá thô, dựng ngay ngắn, mái cỏ gọn. Cấp 3 lớn nhất, chóp cỏ rộng hơn và tua rơm buộc cửa, chim Lạc/mặt trời/dải răng cưa màu đất-đồng trên da; hoa văn cách điệu gợi Lạc Việt, không tái dựng sử chính xác.
+- Ghi quyết định đã chốt vào GAME_DESIGN mục 7 và đồng bộ CLAUDE/AGENTS, giữ phần phụ lục. ASSET_SPEC cập nhật mô tả/tỉ lệ. Chỉ sửa generator/ba SVG lều và tài liệu; móng, thổ dân/rig, camera/map/core không đổi. Hash trước/sau chỉ ba SVG lều đổi.
+
+### Kiểm tra
+- Godot 4.7.2 import sạch; test thường **78/78**, strict **78/78**, runtime headless 600 frame sạch. Đã xoá `override.cfg`. Warning ô bị chặn của `Commands.spawn_villager` thuộc test cố ý cũ; không có cảnh báo mới.
+- Đã tự mở footprint, levels và village_zoom_1 sau sửa; khác cỡ/dáng đọc rõ trong làng. SVG hợp lệ, khung giữ nguyên; generator chạy lại cho cùng kết quả, hash chỉ ba SVG lều đổi.
+
+### Cách xem & hạn chế
+- Trước: `build/art-review/2026-10-03/tents-v6/after/levels.png`, `village_zoom_1.png`, `footprint.png`. Sau: cùng tên trong `build/art-review/2026-10-04/tents-v7/after/`; bảng ba cấp trái→phải trên ô xanh 2×2. Chụp seed 42, buildings/jobs/wait 40/speed 4, tự mở bảng và ảnh trong game. Trong game xây/nâng Lều 1→2→3 rồi zoom gần/xa để thấy cỡ, da/cỏ và hoa văn.
+- Các công trình khác vẫn hình cũ; lỗ rách/đường khâu và hoa văn nhỏ sẽ giảm độ rõ khi zoom xa. Cỡ lều 1 nhỏ trong cùng sân là chủ ý theo yêu cầu, không đổi diện tích đi lại/xây.
+
+### Số nên chỉnh
+- Thân 0.76/0.89/1.0 quanh (128,276); độ phủ cỏ: thưa/gọn/dày tới y≈136/146/162 trước scale; màu da cũ và số lỗ rách; độ lớn/chất màu chim Lạc/mặt trời/tua rơm. Chỉ là số hình, không cân bằng game.
+
+---
+
+## Thử lều da thú thuôn nhọn — Ít rơm ở chóp, nét Việt nhẹ (2026-10-04)
+
+**Trạng thái:** bản thử theo yêu cầu mới nhất, chờ duyệt; không commit/push, chưa vẽ thêm hình khác.
+
+### Đã làm & quyết định
+- Người dùng đổi hướng: lều da thú giống cảm giác Prehistoric Tribes, dáng thuôn nhọn, phủ chút rơm và gợi nét Việt. Yêu cầu mới ưu tiên hơn vật liệu toàn lá/dáng vòm và điều cấm lều da trong spec cũ; chỉ thử ba lều, chưa sửa thiết kế chung của mọi công trình.
+- Thân da nâu kem, chân rộng/elip, đỉnh lệch sau-trái; khe cửa và chân cửa xiên trước-phải. Đường khâu thô, nếp da, mép da cửa kéo mở/buộc mây; mái/thân liền, không vách/sàn/cột nhà. Chóp rơm nhỏ có sợi tơi và dây buộc; phần lớn bề mặt vẫn da.
+- Cấp 1 da đơn giản; cấp 2 thêm da vá; cấp 3 thêm miếng tre đan và mặt trời nhỏ lấy cảm hứng trống đồng. Khung tre ngắn/dây mây/cọc neo giữ nét vật liệu Việt, không chép texture/hình gốc. Dáng tưởng tượng, không khẳng định chính xác lịch sử.
+- Chỉ thay `tent()` trong generator, ba SVG sinh ra, ASSET_SPEC và DEVLOG. Tên file, khung 256×300, neo (128,276), diện tích/sân 2×2, móng, dân/rig, camera/map/core giữ nguyên. Hash soát trước/sau chỉ ba SVG lều đổi.
+
+### Kiểm tra
+- Godot 4.7.2 import sạch, test thường **78/78**, strict **78/78**, runtime headless 600 frame sạch. Đã xoá `override.cfg`. Cảnh báo `Commands.spawn_villager` ô bị chặn là test cố ý cũ; không có cảnh báo mới.
+- Đã tự mở footprint, levels và village_zoom_1; SVG hợp lệ, khung 256×300 giữ nguyên; generator chạy lại cho cùng kết quả, hash chỉ ba SVG lều đổi.
+
+### Cách xem & hạn chế
+- Trước: `build/art-review/2026-10-03/tents-v5/after/levels.png`, `village_zoom_1.png`, `footprint.png`. Sau: cùng tên trong `tents-v6/after/`; bảng ba cấp trái→phải. Chụp seed 42, buildings/jobs/wait 40/speed 4; script/ảnh soát nằm trong build. Trong game xây/nâng lều 1→2→3, zoom gần xem khâu/rơm, zoom xa xem dáng và cửa phải.
+- Các nhà khác vẫn hình cũ. Các cấp dùng cùng dáng; chi tiết vá/tre đan có thể khó thấy khi zoom xa. Đây là bản duyệt vật liệu/dáng, chưa vẽ thêm công trình hay nhân vật.
+
+### Số nên chỉnh
+- Đỉnh `(110,76/69/61)`, chân elip `(128,247)` bán kính `(112,43)`; bó rơm tới y≈146. Cửa đỉnh `(181,207)`, chân xiên `(158,279)`→`(218,261)`. Có thể chỉnh độ thuôn, lượng rơm, sắc da và vị trí vá/tre đan; chỉ là số art.
+
+---
+
+## Thử lều lá vòm thấp — Cửa quay trước-phải, bỏ dáng nhà (2026-10-03)
+
+**Trạng thái:** bản thử theo hai góp ý mới, chờ duyệt; không commit/push, chưa làm thêm hình khác.
+
+### Đã làm & quyết định
+- Người dùng thấy góc chếch gần đúng, nhưng muốn lều tiền sử thay vì nhà và cửa hướng bên phải. Giữ góc cao chếch bên, đảo hướng vẽ trong SVG; camera/lưới không đổi.
+- Đổi ba cấp sang lều khung tre uốn lợp lá cọ vòm thấp, mái chạm gần đất, mặt đầu cũng phủ lá và khe cửa có mép cuộn buộc dây mây. Bỏ vách đứng, sàn nhà, cột nhà sàn/cầu thang và mái thuyền cứng của bản trước. Không dùng lều da/teepee. Đây là lựa chọn đơn giản để thử dáng lều; thay hướng nhà sàn cũ cho đợt này theo yêu cầu mới.
+- Cấp 1 ít gia cố; cấp 2 thêm đai mây và đá neo; cấp 3 mái vàng ấm, đai mây, mặt trời nhỏ. Cao vòm tăng nhẹ thay xây thêm tầng/vách. Viền nâu #4E342E, sân đất vẫn trải 2×2.
+- Chỉ đổi `tent()`/ba SVG sinh ra, ASSET_SPEC và nhật ký. Giữ khung 256×300, neo (128,276), tên file, móng/thổ dân và core; hash generator xác nhận chỉ ba SVG lều đổi.
+
+### Kiểm tra
+- Godot 4.7.2 import và runtime headless 600 frame sạch; strict **78/78**, đã xoá `override.cfg`. Cảnh báo ô bị chặn trong `Commands.spawn_villager` thuộc test cố ý cũ, không có cảnh báo mới.
+- Lượt thường đầu **77/78**: `test_village_lives_for_five_minutes` bắt một người tán gẫu cách điểm neo 3 ô. Cùng bộ SVG đó lượt strict và lượt thường chạy lại đều **78/78**; lỗi không tái hiện, ghi nhận tình huống mô phỏng không ổn định, không chỉnh core ngoài phạm vi art.
+- Tự mở bảng ba cấp, levels và village; XML/SVG hợp lệ, khung 256×300, hash chỉ ba SVG lều đổi. Script/ảnh soát nằm trong build.
+
+### Cách xem & hạn chế
+- Trước: `build/art-review/2026-10-03/tents-v4/after/levels.png`, `village_zoom_1.png`, `footprint.png`. Sau: cùng tên trong `tents-v5/after/`; bảng riêng ba cấp trái→phải trên ô xanh 2×2. Tự mở ảnh để xem cửa quay phải và mái sát đất. Trong game xây/nâng lều 1→2→3 rồi zoom gần.
+- Các nhà khác vẫn dáng/góc cũ; cấp 1/2 gần nhau khi zoom xa, chủ yếu phân biệt qua đai mây. Hình lấy cảm hứng vật liệu tiền sử, không nhằm tái dựng lịch sử hay chép hình gốc.
+- Chụp seed 42, buildings/jobs/wait 40/speed 4; dùng bản sao screenshot trong build chỉ lưu levels/village do ổ C ít chỗ. QA script/ảnh ở build; tool game không đổi.
+
+### Số nên chỉnh
+- Chiếu ngang `−0.60/−0.55`, dốc hai trục `0.28/−0.45`, co cao `0.85`; vòm `112/121/129`, cửa `65/70/74`, độ rộng thân 200, chiều sâu 192 đơn vị vẽ. Chỉ là số art, không cân bằng game.
+
+---
+
+## Thử lều chếch bên — Góc cao có mặt cửa xiên và vách bên (2026-10-03)
+
+**Trạng thái:** bản thử theo xác nhận mới nhất, chờ duyệt; không commit/push, không vẽ thêm.
+
+### Đã làm & quyết định
+- Người dùng làm rõ và xác nhận: muốn nhìn từ trên đồng thời chếch bên như lều Prehistoric Tribes. Hướng mới thay yêu cầu trực diện/không thấy hai vách trong tài liệu cũ cho đợt thử này; chưa đổi thiết kế chung cho mọi hình khi chưa duyệt.
+- Vẽ lại ba cấp qua `tent()` trong generator: cửa/đầu hồi trước-trái xiên, vách bên sau-phải, sống mái chạy chéo. Cấp 1 tre/lá chữ A; cấp 2 vách tre đan, kê đá; cấp 3 nhà sàn, hai đầu mái thuyền nhấc cong, cầu thang xiên, mặt trời theo mặt mái. Nền sân đất phủ 2×2, nhà nằm chéo trong sân.
+- Giữ tên, khung 256×300, neo (128,276); móng, thổ dân, camera, lưới, dữ liệu/core không sửa. Hash xác nhận chỉ ba SVG lều đổi khi chạy generator. Cập nhật ASSET_SPEC theo bản thử.
+
+### Kiểm tra
+- Godot 4.7.2 import sạch; test thường **78/78**, strict **78/78**; runtime headless 600 frame sạch. Đã xoá `override.cfg`. Cảnh báo ô bị chặn của `Commands.spawn_villager` thuộc test cố ý cũ, không có cảnh báo mới.
+- Tự mở `footprint.png`, `levels.png`, `village_zoom_1.png`; SVG/PNG hợp lệ, khung/neo không đổi. Chỉ ba SVG lều thay đổi theo hash trước/sau.
+
+### Cách xem & hạn chế
+- Ảnh trước: `build/art-review/2026-10-03/tents-v3/after/levels.png`, `village_zoom_1.png`. Ảnh sau: `build/art-review/2026-10-03/tents-v4/after/levels.png`, `village_zoom_1.png`, `footprint.png` (ba cấp trái→phải). Tự mở ảnh soát mái/cửa, footprint và khi đứng cạnh công trình cũ; chụp cùng seed 42, buildings/jobs/wait 40/speed 4.
+- Trong game xây/nâng lều cấp 1→3, zoom gần để xem cửa/vách/thang xiên. Công trình khác vẫn chính diện; cấp 1/2 cùng dáng mái nên zoom xa hơi giống nhau. Đây là thử hướng, chưa khẳng định đạt phong cách cuối cùng.
+- Ổ C hết chỗ: dọn ảnh phụ do Codex sinh ở các đợt lều, giữ levels/village/footprint đã gửi. Bản chụp lại dùng bản sao tool trong build chỉ lưu levels/village để hạn chế dung lượng; tool game giữ nguyên.
+
+### Số nên chỉnh
+- Hệ số xiên ngang/sâu `0.60/0.55`, độ dốc trên ảnh `0.28/−0.45`, co chiều cao `0.85`; cao nóc `110/120/146`, độ cong mái thuyền `18`. Tất cả là số vẽ trong SVG, không phải cân bằng game.
+
+---
+
+## Sửa khối mái lều — Bớt nhìn từ trên thẳng xuống, cửa rõ hơn (2026-10-03)
+
+**Trạng thái:** bản sửa hình, chờ người dùng duyệt; chưa commit, chỉ sửa 3 cấp lều.
+
+### Đã làm & quyết định
+- Theo góp ý mới: bản mái phẳng chưa có cảm giác căn lều dựng trên đất như ảnh Prehistoric Tribes. Giữ hướng trực diện/nhìn nghiêng từ trên và vật liệu Việt Nam đã chốt, nhưng không ép mặt trước quá mỏng để lấp ô 2×2.
+- Cấp 1/2: mép ngoài, mép trước và các hàng lá cong để mái phồng; chuyển sắc nhẹ trong SVG tạo phần sáng trên khối mái và phần tối ở rìa. Rút sống mái sâu từ 202 px xuống 159/157 px; tăng đầu hồi từ ~49/57 lên ~88/98 px; cửa cao 56 px file, dễ đọc hơn khi nhìn trong làng. Sàn/nền vẫn trải footprint; cấp 2 giữ vách tre đan và sàn đá.
+- Cấp 3: mái thuyền phồng, hàng lá cong, sáng giữa/tối gần mép; nâng mép mái trước từ ~245 lên ~222..231 để lộ thêm vách/cửa. Giữ cột gỗ/thang tre và mặt trời nhỏ, dời hoa văn lên y=166.
+- Chỉ sửa `tent()` trong generator và 3 SVG sinh ra, cùng mô tả ASSET_SPEC/nhật ký. Khung 256×300, neo (128,276), footprint, móng, thổ dân và core giữ nguyên (đối chiếu hash). Không đổi camera/renderer, không vẽ nhà/vật nào khác.
+
+### Kiểm tra
+- Godot 4.7.2 import sạch; test thường **78/78**, test strict **78/78**; runtime headless 600 frame sạch. Đã xoá `override.cfg`. Warning `Commands.spawn_villager` ô bị chặn thuộc tình huống cố ý của test cũ; không có cảnh báo mới.
+- Kiểm tra SVG/XML, khung 256×300, PNG hợp lệ và generator chạy lại cho cùng kết quả. Tự mở ảnh ba cấp riêng, `levels.png` và `village_zoom_1.png` sau sửa để kiểm tra mái/cửa và tỉ lệ cạnh nhà cũ.
+
+### Ảnh & cách xem
+- `build/art-review/2026-10-03/tents-v3/before/` giữ `levels.png`, `village_zoom_1.png` của bản ngay trước; `after/` là bản sửa, chụp cùng seed 42 và `--buildings --jobs --wait=40 --speed=4`. Tự mở cả hai ảnh sau trong game; mở thêm `after/footprint.png` để soi ba cấp từ trái sang phải, mái/cửa và ô 2×2.
+- `REVIEW.md` gom ảnh trước/sau; script/ảnh soát chỉ nằm trong build có `.gdignore`. Generator chạy lại không đổi thêm SVG nào.
+- Chạy game, xây/nâng Lều cấp 1→2→3; zoom gần xem mái cong/cửa, zoom xa xem dáng có đọc thành căn lều. Các công trình khác còn hình cũ theo phạm vi yêu cầu; cấp 1/2 vẫn cùng dáng mái chữ A.
+
+### Số nên tinh chỉnh
+- `roof_front` 190/180, `eave_front = roof_front + 80`, độ cong mép mái và chuyển sắc `palm_light`/`palm_dark`; cửa từ y=226 tới 282. Cấp 3: mép mái 222..231, vách/cửa hiện tới 266; độ phồng màu ở `boat_roof`. Đây là số hình ảnh, không đổi cân bằng game. Góc vẽ cách điệu cần người dùng duyệt, không khẳng định giống hệt hình gốc.
+
+---
+
+## Sửa lều góc cao — Tre/lá cọ → nhà sàn mái thuyền (2026-10-03)
+
+**Trạng thái:** xong bản sửa theo ảnh mẫu, chờ duyệt — chưa commit; dừng, chưa vẽ thêm hình khác.
+
+### Đã làm & quyết định
+- Đọc lại GAME_DESIGN/AGENTS mục 7 mới và mục nhật ký mới nhất. Bản trước vẫn thiếu chiều sâu footprint: mái cong chỉ nới dáng, chưa cho cảm giác đứng trên cao nhìn xuống. Bản này dùng mặt mái trải từ sát mép sau tới sát mép trước ô 2×2; đầu hồi/cột/thang co thấp, giữ hướng trực diện và lưới vuông.
+- Chỉ vẽ lại `tent_1/2/3` qua `tools/gen_building_art.py`: cấp 1 lán tre chữ A lợp lá cọ, hai mái hình thang trái sáng/phải tối, nóc dài trước–sau và cửa nhỏ; cấp 2 nhà lá có nẹp mái/dây mây, sàn thấp kê đá vôi, vách tre đan; cấp 3 nhà sàn nhỏ mái cong hình thuyền, dải mái sau tối, mái trước rộng sáng, cột gỗ, thang tre ngắn, mặt trời 12 tia màu đồng nhỏ.
+- Vật liệu và màu theo nét Việt Nam tiền sử đã chốt: tre/nứa vàng nâu, lá khô vàng xanh, mây, gỗ, đá vôi. Bỏ lều da, miếng vá da, lông chim. Hoa văn lấy cảm hứng trống đồng, cách điệu cho dễ đọc; không nhằm tái dựng lịch sử chính xác.
+- Giữ khung 256×300, neo (0.5, 0.92) = (128, 276), footprint 2×2, tên file. Cập nhật mô tả ASSET_SPEC; không cần đổi ArtSpecs. Hash đối chiếu trước/sau: chỉ 3 SVG lều thay đổi, móng, các mảnh thổ dân, rig, dữ liệu công trình và mọi SVG khác giữ nguyên.
+
+### Kiểm tra
+- Godot 4.7.2 import sạch; test thường **78/78**, test strict **78/78**; runtime headless 600 frame sạch. Đã xoá `override.cfg`. Warning `Commands.spawn_villager` ô bị chặn thuộc tình huống cố ý trong test cũ; không có cảnh báo mới.
+- Chụp trước/sau cùng seed 42, `--buildings --jobs --wait=40 --speed=4`. Tự mở `levels.png`, `village_zoom_1.png` và ảnh riêng trên ô xanh 2×2, so với phác thảo người dùng. Nền/roof kéo sâu cả hai hàng ô; phần đứng phía trước thấp, không có mặt tường bên isometric. Màu/viền giữ hợp với công trình cũ.
+- PNG lần đầu có file rỗng do ổ C hết dung lượng. Đã dọn ảnh phụ có thể tạo lại và cache import của ảnh QA do Codex sinh trong build; giữ ảnh đã liên kết/ảnh duyệt. Chụp lại thành công và kiểm tra PNG hợp lệ. `build/.gdignore` giữ nguyên.
+- Toàn bộ ảnh, script soát footprint và log nằm trong `build/art-review/2026-10-03/tents-v2/` (không thuộc mã game). `before/levels.png`, `after/levels.png`, hai `village_zoom_1.png` là ảnh so sánh; `after/footprint.png` có ô xanh/đường chia ô chỉ để duyệt. `REVIEW.md` gom các đường dẫn.
+
+### Cách xem thử
+- Mở `before/levels.png` → `after/levels.png`: cấp 1 ở trái trên, cấp 2 phải trên, cấp 3 trái dưới; xem mái trải sâu và đầu hồi thấp. Mở `after/footprint.png`: ba cấp từ trái sang phải, mỗi hình nằm trên ô xanh 2×2.
+- Chạy game, đặt Lều ngủ, giao thợ xây và nâng cấp lên 2/3; zoom gần để xem nẹp/vách tre/sàn đá và thang/hoa văn. Ngủ trong lều vẫn dùng cửa và hành vi cũ.
+
+### Còn biết & số nên tinh chỉnh
+- Các công trình khác còn hướng vẽ/phong cách cũ theo phạm vi được yêu cầu. Cấp 1/2 cùng dáng mái chữ A; khi zoom xa, sàn đá/nẹp/vách đan của cấp 2 hơi khó phân biệt.
+- Số hình ảnh trong `tent()`: footprint x=0..256, y=44..300; nền x=5..251, y=47..296; sống mái cấp 1/2 từ y=31/23 tới 233/225 (chiều sâu 202 px), độ co đầu hồi ~49/57 px. Cấp 3 mái từ y≈27 tới 245, vách/sàn/cột/thang gọn trong 245..300; hoa văn mặt trời bán kính 11 px, 12 tia. Không chỉnh con số cân bằng game.
+
+---
+
+## Sau bản thử góc cao — Góp ý + chốt nét Việt Nam thời tiền sử (2026-10-03)
+
+**Trạng thái:** chỉ tài liệu — chưa commit.
+
+- Duyệt bản thử của Codex: móng 2×2 và bộ thổ dân 01 đạt; **lều vẫn nhìn ngang tầm mắt** — không xoay là đúng, nhưng camera chưa nâng lên cao (chân là đường thẳng ở mép trước, chỉ phủ nửa trước 2×2, không thấy đỉnh). Ghi quy tắc góc cao vào GAME_DESIGN mục 7: chân phủ kín diện tích, chiều cao vẽ rất ngắn, phần lớn hình là mặt trên / mái.
+- **Chốt phong cách công trình: Việt Nam thời tiền sử** (GAME_DESIGN mục 7, ASSET_SPEC): tre / lá cọ / mây / đá vôi / đất nung, hoa văn trống đồng; cấp 1 lán tre lá (Hoà Bình – Bắc Sơn) → cấp 3 nhà sàn mái cong hình thuyền (Đông Sơn); gợi ý riêng cho hang, lửa trại, lều, bếp, kho, lò rèn (xưởng mài rìu đá → lò đất), sân nhảy (cây nêu → trống đồng), móng. Bỏ lều chóp kiểu teepee (của thổ dân Bắc Mỹ).
+- Thêm `build/.gdignore` để Godot không import ảnh / script soát lại của Codex trong `build/`.
+
+---
+
+## Thử hướng vẽ góc cao — Lều 3 cấp + bộ thổ dân 01 (2026-10-03)
+
+**Trạng thái:** xong bản thử, chờ duyệt hướng vẽ — chưa commit; dừng ở phạm vi này.
+
+### Đã làm
+- Vẽ lại `tent_1/2/3` trong `tools/gen_building_art.py`: mái da bo tròn chiếm phần lớn hình, kéo sâu về phía sau theo trục dọc, mặt trước thấp (~64 px file), cửa nhỏ ở giữa chân. Giữ khung 256×300, neo (128, 276), diện tích 2×2 và bảng màu/viền cũ. Cấp 2 thêm miếng vá và vòng đá; cấp 3 thêm hoa văn và lông chim nằm trọn khung.
+- Vẽ lại móng 2×2: nền vuông bo góc phủ 128×128 px hiển thị, cọc thấp có mặt trên elip, dây căng; cọc phía sau không bị cắt bởi mép ảnh. Móng các cỡ khác giữ nguyên.
+- SVG viết tay bộ `head_01`, đủ 5 `face_01_*`, `hair_01`, `body_01`, `arm`, `leg`: đỉnh tóc lớn hơn, mặt thấp vẫn đọc được, vai có mặt trên và thân/chân ngắn. Giữ khung đầu 80×80; đổi khung thân 56×40, tay 16×28, chân 22×26. Điểm neo tỉ lệ giữ nguyên, cập nhật ASSET_SPEC và ghi chú ArtSpecs.
+- Chỉ chỉnh hằng vị trí của VillagerRig (vai/hông/cổ, khoảng cách bàn tay, đồ khuân, biển giơ, đồ sau lưng); không sửa hoạt họa hay lõi game. Các file head_02–03, hair_02–05, body_02–03 và công trình khác không đổi. Sinh lại bằng `python tools/gen_building_art.py` không tạo khác biệt ở những hình ngoài phạm vi.
+
+### Kiểm tra & ảnh duyệt
+- Import Godot 4.7.2 sạch; test thường 78/78 và test với `tools/strict_warnings.cfg` 78/78; headless 600 frame sạch. Đã xoá `override.cfg`. Warning `Commands.spawn_villager` trên ô bị chặn là tình huống cố ý của `test_boot_loads_mode`; không có cảnh báo GDScript mới.
+- Lượt test đầu có 1 lần trượt `test_controller_tap_assigns_and_moves`: hàm chọn ô trống lấy ngẫu nhiên ô không bị chặn, nhưng điểm click vẫn có thể trúng hình vật thể. Hai lượt đầy đủ tiếp theo đều qua, không sửa controller/map/test ngoài phạm vi hình.
+- Chụp trước/sau bằng seed 42, `--buildings --jobs --wait=40 --speed=4`, tự mở xem `levels.png`, `construction.png`, `village_zoom_1.png`, `work.png`. Màu/viền/kích thước lều mới đứng hợp cạnh nhà cũ; cảnh báo bếp/lò vẫn trên mái (khung và neo công trình không đổi).
+- 40 giây đủ xây xong móng bếp, nên chụp thêm `--wait=0 --speed=1` để thấy nền móng và thợ đang khuân/gõ. Có bảng soi riêng bộ 01, 5 nét mặt, các tư thế đi/chặt/hái/khuân/ngủ/biển/câu/ăn/đội mũ, và các bộ cũ ghép chung; tự mở các ảnh ở ba thời điểm.
+- Ảnh nằm trong `build/art-review/2026-10-03/` (được gitignore): `before/` và `after/` chứa bộ chụp chuẩn; `after/site-early/construction.png` chứa móng còn đang xây; `after/rig_0.2.png`, `rig_0.5.png`, `rig_0.8.png` là bảng soi thổ dân. Script bảng soi chỉ nằm cùng thư mục build, không thuộc mã game.
+
+### Cách xem thử
+- Mở ảnh `before/levels.png` và `after/levels.png` để so góc mái; `after/village_zoom_1.png` để xem cạnh nhà cũ; `after/site-early/construction.png` để xem móng; `after/rig_0.8.png` để xem bộ thổ dân và mảnh cũ ghép chung.
+- Trong editor chạy game, xây Lều rồi nâng lên cấp 2/3; phóng to để nhìn sống mái/cửa thấp. Giao dân chặt cây/hái quả/nhặt sỏi/xây nhà, nhìn khớp vai/chân và đồ khuân; cho nghỉ hoặc thiếu đồ để nhìn tư thế ngủ/biển.
+
+### Còn biết & số nên chỉnh
+- Đây là góc vẽ cách điệu khoảng 50–60°, chưa đồng nhất toàn bộ cảnh: nhà/mảnh tóc-thân cũ vẫn giữ hướng vẽ cũ theo phạm vi thử. Bộ 01 cao khoảng 62 px trước scale, ~40 px trong thế giới, nét mặt khó đọc khi zoom xa; các thân cũ cao hơn bộ 01 khoảng 4 px.
+- Số hình ảnh để duyệt: `top` mái lều 94/76/58 px và sống mái trước y=214 trong generator; vai y=-25, cổ y=-27, hông y=-12, `HAND_DISTANCE=11`, `CARRY_HEAD_TOP=-57`, `SIGN_RAISED_POS.y=-46` trong rig. Không chỉnh số cân bằng game.
+
+---
+
 ## Sau Đợt D — Chốt góc vẽ, chuẩn bị giao Codex vẽ lại hình (2026-10-03)
 
 **Trạng thái:** chỉ tài liệu, chưa vẽ lại gì — chưa commit.

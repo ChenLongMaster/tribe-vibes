@@ -25,6 +25,8 @@
 
 > **Cập nhật 2026-10-03 (lần 6) — cảm giác Prehistoric Tribes:** giữ góc nhìn **2D nghiêng 3/4, lưới ô vuông** (game gốc cũng vậy — **không isometric**, không 3D, cho nhẹ máy). Cảm giác game gốc đến từ tỉ lệ và mật độ: **thổ dân nhỏ** (65% cỡ cũ) so với nhà và map; **mỗi công trình có sân đất + vòng đá thấp**, nhà sát nhau thì gộp thành một khu chung; **cây cỏ trang trí phủ kín map** thành từng đám rậm (dương xỉ, cỏ cao, bụi lá, lau sậy ven hồ, nấm dưới tán, hoa) — chỉ để nhìn, màu chìm, viền xanh, không chạm được, khác hẳn mỏ tài nguyên; **sân làng** đất quanh hang + lửa trại; **lối mòn** có sẵn từ làng ra các cụm gần làng, và **chỗ nào thổ dân đi nhiều thì cỏ mòn thành đường đất** (bỏ không thì mọc lại dần) (mục 6.1, 7, 9.1).
 
+> **Hướng hình ảnh đã chốt 2026-10-04:** giữ cảm giác tiền sử dễ thương của Prehistoric Tribes, thêm nét Việt nhẹ qua vật liệu tre/mây/cỏ/rơm và hoa văn Lạc Việt cách điệu. Góc 2D nhìn từ trên chếch bên, lưới vuông; lều da thú thuôn nhọn phủ cỏ/rơm, cửa trước-phải; các cấp khác nhau rõ bằng cỡ, độ hoàn thiện và trang trí. Đây là hướng nghệ thuật tưởng tượng, không ép tái dựng một giai đoạn lịch sử (mục 7).
+
 ---
 
 ## 0. Cách làm việc (đọc trước)
@@ -387,8 +389,29 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 
 ## 7. Hình tạm (placeholder) & quy cách asset
 
-- Claude **tự vẽ toàn bộ hình tạm bằng SVG** trong `assets/placeholder/`. Hình phải dễ thương, không được là ô vuông xám: viền nâu đậm 3 px, màu ấm, bo tròn.
-- **Góc vẽ (chốt 2026-10-03, theo Prehistoric Tribes):** góc **3/4 nhìn từ trên cao khoảng 50–60°, không xoay** — thấy rõ **mặt trên / mái** (chiếm phần lớn hình), **mặt trước thấp** và co lại, chân vật là **mảng phẳng nằm trên đất** khớp ô lưới. **Không isometric** (không xoay 45°, không thấy 2 mặt tường), **không 3D**, giữ lưới ô vuông 64 px. Thổ dân chibi nhìn hơi từ trên xuống (thấy nhiều đỉnh tóc), mặt vẫn quay ra trước cho đọc được biểu cảm. Icon giao diện giữ kiểu phẳng như cũ. (Hình tạm hiện tại vẫn gần nhìn ngang — sẽ vẽ lại dần theo góc này: thử lều + một bộ thổ dân trước, duyệt rồi mới làm hết.)
+### Hướng nghệ thuật đã chốt (2026-10-04)
+
+- **Cảm giác chính:** tiền sử thô mộc, thủ công, hơi ngố nhưng đáng yêu, gần tinh thần Prehistoric Tribes. Hình mềm, bo tròn, vật liệu có nếp/gồ ghề/sờn và nút buộc; nhìn rõ dáng và chức năng khi thu nhỏ. Lấy cảm hứng góc nhìn, tỉ lệ và không khí, không chép hình/texture/logo của game gốc.
+- **Nét Việt là điểm gợi nhẹ:** tre/nứa, dây mây, cỏ/rơm, lá cọ, gỗ, đá vôi, đất nung; thêm chim Lạc, mặt trời, răng cưa hoặc vòng tròn đồng tâm cách điệu ở chỗ phù hợp. Da thú **được dùng và là vật liệu chính của lều ngủ**. Không ép mọi công trình thành nhà sàn hay gán cấp 1→3 thành các thời kỳ lịch sử; chức năng và dáng riêng của từng loại phải đọc được. Không dùng cột totem/biểu tượng đặc trưng của văn hoá khác để trang trí thay nét Việt. Không cần đúng sử 100%.
+- **Góc vẽ:** 2D **3/4 từ trên cao đồng thời chếch một bên**, thấy mái/mặt trên và chiều sâu bên hông; mặt cửa/đầu hồi cũng phải xiên theo cùng khối. Cảm giác nghiêng khoảng 45–60°, lấy hình đã duyệt làm chuẩn thị giác thay vì ép góc số chính xác. Lều quay **trước-phải**. Tránh dáng đối xứng nhìn thẳng cửa hoặc chỉ nâng cao góc nhìn mà không có chiều sâu ngang. Mặt trên chiếm nhiều diện tích, phần đứng co vừa đủ để đọc cửa/chức năng. Khung nhân vật vẫn chibi, mặt/biểu cảm dễ đọc; icon UI phẳng.
+- **Lưới/camera:** giữ ô vuông 64 px, game và renderer 2D. Hướng chếch nằm trong hình SVG/PNG; được thấy hai mặt hoặc bề mặt cong, không cần ép hệ isometric chuẩn, không xoay lưới/camera hay sửa map. Nền/sân công trình phủ đúng footprint; thân có thể nhỏ hơn sân và lớn dần theo cấp. Chân có diện tích/chiều sâu trên đất, không chỉ là đường ngang mép trước.
+- **Phân cấp:** khác rõ ngay từ dáng/cỡ và độ hoàn thiện, rồi mới tới chi tiết nhỏ. Cấp thấp đơn sơ, cũ và sờn; cấp giữa lành lặn, chắc và gọn hơn; cấp cao đầy đặn và trang trí hơn, vẫn cùng họ vật liệu/dáng của công trình. Tăng cấp không mặc định biến lều thành nhà hay chỉ thêm một biểu tượng rất nhỏ.
+- **Phong cách nét/màu:** tự vẽ SVG trong `assets/placeholder/`, viền nâu đậm `#4E342E` 6 px ở file 2× (= 3 px hiển thị), màu ấm, tròn mềm và chi tiết vừa đủ. Cỏ/cây trang trí giữ màu chìm/viền xanh theo quy tắc riêng. Không vẽ chữ trong asset.
+
+### Lều ngủ — chuẩn tham chiếu đã duyệt
+
+- Cả ba cấp là **lều da thú thuôn nhọn phủ cỏ/rơm**, khung tre, dây mây, chân rộng có cảm giác elip nhìn từ trên; cửa chếch trước-phải. Không vách nhà đứng, sàn cao, cầu thang hay mái nhà sàn.
+- **Cấp 1:** nhỏ nhất, da nâu cũ, rách/vá thô, mép sờn, cỏ thưa; nhìn tàn tạ nhưng vẫn đáng yêu. Vẻ cũ này chỉ là ngoại hình cấp 1, không phải trạng thái hư hại gameplay.
+- **Cấp 2:** lớn hơn một chút, da lành/sáng và dựng ngay ngắn, cỏ phủ gọn, ít dấu rách vá.
+- **Cấp 3:** lớn nhất, cỏ/rơm dày hơn, tua rơm và hoa văn gợi **Lạc Việt** (chim Lạc, mặt trời, dải răng cưa), màu đất/đồng, thân vẫn chủ yếu da.
+- Khung **256×300**, hiển thị ×0.5, neo **(128,276)** = (0.5,0.92), sân/footprint **2×2** ở mọi cấp. Thân/phụ kiện hiện thu quanh cùng chân ở **76% / 89% / 100%**; đây là số art có thể tinh chỉnh, không đổi luật diện tích/chỗ ngủ.
+- Chuẩn nhìn: `build/art-review/2026-10-04/tents-v7/after/footprint.png` (cấp 1→3 trái→phải), `levels.png`, `village_zoom_1.png`. Các bản vẽ lều trước là lịch sử thử, không dùng làm chuẩn mới.
+
+### Phạm vi áp dụng khi vẽ tiếp
+
+- Dùng cùng góc nhìn, nét/màu, chất thủ công và cách phân cấp cho art mới, nhưng chọn vật liệu theo chức năng; không biến tất cả thành lều da. Hang đá vôi/cây leo, lửa trại vòng đá/kiềng, bếp nồi/chum đất, kho tre/gỗ/gùi mây, xưởng đá/lò đất, sân nhảy/trống đồng là gợi ý vật liệu, chưa phải dáng cuối đã được duyệt.
+- Hiện chỉ **ba cấp lều và móng/bộ thổ dân 01 đã thử trước** được làm; các công trình/cảnh vật khác giữ nguyên tới đợt riêng. Hướng đã chốt không tự mở rộng phạm vi vẽ hay sửa lõi game. Tiếp tục từng đợt, chụp và tự mở ảnh trong game rồi dừng để người dùng duyệt.
+
 - **Bảng màu gợi ý:** cỏ `#8BC34A`/`#7CB342`, đất `#C8A27A`, nước `#4FC3F7`, gỗ `#8D6E63`, đá `#9E9E9E`, viền `#4E342E`, da thổ dân `#F2C29B`/`#D9A066`/`#A9714B`, áo lông `#A1887F`/`#FFB74D`/`#E57373`.
 - Bộ phận thổ dân, mỗi loại vài biến thể để ghép ngẫu nhiên:
   - `villager/head_01..03.svg`

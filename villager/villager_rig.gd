@@ -45,17 +45,17 @@ const FACE_SLEEP: String = "sleep"
 const FACE_SURPRISED: String = "surprised"
 
 ## Vị trí khớp (px hiển thị, gốc = chân). Đổi ở đây nếu art thật có tỉ lệ khác.
-const HIP_BACK: Vector2 = Vector2(-4, -14)
-const HIP_FRONT: Vector2 = Vector2(5, -14)
-const SHOULDER_BACK: Vector2 = Vector2(-9, -29)
-const SHOULDER_FRONT: Vector2 = Vector2(9, -29)
+const HIP_BACK: Vector2 = Vector2(-4, -12)
+const HIP_FRONT: Vector2 = Vector2(5, -12)
+const SHOULDER_BACK: Vector2 = Vector2(-9, -25)
+const SHOULDER_FRONT: Vector2 = Vector2(9, -25)
 const TORSO_BOTTOM: Vector2 = Vector2(0, -9)
-const NECK: Vector2 = Vector2(0, -31)
-const HAND_DISTANCE: float = 13.0
+const NECK: Vector2 = Vector2(0, -27)
+const HAND_DISTANCE: float = 11.0
 const BACK_LIMB_SHADE: float = 0.85 # tay chân phía sau tối hơn chút cho có chiều sâu
 const HELD_ITEM_SCALE: float = 0.7
 ## Đồ khuân giơ trên đầu: mép dưới của hình đặt sát đỉnh đầu (y so với chân).
-const CARRY_HEAD_TOP: float = -65.0
+const CARRY_HEAD_TOP: float = -57.0
 const CARRY_ITEM_SCALE: float = 1.1
 ## Xác thú vác chổng vó trên đầu — hình thú to nên thu nhỏ lại. Hình thú có khoảng trống
 ## phía trên lưng, lật ngược thì khoảng đó nằm dưới — hạ xuống cho lưng chạm tay.
@@ -63,7 +63,7 @@ const CARCASS_SCALE: float = 0.85
 const CARCASS_SINK: float = 24.0
 ## Tấm biển (px hiển thị): ngồi thì hai tay giơ lên trên đầu (gốc cán ở hai bàn tay); đứng
 ## thì cắm xuống đất ngay trước mặt, một tay vịn. Icon vẽ giữa mặt biển.
-const SIGN_RAISED_POS: Vector2 = Vector2(0, -50)
+const SIGN_RAISED_POS: Vector2 = Vector2(0, -46)
 const SIGN_PLANTED_POS: Vector2 = Vector2(21, 3)
 const SIGN_PLANTED_ARM: float = -1.25
 const SIGN_ICON_POS: Vector2 = Vector2(0, -31)
@@ -72,7 +72,7 @@ const SIGN_ICON_SCALE: float = 1.1
 const HAT_POS: Vector2 = Vector2.ZERO
 const HAT_KEY: String = "villager/hard_hat"
 ## Đồ nghề đeo sau lưng khi không dùng (giáo, rìu, cuốc), xiên chéo qua lưng.
-const BACK_ITEM_POS: Vector2 = Vector2(-7, -21)
+const BACK_ITEM_POS: Vector2 = Vector2(-7, -19)
 const BACK_ITEM_ROTATION: float = -0.5
 ## Câu cá: quăng cần ra trong FISH_CAST_SECONDS đầu, phao nổi trước mặt.
 const FISH_CAST_SECONDS: float = 0.7
