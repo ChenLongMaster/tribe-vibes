@@ -109,7 +109,7 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 	KITCHEN: {
 		"name_key": "BUILDING_KITCHEN_NAME",
 		"desc_key": "BUILDING_KITCHEN_DESC",
-		"footprint": Vector2i(2, 2),
+		"footprint": Vector2i(3, 2),
 		"buildable": true,
 		"production": true,
 		"staff_job": &"cook",
@@ -117,7 +117,7 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 		"food_storage": true,
 		"glow": {"offset": Vector2(0, -40), "radius": 180.0, "color": Color(1.0, 0.6, 0.25, 0.4)},
 		"cook_seconds": Balance.COOK_SECONDS_KITCHEN,
-		"stock_display": {ResourceDefs.MEAL: {"art": "icons/res_meal", "slots": MEAL_SLOTS_KITCHEN}},
+
 		"levels": [
 			{"art": "buildings/kitchen_1", "cost": {ResourceDefs.WOOD: 25, ResourceDefs.STONE: 10}, "build_seconds": 25.0,
 					"staff": 1, "stock_capacity": {ResourceDefs.MEAL: 6}, "capacity": {ResourceDefs.FOOD: 30}},

@@ -6,7 +6,7 @@ extends TaskWork
 ## thức ăn thô); bếp đầy món chín thì đứng chờ người ăn bớt. Mỗi lượt chờ ngắn để watchdog không
 ## tưởng là bị kẹt.
 
-enum Step { GO, WAIT, COOK }
+enum Step { GO, ENTER, WAIT, COOK }
 
 const WAIT_SECONDS: float = 6.0
 const NAG_SECONDS: float = 15.0 # nhắc "Chưa có gì để nấu…" thưa thưa thôi
@@ -16,6 +16,7 @@ const NO_FOOD_SIGN: String = "icons/res_food"
 var _station: Building
 ## Món thô đang nấu dở (quả / cá / thịt) — bị ngắt thì trả lại kho đúng món.
 var _raw: StringName = &""
+var _resume_cooking: bool = false
 
 
 func _init(owner_job: Job, station: Building) -> void:
@@ -26,6 +27,15 @@ func _init(owner_job: Job, station: Building) -> void:
 
 func start() -> void:
 	hold_job_item()
+	if _station.kitchen != null:
+		if not _station.kitchen.reserve(villager, true):
+			fail()
+			return
+		if villager.interior == _station:
+			if not _station.kitchen.move_inside(villager, _station.kitchen.cooking_spot(villager)):
+				fail()
+			step = Step.ENTER
+			return
 	var stand: Vector2i = world().finder.find_building_stand_cell(_station, villager)
 	if stand == World.INVALID_CELL or not villager.move_to_cell(stand):
 		fail()
@@ -33,17 +43,35 @@ func start() -> void:
 	step = Step.GO
 
 
+func hold_job_item() -> void:
+	if _station.kitchen != null:
+		villager.rig.set_held_item("props/cooking_spoon", true)
+	else:
+		super.hold_job_item()
+
+
 func tick(delta: float) -> Status:
-	if _failed:
+	if _failed or not _station.is_built():
 		return Status.FAILED
 	job.nag_cooldown -= delta
 	match step:
 		Step.GO:
 			if villager.is_moving():
 				return Status.RUNNING
-			villager.face_towards(_station.position)
-			timer = WAIT_SECONDS
-			step = Step.WAIT
+			if _station.kitchen != null:
+				if not _station.kitchen.move_inside(villager, _station.kitchen.cooking_spot(villager)):
+					return Status.FAILED
+				step = Step.ENTER
+			else:
+				_begin_wait()
+		Step.ENTER:
+			if not villager.is_moving():
+				_begin_wait()
+				if _resume_cooking:
+					_resume_cooking = false
+					step = Step.COOK
+					villager.rig.play(VillagerRig.ANIM_COOK)
+					villager.state = Villager.State.WORKING
 		Step.WAIT:
 			if _try_take_raw():
 				begin_work(float(_station.prop("cook_seconds", job.def()["seconds"])))
@@ -69,8 +97,28 @@ func tick(delta: float) -> Status:
 	return Status.RUNNING
 
 
+func _begin_wait() -> void:
+	if _station.kitchen != null:
+		villager.rig.set_facing(-1.0)
+	else:
+		villager.face_towards(_station.position)
+	timer = WAIT_SECONDS
+	step = Step.WAIT
+
+
+func refresh_layout() -> void:
+	if villager.interior != _station:
+		return
+	_resume_cooking = _raw != &""
+	if not _station.kitchen.move_inside(villager, _station.kitchen.cooking_spot(villager)):
+		fail()
+	step = Step.ENTER
+
+
 func stop() -> void:
 	super.stop()
+	if _station.kitchen != null:
+		_station.kitchen.release(villager, true)
 	# Bị ngắt giữa chừng thì trả phần đồ thô lại kho, không làm mất.
 	if _raw != &"":
 		# Kho đầy thì vẫn trả (không làm mất phần đã lấy ra).

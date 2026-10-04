@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="160" height="96" viewBox="0 0 160 96">
-  <!-- Đống củi (cành khô rụng dưới tán cây, nhặt tay) — còn 20% -->
-  <ellipse cx="80" cy="70" rx="32.0" ry="7.0" fill="#3E2723" opacity="0.22"/>
-  <g stroke="#4E342E" stroke-width="9" stroke-linecap="round">
-    <path d="M56.2 56.2 L96.5 67.1"/>
-    <path d="M59.1 66.7 L102.1 58.2"/>
-    <path d="M66.3 55.7 L93.6 73.4"/>
-  </g>
-  <g stroke="#8D6E63" stroke-width="4.6" stroke-linecap="round">
-    <path d="M56.2 56.2 L96.5 67.1"/>
-    <path d="M59.1 66.7 L102.1 58.2"/>
-    <path d="M66.3 55.7 L93.6 73.4"/>
-  </g>
-  <ellipse cx="93.3" cy="60.2" rx="6" ry="3.5" fill="#7CB342" stroke="#4E342E" stroke-width="2"/>
+  <!-- Đống củi 3/4: cành nằm theo hai trục đất xiên, chồng trước/sau, đầu gỗ quay trước-phải -->
+  <ellipse cx="80" cy="70" rx="37.199999999999996" ry="12.0" fill="#948466" stroke="#4E342E" stroke-width="0"/>
+  <path d="M90.9 44.4 Q77.8 59.4 64.8 80.4" fill="none" stroke="#4E342E" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M90.9 44.4 Q77.8 59.4 64.8 80.4" fill="none" stroke="#98764F" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="64.8" cy="80.4" rx="3" ry="3.5" fill="#D6B787" stroke="#4E342E" stroke-width="1.5"/>
+  <path d="M52.35 37.5 Q88.0 51.1 123.73 70.7" fill="none" stroke="#4E342E" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M52.35 37.5 Q88.0 51.1 123.73 70.7" fill="none" stroke="#98764F" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M88.04 54.1 L81.04 45.1" fill="none" stroke="#4E342E" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M88.04 54.1 L81.04 45.1" fill="none" stroke="#98764F" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="123.73" cy="70.7" rx="3" ry="3.5" fill="#D6B787" stroke="#4E342E" stroke-width="1.5"/>
+  <path d="M35.43 52.5 Q66.2 64.6 96.91 82.7" fill="none" stroke="#4E342E" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M35.43 52.5 Q66.2 64.6 96.91 82.7" fill="none" stroke="#98764F" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="96.91" cy="82.7" rx="3" ry="3.5" fill="#D6B787" stroke="#4E342E" stroke-width="1.5"/>
 </svg>

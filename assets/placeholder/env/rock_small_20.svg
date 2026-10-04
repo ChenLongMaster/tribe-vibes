@@ -1,14 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="112" height="88" viewBox="0 0 112 88">
-  <!-- Tảng đá nhỏ (cần cuốc) — còn 20% -->
-  <ellipse cx="56.0" cy="78" rx="44.8" ry="7.0" fill="#3E2723" opacity="0.18"/>
-  <g transform="translate(23.5 33.6) scale(0.58)">
-    <path d="M16 70 C8 54 16 32 36 26 C48 12 76 12 88 26 C102 34 106 54 98 68 C92 78 76 80 56 80 C36 80 22 78 16 70 Z" fill="#9E9E9E" stroke="#4E342E" stroke-width="10.3" stroke-linejoin="round"/>
-    <path d="M34 34 C44 22 66 20 76 28 C66 30 50 34 42 44 C38 42 35 38 34 34 Z" fill="#BDBDBD"/>
-    <path d="M69 26 l16 5 l-4 14 Z" fill="#757575"/>
-    <path d="M50 40 l9 9 l-6 11" fill="none" stroke="#616161" stroke-width="6.9" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Đá 3/4 trước-phải: mặt trên rộng xiên, mặt hông phải và mặt trước thấp khác sắc -->
+  <ellipse cx="56.0" cy="75.44" rx="47.04" ry="7.48" fill="#8C8A70" stroke="#4E342E" stroke-width="0"/>
+  <g transform="translate(24.64 34.07) scale(0.392 0.385)">
+  <path d="M16 70 Q13 56 30 43 L47 28 Q70 18 102 27 L132 44 Q147 53 145 72 L139 96 Q132 109 105 115 L60 111 L32 97 Q17 89 16 70 Z" fill="#A09E8D" stroke="#4E342E" stroke-width="10.714285714285714" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M100 87 L144 62 L139 96 Q132 109 105 115 L100 102 Z" fill="#858978" stroke="#4E342E" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M18 65 Q22 48 34 44 L50 30 Q75 23 100 30 L130 47 Q143 54 140 63 L101 90 Q82 98 61 88 L30 76 Q19 73 18 65 Z" fill="#C4C3AF" stroke="#4E342E" stroke-width="5.357142857142857" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M40 48 L64 33 Q79 29 98 34 L115 45 L91 54 L60 63 Z" fill="#DBD8C0" stroke="#4E342E" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M101 90 L105 112" fill="none" stroke="#717866" stroke-width="3.571428571428571" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M34 91 Q44 83 57 90 L50 97 L39 98 Z" fill="#7B8C57" stroke="#4E342E" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M91 49 L77 60 L85 72 L69 86" fill="none" stroke="#828676" stroke-width="5.357142857142857" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
-  <ellipse cx="13.4" cy="76.0" rx="5.6" ry="4.0" fill="#9E9E9E" stroke="#4E342E" stroke-width="2.5"/>
-  <ellipse cx="89.6" cy="76.0" rx="7.0" ry="5.0" fill="#9E9E9E" stroke="#4E342E" stroke-width="2.5"/>
-  <ellipse cx="100.8" cy="76.0" rx="4.2" ry="3.0" fill="#9E9E9E" stroke="#4E342E" stroke-width="2.5"/>
-  <ellipse cx="31.4" cy="76.0" rx="4.2" ry="3.0" fill="#9E9E9E" stroke="#4E342E" stroke-width="2.5"/>
+  <ellipse cx="16.8" cy="76.4" rx="6.0" ry="4" fill="#B3B19E" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="91.8" cy="76.4" rx="7.5" ry="5" fill="#B3B19E" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="35.8" cy="76.4" rx="4.5" ry="3" fill="#B3B19E" stroke="#4E342E" stroke-width="2"/>
 </svg>

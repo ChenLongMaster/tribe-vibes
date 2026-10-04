@@ -201,7 +201,7 @@ func test_strike_and_resume() -> void:
 	check(worker.on_strike, "Giải trí = 0 thì đình công")
 	check(worker.task is TaskStrike, "Đình công: quăng đồ nghề, dậm chân")
 	check(toasts.has("TOAST_STRIKE"), "Có thông báo đình công")
-	check(worker.activity_icon() == "icons/angry", "Trên đầu hiện 💢")
+	check(worker.activity_icon() == "icons/angry", "Icon đình công cho bảng nhóm là 💢")
 	Commands.assign_job(worker.id, _nearest(world, MapData.KIND_TREE))
 	await _simulate(10.0)
 	check(not (worker.task is TaskWork), "Đang đình công thì từ chối làm việc")

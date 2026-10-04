@@ -14,7 +14,8 @@ class_name SaveGame
 
 ## Tăng khi cách sinh map đổi (map dựng lại từ seed phải ra đúng map cũ) hoặc cấu trúc save đổi.
 ## v3: map 96×72, tài nguyên theo cụm, dãy vách đá.
-const VERSION: int = 7
+## v8: bếp3×2; không dựng save2×2 cũ đè vào công trình bên cạnh.
+const VERSION: int = 8
 
 
 ## Ván lưu này còn dựng lại được không (cùng phiên bản cách sinh map).

@@ -236,6 +236,9 @@ func _add_stock(b: Building) -> void:
 		return
 	_body.add_child(_icon_text(ResourceDefs.icon(ResourceDefs.MEAL), Loc.t("UI_BUILDING_MEALS", {
 		"amount": Loc.number(b.stock_of(ResourceDefs.MEAL)), "max": Loc.number(capacity)})))
+	if b.kitchen != null:
+		_body.add_child(_icon_text(ResourceDefs.icon(ResourceDefs.MEAL), Loc.t("UI_BUILDING_DINERS", {
+			"used": Loc.number(b.kitchen.seats.size()), "max": Loc.number(KitchenLayout.seat_count(b.level))})))
 
 
 # Lò rèn: mỗi món một hàng — icon, tên, đang có / chứa tối đa, giá, nút −/+ đặt số muốn rèn.

@@ -123,6 +123,7 @@ UI_BUILDING_HINT_SLEEP,Ai mệt sẽ tự vào đây ngủ. Click phải vào l�
 UI_BUILDING_STORAGE,Chỗ cất cho cả làng:,
 UI_BUILDING_HOLDS,+{amount},
 UI_BUILDING_MEALS,Món chín: {amount}/{max},
+UI_BUILDING_DINERS,Chỗ ăn đã giữ: {used}/{max},
 UI_BUILDING_DANCERS,Chơi cùng lúc {count} người,
 UI_BUILDING_HINT_DANCE,Thả thổ dân vào sân để đi chơi (nhảy disco có ở bản sau).,
 UI_BUILDING_UPGRADE,Nâng lên cấp {level},

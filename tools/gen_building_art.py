@@ -2,6 +2,7 @@
 # Chạy lại khi muốn chỉnh màu / chi tiết: python tools/gen_building_art.py
 # Quy ước (khớp ASSET_SPEC.md + data/art_specs.gd): vẽ 2×; rộng = số ô ngang × 128; mép dưới
 # hình = mép dưới diện tích công trình; điểm neo cách mép dưới 24 px (= Building.FOOT_INSET ×2).
+import kitchen_art
 import math
 import os
 
@@ -168,49 +169,51 @@ def tent(level):
 
 # --- Bếp (2×2: 256 × 320) ---
 
+def kitchen_trial():
+    # Góc lều mẫu: mái nhìn từ trên, mặt mở trước-phải, cọc vẫn đứng thẳng.
+    b=rect(5,68,246,247,'#C8A27A',24,0)+rect(12,75,232,234,'#B99A72',19,0)
+    b+=ellipse(130,269,106,30,'#AA8E69',0)
+    for x,y,top in [(101,221,102),(222,249,135)]:
+        b+=line(x,top,x,y,LINE,12)+line(x-1,top+2,x-1,y-2,'#A28B54',6)
+        for cy in range(top+18,y,29):b+=ellipse(x,cy,4,2,'#D2BA75',0)
+    # Nền bếp/nồi có miệng elip lớn, tay cầm và cạnh đá cùng góc xiên.
+    b+=path('M90 253 Q99 234 130 232 L173 247 L182 272 Q173 286 140 289 L103 277 Z','#929481',5)
+    b+=path('M95 250 L120 235 L151 239 L174 251 L151 267 L118 262 Z','#C7C5AC',3)
+    for x,y in [(107,268),(129,278),(162,275)]:b+=ellipse(x,y,9,5,'#B6B6A0',0)
+    b+=flame(140,272,.48)
+    b+=path('M111 236 Q109 261 132 266 Q158 276 168 250 L171 237 Z','#8A5944',5)
+    b+=path('M151 243 L171 237 Q169 260 155 266 L146 265 Z','#684331',0)
+    b+=ellipse(140,236,31,15,'#AC7651',4)
+    b+=ellipse(140,236,24,10,'#E7B574',0)
+    b+=ellipse(137,233,15,4,'#F0CA8A',0)
+    b+=path('M111 233 Q100 229 100 239 Q102 248 113 249 M168 239 Q179 238 176 247 Q174 253 165 253','none',4)
+    # Cọc gần vẽ sau nồi, chừa hai bên/mép trước cho món chín do game bày.
+    for x,y,top in [(28,271,166),(166,286,216)]:
+        b+=line(x,top,x,y,LINE,12)+line(x-1,top+2,x-1,y-2,'#B29860',6)
+        for cy in range(top+14,y,24):b+=ellipse(x,cy,4,2,'#D8C389',0)
+        b+=line(x-7,top+9,x+6,top+15,'#CFB47B',3)
+        b+=line(x-6,top+16,x+6,top+9,'#CFB47B',2)
+    # Mái một dốc đơn sơ, có chiều sâu ngang; không vẽ đầu hồi đối xứng.
+    b+=path('M24 162 L162 210 L230 124 L224 141 L172 224 L160 227 L151 219 L138 220 L125 212 L112 214 L99 205 L86 205 L74 195 L62 198 L51 187 L39 187 L26 178 Z','#858953',5)
+    b+=path('M25 159 Q52 137 78 103 L99 76 Q131 81 164 97 L229 119 Q216 138 204 158 L164 216 L151 211 L140 215 L126 205 L112 206 L100 196 L86 197 L75 187 L62 189 L52 180 L39 180 L24 167 Z','#B7B06E',6)
+    b+=path('M99 81 Q128 85 159 102 L224 121 L211 141 Q164 117 87 100 Z','#C8BE7C',0)
+    for i in range(9):
+        t=(i+.5)/9
+        x=99+125*t;y=81+40*t;ex=27+135*t;ey=164+48*t
+        b+=path(f'M{x:.1f} {y+5:.1f} Q{x-27:.1f} {y+32:.1f} {ex:.1f} {ey-9:.1f}','none',0,' stroke="#8F9459" stroke-width="3" stroke-linecap="round"')
+        b+=line(x-3,y+15,ex-3,ey-18,'#D6C783',1.8)
+    b+=path('M36 151 Q97 168 174 202','none',0,' stroke="#7F8450" stroke-width="3" stroke-linecap="round"')
+    for x,y in [(56,158),(111,179),(165,198)]:
+        b+=line(x-5,y-5,x+6,y+5,'#DCCA91',3)+line(x-5,y+5,x+6,y-5,'#DCCA91',2)
+    # Hơi nước ở phần mở, không vượt mái hay che vùng icon cảnh báo.
+    b+=path('M131 218 q-5 -9 1 -18 q5 -8 0 -14 M151 224 q6 -8 0 -16','none',0,' stroke="#FFF3D7" stroke-width="3" stroke-linecap="round" opacity="0.85"')
+    return svg(256,320,b,'Bếp cấp1 thử: mái cỏ/tre thấp 3/4 trước-phải, nồi đất/bếp đá, giữ khung và neo')
+
+
+
 def kitchen(level):
-    w, h = 256, 320
-    b = shadow(128, 302, 120, 14)
-    roof = ["#D7B46A", "#E0BE70", "#C9A55A"][level - 1]
-    # Cột.
-    for x in (28, 228):
-        b += rect(x - 9, 120, 18, 172, "#8D6E63", 6)
-    roof_top = [110, 92, 80][level - 1]
-    b += path(f"M4 150 L128 {roof_top - 40} L252 150 L236 168 L20 168 Z", roof)
-    for x in range(30, 230, 26):
-        b += line(x, 158, x + 6, 140, "#B8954F", 4)
-    if level >= 2:
-        b += path(f"M58 {roof_top - 6} L128 {roof_top - 52} L198 {roof_top - 6}", "none", 0, f' stroke="#A67C3D" stroke-width="8" stroke-linecap="round"')
-    # Bếp đá + nồi.
-    hearth_w = [120, 150, 170][level - 1]
-    x0 = 128 - hearth_w // 2
-    b += rect(x0, 236, hearth_w, 48, "#9E9E9E", 14)
-    for i in range(hearth_w // 30):
-        b += ellipse(x0 + 18 + i * 30, 252, 10, 6, "#BDBDBD", 0)
-    b += flame(128, 250, 0.7)
-    b += path("M92 210 Q92 248 128 248 Q164 248 164 210 Z", "#5D4037")
-    b += ellipse(128, 210, 38, 10, "#8D6E63")
-    b += ellipse(128, 210, 28, 6, "#FFCC80", 0)
-    # Hơi bốc lên.
-    b += path("M116 196 q-8 -12 0 -24 q8 -12 0 -24", "none", 0, ' stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.8"')
-    b += path("M140 196 q8 -12 0 -24 q-8 -12 0 -24", "none", 0, ' stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.8"')
-    if level >= 2:
-        # Kệ hũ.
-        b += rect(196, 196, 44, 10, "#8D6E63", 4)
-        b += path("M200 196 q-2 -22 10 -22 q12 0 10 22 Z", "#FFB74D", 4)
-        b += path("M222 196 q-2 -18 8 -18 q10 0 8 18 Z", "#E57373", 4)
-    if level >= 3:
-        # Lò nướng đá có ống khói.
-        b += path("M16 288 L16 210 Q16 180 46 180 Q76 180 76 210 L76 288 Z", "#9E9E9E")
-        b += path("M30 288 L30 228 Q30 214 46 214 Q62 214 62 228 L62 288 Z", "#4E342E", 4)
-        b += flame(46, 282, 0.5)
-        b += rect(36, 120, 22, 64, "#8D8D8D", 4)
-        b += path("M40 112 q-8 -14 4 -24 q12 -10 4 -26", "none", 0, ' stroke="#ECEFF1" stroke-width="7" stroke-linecap="round" opacity="0.85"')
-    b += line(20, 292, 236, 292, LINE, 6)
-    return svg(w, h, b, f"Bếp cấp {level}")
+    return kitchen_art.composite(level)
 
-
-# --- Kho (3×3: 384 × 380) ---
 
 def logs(x, y, n, rows):
     out = ""
@@ -344,37 +347,32 @@ def dance_floor(level):
 
 
 def foundation(cols, rows):
-    w, h = cols * 128, rows * 128
-    if (cols, rows) == (2, 2):
-        # Nền giữ vuông theo lưới; mặt trên cọc hiện rõ, không cắt mất cọc phía sau.
-        b = rect(4, 4, 248, 248, "#C8A27A", 20, 0)
-        b += rect(11, 11, 234, 234, "#D4B28A", 16, 0)
-        b += path("M18 237 Q128 246 238 237", "none", 0,
-                  ' stroke="#B08B66" stroke-width="5" stroke-linecap="round"')
-        for x, y in [(58, 74), (143, 57), (178, 111), (66, 157), (150, 194)]:
-            b += line(x, y, x + 22, y + 3, "#B08B66", 4)
-            b += line(x + 7, y + 10, x + 25, y + 12, "#B08B66", 3)
-        b += path("M23 21 L233 21 L233 226 L23 226 Z", "none", 0,
-                  ' stroke="#FFF8E1" stroke-width="3" stroke-linejoin="round"')
-        b += stones([(79, 117, 9), (186, 166, 8)])
-        for x, y in [(23, 39), (233, 39), (23, 244), (233, 244)]:
-            b += rect(x - 7, y - 27, 14, 28, "#8D6E63", 4, 4)
-            b += ellipse(x, y - 27, 7, 4, "#BCAAA4", 3)
-        return svg(w, h, b, "Móng 2×2: nền vuông nhìn từ trên, cọc thấp có mặt trên")
-    b = rect(10, 10, w - 20, h - 20, "#C8A27A", 18, 0)
-    b += f'  <rect x="10" y="10" width="{w - 20}" height="{h - 20}" rx="18" fill="none" stroke="#A1887F" stroke-width="5" stroke-dasharray="16 12"/>\n'
-    # Vạch đất cào.
-    for i in range(1, cols * 2):
-        x = i * 64
-        b += line(x - 14, h * 0.35, x + 6, h * 0.35 + 18, "#B08B66", 4)
-        b += line(x + 4, h * 0.7, x + 24, h * 0.7 + 14, "#B08B66", 4)
-    # Cọc + dây căng ở 4 góc.
-    corners = [(22, 22), (w - 22, 22), (22, h - 22), (w - 22, h - 22)]
-    b += path(f"M22 14 L{w - 22} 14 L{w - 22} {h - 30} L22 {h - 30} Z", "none", 0, ' stroke="#FFF8E1" stroke-width="3"')
-    for (x, y) in corners:
-        b += rect(x - 6, y - 30, 12, 34, "#8D6E63", 4, 4)
-    b += stones([(w * 0.3, h * 0.55, 10), (w * 0.72, h * 0.4, 8)])
-    return svg(w, h, b, f"Móng {cols}×{rows} ô (phủ đúng diện tích)")
+    w,h=cols*128,rows*128
+    # Toàn nền giữ footprint vuông; bố cục thi công nằm xiên bên trong.
+    b=rect(4,4,w-8,h-8,'#C8A27A',20,0)+rect(11,11,w-22,h-22,'#D4B28A',16,0)
+    b+=path(f'M17 {h-19} Q{w*.5} {h-4} {w-17} {h-19}','none',0,' stroke="#B08B66" stroke-width="4" stroke-linecap="round"')
+    corners=[(.43*w,.23*h),(.87*w,.43*h),(.59*w,.85*h),(.13*w,.64*h)]
+    back,side,front,left=corners
+    # Dây ở đầu cọc: các đoạn xa ở sau, các cọc gần che lên dây.
+    b+=path('M'+' L'.join(f'{x:.1f} {y-22:.1f}' for x,y in corners)+' Z','none',0,' stroke="#D6BD86" stroke-width="3" stroke-linejoin="round"')
+    for i in range(5):
+        x=w*(.24+i*.11);y=h*(.26+(i%3)*.17)
+        b+=line(x,y,x+23,y+10,'#B08B66',3)+line(x+7,y+11,x+23,y+18,'#B08B66',2)
+    # Vật liệu nhỏ có mặt trên/hông, không biến móng thành nền bê tông.
+    for x,y in [(w*.30,h*.55),(w*.68,h*.64)]:
+        b+=path(f'M{x-10:.1f} {y-3:.1f} L{x-3:.1f} {y-10:.1f} L{x+10:.1f} {y-5:.1f} L{x+11:.1f} {y+5:.1f} L{x:.1f} {y+9:.1f} L{x-10:.1f} {y+4:.1f} Z','#A3A591',2.5)
+        b+=path(f'M{x-10:.1f} {y-3:.1f} L{x-3:.1f} {y-10:.1f} L{x+10:.1f} {y-5:.1f} L{x:.1f} {y+2:.1f} Z','#D1CDB6',1.5)
+    for i in range(3):
+        x=w*.62+i*6;y=h*.28+i*6
+        b+=line(x,y,x+37,y+17,LINE,6)+line(x,y,x+37,y+17,'#A38A57',3)
+        b+=ellipse(x+37,y+17,2,3,'#D7BD82',1)
+    for x,y in sorted(corners,key=lambda p:p[1]):
+        b+=rect(round(x-6,1),round(y-23,1),12,24,'#9B7A50',3,3)
+        b+=line(x+3,y-19,x+3,y-1,'#77583E',2)
+        b+=ellipse(round(x,1),round(y-23,1),7,4,'#D7B88A',3)
+        b+=line(x-6,y-14,x+6,y-10,'#CFB47B',2)
+    return svg(w,h,b,f'Móng{cols}×{rows}: nền phủ ô vuông, cọc/dây/vật liệu bên trong 3/4 trước-phải')
+
 
 
 def hard_hat():
@@ -435,6 +433,7 @@ def boulder_path(cx, cy, rx, ry, rng, points=11):
 
 
 def main():
+    kitchen_art.generate(write)
     for level in (1, 2, 3):
         write(f"buildings/tent_{level}", tent(level))
         write(f"buildings/kitchen_{level}", kitchen(level))

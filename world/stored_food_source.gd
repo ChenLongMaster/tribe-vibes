@@ -15,8 +15,18 @@ func _init(building: Building) -> void:
 	target_cell = building.origin_cell
 
 
-func is_available(_villager: Villager) -> bool:
-	return has_meal() or has_raw()
+func is_available(person: Villager) -> bool:
+	return (has_meal() or has_raw()) and (_building.kitchen == null or _building.kitchen.has_seat(person))
+
+
+func reserve(person: Villager, _reservations: Reservations) -> void:
+	if _building.kitchen != null:
+		_building.kitchen.reserve(person)
+
+
+func release(person: Villager, _reservations: Reservations) -> void:
+	if _building.kitchen != null:
+		_building.kitchen.release(person)
 
 
 func has_meal() -> bool:

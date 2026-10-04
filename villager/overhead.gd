@@ -1,7 +1,7 @@
 class_name Overhead
 extends Node2D
 ## Mọi thứ hiện trên đầu thổ dân: bong bóng nói / bong bóng nghĩ (chỉ có HÌNH, thổ dân
-## không nói chữ — giống game gốc), icon việc đang làm, tên, chữ Z khi ngủ, tim bay. Đây là
+## không nói chữ — giống game gốc), tên, chữ Z khi ngủ, tim bay. Đây là
 ## kênh "phản hồi rõ ràng" để người chơi luôn biết thổ dân đang làm gì và muốn gì.
 ## (Tấm biển giơ trên tay nằm ở VillagerRig vì nó đi theo động tác tay.)
 ##
@@ -16,7 +16,6 @@ const THOUGHT_ICON_SCALE: float = 1.1
 const MAX_SPEECH_ICONS: int = 2
 const BUBBLE_GAP_ABOVE_NAME: float = 18.0
 const NAME_FONT_SIZE: int = 13
-const ACTIVITY_BOB: float = 2.0
 const ZZZ_INTERVAL: float = 0.9
 const ZZZ_LIFE: float = 1.6
 const HEART_LIFE: float = 1.2
@@ -35,7 +34,6 @@ var _thought_icon: Sprite2D
 ## Bong bóng đang hiện (_bubble, _thought hoặc null) và thời gian còn lại (INF = tới khi xoá).
 var _shown: CanvasItem
 var _bubble_time: float = 0.0
-var _activity: Sprite2D
 var _name_label: Label
 var _zzz_timer: float = 0.0
 var _alert: Sprite2D
@@ -45,9 +43,6 @@ var _time: float = 0.0
 
 
 func _ready() -> void:
-	_activity = Sprite2D.new()
-	_activity.visible = false
-	add_child(_activity)
 	_name_label = _make_name_label()
 	add_child(_name_label)
 	_bubble = _make_bubble()
@@ -69,7 +64,6 @@ func _ready() -> void:
 		_villager.bubble_requested.connect(_on_bubble_requested)
 		_villager.bubble_cleared.connect(_hide_bubble)
 		_villager.heart_requested.connect(_on_heart_requested)
-		_villager.task_changed.connect(_on_task_changed)
 		_name_label.text = _villager.data.display_name
 
 
@@ -100,13 +94,6 @@ func _on_heart_requested() -> void:
 	_float_sprite("fx/heart", Vector2(0, 4), Vector2(0, -34), HEART_LIFE, 1.0)
 
 
-func _on_task_changed(villager: Villager) -> void:
-	var icon_key: String = villager.activity_icon()
-	_activity.visible = not icon_key.is_empty()
-	if _activity.visible:
-		ArtLibrary.setup_sprite(_activity, icon_key)
-
-
 func _pop_in(item: CanvasItem, seconds: float) -> void:
 	_shown = item
 	_bubble_time = seconds
@@ -135,9 +122,6 @@ func _process(delta: float) -> void:
 	_bubble.pivot_offset = Vector2(_bubble.size.x * 0.5, _bubble.size.y)
 	_thought.position = Vector2(0, -lift)
 	_name_label.position = Vector2(-_name_label.size.x * 0.5, -_name_label.size.y + 4.0)
-	_activity.position = Vector2(0, -6 - lift + sin(_time * 3.0) * ACTIVITY_BOB)
-	# Bong bóng đang hiện thì giấu icon việc cho đỡ rối.
-	_activity.modulate.a = 0.0 if _shown != null else 1.0
 	# Chữ Z bay lên khi đang ngủ — đọc thẳng trạng thái, lõi không phải báo riêng.
 	if _villager != null and _villager.state == Villager.State.SLEEPING:
 		_zzz_timer -= delta

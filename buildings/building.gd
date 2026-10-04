@@ -67,6 +67,8 @@ var builders: Array[Villager] = []
 ## Người đang ngủ trong lều.
 var sleepers: Array[Villager] = []
 
+var kitchen: KitchenInterior
+
 var _time: float = 0.0
 var _frames: Array[Texture2D] = []
 var _frame_fps: float = DEFAULT_FRAME_FPS
@@ -101,6 +103,9 @@ func setup(id: StringName, cell: Vector2i, start_level: int = 1) -> void:
 
 
 func _ready() -> void:
+	if building_id == BuildingDefs.KITCHEN:
+		y_sort_enabled = true
+		kitchen = KitchenInterior.new(self)
 	_foundation = Sprite2D.new()
 	_foundation.position = Vector2(0, FOOT_INSET)
 	add_child(_foundation)
@@ -526,19 +531,30 @@ func _refresh_visual() -> void:
 	_sprite.visible = level >= 1
 	if _sprite.visible:
 		ArtLibrary.setup_sprite(_sprite, BuildingDefs.art(building_id, level))
+	if kitchen != null:
+		_sprite.self_modulate.a = 0.0
+		kitchen.refresh()
+		if level >= 1:
+			# Chỉ mái đổ bóng cao; sân đất không đổ bóng như một bức tường.
+			ArtLibrary.setup_sprite(_sprite, "buildings/kitchen/roof_" + str(level))
+		_warning.z_index = 2
+		_overlay.z_index = 2
+		_warning.position.x = KitchenLayout.local_point(Vector2(88, 113), maxi(level, 1)).x
 	# Móng: hình công trình mờ mờ, mọc dần từ dưới lên theo tiến độ xây.
 	_ghost.visible = building and level == 0
 	if _ghost.visible:
 		ArtLibrary.setup_sprite(_ghost, BuildingDefs.art(building_id, target_level()))
 		_ghost_material.set_shader_parameter("progress", build_progress())
 	_extra_sprite.visible = not _frames.is_empty() and level >= 1
-	_warning.position = Vector2(0, _warning_y())
+	_warning.position.y = _warning_y()
 	set_process(true)
 	_overlay.queue_redraw()
 
 
 # Cảnh báo nằm trên mái (không lơ lửng phía trên — dễ lẫn sang công trình đứng sau).
 func _warning_y() -> float:
+	if kitchen != null:
+		return KitchenLayout.local_point(Vector2(88, 113), maxi(level, 1)).y
 	return -_art_height() * WARNING_HEIGHT
 
 

@@ -322,6 +322,10 @@ func _add_tree(cell: Vector2i, variant_roll: float, t: float) -> void:
 	var species: float = _noise.get_noise_2d(cell.x * 0.8 + 900.0, cell.y * 0.8) * 0.9
 	var conifer_chance: float = 0.25 + clampf(1.0 - t, 0.0, 1.0) * 0.35 + species
 	var variant: int = 1 if variant_roll < conifer_chance else 0
+	# Tre dùng chung loại cây/gỗ; chỉ thêm ngoại hình trong phần rừng lá rộng.
+	var broadleaf_start: float = clampf(conifer_chance, 0.0, 1.0)
+	if variant == 0 and variant_roll < broadleaf_start + (1.0 - broadleaf_start) * Balance.BAMBOO_CHANCE:
+		variant = 2
 	# Cây non hay mọc ở bìa rừng (rừng đang lan ra).
 	var extra: Dictionary = {}
 	if _rng.randf() < Balance.YOUNG_TREE_CHANCE * (0.4 + clampf(t, 0.0, 1.5)):
@@ -365,7 +369,7 @@ func _place_boulders_around(center: Vector2i, count: int, radius: float) -> void
 	for i: int in mini(count, cells.size()):
 		var big_chance: float = Balance.ROCK_BIG_CHANCE * (1.4 if i < count / 2.0 else 0.6)
 		_add_object(MapData.KIND_ROCK, cells[i], 0 if _rng.randf() < big_chance else 1, _jitter(Balance.ROCK_JITTER),
-				_start_amount(Balance.ROCK_STONE, Balance.ROCK_START_AMOUNT_MIN))
+				_start_amount(Balance.ROCK_STONE, Balance.ROCK_START_AMOUNT_MIN, true))
 
 
 # Bãi đá tảng LIỀN dọc chân một dãy vách — chỉ ở PHÍA TRƯỚC (nam, dưới mặt đứng), như đá lở
@@ -404,7 +408,7 @@ func _place_ridge_scree(ridge: Array[Vector2i]) -> void:
 		var near_cliff: bool = _cliff_set.has(cell + Vector2i.UP)
 		var big_chance: float = Balance.ROCK_BIG_CHANCE * (1.5 if near_cliff else 0.6)
 		_add_object(MapData.KIND_ROCK, cell, 0 if _rng.randf() < big_chance else 1, _jitter(Balance.ROCK_JITTER),
-				_start_amount(Balance.ROCK_STONE, Balance.ROCK_START_AMOUNT_MIN))
+				_start_amount(Balance.ROCK_STONE, Balance.ROCK_START_AMOUNT_MIN, true))
 		placed += 1
 
 
@@ -473,7 +477,7 @@ func _place_bushes_around(center: Vector2i, count: int, in_meadow: bool) -> void
 	var chosen: Array[Vector2i] = []
 	_pick_spaced(options, count, Balance.BUSH_MIN_SPACING, chosen)
 	for cell: Vector2i in chosen:
-		_add_object(MapData.KIND_BUSH, cell, 0, _jitter(Balance.ROCK_JITTER), _start_amount(Balance.BUSH_FOOD, Balance.START_AMOUNT_MIN))
+		_add_object(MapData.KIND_BUSH, cell, 0, _jitter(Balance.ROCK_JITTER), _start_amount(Balance.BUSH_FOOD, Balance.START_AMOUNT_MIN, true))
 
 
 # --- Tiện ích vị trí ---
@@ -778,9 +782,11 @@ func _add_object(kind: StringName, cell: Vector2i, variant: int, jitter: Vector2
 	_occupied[_data.index(cell)] = 1
 
 
-## Lượng lúc mở ván: ngẫu nhiên từ `min_fraction` tới đầy — mỏ to nhỏ không đều như ngoài tự nhiên.
-func _start_amount(capacity: int, min_fraction: float) -> Dictionary:
-	return {"amount": _rng.randi_range(ceili(capacity * min_fraction), capacity)}
+## Chỉ sỏi/củi khác lượng; bụi quả/đá đầy, giữ lượt RNG để bố cục cùng seed ổn định.
+func _start_amount(capacity: int, min_fraction: float, full: bool = false) -> Dictionary:
+	# Giữ lượt RNG để đổi lượng không làm lệch vị trí tài nguyên của cùng seed.
+	var rolled: int = _rng.randi_range(ceili(capacity * min_fraction), capacity)
+	return {"amount": capacity if full else rolled}
 
 
 func _add_building(id: StringName, cell: Vector2i) -> void:

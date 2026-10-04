@@ -106,7 +106,7 @@ func spawn_boulder() -> bool:
 		if _cliff_cells.has(cell) or _behind_cliff(cell) or not _can_block(cell):
 			continue
 		var variant: int = 0 if _rng.randf() < Balance.ROCK_BIG_CHANCE else 1
-		var start: int = _rng.randi_range(ceili(Balance.ROCK_STONE * Balance.ROCK_START_AMOUNT_MIN), Balance.ROCK_STONE)
+		var start: int = Balance.ROCK_STONE
 		var node: ResourceNode = _world.place_resource(MapData.KIND_ROCK, cell, variant, _jitter(), true, start)
 		node.pop(0.2)
 		EventBus.work_impact.emit(node.position, JobDefs.IMPACT_STONE)

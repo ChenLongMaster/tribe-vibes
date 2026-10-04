@@ -467,6 +467,10 @@ func _yard_rect(building: Building) -> Rect2:
 
 
 func _add_yard(building: Building) -> void:
+	if building.building_id == BuildingDefs.KITCHEN:
+		# Sân/vòng đá đã nằm trong art, giữ đúng cỡ nhỏ–vừa–lớn đã duyệt.
+		_decor_layer.hide_cells(building.footprint_cells())
+		return
 	var cells: Array[Vector2i] = building.footprint_cells()
 	var covered: Array[Vector2i] = []
 	var origin: Vector2i = building.origin_cell

@@ -60,6 +60,7 @@ var job: Job
 ## Đang đình công: từ chối mọi việc, chỉ đứng chơi tới khi giải trí hồi lại.
 var on_strike: bool = false
 ## Đang ở trong công trình nào (ngủ trong lều) — null = ở ngoài.
+var interior: Building
 var inside: Building
 ## Đã đứng rảnh (không việc, không lo ăn ngủ) bao lâu — quá IDLE_BORED_SECONDS thì chán.
 var idle_seconds: float = 0.0
@@ -168,6 +169,8 @@ func start_task(new_task: Task) -> void:
 	if task != null:
 		task.villager = self
 		task.start()
+	if interior != null and not _moving and (task == null or task.priority < Task.Priority.NEED) and not task is TaskCook:
+		move_to_cell(interior.kitchen.entry_cell())
 	notify_task_changed()
 
 
@@ -196,7 +199,7 @@ func skill_level(skill: StringName) -> int:
 	return status.skill_level(skill, data)
 
 
-## Báo phần hiển thị (icon trên đầu…) rằng việc đang làm vừa đổi bước.
+## Báo bảng thông tin và nhóm đang chọn rằng việc vừa đổi bước.
 func notify_task_changed() -> void:
 	_refresh_gear()
 	task_changed.emit(self)
@@ -386,7 +389,7 @@ func show_heart() -> void:
 ## Đi tới ô `cell` (theo AStar). `final_point` để dừng đúng một điểm cụ thể trong ô.
 ## Trả về false nếu không có đường.
 func move_to_cell(cell: Vector2i, final_point: Vector2 = Vector2.INF) -> bool:
-	var from_cell: Vector2i = world.cell_of(self)
+	var from_cell: Vector2i = path_origin()
 	var points: PackedVector2Array = world.grid.find_path(from_cell, cell)
 	if points.is_empty() or WorldGrid.world_to_cell(points[points.size() - 1]) != cell:
 		_moving = false
@@ -395,12 +398,28 @@ func move_to_cell(cell: Vector2i, final_point: Vector2 = Vector2.INF) -> bool:
 		points[i] += _lane_offset
 	if final_point != Vector2.INF:
 		points[points.size() - 1] = final_point
+	if interior != null:
+		var exiting: PackedVector2Array = interior.kitchen.exit_path(self)
+		exiting.append_array(points)
+		follow_path(exiting)
+		return true
 	_path = points
 	# Điểm đầu là tâm ô đang đứng — bỏ qua để không quay lại giật lùi.
 	_path_index = 1 if points.size() > 1 else 0
 	_moving = true
 	_stuck_time = 0.0
 	return true
+
+
+func path_origin() -> Vector2i:
+	return interior.kitchen.entry_cell() if interior != null else world.cell_of(self)
+
+
+func follow_path(points: PackedVector2Array) -> void:
+	_path = points
+	_path_index = 0
+	_moving = not points.is_empty()
+	_stuck_time = 0.0
 
 
 func stop_moving() -> void:
@@ -442,6 +461,8 @@ func _update_movement(delta: float) -> void:
 		rig.set_facing(to_target.x)
 	if to_target.length() <= maxf(step, ARRIVE_DISTANCE):
 		position = target
+		if interior != null and world.cell_of(self) == interior.kitchen.entry_cell():
+			interior = null
 		_path_index += 1
 		if _path_index >= _path.size():
 			_moving = false

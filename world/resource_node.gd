@@ -347,7 +347,9 @@ func stage_suffix() -> String:
 func _art_key() -> String:
 	match kind:
 		MapData.KIND_TREE:
-			return "env/tree_stump" if is_depleted() else "env/tree_%02d" % (variant + 1)
+			if is_depleted():
+				return "env/bamboo_stump" if variant == 2 else "env/tree_stump"
+			return "env/tree_%02d" % (variant + 1)
 		MapData.KIND_ROCK:
 			return "env/rock_%s_%s" % ["big" if variant == 0 else "small", stage_suffix()]
 		MapData.KIND_BUSH:

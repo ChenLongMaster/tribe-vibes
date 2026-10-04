@@ -4,6 +4,231 @@ Mỗi đợt một mục: đã làm gì, chọn gì và vì sao. Mục mới nh�
 
 ---
 
+## Chốt tài liệu art đã áp dụng và style hiện hành (2026-10-04)
+
+- Theo yêu cầu người dùng: GAME_DESIGN mục7 thêm bảng trạng thái đang dùng cho lều/móng/nhân vật01/tài nguyên/bếp/phản hồi trên đầu, ghi rõ nhóm chưa vẽ lại và nguồn ảnh chuẩn. Sửa ghi chú bụi dâu v7 còn “chờ duyệt” thành đã đồng ý/đang dùng; các phác bếp cũ giữ làm lịch sử.
+- Ghi lại style tiền sử thủ công dễ thương, màu ấm/viền nâu/bo tròn, góc3/4 cao có chiều sâu ngang, lều hướng trước-phải và nét Việt gợi nhẹ. Giữ các ngoại lệ đã duyệt: bụi dâu tán mềm/quả đỏ nhỏ nhiều riêng lẻ; bếp sân chính diện/khu nấu chếch phải/bàn dọc/người ngồi hai bên. Bụi mới sinh đầy100%, không sửa lượng trong save.
+- Đồng bộ GAME_DESIGN sang CLAUDE/AGENTS giữ prefix/phụ lục; ASSET_SPEC thêm trạng thái tài nguyên/style và sửa ghi chú icon nồi trên đầu đã lỗi thời. Chỉ cập nhật tài liệu, không thay asset/code/cân bằng, không commit/push.
+- Kiểm tra: bản thiết kế trong CLAUDE/AGENTS khớp GAME_DESIGN, ảnh tham chiếu tồn tại; import và runtime600 frame sạch. Không chạy lại bộ test84 đã qua ở đợt bỏ icon vì lần này chỉ sửa Markdown.
+- Cách xem: đọc mục7 GAME_DESIGN và mục “Tài nguyên đã áp dụng và chuẩn style hiện hành” ASSET_SPEC. Hạn chế: nhóm chưa vẽ lại vẫn giữ hình cũ; không có số mới cần chỉnh.
+
+---
+
+## Bỏ icon công việc thường trực trên đầu dân (2026-10-04)
+
+- Theo yêu cầu màn hình thoáng hơn: Overhead không tạo sprite icon việc, không nghe task_changed để vẽ icon và không chạy hiệu ứng nhún của icon. Giữ cảnh báo chỉ số thấp, bong bóng nghĩ/nói, biển, Zzz, tim và sao khi ngất. Giữ activity_icon cho bảng nhóm và activity_key/args cho bảng thông tin; không đổi AI, task hay animation.
+- GAME_DESIGN cập nhật mục2/5.2/6.2, đồng bộ CLAUDE/AGENTS và giữ nguyên phụ lục. Sửa mô tả test đình công để phản ánh icon bảng nhóm. Không đổi SVG/neo hay thông số cân bằng.
+- Ảnh trước: build/art-review/2026-10-04/kitchen-live-v1/after/kitchen_levels.png. Ảnh sau: build/art-review/2026-10-04/no-work-icons/after/kitchen_levels.png. Tự mở cả hai so sánh; live scene dùng cùng bố cục và người nấu/ăn thật, giữ người tại khoảnh khắc hoạt động để so đủ chỗ như đợt trước.
+- Kiểm tra: import sạch; toàn bộ84/84 test strict qua, runtime600 frame strict và cảnh chụp thật sạch. override.cfg đã xoá; git diff --check qua. Log/scene QA nằm trong build/art-review/2026-10-04/no-work-icons.
+- Cách thử: giao dân hái/chặt/nấu hoặc chờ họ ăn; không còn icon việc trên đầu, chọn dân xem dòng đang làm trong bảng thông tin. Hạn chế: icon cảnh báo nhu cầu và bong bóng vẫn có thể xuất hiện khi nhiều người đói; đây là phản hồi đang giữ theo thiết kế. Không có số mới cần chỉnh. Không commit/push.
+
+---
+
+## Áp dụng bếp v7 vào game — Sân3×2 có dân nấu/ngồi ăn (2026-10-04)
+
+- Theo người dùng duyệt mẫu v7 và yêu cầu áp dụng: thay cả kitchen_1/2/3 bằng hình đã duyệt, footprint3×2 ở mọi cấp; sân76/89/100%, mái nấu chéo phải52/60/67%, chiếu/bàn dọc. Cấp1 đá/hai chiếu/4 khách; cấp2 đá+tre mảnh/ba bàn đá tam giác/6 khách; cấp3 đá+gỗ chắc/bốn bàn gỗ2×2/8 khách. Giữ costs/build_seconds/cook_seconds/staff1–2–3/stock_capacity6–10–16/capacityFOOD30–60–120.
+- Khung384×336/2×, sân rawy64→320, neo raw192,296 = (0.5,37/42). ArtSpecs/ASSET_SPEC đồng bộ; móng dùng foundation_3x2 đã có. tools/gen_building_art.py gọi helper tự chứa tools/kitchen_art.py, không đọc build. Thêm36 lớp SVG cùng khung/neo và props/cooking_spoon20×80/neo10,6. So với baseline đầu đợt, chỉ ba SVG bếp cũ đổi; tất cả hình lều/móng/tài nguyên/nhân vật khác giữ hash. Soát XML,36 lớp khớp hình học v7, tái sinh deterministic toàn bộ asset.
+- KitchenInterior tách hình theo y-sort cùng Entities: sân dưới người, mái che đầu bếp, cọc/rào gần che đúng, từng bàn riêng. Nguồn bóng chỉ mái (sân không đổ bóng cao), warning ở mái trên-trái; món chín bày tối đa6 bát nhỏ trên quầy dưới-trái, số dự trữ thật trên panel. Dân vẫn scale game0.65; không lấy scale nhỏ hơn của người phác. Đầu bếp cầm muôi thay icon nồi; vị trí1/2/3 thợ giãn trong khu nấu.
+- TaskCook/TaskEat dùng vị trí nấu/ghế có giữ chỗ; khách qua cổng, lấy đúng một món ở quầy, tránh bàn tới ghế trái/phải, ngồi ăn rồi ra cổng. Bếp đầy ghế tìm nguồn ăn khác theo luật cũ; chưa có hàng chờ riêng. AStar thế giới vẫn chặn footprint, tuyến nội thất riêng tránh bàn/quầy; path_origin tại cổng cho người ở trong sân để lệnh mới không bị từ chối vì ô đang đứng bị chặn. Đặt công trình không bịt cổng bếp. Lệnh mới khi đang ăn vẫn chờ ăn xong; task bị ngắt thật trả ghế. Nâng cấp điều chỉnh điểm bàn/nấu và giữ phần đang làm. Panel thêm số chỗ ăn đã giữ, chữ qua Loc/CSV. Không đổi luật nhu cầu/nấu/AI chọn việc khác.
+- SaveGame format8 do bếp2×2→3×2 có thể đè nhà bên cạnh trong save cũ; format7 không tải, không xoá file cũ. Save format8 roundtrip giữ cấp,footprint,stock/job; ghế/vị trí task tạm không lưu. Lưu khi đang trong sân thì tải lại người ra ô trống theo cơ chế restore hiện có.
+- GAME_DESIGN ghi trạng thái đã triển khai ở mục7 và hàng Bếp mục9.3, đồng bộ CLAUDE/AGENTS giữ phụ lục; ASSET_SPEC ghi bộ lớp/neo/đồ cầm và đánh dấu các mẫu cũ là lịch sử.
+- Kiểm tra: import sạch; toàn bộ84/84 test thường và84/84 strict; runtime600 frame thường/strict sạch; strict live scene sạch. override.cfg đã xoá. Thêm4 test về dung lượng4/6/8, mỗi ghế có đường từ quầy, cổng không bị xây chặn, ăn xong trả ghế/lệnh mới, nâng cấp có khách/đầu bếp, ngắt task và save/load. Warning spawn ô chặn ở test_boot_loads_mode là test cũ cố ý; Loc thông báo thiếu en dùng vi. Đã sửa lỗi test dùng uid sau free rồi chạy lại sạch (runner không tự coi SCRIPT ERROR là FAIL, nên đã soát log).
+- Chụp chuẩn seed42/buildings/jobs/wait40/speed4 trong build/art-review/2026-10-04/kitchen-live-v1/after; tự mở levels.png/village_zoom_1.png/construction.png/work.png. wait40 đã xây xong, chụp thêm construction-early/wait5/speed1 và tự mở construction.png để xem móng3×2/thợ khuân. live.gd dựng World thật seed42, dùng Commands/TaskCook/TaskEat, chờ người tự đi vào/nấu/ngồi; giữ từng người tại khoảnh khắc đó để so đủ4/6/8 khách và1/2/3 thợ, không phải ảnh mọi người tự đồng thời ăn trong ván thường. Đã tự mở kitchen_1/2/3 và kitchen_levels.png, chỉnh lớp mái/muôi/vị trí thợ rồi chụp lại. audit.py/audit.json và mọi script/log/ảnh kiểm tra trong build.
+- Trước: build/art-review/2026-10-04/kitchen-foundation-v1/after/village_zoom_1.png và board.png (bếp đang chơi trước đợt này); mẫu duyệt: kitchen-compound-v7-vertical/levels.png. Sau: kitchen-live-v1/after/kitchen_levels.png (cấp1→3 trái→phải), village_zoom_1.png; construction-early/construction.png. Cách thử: godot --path . -- --seed=42; bấm Xây→Bếp, đặt sáu ô trống/cổng thông, chọn dân click phải móng để xây; có thức ăn thô thì giao người vào bếp nấu, dân đói tự vào quầy/ghế; nâng cấp để xem thêm bàn/rào/dụng cụ. live.tscn trong thư mục QA dựng lại ảnh đủ ghế.
+- Hạn chế: save cũ format7 không tương thích; chưa có xếp hàng trước cổng; quầy chỉ bày6 bát đại diện lượng, panel giữ số chính xác. Cỡ bếp/nội thất/nhân vật theo mẫu đã chốt, icon nhu cầu/việc có thể hơi dày khi đầy8 khách và3 thợ. Số có thể tinh chỉnh: sân76/89/100%, mái52/60/67%, khoảng cách ghế/thợ và vị trí che khuất; giữ footprint6ô và trần8 khách. Dừng ở bếp, không vẽ thêm công trình, không commit/push.
+
+---
+
+## Chiếu/bàn ăn dọc, khu nấu nâng cấp rõ — Phác v7 (2026-10-04)
+
+- Theo phản hồi đã duyệt bố cục v6: đổi chiếu/bàn ăn sang trục dài dọc màn hình, giữ người ngồi trái–phải. Vẽ lại mặt trên/viền/mặt đứng/chân bàn (không xoay cả sprite90°); hai phần thức ăn trên/dưới trên mỗi chiếu/bàn. Giữ bàn bày món dưới-trái riêng, lối vào và tam giác/2×2. Dời hàng chỗ ăn gần lên17px và bàn giữa tam giác lên8px ở file2× để chân bàn dọc không sát rào.
+- Khu nấu tăng rõ cỡ/dáng/độ hoàn thiện và đồ nghề: cấp1 mái nhỏ thưa/sờn, tre và một nồi/cán khuấy; cấp2 mái lớn chắc hơn, tre buộc, muôi/trở đồ tre treo, chum, cối đất/chày gỗ; cấp3 mái rộng nhiều lớp/tua cỏ, khung gỗ dày, quầy chuẩn bị, bếp/nồi phụ, giàn muôi/rây đan, gùi, mặt trời nhỏ. Giữ hướng chếch phải và khung bốn chân; nồi/cán khuấy/người nấu dịch theo cỡ phần nấu.
+- Mẫu/script trong build/art-review/2026-10-04/kitchen-compound-v7-vertical; extend.py dựng generator từ v6 rồi draw.py xuất hình. Khung384×336/2×, footprint3×2 không đổi, sân76/89/100%, phần nấu52/60/67%,4/6/8người. Tỉ lệ dân chung cho cả ba cấp, rig game không đổi. Giữ bản v6 để so sánh.
+- Tự mở levels.png, layout.png và footprint.png: mặt bàn/chiếu dọc rõ, người vẫn ở hai bên, góc mái đúng hướng, đồ nấu/cỡ mái tăng và khu ăn không bị thêm bàn. Import/runtime600 frame thường sạch; strict preview/runtime sạch, override.cfg đã xoá. Soát37 SVG XML/khung, số chỗ2/3/4 và174SVG game giữ hash. Không chạy lại bộ80test đã qua ởv1 vì chỉ thay cảnh phác/tài liệu, không sửa core hoặc art đang dùng.
+- GAME_DESIGN ghi quy tắc bàn dọc/khu nấu nâng cấp, đồng bộ CLAUDE/AGENTS giữ phụ lục, ASSET_SPEC ghi mẫu mới nhất. Bếp đang chơi vẫn2×2/art cũ, chưa đổi ArtSpecs/neo/AI/footprint code. Đây là ảnh scene dựng sẵn, chưa phải hành vi tự nấu/chọn ghế/lấy món.
+- Trước: kitchen-compound-v6-six-cells/levels.png; sau: kitchen-compound-v7-vertical/levels.png, layout.png, footprint.png. Cách xem: mở ảnh hoặc godot --audio-driver Dummy --path . res://build/art-review/2026-10-04/kitchen-compound-v7-vertical/preview.tscn.
+- Số nên chỉnh: độ dài/rộng mặt bàn dọc, khoảng trống giữa hàng, cỡ mái52/60/67% và mức chi tiết dụng cụ khi thu xa. Giữ6ô và tối đa8người. Dừng ở mẫu chờ duyệt, không commit/push.
+
+---
+
+## Bếp6ô, sân lớn dần và người ăn ngồi ngang — Phác v6 (2026-10-04)
+
+- Theo ba sơ đồ đính chính mới nhất: thiết kế cả ba cấp chiếm3×2 =6ô, tối đa4 chỗ ăn/8 người; cấp1 hai chiếu/4 người, cấp2 ba bàn đá/6 người xếp tam giác (hai trái trên/dưới, một phải giữa), cấp3 bốn bàn gỗ/8 người xếp2×2. Người ăn ở hai bên trái–phải từng chỗ và cầm món quay vào giữa, không ngồi trên–dưới. Bàn bày thức ăn riêng dưới-trái, cổng trước cạnh bàn, lối bên phải bàn bày nối vào khu ăn.
+- Cấp1 sân/nội thất thu76%, cấp2 89%, cấp3 100% quanh cùng tâm; giữ vùng6ô như nhau, không tăng footprint theo cấp. Vòng đá/rào tre mảnh/rào gỗ chắc giữ phân cấp đã yêu cầu, giảm chiều cao rào gỗ xuống28px ở file2× để không che gần hết người. Thêm chum/gùi/mặt trời nhỏ; bàn bày riêng không tính vào số bàn/chỗ ăn.
+- Khu nấu trên-trái đảo sang phải theo phản hồi; mái/hông/cọc/nồi cùng khối, không xoay camera/lưới. Lỗi v4 chân bị mái/nồi che đã sửa: khung bốn cọc, kéo phần chân lộ ra, nồi dịch khỏi cọc gần và cọc gần tách lớp trước nồi. Cán khuấy hướng về người nấu. Đã tự mở ảnh có người và ảnh trống để soi chân/che khuất.
+- Mẫu/script tại build/art-review/2026-10-04/kitchen-compound-v6-six-cells; khung384×336 ở2×, vùng sân384×256 từy64. Ảnhlevels.png, layout.png, footprint.png (có lưới QA6ô). Người phác cùng tỉ lệ ở ba cấp, chỉ sân/nội thất thu; rig game không đổi. Bảnv5 đang dựng trước lời đính chính đã bỏ, không xuất hình/chốt thiết kế.
+- Không sửa asset/AI/map/footprint code:174 SVG game khớp baseline, bếp đang chơi vẫn2×2. GAME_DESIGN cập nhật thiết kế mục7 và hàng bếp mục9.3 thành3×2/4–6–8người (ghi rõ chưa triển khai), đồng bộ CLAUDE/AGENTS giữ phụ lục; ASSET_SPEC ghi riêng khung phác và lịch sử bị thay thế. Cảnh mẫu không đăng ký ArtLibrary/ArtSpecs/neo mới.
+- Kiểm tra: import sạch, runtime600 frame thường và strict sạch, strict preview sạch, override.cfg đã xoá; SVG XML/khung và dữ liệu2/3/4chỗ→4/6/8người hợp lệ. Không chạy lại bộ80test đã qua ởv1 vì chỉ sửa cảnh phác/tài liệu, không thay core/art đang dùng. Tự mở levels/layout/footprint và chỉnh rào/cọc để đọc rõ hơn.
+- Trước: kitchen-compound-v4-tiers/levels.png; sau: kitchen-compound-v6-six-cells/levels.png, layout.png, footprint.png. Cách xem: mở ảnh hoặc godot --audio-driver Dummy --path . res://build/art-review/2026-10-04/kitchen-compound-v6-six-cells/preview.tscn. Hạn chế: người dựng sẵn, chưa có AI đi vào/chọn ghế/lấy món hoặc đổi bếp trong ván chơi.
+- Số nên chỉnh: tỉ lệ sân76/89/100%, khoảng cách ghế trái/phải, độ rộng cổng76px ở2×, độ cao rào gỗ28px ở2×; footprint3×2 và tối đa8 người là yêu cầu cố định. Dừng ở bản phác cho người dùng duyệt, không commit/push.
+
+---
+
+## Phân cấp khu bếp, mái nấu chéo và khu ăn thẳng — Phác v4 (2026-10-04)
+
+- Người dùng đồng ý layout chữ nhật, yêu cầu sửa phân cấp và góc mái nấu. Cấp1 chỉ vòng đá tự nhiên (lệch cỡ/màu), hai chiếu mây nhỏ cho bốn người ngồi đất, không bàn/rào. Cấp2 thêm rào tre mảnh với cọc/đốt/buộc hơi lệch, ba bàn đá. Cấp3 rào gỗ dày chắc có giằng chéo, bốn bàn gỗ. Giữ cổng trước và đường giữa nấu/ăn.
+- Khu nấu góc trên-trái dựng chéo trước-phải như lều, cả mái/mặt hông/khung/nồi theo khối, không xoay toàn bộ sprite và không còn chính diện v3. Khu ăn vẫn cạnh ngang chính diện; chiếu/bàn không bị nghiêng theo mái. Dùng phần bếp có chiều sâu ngang/dọc của bản v1 làm nền, bổ sung trang trí theo cấp: chiếu/sờn/bếp đơn sơ; tre buộc/chum đất; mái buộc chắc/gùi mây/mặt trời nhỏ gợi Lạc Việt. Không sao chép art game tham khảo.
+- Mẫu/script nằm riêng tại build/art-review/2026-10-04/kitchen-compound-v4-tiers. Giữ khung512×448/2×, sân4×3 đang thử; không sửa bếp hiện hành2×2/ArtSpecs/asset/gameplay/AI.174 SVG game khớp baseline. Số người ăn cấp2–3 chưa quyết định từ số bàn; trong ảnh đặt một người mỗi bàn để đọc bố cục, riêng cấp1 thể hiện đủ bốn người.
+- Import sạch; strict preview và runtime600 frame sạch, override.cfg đã xoá. Lỗi gán Array sang Array[Vector2] trong script phác lần đầu đã sửa bằng assign() rồi chạy lại sạch. Tự mở levels.png và layout.png, dời hàng bàn gần cấp3 lên20px ở file2× để chừa chân người khỏi rào. Soát XML/khung/hash; không chạy lại bộ80 test đã qua ở v1 vì không thay core và hình đang dùng trong game.
+- Trước: kitchen-compound-v3-rectangle/levels.png; sau: kitchen-compound-v4-tiers/levels.png và layout.png. Cách xem: mở hai ảnh hoặc godot --audio-driver Dummy --path . res://build/art-review/2026-10-04/kitchen-compound-v4-tiers/preview.tscn. GAME_DESIGN ghi yêu cầu mới nhất, đồng bộ CLAUDE/AGENTS giữ phụ lục, cập nhật ASSET_SPEC.
+- Hạn chế: đây là cảnh dựng người sẵn, chưa có AI đi vào/chọn chỗ ăn; chưa thay art bếp trong ván chơi. Số nên chỉnh: sân4×3/cổng90px ở2×; rào tre cao24px, gỗ37px ở2×; bàn rộng≈94px/chiếu98px ở2×, độ chéo mái và khoảng trống giữa bàn. Dừng chờ duyệt mẫu, không commit/push.
+
+---
+
+## Khu bếp chữ nhật có hàng rào — Phác v3 (2026-10-04)
+
+- Theo ảnh tham khảo mới và mô tả của người dùng: sân chữ nhật, mái che nấu góc trên-trái nghiêng về phía màn hình để thấy mặt trên/chiều sâu dọc; bàn ăn giữ thẳng, không xoay ngang. Dựng ba cấp hàng rào: tre / đá kê dưới tre / đá kê dưới gỗ, cổng giữa cạnh phía trước. Lấy bố cục/cách đọc hoạt động từ ảnh tham khảo, tự vẽ SVG theo nét/màu game.
+- Mẫu tại build/art-review/2026-10-04/kitchen-compound-v3-rectangle: khung512×448 ở2×, sân512×384 tương ứng đề xuất4×3. Dùng lại mái/nồi/bàn v2, dời bàn sang phải; một người nấu/hai người ăn giống nhau ở cả ba cấp để chỉ so hàng rào. Tách hàng rào phía xa/gần và mái/bàn/người để thử che khuất. Lối giữa khu nấu/ăn và cổng không bị rào kín.
+- Chỉ script/mẫu trong build và tài liệu đổi;174 SVG game không đổi so baseline, không sửa core/AI/ArtSpecs/footprint bếp hiện hành2×2. GAME_DESIGN ghi đề xuất mới/chờ duyệt, đồng bộ CLAUDE/AGENTS giữ phụ lục, ASSET_SPEC ghi khung thử riêng. Ba cấp này mới khác hàng rào, chưa thiết kế nâng cấp đầy đủ mái/khu nấu/bàn/số ghế.
+- Import sạch; strict preview và runtime600 frame sạch, override.cfg đã xoá. Tự mở levels.png/layout.png: trái→phải cấp1→3, mái/nồi rõ, bàn cạnh ngang, hàng rào đá dưới tre/gỗ và lối vào đọc được.11 lớp SVG hợp lệ; không chạy lại bộ80 test đã qua ở v1 vì chỉ sửa cảnh phác riêng, không thay gameplay.
+- Trước: kitchen-compound-v2-front/inhabited.png; sau: kitchen-compound-v3-rectangle/levels.png và layout.png. Cách xem: mở hai ảnh hoặc godot --audio-driver Dummy --path . res://build/art-review/2026-10-04/kitchen-compound-v3-rectangle/preview.tscn. Người đặt sẵn, chưa có AI chọn ghế/đi vào sân.
+- Số cần duyệt: sân4×3 (chưa chốt footprint), cổng90px ở file2×, hàng rào cao25/30px ở file2×, hai chỗ ngồi mẫu. Dừng chờ duyệt bố cục/vật liệu, chưa thay game hay vẽ thêm công trình; không commit/push.
+
+---
+
+## Bếp chính diện nhìn từ trên — Phác góc v2 (2026-10-04)
+
+- Theo phản hồi mẫu v1 nghiêng ngang gây khó chịu: dựng lại mái/bàn/bếp chính diện, chỉ nghiêng dọc từ trên xuống. Cạnh trước nằm ngang, mặt trên mái rộng, mặt bàn thấy rõ, miệng nồi elip ngang và lỗ lửa ở giữa. Giữ hai khu nấu/ăn, sân3×3, một người nấu/hai người ăn và lều hiện có làm mốc.
+- Mẫu/script nằm riêng trong build/art-review/2026-10-04/kitchen-compound-v2-front; giữ v1 để so sánh. Không đổi asset game, footprint hiện hành, camera, AI, ArtSpecs hoặc rig game;174 SVG khớp hash trước thử. Góc mới chỉ là đề xuất chờ duyệt cho bếp, chưa thay chuẩn chung. Cập nhật GAME_DESIGN, đồng bộ CLAUDE/AGENTS giữ phụ lục và ghi mẫu trong ASSET_SPEC.
+- Tự mở inhabited.png và layout.png, chỉnh người nấu xuống14px ở khung2× để tóc/mặt không bị mái che. Import/runtime600 frame sạch, strict preview/runtime sạch, override.cfg đã xoá. Cảnh đồ hoạ lần đầu lỗi thiết bị âm thanh WASAPI rồi fallback; chạy lại với --audio-driver Dummy sạch. Không chạy lại bộ80 test đã qua ở v1 vì lần này chỉ sửa mẫu SVG/script trong build và tài liệu, không thay core.
+- Trước: kitchen-compound-v1/inhabited.png; sau: kitchen-compound-v2-front/inhabited.png và layout.png. Cách xem: mở ảnh hoặc godot --audio-driver Dummy --path . res://build/art-review/2026-10-04/kitchen-compound-v2-front/preview.tscn. Đây là cảnh dựng riêng, nhân vật đặt sẵn, chưa có AI chọn ghế/đi vào sân.
+- Số cần duyệt: độ sâu mái≈100px/bàn≈48px ở khung2×, sân3×3 và hai ghế mẫu. Dừng chờ duyệt góc, chưa sửa các công trình khác hay lều; không commit/push.
+
+---
+
+## Phác khu bếp có người nấu và ngồi ăn — Bố cục chờ duyệt (2026-10-04)
+
+- Theo bước phác đã đề xuất và được đồng ý: dựng khu bếp3×3 cạnh lều2×2 hiện có. Khu nấu sau-trái dưới mái cỏ một phần, tre/mây, nồi đất/bếp đá, một người khuấy; bàn gỗ thấp/ghế khúc gỗ phía trước-phải với hai người ngồi ăn. Chừa lối giữa hai khu và cửa sân phía trước-phải; cùng góc 3/4 trên cao/chếch với lều.
+- Mẫu nằm riêng trong build/art-review/2026-10-04/kitchen-compound-v1: năm lớp SVG384×448, draw.py dùng helper generator nhưng không chạy main. preview.tscn/gd dựng rig01 thật của game; seated_preview.gd thử ghép tư thế ngồi với animation ăn/cầm món chín, chỉ trong bản phác. Mái/bàn/người tách lớp để xem che khuất; chưa phải hệ xếp lớp theo vị trí động.
+- Không sửa lõi, AI, dữ liệu công trình, ArtSpecs hoặc asset game: hash174 SVG giữ nguyên so với trước phác. Bếp trong game vẫn2×2/kitchen_1 khung256×320/neo(0.5,0.925). Đề xuất3×3 và2/4/6 chỗ ăn theo cấp chưa chốt hay triển khai. GAME_DESIGN ghi rõ phác chờ duyệt, đồng bộ CLAUDE/AGENTS giữ phụ lục; ASSET_SPEC mô tả riêng mẫu build.
+- Kiểm tra: năm SVG XML hợp lệ; import sạch; test thường80/80 và strict80/80; runtime600 frame thường/strict sạch; cảnh preview strict sạch; override.cfg đã xoá. Warning spawn ô chặn là test cũ cố ý; log Loc thông báo dùng tiếng Việt thay bản en còn thiếu. Tự mở inhabited.png và layout.png: người nấu lộ cạnh nồi, hai người ngồi hai phía bàn, tỉ lệ cạnh lều rõ.
+- Trước: build/art-review/2026-10-04/kitchen-foundation-v1/after/board.png (bếp1 hiện hành). Sau/phác: kitchen-compound-v1/inhabited.png và layout.png. Đây là cảnh bố cục dựng riêng, không phải ảnh ván game seed42 hay bằng chứng AI tự vào bếp.
+- Cách xem: mở hai ảnh hoặc chạy godot --path . res://build/art-review/2026-10-04/kitchen-compound-v1/preview.tscn để dựng lại. Hạn chế: nhân vật đặt sẵn, chưa tìm đường vào sân/đặt chỗ ghế/lấy món ăn; chỉ mẫu một cấp, chưa triển khai hành vi hay vẽ các công trình khác.
+- Số cần duyệt: sân3×3, hai chỗ ngồi mẫu (đề xuất2/4/6 theo cấp), độ che của mái, khoảng cách bàn/nồi và độ rộng lối đi. Giữ tỉ lệ dân theo Balance.VILLAGER_SCALE; ảnh phóng đồng đều1.1 từ khung2× để dễ soi. Dừng chờ duyệt bố cục, không commit/push.
+
+---
+
+## Mẫu bếp cấp1 và ba cỡ móng góc xiên — Thử hướng công trình (2026-10-04)
+
+- Theo đề xuất đã được đồng ý: làm thử bếp cấp1 + móng trước, không vẽ hết công trình. Bếp mái cỏ một dốc thấp trên tre/đốt/dây mây, mặt trên rộng xiên theo lều trước-phải; mở phía gần để thấy bếp đá/nồi đất miệng elip và hơi nước. Không dựng nhà vách đứng; cọc vẫn đứng thẳng, mái và đá/nồi có chiều sâu.
+- Móng2×2/3×2/3×3 dùng nền đất vuông bo góc phủ đúng footprint, cọc thấp có mặt cắt/hông, dây căng và cành tre/đá bố trí xiên bên trong. Không xoay lưới hay làm nền thành hình thoi gây hụt diện tích. Cọc xa không bị cắt khung.
+- Chỉ tools/gen_building_art.py và4 SVG kitchen_1/foundation_2x2/3x2/3x3 đổi hình; các cấp bếp2–3/lều/kho/lò/sân/tài nguyên giữ nguyên. Bếp256×320/neo0.5,0.925; móng256×256/384×256/384×384/neo0.5,1.0 giữ nguyên, ArtSpecs không đổi. Không sửa lõi/map/cost/AI/slots.
+- Giữ vùng warning x128,y≈112 trên mái; chừa hai bên/mép trước cho các slot món chín hiện có. Generator tái sinh ổn định/hash chỉ4SVG đổi. XML/khung hợp lệ. Đồng bộ GAME_DESIGN/CLAUDE/AGENTS và ASSET_SPEC.
+- Kiểm tra Godot: import sạch, lần chạy lại toàn bộ thường80/80, strict80/80, runtime600 frame sạch; override.cfg đã xoá. Lần thường đầu79/80 trượt test_controller_tap_assigns_and_moves ở bước đất trống; chạy riêng1/1 và full lần2 qua, không thay code. Test chọn vị trí đất ngẫu nhiên quanh làng, chưa xác định nguyên nhân trượt không ổn định. Warning spawn ô chặn là test cũ cố ý. Tự mở board.png, village_zoom_1.png, buildings.png: mái cạnh lều, warning trên mái, món chín không che. Ảnh construction.png ở wait40/speed4 đã xây xong; chụp thêm construction-early/wait5/speed1 để soi móng có thợ xây.
+- Ảnh trước/sau: build/art-review/2026-10-04/kitchen-foundation-v1/before và after (seed42/buildings/jobs/wait40/speed4). Ảnh trước lấy từ lần chụp resources-v7 cùng tham số; hình công trình chưa đổi lúc đó. Bảng art: lều1/bếp1/móng2×2 hàng trên, móng3×2/3×3 hàng dưới; script soát/ảnh trong build.
+- Cách thử: ván mới seed42, đặt bếp/cử thợ xây, sau xây cử người nấu; thấy mái xiên, nồi/hơi nước, món chín bày quanh chân. Đặt kho/lò để xem ba cỡ móng đúng vùng đặt. Hạn chế: bếp2–3/các công trình còn art cũ, chưa thành bộ3cấp đồng bộ; giàn giáo code cũ chưa vẽ lại. Chỉ mẫu chờ duyệt góc.
+- Số có thể chỉnh: độ dốc mái/độ lộ nồi, độ cao cọc, màu cỏ/mái, vị trí khung dây trong móng. Không đổi khung/neo/sản lượng. Dừng chờ duyệt mẫu trước khi làm phần còn lại, không commit/push.
+
+---
+
+## Trở lại bụi dâu mềm, quả nhỏ và nhiều hơn — Bản thử v7 (2026-10-04)
+
+- Người dùng đồng ý các tài nguyên khác v6 nhưng từ chối bụi dâu phân tầng, yêu cầu dùng lại bụi cũ. Khôi phục chính xác tán/lá/thân/bóng bụi v5 (đối chiếu14 phần tử đầu với board.svg v5); giữ các tài nguyên khác góc v6.
+- Giữ dáng quả đỏ tròn mọng riêng lẻ đã duyệt, scale65% (nhỏ hơn35%); tăng số quả18/9/4 cho đầy/nửa/ít thay9/4/2. Bố trí rải đều, giữ khoảng lá giữa quả, không ghép đôi. Trụi vẫn cùng tán. Chỉ thay4 SVG bush và hàm bush() trong generator; khung192×160/neo0.5/0.91, hiển thị×0.5 không đổi.
+- Sinh mới đầy100%, amount/capacity/sản lượng/save sau hái không đổi; không sửa core/map. GAME_DESIGN ghi ngoại lệ bụi theo yêu cầu mới nhất rồi đồng bộ CLAUDE/AGENTS; cập nhật ASSET_SPEC. Không tự ép lại góc v6 cho bụi đã bị từ chối.
+- Kiểm tra: hash chỉ4 SVG bụi đổi so với v6, generator tái sinh ổn định; tán/lá/thân/bóng khớp v5. Godot import sạch; thường80/80, strict80/80; runtime600 frame sạch, override.cfg đã xoá. Warning spawn ô chặn là test cũ cố ý. Tự mở strawberries.png và village_zoom_1.png để xem quả nhỏ/nhiều trong game.
+- Ảnh trước: build/art-review/2026-10-04/resources-v6/after; tham chiếu bụi cũ resources-v5/after/strawberries.png. Sau: build/art-review/2026-10-04/resources-v7/after, cùng seed42/buildings/jobs/wait40/speed4. Script soát/ảnh đều trong build.
+- Cách thử: ván mới seed42, nhìn bụi dưới sân làng; click thấy30/30 rồi giao hái để giảm số quả và trụi. Hạn chế: hạt/điểm bóng nhỏ hơn khi thu xa, UI vẫn Bụi quả; bụi dùng dáng cũ theo yêu cầu trong khi loại khác giữ góc v6.
+- Số nên chỉnh: scale quả0.65, số quả18/9/4 (chỉ hình, không capacity), khoảng cách giữa quả. Dừng chờ duyệt, chưa vẽ thêm, không commit/push.
+
+---
+
+## Đồng bộ góc xiên 3/4 của nhóm tài nguyên với lều — Bản thử v6 (2026-10-04)
+
+- Phản hồi: kiểu dáng đã ổn nhưng tài nguyên vẫn cảm giác nhìn thẳng, không cùng góc lều trước-phải. Đổi cách dựng khối trong SVG, không xoay camera/lưới/sprite hay sửa core. Giữ vật liệu và kiểu dáng: cây lá rộng chia mảng, tre đốt/lá thuôn, dâu đỏ tròn mọng riêng lẻ, đá xám ngà, củi cành cong/chạc và sỏi.
+- Cây/bụi: mặt trên tán xiên rộng, mặt hông thấp và tối, lớp xa vẽ trước/lớp gần đè lên. Thân đứng thẳng, gốc rễ chéo và hông thân phân sắc. Tre/gốc tre: gốc bố trí trước-sau trên đất, thân xa/gần khác chiều cao, đốt/miệng cắt nhìn từ trên. Gốc cây: mặt cắt xiên lớn/vân vòng, hông phải và rễ có chiều sâu.
+- Đá: mặt trên rộng xiên, hông phải tối và mặt trước thấp riêng. Củi: cành trên hai trục đất xiên, có chồng lớp và đầu gỗ quay trước-phải. Sỏi: viên có mặt trên/hông thấp, phân bố trên cùng mặt đất; lượng ít làm nền thu nhỏ. Dâu vẫn 9/4/2 quả, cùng dáng/màu/điểm bóng; chỉ bố trí quả/lá trên khối tán mới, tránh ghép đôi/chồng quả.
+- Generator có ground() cho hai trục (0.86,0.40)/(-0.65,0.50), phương đứng giữ thẳng; chỉ tính tọa độ SVG, không dùng mô hình 3D hay thay engine. Mảng lá dùng tọa độ cuối cùng để viền không co/giãn. Chỉ 20 SVG trong nhóm thử đổi; khung/neo/sinh đầy100%/save/sản lượng giữ nguyên, không đổi ArtSpecs. Cây thông tree_02/vách/nước/decor và công trình khác vẫn art cũ, ngoài nhóm vẽ thử này.
+- Đồng bộ quy tắc góc trong GAME_DESIGN rồi copy CLAUDE/AGENTS, cập nhật ASSET_SPEC; bản v1–v5 là lịch sử kiểu dáng, không dùng làm chuẩn góc tài nguyên. Dừng chờ duyệt góc v6.
+- Kiểm tra: generator tái sinh cùng hash, 20 khung SVG giữ nguyên. Import sạch; test thường80/80, strict80/80; runtime600 frame sạch, override.cfg đã xoá. Warning spawn ô chặn là test cũ cố ý. Tự mở board.png, village_zoom_1.png, resources.png, cliff.png; kiểm tra tán/bụi/đá/củi cạnh lều mẫu trong game.
+- Ảnh trước: build/art-review/2026-10-04/resources-v5/after; sau: build/art-review/2026-10-04/resources-v6/after, cùng seed42/buildings/jobs/wait40/speed4. Bảng art có lều mẫu để đối chiếu hướng. Script soát/ảnh ở build.
+- Cách thử: ván mới seed42, nhìn cụm cây/tre bên trái, dâu dưới sân làng, bãi đá/sỏi trước vách; giao hái/chặt/nhặt để xem các mức và gốc không đổi chân. Hạn chế: các hình ngoài nhóm thử còn góc cũ, map chưa đồng bộ toàn bộ; quả/hạt nhỏ khi thu xa.
+- Số nên chỉnh: độ co chiều sâu/độ dốc của mặt tán, hông tán13–16px ở file2×, hai trục đặt vật và độ tối hông đá; giữ khung/neo và 9/4/2 quả. Không commit/push.
+
+---
+
+## Dâu đỏ hơn, giữ dáng đã duyệt — Bản thử v5 (2026-10-04)
+
+- Người dùng duyệt hình dáng dâu v4, yêu cầu tăng đỏ. Chỉ thay ba màu trong generator: thân #DB6050→#DF3235, phần tối #CC5044→#C4262E, mảng sáng #EE7C63→#F1534A. Giữ điểm bóng/hạt vàng/đài xanh, tất cả path/vị trí/kích thước.
+- Kiểm tra byte SVG với bản trước sau khi thay đúng ba màu: chỉ bush_100/50/20 thay đổi; bush_empty/cây/tre/hình khác giữ nguyên. Giữ 9/4/2 quả, khung192×160/neo0.5/0.91, sinh mới đầy100%, lượng/sản lượng/save không đổi. Không sửa lõi/map. Cập nhật GAME_DESIGN/CLAUDE/AGENTS/ASSET_SPEC.
+- Import sạch; test thường80/80, strict80/80; runtime600 frame sạch; override.cfg đã xoá. Warning spawn ô chặn là test cũ cố ý. Tự mở strawberries.png và village_zoom_1.png, màu đỏ rõ hơn khi hiển thị trong game.
+- Ảnh trước: build/art-review/2026-10-04/resources-v4/after/strawberries.png và village_zoom_1.png. Sau: build/art-review/2026-10-04/resources-v5/after, cùng seed42/buildings/jobs/wait40/speed4. Script soát/ảnh đều trong build.
+- Cách thử: ván mới seed42, xem bụi dưới sân làng hoặc giao hái để thấy ba mức quả. Hạn chế: hạt/điểm bóng nhỏ khi thu xa; UI vẫn Bụi quả. Số nên chỉnh: ba mã màu dâu nêu trên; dáng đã duyệt giữ nguyên.
+- Dừng chờ duyệt màu, không vẽ thêm, không commit/push.
+
+---
+
+## Dâu tây riêng lẻ, tròn mọng — Bản thử v4 (2026-10-04)
+
+- Theo phản hồi: bỏ cặp 2 quả dính nhau, bố trí 9 quả đơn với khoảng lá giữa quả; mức nửa còn 4 quả, ít còn 2 quả, trụi giữ tán. Quả tròn đầy, đáy chỉ nhọn nhẹ, đỏ ấm, mảng sáng/điểm bóng gợi mọng nước; giữ hạt vàng nhỏ và đài xanh.
+- Giữ cây đã duyệt, tre và hình khác; chỉ bush_100/50/20/empty thay đổi. Khung 192×160/neo 0.5/0.91, hiển thị ×0.5, luật sinh mới đầy 100% và lượng/sản lượng/save sau hái không đổi. Không sửa lõi/map. Cập nhật GAME_DESIGN/CLAUDE/AGENTS/ASSET_SPEC.
+- Generator chạy lại cùng hash, kiểm tra SVG cùng khung. Godot import sạch; thường 80/80, strict 80/80; runtime 600 frame sạch. override.cfg đã xoá; warning spawn ô chặn là test cũ cố ý.
+- Ảnh trước: build/art-review/2026-10-04/resources-v3/after/strawberries.png và village_zoom_1.png. Sau: build/art-review/2026-10-04/resources-v4/after, cùng seed42/buildings/jobs/wait40/speed4. Đã tự mở strawberries.png và village_zoom_1.png; hình quả riêng lẻ vẫn đọc được trong game. Script soát và ảnh ở build.
+- Cách thử: ván mới seed42, xem bụi dưới sân làng, click thấy đầy30/30; giao hái để thấy quả giảm/trụi. Hạn chế: hình bụi cách điệu, UI vẫn tên Bụi quả; chi tiết hạt/điểm bóng nhỏ khi thu xa.
+- Số nên chỉnh: 9/4/2 quả đơn (chỉ mật độ hình), độ tròn/cỡ quả, độ sáng điểm bóng; không thay capacity. Dừng chờ duyệt, không vẽ thêm, không commit/push.
+
+---
+
+## Đổi dâu tằm thành dâu tây — Bản thử v3 (2026-10-04)
+
+- Người dùng duyệt cây v2; giữ nguyên cây, tre và mọi tài nguyên/công trình khác. Chỉ đổi bush_100/50/20/empty và phần bush() trong generator.
+- Dâu tây cách điệu: quả đỏ thuôn tim, hạt vàng nhỏ, đài xanh, lá ba chét có mép răng cưa nhẹ. Giữ 9/4/2 chùm, mỗi chùm 2 quả; trụi giữ tán. Giữ khung 192×160, neo 0.5/0.91, hiển thị ×0.5.
+- Luật sinh mới luôn đầy 100%, lượng sau hái/save và sản lượng không đổi; không sửa lõi/map. Đồng bộ GAME_DESIGN/CLAUDE/AGENTS, cập nhật ASSET_SPEC. Generator chạy lại cho cùng hash; chỉ bốn SVG bụi đổi so với v2.
+- Kiểm tra: import sạch, test thường 80/80, strict 80/80, runtime 600 frame sạch; xoá override.cfg. Warning spawn ô chặn là test cũ cố ý. Tự mở board/strawberries và ảnh village_zoom_1/close_zoom_2 trong game.
+- Ảnh trước: build/art-review/2026-10-04/resources-v2/after; sau: build/art-review/2026-10-04/resources-v3/after (seed42/buildings/jobs/wait40/speed4). Script soát và ảnh đều trong build.
+- Cách thử: ván mới seed42, nhìn bụi ở dưới sân làng, click thấy đầy30/30; giao hái sẽ giảm quả rồi trụi. Tên UI vẫn Bụi quả; hình là bụi dâu tây cách điệu.
+- Số nên chỉnh nếu cần: cỡ quả, độ đỏ/hạt vàng, 9/4/2 chùm; khung/neo không đổi. Dừng chờ duyệt hình, chưa vẽ thêm, không commit/push.
+
+---
+
+## Sửa cây lá rộng và đổi bụi quả thành dâu tằm — Bản thử v2 (2026-10-04)
+
+- Theo phản hồi cây trông kỳ: tree_01 đổi từ tán tròn đều sang tán lệch chia mảng hữu cơ, khe lộ chạc và thân cong/gốc bè. Mặt trên sáng, mặt dưới tối, giữ khung 192×256 và neo 0.5/0.92.
+- Bụi quả đổi sang dâu tằm cách điệu: lá tim có răng cưa nhẹ/gân, quả dài đỏ tím có nhiều hạt nhỏ, mỗi chùm 2 quả; 9/4/2 chùm cho 100/50/20, trụi giữ tán. Giữ khung 192×160/neo 0.5/0.91. Sinh mới luôn đầy 100%, lượng sau hái/save giữ như đợt trước.
+- Chỉ 5 SVG tree_01/bush_100/50/20/empty đổi; generator tái sinh ổn định, tre/đá/củi/sỏi/lều/dân giữ hình. Không đổi code lõi/map/sản lượng. Đồng bộ GAME_DESIGN/CLAUDE/AGENTS và ASSET_SPEC.
+- Kiểm tra: import sạch, thường 80/80, strict 80/80, runtime 600 frame sạch; override.cfg đã xoá. Warning spawn vào ô chặn là test cũ cố ý. Lần chụp đầu khởi chạy khi strict còn bật bị warning integer division của screenshot.gd cũ; đã dừng và chạy lại sau khi xoá override, không mở rộng sửa công cụ ngoài phạm vi.
+- Ảnh trước: resources-v1/after; sau: build/art-review/2026-10-04/resources-v2/after. Chụp cùng seed 42/buildings/jobs/wait 40/speed 4; tự mở board.png và village_zoom_1/resources/work để kiểm tra kích thước trong game.
+- Cách thử: ván mới seed 42, nhìn cây ở bìa làng, click bụi dâu thấy đầy 30/30; giao hái để thấy quả giảm rồi trụi, lá vẫn giữ dáng.
+- Hạn chế: dâu là bụi cách điệu, tên UI vẫn Bụi quả; cây thông và phần map khác còn hình cũ. Chờ duyệt cây/dâu trước khi vẽ tiếp.
+- Số có thể chỉnh: 9/4/2 chùm, 2 quả/chùm, sắc đỏ tím và độ tách mảng tán; khung/neo/sản lượng không đổi. Không commit/push.
+
+---
+
+## Thử tài nguyên/map cạnh làng — Cây lá rộng, tre, quả đỏ cam, đá và củi (2026-10-04)
+
+**Trạng thái:** bản thử theo nhóm đã đề xuất, dừng chờ duyệt, chưa commit/push.
+
+### Đã làm & quyết định
+- Generator tài nguyên vẽ lại tree_01 và gốc cây, bụi quả 100/50/20/trụi, đá to/nhỏ 3 mức, củi 3 mức. Khối mềm/viền nâu/màu ấm, tán và mặt đá nhìn từ trên, quả rừng đỏ cam; giữ khung/neo cũ. Củi có cành cong/chạc và mặt cắt gỗ. Sỏi giữ hình cũ ở đợt thử.
+- Thêm tree_03 (176×272, neo 0.5/0.93) và bamboo_stump (96×72, neo 0.5/0.8) vào ArtSpecs/ASSET_SPEC. Tre là biến thể TREE cho cùng gỗ/rìu/cây non/mọc lại, không thêm tài nguyên/AI. Giữ tree_02 thông cũ. Trong phần cây lá rộng, 28% dùng hình tre theo cùng RNG/phân bố rừng; không sửa địa hình, đường đi hay vị trí mỏ của seed.
+- Map mới bụi quả và đá tảng đầy amount=capacity; sỏi/củi giữ ngẫu nhiên 50–100%. Giữ lượt RNG của lượng ban đầu để vị trí map không lệch; đá tảng do vách lở cũng đầy. Save restore giữ lượng đã khai thác, không ép đầy lại. Hai test mới kiểm tra nhiều seed, lượng sỏi/củi, tre, lượng quả trong save và gốc/mọc lại tre.
+- Chỉ thay hình và phần code cần cho biến thể tre/luật lượng được yêu cầu, không sửa AI/luật việc/camera. Generator chạy lại giữ hình; hash cho thấy hình thay đổi chỉ trong nhóm thử, lều/dân/nhà/sỏi/cảnh khác giữ nguyên. GAME_DESIGN/CLAUDE/AGENTS/ASSET_SPEC đồng bộ mô tả.
+
+### Kiểm tra
+- Godot 4.7.2 import sạch; toàn bộ test thường **80/80**, strict **80/80**, runtime headless 600 frame sạch. Đã xoá `override.cfg`. Warning ô bị chặn của Commands.spawn_villager là test cố ý cũ; không có warning mới.
+- Hai test mới qua: sinh lượng nhiều seed/biến thể tre; spawn trực tiếp, save giữ quả đã hái, gốc tre/mọc lại. Generator chạy lại cho cùng kết quả; tự mở bảng art và ảnh village/resources/cliff/work, giữ khung/neo và màu/viền hợp với lều.
+
+### Cách xem & hạn chế
+- `build/art-review/2026-10-04/resources-v1/before/` và `after/`: cùng seed 42, buildings/jobs/wait 40/speed 4. Tự mở village_zoom_1/resources/cliff/work để soi trong game; board.png là bảng hình và các mức khai thác cạnh lều mẫu, script soát chỉ ở build.
+- Chạy ván mới seed 42, nhìn cây/tre ở bìa làng; click bụi quả trước hái sẽ đầy 30/30, đá 16/16; hái quả/chặt tre rồi lưu/nạp vẫn giữ lượng và gốc. Tre non theo scale cây non, tre chặt còn gốc rỗng, mọc lại đúng tre.
+- Cây thông, vách đá, nước và decor còn art cũ; tre UI vẫn tên chung Cây, dùng cùng khúc gỗ khi khuân. Chưa thêm tre trang trí riêng hay bố trí riêng ven nước. Đây là đợt thử, chưa làm hết map.
+
+### Số nên chỉnh
+- BAMBOO_CHANCE=0.28 trong phần cây lá rộng; độ dày/độ xanh tán, độ dày thân/lá tre, quả 9/4/2 chùm; độ sáng mặt đá, cỡ củi. Khung/neo cũ không đổi, không chỉnh giá/nhu cầu/sản lượng.
+
+---
+
+## Chuẩn bị tài nguyên — Bụi quả mới sinh luôn đầy (2026-10-04)
+
+**Trạng thái:** ghi yêu cầu bổ sung ở bước bàn ý tưởng; chưa bắt đầu đợt vẽ tài nguyên/map, chưa đổi core hay commit/push.
+
+- Người dùng chốt bụi quả lúc sinh luôn 100%; chỉ sỏi/củi khác lượng ban đầu. Bụi quả vẫn có hình ít quả/trụi sau khi hái và đầy khi mọc lại. Đủ 100% là amount=capacity, không chỉ ép texture đầy.
+- Cập nhật GAME_DESIGN mục 9.1, đồng bộ CLAUDE/AGENTS giữ phụ lục, thêm quy tắc vào ASSET_SPEC. Không sửa lịch sử DEVLOG cũ.
+- Kiểm tra code hiện tại: MapGenerator còn random lượng khởi đầu cho bụi quả và đá tảng; ResourceNode mặc định spawn đầy và bụi mọc lại đã đầy. Khi triển khai đợt tài nguyên/map cần đổi lượng khởi đầu của các mỏ ngoài sỏi/củi theo quy tắc mới; không áp dụng lên lượng còn lại trong save đã chơi.
+- Cách kiểm tra ở đợt triển khai: map mới nhiều seed, mọi bụi amount=capacity và hình đầy; sỏi/củi có lượng khác nhau; hái quả rồi load save vẫn giữ lượng đã hái. Đợt này chỉ ghi tài liệu, không có ảnh hay test game mới, không chỉnh con số.
+
+---
+
 ## Chốt và đồng bộ phong cách nghệ thuật — Prehistoric Tribes gợi nét Việt (2026-10-04)
 
 **Trạng thái:** chỉ tài liệu theo yêu cầu; không vẽ thêm, không đổi code/core, không commit/push.

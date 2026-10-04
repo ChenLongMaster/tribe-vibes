@@ -118,7 +118,7 @@ func move_villager(villager_id: int, cell: Vector2i) -> bool:
 	var villager: Villager = _commandable(villager_id)
 	if villager == null or _world.grid.is_blocked(cell):
 		return false
-	if not _world.grid.has_path(_world.cell_of(villager), cell):
+	if not _world.grid.has_path(villager.path_origin(), cell):
 		return false
 	villager.order_move(cell)
 	EventBus.move_ordered.emit(villager, cell)
@@ -286,7 +286,7 @@ func _send_to_building(villager: Villager, building: Building) -> bool:
 			var cells: Array[Vector2i] = building.footprint_cells()
 			cells.shuffle()
 			for cell: Vector2i in cells:
-				if _world.grid.has_path(_world.cell_of(villager), cell):
+				if _world.grid.has_path(villager.path_origin(), cell):
 					villager.order_move(cell)
 					EventBus.move_ordered.emit(villager, cell)
 					return true

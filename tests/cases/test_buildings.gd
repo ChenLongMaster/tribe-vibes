@@ -10,6 +10,114 @@ const TEST_SAVE_PATH: String = "user://test_save.json"
 const OBJECT_PANEL: GDScript = preload("res://ui/common/object_panel.gd")
 
 
+func test_kitchen_seat_capacity_routes_and_gate() -> void:
+	var world: World = await _make_world(42)
+	var people: Array[Villager] = _spawn(world, 9)
+	for person: Villager in people:
+		person.set_process(false)
+	for tier: int in range(1, 4):
+		var kitchen: Building = _add_built(world, BuildingDefs.KITCHEN, tier)
+		check_eq(kitchen.footprint_cells().size(), 6, "Bếp luôn chiếm sáu ô")
+		kitchen.add_stock(ResourceDefs.MEAL, 1)
+		var capacity: int = KitchenLayout.seat_count(tier)
+		for index: int in capacity:
+			check(kitchen.kitchen.reserve(people[index]), "Đặt ghế riêng")
+			check(kitchen.kitchen.reserve(people[index]), "Đặt lại không chiếm thêm ghế")
+			var destination: Vector2 = kitchen.kitchen.seat(people[index])
+			check(not KitchenLayout.route(Vector2(108, 275), destination, tier).is_empty(), "Từ quầy tới được mỗi ghế, tránh bàn")
+		check_eq(kitchen.kitchen.seats.size(), capacity, "4/6/8 chỗ theo cấp")
+		check(not StoredFoodSource.new(kitchen).is_available(people[capacity]), "Bếp đầy ghế không nhận thêm khách")
+		kitchen.kitchen.release(people[0])
+		check(kitchen.kitchen.reserve(people[capacity]), "Ghế trả lại dùng được ngay")
+		check(not Commands.can_place_building(BuildingDefs.TENT, kitchen.kitchen.entry_cell()), "Không xây bịt cổng bếp")
+	await _free_world(world)
+
+
+func test_kitchen_dining_interrupt_and_exit() -> void:
+	var world: World = await _make_world(42)
+	var person: Villager = _spawn(world, 1)[0]
+	person.data.traits.clear()
+	var kitchen: Building = _add_built(world, BuildingDefs.KITCHEN, 3)
+	kitchen.add_stock(ResourceDefs.MEAL, 4)
+	person.position = WorldGrid.cell_to_world(kitchen.kitchen.entry_cell())
+	person.anchor_cell = kitchen.kitchen.entry_cell()
+	person.status.hunger = 40.0
+	person.start_task(TaskEat.new(StoredFoodSource.new(kitchen)))
+	await _simulate(20.0, func(_elapsed: float) -> bool: return person.state == Villager.State.EATING)
+	check(person.state == Villager.State.EATING and person.rig.seated_eating, "Đi vào sân, lấy món rồi ngồi ăn")
+	check(person.interior == kitchen, "Người thật đứng trong sân bếp")
+	check_eq(kitchen.stock_of(ResourceDefs.MEAL), 3, "Lấy đúng một món ở quầy")
+	var destination: Vector2i = world.finder.find_free_cell_near(kitchen.kitchen.entry_cell(), 2.0, 4.0)
+	check(Commands.move_villager(person.id, destination), "Đang ăn vẫn nhận lệnh mới")
+	check_eq(kitchen.kitchen.seats.size(), 1, "Lệnh chờ ăn xong, vẫn giữ ghế")
+	person.status.hunger = 100.0
+	await _simulate(20.0, func(_elapsed: float) -> bool: return world.cell_of(person) == destination and not person.is_moving())
+	check(person.interior == null and world.cell_of(person) == destination, "Ra đúng cổng trước khi đi theo lệnh")
+	check(not person.rig.seated_eating, "Bỏ tư thế ngồi khi đi")
+	check(kitchen.kitchen.seats.is_empty(), "Ăn xong trả ghế trước khi theo lệnh mới")
+	await _free_world(world)
+
+
+func test_kitchen_finishes_meal_and_releases_seat() -> void:
+	var world: World = await _make_world(42)
+	var person: Villager = _spawn(world, 1)[0]
+	var kitchen: Building = _add_built(world, BuildingDefs.KITCHEN, 1)
+	kitchen.add_stock(ResourceDefs.MEAL, 1)
+	person.position = WorldGrid.cell_to_world(kitchen.kitchen.entry_cell())
+	person.anchor_cell = kitchen.kitchen.entry_cell()
+	person.status.hunger = 40.0
+	person.start_task(TaskEat.new(StoredFoodSource.new(kitchen)))
+	await _simulate(25.0, func(_elapsed: float) -> bool: return person.status.hunger > 90.0 and person.interior == null and kitchen.kitchen.seats.is_empty())
+	check(person.status.hunger > 90.0, "Ăn xong vẫn no theo luật cũ")
+	check(person.interior == null and kitchen.kitchen.seats.is_empty(), "Ăn xong tự ra sân và trả ghế")
+	await _free_world(world)
+
+
+func test_kitchen_upgrade_with_guests_and_interruption() -> void:
+	var world: World = await _make_world(42)
+	var people: Array[Villager] = _spawn(world, 2)
+	var person: Villager = people[0]
+	var chef: Villager = people[1]
+	var kitchen: Building = _add_built(world, BuildingDefs.KITCHEN, 1)
+	kitchen.add_stock(ResourceDefs.MEAL, 4)
+	GameState.add_resource(ResourceDefs.FOOD, 10)
+	for worker: Villager in people:
+		worker.data.traits.clear()
+		worker.position = WorldGrid.cell_to_world(kitchen.kitchen.entry_cell())
+		worker.anchor_cell = kitchen.kitchen.entry_cell()
+	person.status.hunger = 40.0
+	person.start_task(TaskEat.new(StoredFoodSource.new(kitchen)))
+	check(Commands.assign_job(chef.id, kitchen), "Đầu bếp vào khu nấu")
+	await _simulate(20.0, func(_elapsed: float) -> bool: return person.state == Villager.State.EATING and chef.task is TaskCook and chef.task.step == TaskCook.Step.COOK)
+	check(person.rig.seated_eating and chef.interior == kitchen, "Khách và đầu bếp cùng ở bên trong")
+	kitchen.start_construction(2)
+	for resource_id: StringName in kitchen.construction_cost():
+		kitchen.deliver_material(resource_id, int(kitchen.construction_cost()[resource_id]))
+	kitchen.add_build_work(1000.0)
+	check_eq(kitchen.level, 2, "Nâng cấp khi bếp đang hoạt động")
+	check_eq(kitchen.kitchen.seats.size(), 1, "Không mất ghế khách khi đổi layout")
+	await _simulate(20.0, func(_elapsed: float) -> bool: return person.status.hunger > 90.0 and kitchen.kitchen.seats.is_empty())
+	check(person.status.hunger > 90.0 and kitchen.kitchen.seats.is_empty(), "Đổi bàn vẫn ăn xong và trả ghế")
+	person.status.hunger = 40.0
+	person.start_task(TaskEat.new(StoredFoodSource.new(kitchen)))
+	await _simulate(20.0, func(_elapsed: float) -> bool: return person.rig.seated_eating)
+	person.status.hunger = 100.0
+	person.start_task(TaskReturn.new(true))
+	check(kitchen.kitchen.seats.is_empty(), "Task bị ngắt thật sự trả ghế ngay")
+	await _simulate(20.0, func(_elapsed: float) -> bool: return person.interior == null and not person.is_moving())
+	check(person.interior == null, "Bị ngắt vẫn ra qua cổng, không kẹt trong ô chặn")
+	var saved: Dictionary = SaveGame.capture(world)
+	var kitchen_uid: int = kitchen.uid
+	check(SaveGame.is_compatible(saved), "Save footprint mới tương thích")
+	await _free_world(world)
+	var restored: World = await _make_world(42)
+	SaveGame.restore(restored, saved)
+	var loaded: Building = restored.get_building(kitchen_uid)
+	check(loaded != null and loaded.level == 2 and loaded.footprint_cells().size() == 6, "Lưu/tải giữ bếp3×2 và cấp")
+	check(loaded.kitchen.seats.is_empty(), "Ghế tạm được trả khi dựng lại ván")
+	await _free_world(restored)
+
+
 func test_building_defs_complete() -> void:
 	for building_id: StringName in BuildingDefs.MENU_ORDER:
 		check(BuildingDefs.is_buildable(building_id), "%s xây được" % building_id)

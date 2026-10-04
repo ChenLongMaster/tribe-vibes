@@ -1,7 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="72" viewBox="0 0 96 72">
-  <ellipse cx="48" cy="60" rx="38" ry="9" fill="#3E2723" opacity="0.18"/>
-  <path d="M18 30 V50 Q48 66 78 50 V30 Z" fill="#8D6E63" stroke="#4E342E" stroke-width="6" stroke-linejoin="round"/>
-  <ellipse cx="48" cy="30" rx="30" ry="12" fill="#D7B48A" stroke="#4E342E" stroke-width="6"/>
-  <ellipse cx="48" cy="30" rx="16" ry="6" fill="none" stroke="#B08B63" stroke-width="3"/>
-  <ellipse cx="48" cy="30" rx="5" ry="2.5" fill="#B08B63"/>
+  <!-- Gốc cây 3/4: mặt cắt xiên rộng, hông phải tối và rễ trước/sau -->
+  <ellipse cx="48" cy="58" rx="36" ry="10" fill="#928660" stroke="#4E342E" stroke-width="0"/>
+  <path d="M23 23 L72 24 L73 46 L87 59 L64 60 L54 54 L43 63 L21 59 L12 51 L25 44 Z" fill="#957149" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M54 27 L72 24 L73 46 L85 57 L65 58 L56 49 Z" fill="#795C41" stroke="#4E342E" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/>
+  <g transform="translate(47 24) rotate(15)">
+  <ellipse cx="0" cy="0" rx="27" ry="15" fill="#D9B783" stroke="#4E342E" stroke-width="4"/>
+  <ellipse cx="0" cy="0" rx="17" ry="9" fill="none" stroke="#AD8551" stroke-width="2"/>
+  <ellipse cx="0" cy="0" rx="8" ry="4" fill="none" stroke="#AD8551" stroke-width="2"/>
+  <path d="M7 3 L23 7" fill="none" stroke="#AD8551" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <path d="M32 37 L30 49" fill="none" stroke="#BC9865" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 </svg>

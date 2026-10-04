@@ -101,6 +101,7 @@ const WALK_PHASE_PER_PIXEL: float = 0.11
 var facing: float = 1.0
 ## Tốc độ di chuyển hiện tại (px/giây) — chân bước nhanh chậm theo.
 var move_speed: float = 0.0
+var seated_eating: bool = false
 var anim: StringName = ANIM_IDLE
 
 var _anim_time: float = 0.0
@@ -409,6 +410,10 @@ func _animate(t: float) -> void:
 			_arm_back.rotation = -0.5
 			_head.rotation = 0.1
 		ANIM_EAT:
+			if seated_eating:
+				_pose.position.y = 7.0
+				_leg_front.rotation = -1.35
+				_leg_back.rotation = -1.25
 			_arm_front.rotation = -2.3 + 0.25 * sin(t * 9.0)
 			_head.scale.y = 1.0 + 0.035 * sin(t * 18.0)
 			_breathe(breathe)
@@ -597,7 +602,7 @@ func _place_held_item() -> void:
 	if _held_item.visible:
 		_held_item.position = SHOULDER_FRONT + Vector2(0, HAND_DISTANCE).rotated(_arm_front.rotation)
 		if _held_is_tool:
-			_held_item.rotation = _arm_front.rotation + TOOL_TILT
+			_held_item.rotation = _arm_front.rotation + (-0.2 if _held_key == "props/cooking_spoon" else TOOL_TILT)
 
 
 func _set_part(sprite: Sprite2D, key: String, color: Color) -> void:

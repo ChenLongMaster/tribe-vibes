@@ -12,7 +12,9 @@ const PIVOTS: Dictionary[String, Vector2] = {
 	"ground/grass_patch_02": Vector2(0.5, 0.5),
 	"env/tree_01": Vector2(0.5, 0.92),
 	"env/tree_02": Vector2(0.5, 0.93),
+	"env/tree_03": Vector2(0.5, 0.93),
 	"env/tree_stump": Vector2(0.5, 0.8),
+	"env/bamboo_stump": Vector2(0.5, 0.8),
 	"env/rock_big_100": Vector2(0.5, 0.88),
 	"env/rock_big_50": Vector2(0.5, 0.88),
 	"env/rock_big_20": Vector2(0.5, 0.88),
@@ -56,6 +58,7 @@ const PIVOTS: Dictionary[String, Vector2] = {
 	# Giỏ, xô xách thõng: neo ở quai (mép trên) để treo dưới bàn tay.
 	"props/basket": Vector2(0.5, 0.15),
 	"props/bucket": Vector2(0.5, 0.15),
+	"props/cooking_spoon": Vector2(0.5, 0.075),
 	"env/twigs_100": Vector2(0.5, 0.73),
 	"env/twigs_50": Vector2(0.5, 0.73),
 	"env/twigs_20": Vector2(0.5, 0.73),
@@ -68,9 +71,9 @@ const PIVOTS: Dictionary[String, Vector2] = {
 	"buildings/tent_1": Vector2(0.5, 0.92),
 	"buildings/tent_2": Vector2(0.5, 0.92),
 	"buildings/tent_3": Vector2(0.5, 0.92),
-	"buildings/kitchen_1": Vector2(0.5, 0.925),
-	"buildings/kitchen_2": Vector2(0.5, 0.925),
-	"buildings/kitchen_3": Vector2(0.5, 0.925),
+	"buildings/kitchen_1": Vector2(0.5, 37.0 / 42.0),
+	"buildings/kitchen_2": Vector2(0.5, 37.0 / 42.0),
+	"buildings/kitchen_3": Vector2(0.5, 37.0 / 42.0),
 	"buildings/storage_1": Vector2(0.5, 0.9368),
 	"buildings/storage_2": Vector2(0.5, 0.9368),
 	"buildings/storage_3": Vector2(0.5, 0.9368),
@@ -94,6 +97,7 @@ const PIVOTS: Dictionary[String, Vector2] = {
 ## Bộ thử góc cao: body_01 56×40, arm 16×28, leg 22×26; giữ neo tỉ lệ,
 ## vị trí khớp và đồ khuân được chỉnh trong VillagerRig để ghép cả mảnh cũ.
 const PREFIX_PIVOTS: Dictionary[String, Vector2] = {
+	"buildings/kitchen/": Vector2(0.5, 37.0 / 42.0),
 	"villager/head_": Vector2(0.5, 0.9),
 	"villager/face_": Vector2(0.5, 0.9),
 	"villager/hair_": Vector2(0.5, 0.9),

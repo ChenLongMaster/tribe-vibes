@@ -134,6 +134,7 @@ const ROCK_WORKERS: int = 2
 const RESOURCE_STAGE_HALF: float = 0.5 # còn ≤ chừng này phần thì đổi sang hình "vừa"
 const RESOURCE_STAGE_LOW: float = 0.2 # còn ≤ chừng này phần thì đổi sang hình "ít"
 ## Lúc mở ván mỗi mỏ có lượng ngẫu nhiên (phần của đầy) — map trông không đều tăm tắp.
+const BAMBOO_CHANCE: float = 0.28 # phần cây lá rộng được thay bằng bụi tre, không đổi loại tài nguyên
 const START_AMOUNT_MIN: float = 0.5
 const ROCK_START_AMOUNT_MIN: float = 0.3
 ## Bụi quả hái trụi thì chừng này ngày sau mới ra quả lại đầy (như mùa quả, không mô phỏng mùa).

@@ -163,6 +163,8 @@ func find_storage_for(resource_id: StringName, villager: Villager) -> Building:
 ## Ô trống sát mép một công trình (mọi cỡ) mà thổ dân đi tới được, gần thổ dân nhất.
 ## `free_only` = bỏ qua ô người khác đã giữ chỗ đứng (nhiều thợ xây quanh một công trình).
 func find_building_stand_cell(building: Building, villager: Villager, free_only: bool = false) -> Vector2i:
+	if building.kitchen != null and building.is_built() and not free_only:
+		return _closest_reachable([building.kitchen.entry_cell()], villager)
 	var footprint: Array[Vector2i] = building.footprint_cells()
 	var options: Array[Vector2i] = []
 	for cell: Vector2i in footprint:
@@ -190,9 +192,9 @@ func _can_reach_target(node: Node2D, villager: Villager) -> bool:
 	if node is Building:
 		return find_building_stand_cell(node as Building, villager) != World.INVALID_CELL
 	if node is Animal:
-		return _world.grid.has_path(_world.cell_of(villager), (node as Animal).current_cell())
+		return _world.grid.has_path(villager.path_origin(), (node as Animal).current_cell())
 	if node is ResourceNode and (node as ResourceNode).is_loose():
-		return _world.grid.has_path(_world.cell_of(villager), (node as ResourceNode).cell)
+		return _world.grid.has_path(villager.path_origin(), (node as ResourceNode).cell)
 	return find_stand_cell(Job.target_cell(node), villager) != World.INVALID_CELL
 
 
@@ -258,7 +260,7 @@ func find_stand_cell(target_cell: Vector2i, villager: Villager, prefer_sides: bo
 # Trong các ô cho sẵn, ô gần thổ dân nhất mà đi tới được. `penalty` (px) cộng thêm vào
 # khoảng cách của ô kém ưu tiên.
 func _closest_reachable(options: Array[Vector2i], villager: Villager, penalty: Dictionary[Vector2i, float] = {}) -> Vector2i:
-	var from_cell: Vector2i = _world.cell_of(villager)
+	var from_cell: Vector2i = villager.path_origin()
 	var score: Dictionary[Vector2i, float] = {}
 	for cell: Vector2i in options:
 		score[cell] = WorldGrid.cell_to_world(cell).distance_to(villager.position) + penalty.get(cell, 0.0)
@@ -282,7 +284,7 @@ func find_free_cell_near(around: Vector2i, min_ring: float, max_ring: float) -> 
 
 func _find_ground_spot(villager: Villager) -> Vector2i:
 	var campfire: Vector2 = Vector2(_world.map_data.campfire_cell)
-	var from_cell: Vector2i = _world.cell_of(villager)
+	var from_cell: Vector2i = villager.path_origin()
 	var options: Array[Vector2i] = []
 	var ring: int = ceili(Balance.SLEEP_SPOT_MAX_RING)
 	for y: int in range(-ring, ring + 1):

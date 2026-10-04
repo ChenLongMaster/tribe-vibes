@@ -5,12 +5,13 @@ extends Task
 ## rồi ăn tại chỗ. Ăn xong no căng, vui lên chút và đỡ mệt chút. Không quan tâm nguồn là
 ## gì — FoodSource lo phần đó.
 
-enum Step { GO, FETCH, EAT }
+enum Step { GO, ENTER, FETCH, SEAT, EAT, EXIT }
 
 const THOUGHT_ICON: String = "icons/res_food"
 
 var _source: FoodSource
 var _restore: float = 0.0
+var _kitchen: KitchenInterior
 
 
 func _init(source: FoodSource) -> void:
@@ -24,6 +25,16 @@ func start() -> void:
 		fail()
 		return
 	_source.reserve(villager, world().reservations)
+	if _source.target is Building:
+		_kitchen = (_source.target as Building).kitchen
+		if _kitchen != null and not _kitchen.seats.has(villager.id):
+			fail()
+			return
+	if _kitchen != null and villager.interior == _kitchen.building:
+		if not _kitchen.move_inside(villager, Vector2(108, 275)):
+			fail()
+		step = Step.ENTER
+		return
 	var stand: Vector2i = World.INVALID_CELL
 	if _source.target is Building:
 		stand = world().finder.find_building_stand_cell(_source.target as Building, villager)
@@ -39,18 +50,25 @@ func start() -> void:
 func tick(delta: float) -> Status:
 	if _failed:
 		return Status.FAILED
+	if _kitchen != null and not _kitchen.building.is_built():
+		return Status.FAILED
 	match step:
 		Step.GO:
 			if villager.is_moving():
 				return Status.RUNNING
 			if not _source.is_available(villager):
 				return Status.FAILED
-			villager.clear_bubble()
-			villager.face_towards(_source.target.position)
-			villager.rig.play(_source.fetch_anim())
-			villager.state = Villager.State.WORKING
-			timer = _source.fetch_seconds(villager)
-			step = Step.FETCH
+			if _kitchen != null:
+				if not _kitchen.move_inside(villager, Vector2(108, 275)):
+					return Status.FAILED
+				step = Step.ENTER
+			else:
+				_begin_fetch()
+		Step.ENTER:
+			if not villager.is_moving():
+				if not _source.is_available(villager):
+					return Status.FAILED
+				_begin_fetch()
 		Step.FETCH:
 			timer -= delta
 			if timer > 0.0:
@@ -59,10 +77,15 @@ func tick(delta: float) -> Status:
 			if _restore <= 0.0:
 				return Status.FAILED
 			villager.rig.set_held_item(_source.taken_icon)
-			villager.rig.play(VillagerRig.ANIM_EAT)
-			villager.state = Villager.State.EATING
-			timer = Balance.EAT_SECONDS
-			step = Step.EAT
+			if _kitchen != null:
+				if not _kitchen.move_inside(villager, _kitchen.seat(villager)):
+					return Status.FAILED
+				step = Step.SEAT
+			else:
+				_begin_eat()
+		Step.SEAT:
+			if not villager.is_moving():
+				_begin_eat()
 		Step.EAT:
 			timer -= delta
 			if timer > 0.0:
@@ -71,11 +94,58 @@ func tick(delta: float) -> Status:
 			villager.status.add_fun((Balance.FUN_EAT + _source.taken_fun) * Traits.modifier(villager.data.traits, "eat_joy"))
 			villager.status.add_energy(Balance.EAT_ENERGY)
 			villager.emote("icons/happy")
-			return Status.DONE
+			if _kitchen != null:
+				villager.rig.seated_eating = false
+				villager.rig.set_held_item("")
+				if not villager.move_to_cell(_kitchen.entry_cell()):
+					return Status.FAILED
+				step = Step.EXIT
+			else:
+				return Status.DONE
+		Step.EXIT:
+			if not villager.is_moving():
+				return Status.DONE
 	return Status.RUNNING
 
 
+func _begin_fetch() -> void:
+	villager.clear_bubble()
+	villager.face_towards(_kitchen.point(Vector2(58, 257)) if _kitchen != null else _source.target.position)
+	villager.rig.play(_source.fetch_anim())
+	villager.state = Villager.State.WORKING
+	timer = _source.fetch_seconds(villager)
+	step = Step.FETCH
+
+
+func refresh_layout() -> void:
+	if villager.interior != _kitchen.building:
+		return
+	if step == Step.EAT or step == Step.SEAT:
+		villager.rig.seated_eating = false
+		if not _kitchen.move_inside(villager, _kitchen.seat(villager)):
+			fail()
+		step = Step.SEAT
+	elif step == Step.ENTER or step == Step.FETCH:
+		if not _kitchen.move_inside(villager, Vector2(108, 275)):
+			fail()
+		step = Step.ENTER
+	elif step == Step.EXIT:
+		if not villager.move_to_cell(_kitchen.entry_cell()):
+			fail()
+
+
+func _begin_eat() -> void:
+	villager.rig.seated_eating = _kitchen != null
+	if _kitchen != null:
+		villager.rig.set_facing(1.0 if _kitchen.seats[villager.id] % 2 == 0 else -1.0)
+	villager.rig.play(VillagerRig.ANIM_EAT)
+	villager.state = Villager.State.EATING
+	timer = Balance.EAT_SECONDS
+	step = Step.EAT
+
+
 func stop() -> void:
+	villager.rig.seated_eating = false
 	if step == Step.GO:
 		villager.clear_bubble()
 	if _source != null:
