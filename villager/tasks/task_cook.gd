@@ -48,7 +48,7 @@ func hold_job_item() -> void:
 	if _uses_roast():
 		villager.rig.set_held_item("")
 	elif _station.kitchen != null:
-		villager.rig.set_held_item("props/cooking_spoon", true)
+		villager.rig.set_held_item("props/stone_kitchen_knife" if _station.level == 1 else "props/cooking_spoon", true)
 	else:
 		super.hold_job_item()
 
@@ -106,6 +106,8 @@ func _uses_roast() -> bool:
 
 func _apply_station_animation() -> void:
 	_work_anim = VillagerRig.ANIM_ROAST if _uses_roast() else VillagerRig.ANIM_COOK
+	if _station.kitchen != null and _station.level == 1:
+		_work_anim = VillagerRig.ANIM_PREPARE
 	hold_job_item()
 	villager.rig.play(_work_anim)
 

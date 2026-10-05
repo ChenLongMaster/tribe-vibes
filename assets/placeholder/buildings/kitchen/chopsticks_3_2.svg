@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="552" viewBox="0 0 512 552">
+<g transform="translate(0,48)"><g transform="scale(1.3333333333333333,1.5)"><g transform="translate(192,192) scale(1.0) translate(-192,-192)"><g transform="translate(226,234) scale(0.6)">  <ellipse cx="0" cy="5" rx="6" ry="2" fill="#73533B" stroke="#4E342E" stroke-width="1"/>
+  <path d="M-6 -9 L6 -9 L5 5 Q0 8 -5 5 Z" fill="#B89251" stroke="#4E342E" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="0" cy="-9" rx="6" ry="2.5" fill="#6F5135" stroke="#4E342E" stroke-width="1"/>
+  <path d="M-5 -21 L-3 -7" stroke="#D7B577" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M1 -24 L0 -7" stroke="#D7B577" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M5 -22 L3 -7" stroke="#D7B577" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M1 -20 L1 -7" stroke="#D7B577" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M-5 -2 L5 -2" stroke="#E2C795" stroke-width="1" stroke-linecap="round" fill="none"/>
+</g></g></g></g></svg>

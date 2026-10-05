@@ -14,9 +14,19 @@ Tài liệu này liệt kê **mọi** file hình game đang dùng, để bạn v
 
 > **Lượng lúc sinh tài nguyên (chốt 2026-10-04):** bụi quả mới sinh luôn đầy **100%**, dùng hình đầy quả. Chỉ sỏi/củi được khác lượng ban đầu; hình bụi quả thưa/trụi dành cho trạng thái đã bị hái, mọc lại thì đầy. Đây là quy tắc dữ liệu sinh, không chỉ chọn texture đầy cho một bụi thực tế thiếu quả.
 
+## Chi tiết bếp ba cấp và khung PNG (2026-10-05) — ưu tiên hiện hành
+
+- Scene cấp1 tách hai nhóm root: `MeatRack/Art` dùng `rack_1.svg`; `CookingCanopy/Cook` dùng `cook_1.svg` (thớt đá). Kéo/scale độc lập; marker Cook0/cảnh báo theo thớt. Hình/khung/neo/tọa độ ban đầu giữ nguyên, không sinh thêm asset hay đổi rào. Sau chỉnh vị trí cần Ctrl+S và Export menu / placement PNG.
+- Con quay cấp3 đổi thành **heo rừng nguyên con**, mõm bè/ngà nhỏ, tai, chân gập và đuôi cong, màu nâu vàng đã nướng. Giữ key `buildings/kitchen/roast_chicken_3.svg` và node `RoastFire/Chicken` để tương thích scene/animation; khung512×552/neo256,504 không đổi. Cấp1 chim cút, cấp2 gà; giá/lửa/ghế/rào giữ nguyên. PNG kitchen_3 xuất lại từ scene, hình con quay vẫn là cùng MEAL.
+- Cấp1 không mái/nồi: thớt đá có thịt và dao, giàn thịt gác bếp; chiếu bày món có viền riêng, món thịt/chim trên lá chuối. Chiếu khách dùng lá chuối, giá quay chim cút nhỏ. Cấp2 giữ mái cũ, giàn thịt khuất một phần, đôi đũa lệch nhẹ cạnh mỗi chén bàn ăn. Cấp3 mái lá xếp hàng/diềm gỗ/giằng/vách đan/mặt trời nhỏ, mỗi bàn có ống đũa tre.
+- `buildings/kitchen/rack_1..2` và `chopsticks_3_0..3`: SVG512×552, neo(256,504), tỉ lệ(0.5,21/23), ×0.5. Node MeatRack / ChopstickHolder riêng; chỉ crop alpha vùng chọn. Giữ toàn bộ rào và nhóm nội thất người dùng đã chỉnh; marker Cook0 cấp1 theo thớt. Lá chuối/chén/đũa trong hình bàn; món dự trữ được thêm động theo kho.
+- **PNG thật** `assets/art/buildings/kitchen_1..3.png`:576×552, hiển thị288×276, neo(288,504), vẫn tỉ lệ(0.5,21/23). Nới đệm ngang để chứa đá đã được người dùng chỉnh ngoài khung cũ; không scale/dời vật. **SVG composite/lớp** còn512×552/neo256,504, phục vụ fallback/generator. ArtSpecs dùng cùng neo tỉ lệ nên không cần đổi giá trị. Footprint vẫn4×3; khung xám xuất576×552 là hợp đồng hiện hành, thay số PNG cũ ở các mục lịch sử.
+- `props/stone_kitchen_knife`:24×60, neo(12,9) = (0.5,0.15), hiển thị12×30 trước thu rig. `props/meal_smoked_meat` / `meal_roast_bird`:64×48, neo(32,24) = (0.5,0.5), hiển thị32×24 trước thu rig/quầy. Bày món cấp1 dùng hệ số0.28; rig dùng hệ số đồ cầm hiện hành. Không dùng icon chén khi dân cầm món chín cấp1.
+- Biến thể thịt/chim chọn theo vị trí bếp/ô bày, không thêm loại kho/công thức hoặc dùng RNG mô phỏng. Bóng gian cấp1 theo thớt; cảnh báo theo giàn thấp. Khung/bảng màu/không chữ giữ nguyên. Nguồn bố cục là scene, generator không sinh đè các scene/PNG ráp tay.
+
 ## Rào bếp dùng instance mảnh (2026-10-05) — hiện hành
 
-Ba scene kitchen_1..3 đã bỏ Sprite Art rào nguyên khối, thay bằng 42/79/79 instance trong FenceBack/FenceFront. Cấp1 đá; cấp2 đá/tre; cấp3 đá/gỗ. Các nhóm rào mở khoá, không gom chọn toàn nhóm; chọn từng mảnh để chỉnh. Đường bao/cổng theo toạ độ gốc, nội thất/marker/vùng tránh người dùng chỉnh giữ nguyên. Khung512×552/neo256,504/footprint4×3 và ArtSpecs giữ nguyên; ba PNG assets/art/buildings/kitchen_1..3 đã xuất lại. SVG rào cũ không xoá nhưng không còn được ba scene nạp. Generator kit không sửa bố cục scene.
+Ba scene kitchen_1..3 đã bỏ Sprite Art rào nguyên khối, thay bằng 42/79/79 instance trong FenceBack/FenceFront. Cấp1 đá; cấp2 đá/tre; cấp3 đá/gỗ. Các nhóm rào mở khoá, không gom chọn toàn nhóm; chọn từng mảnh để chỉnh. Đường bao/cổng theo toạ độ gốc, nội thất/marker/vùng tránh người dùng chỉnh giữ nguyên. Các lớp SVG512×552/neo256,504/footprint4×3 và ArtSpecs giữ nguyên; ba PNG576×552/neo288,504 assets/art/buildings/kitchen_1..3 đã xuất lại. SVG rào cũ không xoá nhưng không còn được ba scene nạp. Generator kit không sửa bố cục scene.
 
 ## Bộ mảnh trang trí ráp tay (2026-10-05)
 
@@ -36,7 +46,7 @@ Sprite crop alpha chỉ giảm vùng chọn trong suốt, giữ file/neo. Thanh 
 ## Bố cục bếp chỉnh bằng scene Godot (2026-10-05) — hiện hành
 
 - Nguồn bố cục là `buildings/kitchen_layouts/kitchen_1..3.tscn`; Root có nhóm CookingCanopy/Serving/RoastFire/Dining0… và rào ghép mảnh trong FenceBack/FenceFront. Sprite giữ ID ArtLibrary, dùng region_rect cắt khoảng trong suốt để chọn/nhìn từng vật dễ hơn. Crop chỉ ở Sprite, không đổi file SVG/khung/neo. Mỗi bàn có cặp ghế riêng `seating_<level>_<index>.svg`, cùng hợp đồng512×552; lớp seats_1..3 nguyên khối vẫn để tương thích/composite cũ.
-- Position/Scale dương nhóm là nguồn chung cho hình, marker tương tác, mặt ghế và vùng tránh. KitchenLayout đọc transform scene, giữ raw chỉ làm trung gian đường đi; không cần sửa số Python/GDScript để dời vật. KitchenInterior nạp chính scene, ghép động món/lửa/gà/khói; cảnh báo và bóng mái theo nhóm. Giữ mái cũ,4×3/512×552/neo256,504/hiển thị0.5/4–6–8 khách/1–2–3 thợ.
+- Position/Scale dương nhóm là nguồn chung cho hình, marker tương tác, mặt ghế và vùng tránh. KitchenLayout đọc transform scene, giữ raw chỉ làm trung gian đường đi; không cần sửa số Python/GDScript để dời vật. KitchenInterior nạp chính scene, ghép động món/lửa/gà/khói; cảnh báo và bóng mái theo nhóm. Gian nấu theo chi tiết ba cấp hiện hành;4×3/hiển thị0.5/4–6–8 khách/1–2–3 thợ, SVG512×552 và PNG576×552.
 - Show Guides/Show People chỉ hiển thị trong editor. Dân mẫu đứng giữ cỡ người lớn0.65, không scale theo đồ vật; game thật dùng rig/animation hiện hành. Root/Sprite con khoá chọn; các nhóm nội thất chỉnh qua nhóm cha, rào chỉnh từng instance mảnh. Không xoay/mirror nhóm hoặc đổi tên/số marker tương tác.
 - Nút Export menu / placement PNG trên root xuất assets/art/buildings/kitchen_1..3.png từ scene đang sửa, nền alpha/khung/neo giữ nguyên. Lưu scene trước khi xuất, chờ import rồi chạy lại. Đây là hình cho menu/bóng đặt/móng; cần xuất lại sau khi chỉnh bố cục. Nếu hình vượt khung xám thì báo warning và không ghi đè. Generator tạm không ghi đè scene hay PNG. Xem README trong thư mục scene.
 
@@ -367,7 +377,7 @@ Quy ước chung cho hình công trình (để art thật thay vào là khớp l
 | Key | Cỡ file (2×) | Hiển thị | Neo | Ghi chú |
 |---|---|---|---|---|
 | `buildings/tent_1` · `_2` · `_3` | 256×300 | 128×150 (phủ 2×2 ô) | (0.5, 0.92) | Cả ba là lều da phủ cỏ/rơm, cửa chếch phải. Thân 76%/89%/100% quanh chân (128,276), sân đất cố định 2×2. Cấp 1 nhỏ, da nâu cũ rách, miếng vá, mép sờn, cỏ thưa. Cấp 2 lớn hơn, da lành sáng, mái cỏ ngay ngắn. Cấp 3 lớn nhất, mái cỏ dày, tua rơm cửa, chim Lạc/mặt trời/dải răng cưa màu đất-đồng trên da. |
-| `buildings/kitchen_1` · `_2` · `_3` | 512×552 | 256×276 (4×3) | (0.5,21/23), raw(256,504) | Composite mẫu v7 đã duyệt: sân nhỏ/vừa/lớn, mái nấu chéo phải,2 chiếu/3 bàn đá tam giác/4 bàn gỗ,4/6/8 khách. Dùng cho menu/bóng mờ; game sống dùng các lớp dưới. |
+| `buildings/kitchen_1` · `_2` · `_3` | PNG576×552 / SVG512×552 | PNG288×276 / SVG256×276 (4×3) | (0.5,21/23), PNG(288,504) / SVG(256,504) | Composite mẫu v7 đã duyệt: sân nhỏ/vừa/lớn, mái nấu chéo phải,2 chiếu/3 bàn đá tam giác/4 bàn gỗ,4/6/8 khách. Dùng cho menu/bóng mờ; game sống dùng các lớp dưới. |
 | `buildings/kitchen/floor_1..3` | 512×552 | 256×276 | (0.5,21/23) | Lớp rỗng trong suốt để giữ hợp đồng asset; đất sân dùng nền map chung. |
 | `buildings/kitchen/fence_back_1..3` · `fence_front_1..3` | 512×552 | 256×276 | (0.5,21/23) | Đá / đá+tre mảnh / đá+gỗ dày, cổng trước-trái; hai lớp xa/gần. |
 | `buildings/kitchen/cook_1..3` · `roof_1..3` · `pole_1..3` · `steam_1..3` | 512×552 | 256×276 | (0.5,21/23) | Khu nấu/mái/chân gần/hơi nước tách lớp;52/60/67%, bốn cọc và dụng cụ tăng qua cấp. |
@@ -376,6 +386,9 @@ Quy ước chung cho hình công trình (để art thật thay vào là khớp l
 | `buildings/kitchen/roast_base_1..3` · `roast_chicken_1..3` · `roast_fire_1..3` | 512×552 | 256×276 | (0.5,21/23) | Giá/than, thân gà và lửa tách lớp để quay quanh xiên; khói mỏng vẽ bằng code. |
 | `buildings/kitchen/dining_1_0..1` · `dining_2_0..2` · `dining_3_0..3` | 512×552 | 256×276 | (0.5,21/23) | Mỗi chiếu/bàn một lớp để người đi trước/sau; trục dài dọc. |
 | `props/cooking_spoon` | 20×80 | 10×40, thu theo rig | (0.5,0.075), raw(10,6) | Muôi gỗ neo cán ở tay, xoay khi khuấy nồi. |
+| `props/stone_kitchen_knife` | 24×60 | 12×30, thu theo rig | (0.5,0.15), raw(12,9) | Dao đá cấp1, cán nối bàn tay, nhịp thái trên thớt. |
+| `props/meal_smoked_meat` · `meal_roast_bird` | 64×48 | 32×24, thu theo rig/quầy | (0.5,0.5), raw(32,24) | Món chín trên lá chuối ở cấp1; cùng kho MEAL. |
+| `buildings/kitchen/rack_1..2` · `chopsticks_3_0..3` | 512×552 | 256×276 | (0.5,21/23), raw(256,504) | Giàn thịt/ống đũa tách Sprite; lấy bố cục cuối từ scene. |
 
 | `buildings/storage_1` · `_2` · `_3` | 384×380 | 192×190 (3×3) | (0.5, 0.9368) | Kho: cấp 1 mái che dựa + đống gỗ, đống đá; cấp 2 nhà vách gỗ cửa lớn; cấp 3 nhà kho to, nền đá, cửa đôi. |
 | `buildings/forge_1` · `_2` · `_3` | 384×320 | 192×160 (3×2) | (0.5, 0.925) | Lò rèn: lò đá vòm bên trái (miệng lò đỏ rực), đe đá ở giữa; cấp 2 thêm mái + ống bễ; cấp 3 ống khói cao + cờ. **Chừa trống phần trước-trái, giữa và phải** để code dựng rìu (trái), cuốc (giữa), giáo (phải). |

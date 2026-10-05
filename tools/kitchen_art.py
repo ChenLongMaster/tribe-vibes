@@ -224,7 +224,17 @@ def canopy_roof(body, level):
 def dining(body, x, y, factor):
     return f'<g transform="translate({x},{y}) scale({factor})">' + body + '</g>'
 
-def mat(x, y):
+def banana_leaf(x, y, food=True):
+    b = path(f'M{x-13} {y} Q{x-17} {y-10} {x+10} {y-9} Q{x+17} {y-2} {x+11} {y+6} Q{x-1} {y+10} {x-13} {y} Z', '#789950', 1.6)
+    b += line(x-11, y+2, x+12, y-5, '#CFD58A', 1.2)
+    for dx in (-5, 1, 7):
+        b += line(x+dx, y-1, x+dx-2, y-6, '#ABC072', .7)
+    if food:
+        b += ellipse(x-3, y-1, 4.5, 2.4, '#BD763F', 1)
+        b += ellipse(x+5, y-3, 3, 2, '#D49953', .8)
+    return b
+
+def mat(x, y, serving=False):
     b = contact_shadow(x + 4, y + 5, 30, 33)
     b += path(f'M{x-25} {y-32} Q{x} {y-35} {x+25} {y-32} L{x+30} {y+33} Q{x} {y+37} {x-30} {y+33} Z', '#AA8954', 3)
     b += path(f'M{x-24} {y-33} Q{x} {y-36} {x+24} {y-33} L{x+29} {y+29} Q{x+4} {y+33} {x-29} {y+29} Z', '#D8BC7D', 2)
@@ -236,9 +246,13 @@ def mat(x, y):
     for dx in range(-24, 25, 6):
         b += line(x + dx, y + 33, x + dx + 1, y + 38, '#AA8954', 1.5)
     b += path(f'M{x-29} {y+25} Q{x-18} {y+23} {x-17} {y+29} L{x-29} {y+29} Z', '#E4CA91', 1)
-    return b + bowl(x, y - 13) + bowl(x, y + 13)
+    if serving:
+        b += path(f'M{x-23} {y-29} L{x+23} {y-29} L{x+25} {y-23} L{x-25} {y-23} Z', '#9A6B42', 0)
+        b += path(f'M{x-27} {y+19} L{x+27} {y+19} L{x+28} {y+25} L{x-28} {y+25} Z', '#9A6B42', 0)
+        return b
+    return b + banana_leaf(x, y - 13) + banana_leaf(x, y + 13)
 
-def table(x, y, wood):
+def table(x, y, wood, index=0):
     b = contact_shadow(x + 7, y + 40, 33, 14)
     if wood:
         for dx in (-22, 22):
@@ -257,7 +271,47 @@ def table(x, y, wood):
         b += path(f'M{x - 23} {y - 35} Q{x} {y - 40} {x + 22} {y - 34} L{x + 31} {y + 24} Q{x+2} {y + 33} {x - 31} {y + 26} Z', '#C9CBB7', 4)
         b += path(f'M{x - 19} {y - 30} L{x + 16} {y - 31} L{x+22} {y-17} L{x-21} {y-21} Z', '#DDDDC7', 0)
         b += path(f'M{x + 19} {y - 28} l-6 8 l4 9', 'none', 0, ' stroke="#A2AA95" stroke-width="2"')
-    return b + bowl(x, y - 13) + bowl(x, y + 13)
+    b += bowl(x, y - 13) + bowl(x, y + 13)
+    if not wood:
+        # Hai đôi lệch hướng/độ mở nhẹ, tránh xếp như một mẫu đóng dấu.
+        for row, dy in enumerate((-13, 13)):
+            angle = (-12, 9, 17, -6, 4, -15)[(index*2+row) % 6]
+            sticks = line(-9, -5, 10, 1, '#855D38', 1.6) + line(-8, -2, 11, 4, '#BA8D53', 1.4)
+            b += f'<g transform="translate({x+11} {y+dy+7}) rotate({angle})">{sticks}</g>'
+    return b
+
+def chopstick_holder():
+    b = ellipse(0, 5, 6, 2, '#73533B', 1)
+    b += path('M-6 -9 L6 -9 L5 5 Q0 8 -5 5 Z', '#B89251', 1.5)
+    b += ellipse(0, -9, 6, 2.5, '#6F5135', 1)
+    for x, y, tilt in [(-3,-21,-2), (0,-24,1), (3,-22,2), (1,-20,0)]:
+        b += line(x+tilt,y,x,-7,'#D7B577',1.5)
+    b += line(-5,-2,5,-2,'#E2C795',1)
+    return b
+
+def smoked_rack():
+    b = ''
+    for x, y in [(72, 243), (181, 265)]:
+        b += line(x,y,x,y-108,LINE,7) + line(x-1,y-2,x-1,y-107,'#AA9259',3)
+        for dy in (22,46,70,94):
+            b += line(x-3,y-dy,x+3,y-dy,'#DCC792',1.5)
+    b += line(70,139,184,161,LINE,7) + line(71,137,184,159,'#C0A774',3)
+    for i, (x,y) in enumerate([(89,143),(112,148),(136,153),(160,158)]):
+        b += line(x,y,x-2,y+9,'#DCC594',2)
+        b += path(f'M{x-5} {y+8} Q{x+2} {y+5} {x+7} {y+10} L{x+4} {y+44-i*3} Q{x-3} {y+52-i*3} {x-8} {y+41-i*3} Z', '#8B5135' if i%2 else '#A96540', 2)
+        b += line(x-3,y+13,x-4,y+35,'#D49B6C',1.5)
+        b += path(f'M{x} {y+18} l3 3 l-4 6 l3 4', 'none', 1)
+    return b
+
+def stone_prep():
+    b = contact_shadow(109,244,39,11)
+    b += path('M70 213 Q87 197 114 199 L144 213 L148 232 Q121 249 80 236 L68 225 Z', '#8E988C',3)
+    b += path('M72 212 Q88 200 113 201 L142 214 Q112 232 72 223 Z', '#CDD0B9',3)
+    b += path('M88 213 Q95 204 111 210 Q125 211 122 220 Q106 228 92 222 Z','#B77551',2)
+    b += path('M92 213 Q102 211 114 215 L111 218 Q100 215 94 218 Z','#E6BD8D',0)
+    b += path('M125 209 L138 212 L127 223 L120 219 Z','#AAB3A1',1.5)
+    b += line(138,213,146,206,'#9C764B',4)
+    return b
 
 def pot(x, y, size=1):
     b = path('M-15 0 Q-14 19 0 21 Q14 19 15 0 Z', '#97613F', 3)
@@ -287,8 +341,9 @@ def upgraded_cooking(level):
     top = roof
     front_pole = pole
     if level == 1:
-        top = top.replace('#B7B06E', '#AAA267').replace('#C8BE7C', '#BDB67B')
-        top += path('M52 115 l17 5 l-12 20 l-16 -5 Z', '#A2945C', 1.5)
+        cook = stone_prep()
+        top = ''
+        front_pole = ''
     elif level == 2:
         cook += utensils(level) + jar(188, 280)
         cook += path('M171 248 Q167 266 184 268 Q202 266 197 248 Z', '#A97850', 3) + ellipse(184, 248, 13, 5, '#D4A876', 2)
@@ -310,16 +365,31 @@ def upgraded_cooking(level):
         cook += rect(155, 274, 22, 22, '#AA8751', 5, 2)
         for dx in range(159, 175, 5):
             cook += line(dx, 278, dx, 293, '#D0B077', 1)
-        top = top.replace('#B7B06E', '#C5B676').replace('#858953', '#91834F')
-        top += path('M23 142 Q78 152 136 184 L135 194 Q76 162 23 152 Z', '#AD9C63', 2)
-        for i in range(7):
-            x = 32 + i * 15
-            y = 149 + i * 5.6
-            top += line(x, y, x - 3, y + 12, '#DDCA89', 2)
-        top += line(67, 79, 201, 110, '#4E342E', 6) + line(68, 78, 201, 109, '#D1B984', 2)
-        top += ellipse(179, 112, 9, 7, '#AD8951', 2)
-        for dx, dy in [(0, -11), (0, 11), (-12, 0), (12, 0)]:
-            top += line(179 + dx * 0.7, 112 + dy * 0.7, 179 + dx, 112 + dy, '#7A603D', 1.5)
+        # Gian chắc chắn: vách đan thấp/giằng khung, mái lá xếp hàng và diềm gỗ.
+        panel = path('M73 164 L189 192 L189 218 L73 192 Z', '#B2945F', 3)
+        for x in range(78, 187, 9):
+            y = 165 + (x-73)*.24
+            panel += line(x,y,x,y+25,'#DDC792',1)
+        for dy in (7,15,23):
+            panel += line(74,164+dy,188,191+dy,'#886D42',1)
+        cook = panel + cook
+        cook += line(70,165,91,185,'#8F7049',7) + line(198,198,176,210,'#8F7049',7)
+        cook += line(70,142,198,174,LINE,8) + line(70,140,198,172,'#B49663',3)
+        top = path('M20 141 L132 181 L202 110 L201 124 L137 195 L20 154 Z', '#7C754D', 4)
+        top += path('M20 140 Q44 108 66 77 Q109 79 202 107 Q176 143 135 183 Q75 168 20 140 Z', '#B9B77B', 5)
+        for i in range(3):
+            top += path(f'M{35+i*15} {119-i*17} Q{86+i*4} {134-i*18} {151+i*16} {154-i*17}', 'none', 0, ' stroke="#7D8954" stroke-width="3"')
+        for i in range(9):
+            x, y = 70+i*14, 83+i*3
+            top += line(x,y,x-39,y+51,'#D9D397',1.8)
+        top += line(66,78,200,108,LINE,6) + line(67,77,200,107,'#CFB57B',2)
+        top += path('M20 143 Q77 163 133 183 L134 193 Q76 176 20 153 Z','#986F43',3)
+        for i in range(8):
+            x,y = 30+i*13, 150+i*4.5
+            top += path(f'M{x} {y} l4 1 l-3 3 l4 1', 'none', 0, ' stroke="#E0C586" stroke-width="1.2"')
+        top += ellipse(176,116,9,7,'#C69B5E',2)
+        for dx,dy in [(0,-10),(0,10),(-11,0),(11,0)]:
+            top += line(176+dx*.7,116+dy*.7,176+dx,116+dy,'#785637',1.5)
     return (cook, top, front_pole)
 
 ROAST_CENTERS = {1: (158, 210), 2: (154, 210), 3: (282, 187)}
@@ -355,7 +425,7 @@ def roast_parts(level):
         base += ellipse(0, 21, 10, 2.5, '#D6A15B', 0)
         base += ellipse(32, 20, 7, 4, '#B98A59', 2) + ellipse(31, 19, 5, 2, '#869A52', 0)
         base += line(28, 19, 34, 17, '#C1CE81', 1)
-    # Mảnh gà riêng có trục ngay giữa thân để lăn quanh xiên, không xoay chân giá.
+    # Con quay riêng có trục giữa thân; giữ key cũ để scene/animation vẫn tương thích.
     chicken = path('M-13 -8 Q-3 -15 9 -10 Q18 -7 17 1 Q15 11 4 11 Q-10 12 -16 4 Q-19 -2 -13 -8 Z', '#CF8A44', 2.5)
     chicken += path('M-12 -8 Q0 -13 10 -7 Q16 -5 13 -1 Q1 -6 -12 -2 Z', '#EAB368', 0)
     chicken += path('M-2 -2 Q8 -8 10 1 Q8 8 -1 4 Q-5 1 -2 -2 Z', '#B87639', 1.5)
@@ -363,6 +433,24 @@ def roast_parts(level):
     chicken += line(-20, 9, -25, 10, '#E5D3A4', 2.5) + ellipse(-26, 10, 2, 2, '#F0DFB4', 0)
     for x, y in [(-7, -4), (7, -5), (13, 2)]:
         chicken += ellipse(x, y, 1, 1.5, '#A86A36', 0)
+    if level == 1:
+        chicken = '<g transform="scale(.60)">' + chicken + '</g>'
+    elif level == 3:
+        # Heo rừng quay: mõm bè/ngà nhỏ, tai nhọn mềm, chân gập và đuôi cong.
+        chicken = path('M-22 -6 Q-18 -15 -3 -13 Q12 -15 19 -5 L19 5 Q10 15 -6 12 Q-23 12 -22 -6 Z', '#AA693D', 2.5)
+        chicken += path('M-20 -6 Q-13 -13 0 -10 Q10 -12 16 -5 Q1 -8 -18 -1 Z', '#D69A57', 0)
+        chicken += path('M-17 -10 l3 -5 l4 2 l4 -3 l5 3 l5 -1 l3 4', 'none', 0, ' stroke="#75472E" stroke-width="2" stroke-linejoin="round"')
+        chicken += path('M14 -5 Q24 -8 28 1 L32 3 L32 9 Q25 15 16 10 Q10 6 14 -5 Z', '#BB7946', 2)
+        chicken += path('M16 -5 Q12 -16 21 -12 L23 -4 Z', '#975734', 2)
+        chicken += ellipse(29, 6, 7, 4.5, '#D09865', 1.7)
+        chicken += ellipse(29, 5.5, 1.2, 1.4, '#674331', 0) + ellipse(33, 6, 1, 1.3, '#674331', 0)
+        chicken += path('M21 9 Q28 14 28 5 Q30 16 22 14 Z', '#EAD5AA', 1)
+        chicken += line(20, 1, 23, 2, '#674331', 1.5)
+        for x in (-15, 7):
+            chicken += path(f'M{x} 7 Q{x-5} 15 {x+1} 17 L{x+6} 15 L{x+3} 10 Z', '#9A5E38', 1.7)
+            chicken += line(x+1,16,x+4,15,'#674331',2)
+        chicken += path('M-21 1 Q-32 -4 -28 -9 Q-23 -12 -24 -7', 'none', 0, ' stroke="#975734" stroke-width="3" stroke-linecap="round"')
+        chicken += path('M-12 -2 Q-8 1 -5 -2 M0 3 l5 -2', 'none', 0, ' stroke="#DFAC72" stroke-width="1.5"')
     fire = path('M-8 8 Q-12 0 -6 -7 Q-6 -1 -2 -3 Q2 -6 2 -13 Q12 -1 8 7 Q2 14 -8 8 Z', '#EE9644', 1.5)
     fire += path('M-4 7 Q-5 2 -1 -3 Q0 1 3 0 Q7 6 2 9 Z', '#FFD56D', 0)
     x, y = ROAST_CENTERS[level]
@@ -385,11 +473,16 @@ def layers(level):
     put('fence_front_' + str(level), shrink(front, level))
     cook, top, front_pole = upgraded_cooking(level)
     put('cook_' + str(level), shrink(canopy(cook, level), level))
+    if level <= 2:
+        put('rack_' + str(level), shrink(canopy(smoked_rack(), level), level))
     put('roof_' + str(level), shrink(canopy_roof(top, level), level))
     put('pole_' + str(level), shrink(canopy(front_pole, level), level))
-    put('steam_' + str(level), shrink(canopy(steam, level), level))
-    serving = serving_table(0, 0, level != 2) + bowl(0, -20) + bowl(-6, -3) + bowl(7, 11)
-    serving += ellipse(0, 22, 9, 4, '#A47748', 2) + ellipse(-1, 21, 6, 2, '#91AA56', 0)
+    put('steam_' + str(level), '' if level == 1 else shrink(canopy(steam, level), level))
+    if level == 1:
+        serving = mat(0, 0, True)
+    else:
+        serving = serving_table(0, 0, level != 2) + bowl(0, -20) + bowl(-6, -3) + bowl(7, 11)
+        serving += ellipse(0, 22, 9, 4, '#A47748', 2) + ellipse(-1, 21, 6, 2, '#91AA56', 0)
     put('serving_' + str(level), shrink(dining(serving, *SERVING_CENTERS[level], 0.7), level))
     roast_base, roast_chicken, roast_fire = roast_parts(level)
     put('roast_base_' + str(level), shrink(roast_base, level))
@@ -402,13 +495,15 @@ def layers(level):
         if level == 1:
             surface = dining(mat(0, 0), x, y, 0.76)
         else:
-            surface = dining(table(0, 0, level == 3), x, y, 0.6)
+            surface = dining(table(0, 0, level == 3, index), x, y, 0.6)
             for side, sx in enumerate((x - offset, x + offset)):
                 seat = log_seat() if level == 2 else wooden_chair(1 if side == 0 else -1)
                 pair += dining(seat, sx, y + 12, 0.85)
             seats += pair
         put(f'seating_{level}_{index}', shrink(pair, level))
         put(f'dining_{level}_{index}', shrink(surface, level))
+        if level == 3:
+            put(f'chopsticks_3_{index}', shrink(dining(chopstick_holder(), x-8, y, .6), level))
     put('seats_' + str(level), shrink(seats, level))
     return result
 
@@ -420,12 +515,25 @@ def composite(level):
     parts = layers(level)
     names = [f"floor_{level}", f"fence_back_{level}", f"cook_{level}", f"roof_{level}", f"steam_{level}", f"pole_{level}", f"serving_{level}", f"roast_base_{level}", f"roast_fire_{level}", f"roast_chicken_{level}", f"seats_{level}"]
     names += [f"dining_{level}_{i}" for i in range(len(CENTERS[level]))]
+    if level <= 2:
+        names.insert(names.index(f'roof_{level}'), f'rack_{level}')
+    else:
+        names += [f'chopsticks_3_{i}' for i in range(4)]
     names += [f"fence_front_{level}"]
     return svg(512, 552, enlarge("".join(parts[n] for n in names)), "Bếp4×3, neo256,504; mái nghiêng phải, bàn dọc")
 
 def generate(write):
     # Muôi thật để đầu bếp khuấy, icon nồi chỉ dùng trên đầu/bảng thông tin.
     write("props/cooking_spoon", svg(20, 80, line(10, 6, 10, 62, LINE, 7) + line(9, 6, 9, 61, "#C3A375", 3) + ellipse(10, 68, 7, 9, "#AD8954", 3)))
+    write('props/stone_kitchen_knife', svg(24, 60, rect(8, 3, 7, 24, '#A28254', 3, 2) + path('M8 24 L18 25 L20 47 Q12 53 5 55 L5 29 Z', '#AEB7A6', 2) + path('M7 28 L9 47 L7 51 Z', '#E0DECA', 0)))
+    leaf = '<g transform="translate(32 28) scale(1.4) translate(-32 -28)">' + banana_leaf(32, 28, False) + '</g>'
+    smoked = leaf + path('M19 19 Q30 13 40 19 L45 28 Q34 39 20 32 Z', '#9B5A38', 2)
+    for x in (25, 31, 37):
+        smoked += line(x,20,x-2,29,'#DBA173',1.5)
+    bird = leaf + ellipse(32,24,12,8,'#CB8843',2) + ellipse(35,24,5,4,'#AD6B35',1)
+    bird += line(22,28,16,32,'#DECBA3',2) + path('M20 25 Q14 24 16 30 L22 30 Z','#DCA456',1.5)
+    write('props/meal_smoked_meat', svg(64,48,smoked))
+    write('props/meal_roast_bird', svg(64,48,bird))
     for level in (1,2,3):
         for name, body in layers(level).items():
             write("buildings/kitchen/" + name, svg(512,552,enlarge(body)))

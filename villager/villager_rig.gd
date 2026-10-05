@@ -25,6 +25,7 @@ const ANIM_CHOP: StringName = &"chop"
 const ANIM_MINE: StringName = &"mine"
 const ANIM_FISH: StringName = &"fish"
 const ANIM_COOK: StringName = &"cook"
+const ANIM_PREPARE: StringName = &"prepare_food"
 const ANIM_ROAST: StringName = &"roast"
 const ANIM_ATTACK: StringName = &"attack"
 const ANIM_STRIKE: StringName = &"strike"
@@ -549,6 +550,12 @@ func _animate(t: float) -> void:
 			_pose.rotation = 0.12
 			_pose.position.y = -absf(sin(t * 7.0)) * 1.0
 			_head.rotation = 0.12
+		ANIM_PREPARE:
+			# Thớt thấp: nhấc dao ngắn rồi hạ xuống, tay kia giữ thịt.
+			_arm_front.rotation = -0.85 + 0.3 * sin(t * 5.0)
+			_arm_back.rotation = -0.55
+			_pose.rotation = 0.1
+			_head.rotation = 0.14
 		ANIM_STRIKE:
 			# Dậm chân giận dỗi: hai chân thay nhau, tay vung loạn xạ, lắc đầu.
 			var stomp: float = sin(t * 11.0)
@@ -621,6 +628,8 @@ func _place_held_item() -> void:
 		_held_item.position = SHOULDER_FRONT + Vector2(0, HAND_DISTANCE).rotated(_arm_front.rotation)
 		if _held_is_tool:
 			var tilt: float = -0.2 if _held_key == "props/cooking_spoon" else TOOL_TILT
+			if _held_key == "props/stone_kitchen_knife":
+				tilt = -0.7
 			if _held_key == "props/build_hammer":
 				tilt = PI # neo ở cán, đầu búa vung theo phía ngoài bàn tay
 			_held_item.rotation = _arm_front.rotation + tilt

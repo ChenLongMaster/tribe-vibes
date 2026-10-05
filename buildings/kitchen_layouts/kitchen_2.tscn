@@ -1,453 +1,455 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dfwckbty81s5d"]
 
-[ext_resource type="Script" path="res://buildings/kitchen_layouts/layout_scene.gd" id="1_ja6u5"]
+[ext_resource type="Script" uid="uid://b02aa1rq36v07" path="res://buildings/kitchen_layouts/layout_scene.gd" id="1_ja6u5"]
 [ext_resource type="PackedScene" path="res://buildings/parts/bamboo_h_64.tscn" id="2_b724v"]
-[ext_resource type="Script" path="res://buildings/kitchen_layouts/art_piece.gd" id="3_co158"]
+[ext_resource type="Script" uid="uid://ccuyuk8wul4i5" path="res://buildings/kitchen_layouts/art_piece.gd" id="3_co158"]
 [ext_resource type="PackedScene" path="res://buildings/parts/bamboo_post.tscn" id="3_y77de"]
 [ext_resource type="PackedScene" path="res://buildings/parts/bamboo_post_tied.tscn" id="4_ulwjj"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/cook_2.svg" id="5_0pi57"]
+[ext_resource type="Texture2D" uid="uid://cgiyb4qlygi0i" path="res://assets/placeholder/buildings/kitchen/cook_2.svg" id="5_0pi57"]
 [ext_resource type="PackedScene" path="res://buildings/parts/stone_08.tscn" id="5_hmrq0"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/roof_2.svg" id="6_1vcgq"]
+[ext_resource type="Texture2D" uid="uid://w2ywbiqm4liw" path="res://assets/placeholder/buildings/kitchen/roof_2.svg" id="6_1vcgq"]
 [ext_resource type="PackedScene" path="res://buildings/parts/stone_07.tscn" id="6_pm26b"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/steam_2.svg" id="7_jvmgg"]
+[ext_resource type="Texture2D" uid="uid://b6yteetttnm24" path="res://assets/placeholder/buildings/kitchen/steam_2.svg" id="7_jvmgg"]
 [ext_resource type="PackedScene" path="res://buildings/parts/stone_06.tscn" id="7_pciiy"]
 [ext_resource type="PackedScene" path="res://buildings/parts/stone_01.tscn" id="8_lp2fo"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/pole_2.svg" id="8_xsipq"]
+[ext_resource type="Texture2D" uid="uid://dw0n2y4ggg6uj" path="res://assets/placeholder/buildings/kitchen/pole_2.svg" id="8_xsipq"]
 [ext_resource type="PackedScene" path="res://buildings/parts/stone_03.tscn" id="9_dnhvu"]
-[ext_resource type="Script" path="res://buildings/kitchen_layouts/person_hint.gd" id="9_fr8oj"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/serving_2.svg" id="10_485rd"]
+[ext_resource type="Script" uid="uid://bfkt6w4we03c4" path="res://buildings/kitchen_layouts/person_hint.gd" id="9_fr8oj"]
+[ext_resource type="Texture2D" uid="uid://r1wvbcxk57d6" path="res://assets/placeholder/buildings/kitchen/serving_2.svg" id="10_485rd"]
 [ext_resource type="PackedScene" path="res://buildings/parts/bamboo_v_64.tscn" id="10_usv5i"]
-[ext_resource type="Script" path="res://buildings/kitchen_layouts/avoid_area.gd" id="11_hnyw8"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/roast_base_2.svg" id="12_b724v"]
+[ext_resource type="Script" uid="uid://bryrg660j6i3c" path="res://buildings/kitchen_layouts/avoid_area.gd" id="11_hnyw8"]
+[ext_resource type="Texture2D" uid="uid://lfurydnykg5s" path="res://assets/placeholder/buildings/kitchen/roast_base_2.svg" id="12_b724v"]
 [ext_resource type="PackedScene" path="res://buildings/parts/stone_04.tscn" id="12_r02ak"]
 [ext_resource type="PackedScene" path="res://buildings/parts/stone_02.tscn" id="13_hicwx"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/roast_fire_2.svg" id="13_y77de"]
+[ext_resource type="Texture2D" uid="uid://uiviq4u4nylg" path="res://assets/placeholder/buildings/kitchen/roast_fire_2.svg" id="13_y77de"]
 [ext_resource type="PackedScene" path="res://buildings/parts/stone_05.tscn" id="14_0l1ci"]
 [ext_resource type="PackedScene" path="res://buildings/parts/bamboo_h_32.tscn" id="14_b724v"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/roast_chicken_2.svg" id="14_ulwjj"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/seating_2_0.svg" id="15_hmrq0"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/dining_2_0.svg" id="16_pm26b"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/seating_2_1.svg" id="17_pciiy"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/dining_2_1.svg" id="18_lp2fo"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/seating_2_2.svg" id="19_dnhvu"]
-[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/dining_2_2.svg" id="20_usv5i"]
+[ext_resource type="Texture2D" uid="uid://bgufxvdxyd85u" path="res://assets/placeholder/buildings/kitchen/roast_chicken_2.svg" id="14_ulwjj"]
+[ext_resource type="Texture2D" uid="uid://c3w3hg4ii37w" path="res://assets/placeholder/buildings/kitchen/seating_2_0.svg" id="15_hmrq0"]
+[ext_resource type="Texture2D" uid="uid://ba1qxih01y2a0" path="res://assets/placeholder/buildings/kitchen/rack_2.svg" id="15_y77de"]
+[ext_resource type="Texture2D" uid="uid://duesytvvm587p" path="res://assets/placeholder/buildings/kitchen/dining_2_0.svg" id="16_pm26b"]
+[ext_resource type="Texture2D" uid="uid://4c14xlre5yj3" path="res://assets/placeholder/buildings/kitchen/seating_2_1.svg" id="17_pciiy"]
+[ext_resource type="Texture2D" uid="uid://ploksjfeos6d" path="res://assets/placeholder/buildings/kitchen/dining_2_1.svg" id="18_lp2fo"]
+[ext_resource type="Texture2D" uid="uid://xhc4omvfhksp" path="res://assets/placeholder/buildings/kitchen/seating_2_2.svg" id="19_dnhvu"]
+[ext_resource type="Texture2D" uid="uid://da41i2mkx6pcu" path="res://assets/placeholder/buildings/kitchen/dining_2_2.svg" id="20_usv5i"]
 
 [node name="KitchenLayout" type="Node2D" unique_id=1215134199]
 y_sort_enabled = true
 script = ExtResource("1_ja6u5")
 level = 2
-metadata/_edit_lock_ = true
 
 [node name="FenceBack" type="Node2D" parent="." unique_id=156367443]
 y_sort_enabled = true
 position = Vector2(0, -152.08499)
 
-[node name="BambooH64_001" type="Node2D" parent="FenceBack" unique_id=543207940 instance=ExtResource("2_b724v")]
+[node name="BambooH64_001" parent="FenceBack" unique_id=543207940 instance=ExtResource("2_b724v")]
 position = Vector2(-88.01111, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooH64_002" type="Node2D" parent="FenceBack" unique_id=1823125049 instance=ExtResource("2_b724v")]
+[node name="BambooH64_002" parent="FenceBack" unique_id=1823125049 instance=ExtResource("2_b724v")]
 position = Vector2(-52.80667, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooH64_003" type="Node2D" parent="FenceBack" unique_id=1084645006 instance=ExtResource("2_b724v")]
+[node name="BambooH64_003" parent="FenceBack" unique_id=1084645006 instance=ExtResource("2_b724v")]
 position = Vector2(-17.602228, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooH64_004" type="Node2D" parent="FenceBack" unique_id=188494101 instance=ExtResource("2_b724v")]
+[node name="BambooH64_004" parent="FenceBack" unique_id=188494101 instance=ExtResource("2_b724v")]
 position = Vector2(17.602213, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooH64_005" type="Node2D" parent="FenceBack" unique_id=19632815 instance=ExtResource("2_b724v")]
+[node name="BambooH64_005" parent="FenceBack" unique_id=19632815 instance=ExtResource("2_b724v")]
 position = Vector2(52.806656, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooH64_006" type="Node2D" parent="FenceBack" unique_id=278019393 instance=ExtResource("2_b724v")]
+[node name="BambooH64_006" parent="FenceBack" unique_id=278019393 instance=ExtResource("2_b724v")]
 position = Vector2(88.01109, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_007" type="Node2D" parent="FenceBack" unique_id=1232947946 instance=ExtResource("3_y77de")]
+[node name="BambooPost_007" parent="FenceBack" unique_id=1232947946 instance=ExtResource("3_y77de")]
 position = Vector2(-105.61333, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPostTied_008" type="Node2D" parent="FenceBack" unique_id=828916058 instance=ExtResource("4_ulwjj")]
+[node name="BambooPostTied_008" parent="FenceBack" unique_id=828916058 instance=ExtResource("4_ulwjj")]
 position = Vector2(-70.40889, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_009" type="Node2D" parent="FenceBack" unique_id=1384584329 instance=ExtResource("3_y77de")]
+[node name="BambooPost_009" parent="FenceBack" unique_id=1384584329 instance=ExtResource("3_y77de")]
 position = Vector2(-35.20445, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_010" type="Node2D" parent="FenceBack" unique_id=986886857 instance=ExtResource("3_y77de")]
+[node name="BambooPost_010" parent="FenceBack" unique_id=986886857 instance=ExtResource("3_y77de")]
 position = Vector2(-7.6293945e-06, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_011" type="Node2D" parent="FenceBack" unique_id=1377024512 instance=ExtResource("3_y77de")]
+[node name="BambooPost_011" parent="FenceBack" unique_id=1377024512 instance=ExtResource("3_y77de")]
 position = Vector2(35.204433, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_012" type="Node2D" parent="FenceBack" unique_id=1146083269 instance=ExtResource("3_y77de")]
+[node name="BambooPost_012" parent="FenceBack" unique_id=1146083269 instance=ExtResource("3_y77de")]
 position = Vector2(70.408875, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPostTied_013" type="Node2D" parent="FenceBack" unique_id=1693248320 instance=ExtResource("4_ulwjj")]
+[node name="BambooPostTied_013" parent="FenceBack" unique_id=1693248320 instance=ExtResource("4_ulwjj")]
 position = Vector2(105.61331, -1.3350067)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="Stone08_014" type="Node2D" parent="FenceBack" unique_id=1138113713 instance=ExtResource("5_hmrq0")]
-position = Vector2(-94.71208, -1.910675)
+[node name="Stone08_014" parent="FenceBack" unique_id=1138113713 instance=ExtResource("5_hmrq0")]
+position = Vector2(-101.00001, -0.91500854)
 scale = Vector2(0.47931853, 0.47931853)
-metadata/_edit_group_ = true
 
-[node name="Stone07_015" type="Node2D" parent="FenceBack" unique_id=36075818 instance=ExtResource("6_pm26b")]
-position = Vector2(-81.310135, -0.78105164)
+[node name="Stone07_015" parent="FenceBack" unique_id=36075818 instance=ExtResource("6_pm26b")]
+position = Vector2(-77, -0.91500854)
 scale = Vector2(0.3387184, 0.3387184)
-metadata/_edit_group_ = true
 
-[node name="Stone06_016" type="Node2D" parent="FenceBack" unique_id=259467844 instance=ExtResource("7_pciiy")]
+[node name="Stone06_016" parent="FenceBack" unique_id=259467844 instance=ExtResource("7_pciiy")]
 position = Vector2(-59.50764, -1.1385956)
 scale = Vector2(0.43057433, 0.43057433)
-metadata/_edit_group_ = true
 
-[node name="Stone06_017" type="Node2D" parent="FenceBack" unique_id=2009335803 instance=ExtResource("7_pciiy")]
+[node name="Stone06_017" parent="FenceBack" unique_id=2009335803 instance=ExtResource("7_pciiy")]
 position = Vector2(-46.105698, -1.9117584)
 scale = Vector2(0.43057433, 0.43057433)
-metadata/_edit_group_ = true
 
-[node name="Stone01_018" type="Node2D" parent="FenceBack" unique_id=2122522105 instance=ExtResource("8_lp2fo")]
-position = Vector2(-24.3032, -0.95339966)
+[node name="Stone01_018" parent="FenceBack" unique_id=2122522105 instance=ExtResource("8_lp2fo")]
+position = Vector2(-30.000002, -0.91500854)
 scale = Vector2(0.34799844, 0.34799844)
-metadata/_edit_group_ = true
 
-[node name="Stone03_019" type="Node2D" parent="FenceBack" unique_id=949165040 instance=ExtResource("9_dnhvu")]
-position = Vector2(-10.901257, -1.8702698)
+[node name="Stone03_019" parent="FenceBack" unique_id=949165040 instance=ExtResource("9_dnhvu")]
+position = Vector2(-6, -0.91500854)
 scale = Vector2(0.32156816, 0.32156816)
-metadata/_edit_group_ = true
 
-[node name="Stone01_020" type="Node2D" parent="FenceBack" unique_id=368151683 instance=ExtResource("8_lp2fo")]
-position = Vector2(10.901241, -0.7511749)
+[node name="Stone01_020" parent="FenceBack" unique_id=368151683 instance=ExtResource("8_lp2fo")]
+position = Vector2(6, 0.084991455)
 scale = Vector2(0.34799844, 0.34799844)
-metadata/_edit_group_ = true
 
-[node name="Stone08_021" type="Node2D" parent="FenceBack" unique_id=2052416784 instance=ExtResource("5_hmrq0")]
-position = Vector2(24.303185, -0.8679962)
+[node name="Stone08_021" parent="FenceBack" unique_id=2052416784 instance=ExtResource("5_hmrq0")]
+position = Vector2(30, 0.084991395)
 scale = Vector2(0.4793186, 0.4793186)
-metadata/_edit_group_ = true
 
-[node name="Stone01_022" type="Node2D" parent="FenceBack" unique_id=1842160915 instance=ExtResource("8_lp2fo")]
-position = Vector2(46.105682, -1.9302521)
+[node name="Stone01_022" parent="FenceBack" unique_id=1842160915 instance=ExtResource("8_lp2fo")]
+position = Vector2(42, -0.91500854)
 scale = Vector2(0.34799844, 0.34799844)
-metadata/_edit_group_ = true
 
-[node name="Stone06_023" type="Node2D" parent="FenceBack" unique_id=1560976573 instance=ExtResource("7_pciiy")]
-position = Vector2(59.507626, -1.2424622)
+[node name="Stone06_023" parent="FenceBack" unique_id=1560976573 instance=ExtResource("7_pciiy")]
+position = Vector2(66, -0.91500854)
 scale = Vector2(0.43057433, 0.43057433)
-metadata/_edit_group_ = true
 
-[node name="Stone07_024" type="Node2D" parent="FenceBack" unique_id=1871756220 instance=ExtResource("6_pm26b")]
-position = Vector2(81.31012, -0.9584503)
+[node name="Stone07_024" parent="FenceBack" unique_id=1871756220 instance=ExtResource("6_pm26b")]
+position = Vector2(76, 0.084991455)
 scale = Vector2(0.3387184, 0.3387184)
-metadata/_edit_group_ = true
 
-[node name="Stone03_025" type="Node2D" parent="FenceBack" unique_id=345604154 instance=ExtResource("9_dnhvu")]
-position = Vector2(94.71207, -1.8982544)
+[node name="Stone03_025" parent="FenceBack" unique_id=345604154 instance=ExtResource("9_dnhvu")]
+position = Vector2(101, 0.084991336)
 scale = Vector2(0.32156813, 0.32156813)
-metadata/_edit_group_ = true
 
-[node name="BambooV64_026" type="Node2D" parent="FenceBack" unique_id=1223183875 instance=ExtResource("10_usv5i")]
+[node name="BambooV64_026" parent="FenceBack" unique_id=1223183875 instance=ExtResource("10_usv5i")]
 position = Vector2(-105.61333, 34.376236)
 scale = Vector2(0.5579882, 0.5579882)
-metadata/_edit_group_ = true
 
-[node name="BambooV64_027" type="Node2D" parent="FenceBack" unique_id=44742347 instance=ExtResource("10_usv5i")]
+[node name="BambooV64_027" parent="FenceBack" unique_id=44742347 instance=ExtResource("10_usv5i")]
 position = Vector2(-105.61333, 70.08748)
 scale = Vector2(0.5579882, 0.5579882)
-metadata/_edit_group_ = true
 
-[node name="BambooV64_028" type="Node2D" parent="FenceBack" unique_id=283084172 instance=ExtResource("10_usv5i")]
+[node name="BambooV64_028" parent="FenceBack" unique_id=283084172 instance=ExtResource("10_usv5i")]
 position = Vector2(-105.61333, 105.79872)
 scale = Vector2(0.5579882, 0.5579882)
-metadata/_edit_group_ = true
 
-[node name="BambooV64_029" type="Node2D" parent="FenceBack" unique_id=1760338736 instance=ExtResource("10_usv5i")]
+[node name="BambooV64_029" parent="FenceBack" unique_id=1760338736 instance=ExtResource("10_usv5i")]
 position = Vector2(-105.61333, 141.50998)
 scale = Vector2(0.5579882, 0.5579882)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_030" type="Node2D" parent="FenceBack" unique_id=2052433272 instance=ExtResource("3_y77de")]
+[node name="BambooPost_030" parent="FenceBack" unique_id=2052433272 instance=ExtResource("3_y77de")]
 position = Vector2(-105.61333, 34.376236)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_031" type="Node2D" parent="FenceBack" unique_id=825245103 instance=ExtResource("3_y77de")]
+[node name="BambooPost_031" parent="FenceBack" unique_id=825245103 instance=ExtResource("3_y77de")]
 position = Vector2(-105.61333, 70.08748)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="Stone04_034" type="Node2D" parent="FenceBack" unique_id=1254460558 instance=ExtResource("12_r02ak")]
+[node name="Stone04_034" parent="FenceBack" unique_id=1254460558 instance=ExtResource("12_r02ak")]
 position = Vector2(-105.6153, 9.692947)
 scale = Vector2(0.4711034, 0.4711034)
-metadata/_edit_group_ = true
 
-[node name="Stone07_035" type="Node2D" parent="FenceBack" unique_id=472982320 instance=ExtResource("6_pm26b")]
+[node name="StoneSideExtra01" parent="FenceBack" unique_id=2137729431 instance=ExtResource("12_r02ak")]
+position = Vector2(-106.4153, 16.520615)
+scale = Vector2(0.329772, 0.329772)
+
+[node name="Stone07_035" parent="FenceBack" unique_id=472982320 instance=ExtResource("6_pm26b")]
 position = Vector2(-105.66904, 23.348282)
 scale = Vector2(0.34547582, 0.34547582)
-metadata/_edit_group_ = true
 
-[node name="Stone01_036" type="Node2D" parent="FenceBack" unique_id=1230495182 instance=ExtResource("8_lp2fo")]
+[node name="StoneSideExtra02" parent="FenceBack" unique_id=2137729432 instance=ExtResource("6_pm26b")]
+position = Vector2(-106.71904, 28.348282)
+scale = Vector2(0.241833, 0.241833)
+
+[node name="Stone01_036" parent="FenceBack" unique_id=1230495182 instance=ExtResource("8_lp2fo")]
 position = Vector2(-105.891815, 45.404182)
 scale = Vector2(0.35494092, 0.35494092)
-metadata/_edit_group_ = true
 
-[node name="Stone03_037" type="Node2D" parent="FenceBack" unique_id=400290234 instance=ExtResource("9_dnhvu")]
+[node name="StoneSideExtra03" parent="FenceBack" unique_id=2137729433 instance=ExtResource("8_lp2fo")]
+position = Vector2(-107.19182, 52.231853)
+scale = Vector2(0.248459, 0.248459)
+
+[node name="Stone03_037" parent="FenceBack" unique_id=400290234 instance=ExtResource("9_dnhvu")]
 position = Vector2(-105.92548, 59.059525)
 scale = Vector2(0.32798338, 0.32798338)
-metadata/_edit_group_ = true
 
-[node name="Stone03_038" type="Node2D" parent="FenceBack" unique_id=3687633 instance=ExtResource("9_dnhvu")]
+[node name="StoneSideExtra04" parent="FenceBack" unique_id=2137729434 instance=ExtResource("9_dnhvu")]
+position = Vector2(-106.72548, 64.059525)
+scale = Vector2(0.229588, 0.229588)
+
+[node name="Stone03_038" parent="FenceBack" unique_id=3687633 instance=ExtResource("9_dnhvu")]
 position = Vector2(-105.90598, 81.11543)
 scale = Vector2(0.32798344, 0.32798344)
-metadata/_edit_group_ = true
 
-[node name="Stone07_039" type="Node2D" parent="FenceBack" unique_id=804845506 instance=ExtResource("6_pm26b")]
+[node name="StoneSideExtra05" parent="FenceBack" unique_id=2137729435 instance=ExtResource("9_dnhvu")]
+position = Vector2(-106.95598, 87.9431)
+scale = Vector2(0.229588, 0.229588)
+
+[node name="Stone07_039" parent="FenceBack" unique_id=804845506 instance=ExtResource("6_pm26b")]
 position = Vector2(-105.941025, 94.770775)
 scale = Vector2(0.34547588, 0.34547588)
-metadata/_edit_group_ = true
 
-[node name="Stone02_040" type="Node2D" parent="FenceBack" unique_id=955510078 instance=ExtResource("13_hicwx")]
+[node name="StoneSideExtra06" parent="FenceBack" unique_id=2137729436 instance=ExtResource("6_pm26b")]
+position = Vector2(-107.24103, 99.770775)
+scale = Vector2(0.241833, 0.241833)
+
+[node name="Stone02_040" parent="FenceBack" unique_id=955510078 instance=ExtResource("13_hicwx")]
 position = Vector2(-105.26144, 116.826675)
 scale = Vector2(0.4112808, 0.4112808)
-metadata/_edit_group_ = true
 
-[node name="Stone05_041" type="Node2D" parent="FenceBack" unique_id=1903959264 instance=ExtResource("14_0l1ci")]
+[node name="StoneSideExtra07" parent="FenceBack" unique_id=2137729437 instance=ExtResource("13_hicwx")]
+position = Vector2(-106.06144, 123.65435)
+scale = Vector2(0.287897, 0.287897)
+
+[node name="Stone05_041" parent="FenceBack" unique_id=1903959264 instance=ExtResource("14_0l1ci")]
 position = Vector2(-105.3305, 130.48203)
 scale = Vector2(0.3649393, 0.3649393)
-metadata/_edit_group_ = true
 
-[node name="BambooV64_042" type="Node2D" parent="FenceBack" unique_id=2137729430 instance=ExtResource("10_usv5i")]
+[node name="StoneSideExtra08" parent="FenceBack" unique_id=2137729438 instance=ExtResource("14_0l1ci")]
+position = Vector2(-106.3805, 133.89787)
+scale = Vector2(0.255458, 0.255458)
+
+[node name="BambooV64_042" parent="FenceBack" unique_id=2137729430 instance=ExtResource("10_usv5i")]
 position = Vector2(105.61333, 34.376236)
 scale = Vector2(0.5579882, 0.5579882)
-metadata/_edit_group_ = true
 
-[node name="BambooV64_043" type="Node2D" parent="FenceBack" unique_id=1464502108 instance=ExtResource("10_usv5i")]
+[node name="BambooV64_043" parent="FenceBack" unique_id=1464502108 instance=ExtResource("10_usv5i")]
 position = Vector2(105.61333, 70.08748)
 scale = Vector2(0.5579882, 0.5579882)
-metadata/_edit_group_ = true
 
-[node name="BambooV64_044" type="Node2D" parent="FenceBack" unique_id=325211091 instance=ExtResource("10_usv5i")]
+[node name="BambooV64_044" parent="FenceBack" unique_id=325211091 instance=ExtResource("10_usv5i")]
 position = Vector2(105.61333, 105.79872)
 scale = Vector2(0.5579882, 0.5579882)
-metadata/_edit_group_ = true
 
-[node name="BambooV64_045" type="Node2D" parent="FenceBack" unique_id=850914299 instance=ExtResource("10_usv5i")]
+[node name="BambooV64_045" parent="FenceBack" unique_id=850914299 instance=ExtResource("10_usv5i")]
 position = Vector2(105.61333, 141.50998)
 scale = Vector2(0.5579882, 0.5579882)
-metadata/_edit_group_ = true
 
-[node name="BambooPostTied_046" type="Node2D" parent="FenceBack" unique_id=927957723 instance=ExtResource("4_ulwjj")]
+[node name="BambooPostTied_046" parent="FenceBack" unique_id=927957723 instance=ExtResource("4_ulwjj")]
 position = Vector2(105.61333, 34.376236)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_047" type="Node2D" parent="FenceBack" unique_id=2075593901 instance=ExtResource("3_y77de")]
+[node name="BambooPost_047" parent="FenceBack" unique_id=2075593901 instance=ExtResource("3_y77de")]
 position = Vector2(105.61333, 70.08748)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="Stone03_050" type="Node2D" parent="FenceBack" unique_id=103863103 instance=ExtResource("9_dnhvu")]
+[node name="Stone03_050" parent="FenceBack" unique_id=103863103 instance=ExtResource("9_dnhvu")]
 position = Vector2(105.66622, 9.692947)
 scale = Vector2(0.32798338, 0.32798338)
-metadata/_edit_group_ = true
 
-[node name="Stone07_051" type="Node2D" parent="FenceBack" unique_id=1797284986 instance=ExtResource("6_pm26b")]
+[node name="StoneSideExtra09" parent="FenceBack" unique_id=2137729439 instance=ExtResource("9_dnhvu")]
+position = Vector2(106.46622, 16.520615)
+scale = Vector2(0.229588, 0.229588)
+
+[node name="Stone07_051" parent="FenceBack" unique_id=1797284986 instance=ExtResource("6_pm26b")]
 position = Vector2(105.304016, 23.348282)
 scale = Vector2(0.34547582, 0.34547582)
-metadata/_edit_group_ = true
 
-[node name="Stone02_052" type="Node2D" parent="FenceBack" unique_id=2060877125 instance=ExtResource("13_hicwx")]
+[node name="StoneSideExtra10" parent="FenceBack" unique_id=2137729440 instance=ExtResource("6_pm26b")]
+position = Vector2(106.35402, 28.348282)
+scale = Vector2(0.241833, 0.241833)
+
+[node name="Stone02_052" parent="FenceBack" unique_id=2060877125 instance=ExtResource("13_hicwx")]
 position = Vector2(105.2586, 45.404182)
 scale = Vector2(0.41128075, 0.41128075)
-metadata/_edit_group_ = true
 
-[node name="Stone06_053" type="Node2D" parent="FenceBack" unique_id=801497890 instance=ExtResource("7_pciiy")]
+[node name="StoneSideExtra11" parent="FenceBack" unique_id=2137729441 instance=ExtResource("13_hicwx")]
+position = Vector2(106.5586, 52.231853)
+scale = Vector2(0.287897, 0.287897)
+
+[node name="Stone06_053" parent="FenceBack" unique_id=801497890 instance=ExtResource("7_pciiy")]
 position = Vector2(105.36702, 59.059525)
 scale = Vector2(0.4391642, 0.4391642)
-metadata/_edit_group_ = true
 
-[node name="Stone06_054" type="Node2D" parent="FenceBack" unique_id=706617036 instance=ExtResource("7_pciiy")]
+[node name="StoneSideExtra12" parent="FenceBack" unique_id=2137729442 instance=ExtResource("7_pciiy")]
+position = Vector2(106.16702, 64.059525)
+scale = Vector2(0.307415, 0.307415)
+
+[node name="Stone06_054" parent="FenceBack" unique_id=706617036 instance=ExtResource("7_pciiy")]
 position = Vector2(105.66578, 81.11543)
 scale = Vector2(0.43916425, 0.43916425)
-metadata/_edit_group_ = true
 
-[node name="Stone07_055" type="Node2D" parent="FenceBack" unique_id=1110847380 instance=ExtResource("6_pm26b")]
+[node name="StoneSideExtra13" parent="FenceBack" unique_id=2137729443 instance=ExtResource("7_pciiy")]
+position = Vector2(106.71578, 87.9431)
+scale = Vector2(0.307415, 0.307415)
+
+[node name="Stone07_055" parent="FenceBack" unique_id=1110847380 instance=ExtResource("6_pm26b")]
 position = Vector2(105.769135, 94.770775)
 scale = Vector2(0.34547588, 0.34547588)
-metadata/_edit_group_ = true
 
-[node name="Stone02_056" type="Node2D" parent="FenceBack" unique_id=1107285934 instance=ExtResource("13_hicwx")]
+[node name="StoneSideExtra14" parent="FenceBack" unique_id=2137729444 instance=ExtResource("6_pm26b")]
+position = Vector2(107.06914, 99.770775)
+scale = Vector2(0.241833, 0.241833)
+
+[node name="Stone02_056" parent="FenceBack" unique_id=1107285934 instance=ExtResource("13_hicwx")]
 position = Vector2(105.322235, 116.826675)
 scale = Vector2(0.4112808, 0.4112808)
-metadata/_edit_group_ = true
 
-[node name="Stone02_057" type="Node2D" parent="FenceBack" unique_id=1672168243 instance=ExtResource("13_hicwx")]
+[node name="StoneSideExtra15" parent="FenceBack" unique_id=2137729445 instance=ExtResource("13_hicwx")]
+position = Vector2(106.12224, 123.65435)
+scale = Vector2(0.287897, 0.287897)
+
+[node name="Stone02_057" parent="FenceBack" unique_id=1672168243 instance=ExtResource("13_hicwx")]
 position = Vector2(105.8534, 130.48203)
 scale = Vector2(0.4112808, 0.4112808)
-metadata/_edit_group_ = true
+
+[node name="StoneSideExtra16" parent="FenceBack" unique_id=2137729446 instance=ExtResource("13_hicwx")]
+position = Vector2(106.9034, 133.89787)
+scale = Vector2(0.287897, 0.287897)
 
 [node name="FenceFront" type="Node2D" parent="." unique_id=578985597]
 y_sort_enabled = true
 position = Vector2(0, -6.5700073)
 
-[node name="BambooPost_032" type="Node2D" parent="FenceFront" unique_id=1334176453 instance=ExtResource("3_y77de")]
+[node name="BambooPost_032" parent="FenceFront" unique_id=1334176453 instance=ExtResource("3_y77de")]
 position = Vector2(-105.61333, -39.71626)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_033" type="Node2D" parent="FenceFront" unique_id=2085133273 instance=ExtResource("3_y77de")]
+[node name="BambooPost_033" parent="FenceFront" unique_id=2085133273 instance=ExtResource("3_y77de")]
 position = Vector2(-105.61333, -4.0050125)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_048" type="Node2D" parent="FenceFront" unique_id=1256584592 instance=ExtResource("3_y77de")]
+[node name="BambooPost_048" parent="FenceFront" unique_id=1256584592 instance=ExtResource("3_y77de")]
 position = Vector2(105.61333, -39.71626)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_049" type="Node2D" parent="FenceFront" unique_id=469849013 instance=ExtResource("3_y77de")]
+[node name="BambooPost_049" parent="FenceFront" unique_id=469849013 instance=ExtResource("3_y77de")]
 position = Vector2(105.61333, -4.0050125)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooH64_058" type="Node2D" parent="FenceFront" unique_id=1008461990 instance=ExtResource("2_b724v")]
+[node name="BambooH64_058" parent="FenceFront" unique_id=1008461990 instance=ExtResource("2_b724v")]
 position = Vector2(-88.60444, -4.005005)
 scale = Vector2(0.53152776, 0.53152776)
-metadata/_edit_group_ = true
 
-[node name="BambooH32_059" type="Node2D" parent="FenceFront" unique_id=771137472 instance=ExtResource("14_b724v")]
+[node name="BambooH32_059" parent="FenceFront" unique_id=771137472 instance=ExtResource("14_b724v")]
 position = Vector2(-63.091106, -4.005005)
 scale = Vector2(0.53152776, 0.53152776)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_060" type="Node2D" parent="FenceFront" unique_id=964405550 instance=ExtResource("3_y77de")]
-position = Vector2(-71.59555, -4.005005)
+[node name="BambooPost_060" parent="FenceFront" unique_id=964405550 instance=ExtResource("3_y77de")]
+position = Vector2(-81.00001, -3.4299927)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPostTied_061" type="Node2D" parent="FenceFront" unique_id=813024241 instance=ExtResource("4_ulwjj")]
+[node name="BambooPostTied_061" parent="FenceFront" unique_id=813024241 instance=ExtResource("4_ulwjj")]
 position = Vector2(-54.586662, -4.005005)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="Stone08_062" type="Node2D" parent="FenceFront" unique_id=489645754 instance=ExtResource("5_hmrq0")]
-position = Vector2(-95.00874, -3.9912405)
+[node name="Stone08_062" parent="FenceFront" unique_id=489645754 instance=ExtResource("5_hmrq0")]
+position = Vector2(-105, -0.42999268)
 scale = Vector2(0.4569287, 0.4569287)
-metadata/_edit_group_ = true
 
-[node name="Stone05_063" type="Node2D" parent="FenceFront" unique_id=1451499166 instance=ExtResource("14_0l1ci")]
-position = Vector2(-82.200134, -3.8156633)
+[node name="Stone05_063" parent="FenceFront" unique_id=1451499166 instance=ExtResource("14_0l1ci")]
+position = Vector2(-86.00001, -1.4299929)
 scale = Vector2(0.3410876, 0.3410876)
-metadata/_edit_group_ = true
 
-[node name="Stone02_064" type="Node2D" parent="FenceFront" unique_id=1435330202 instance=ExtResource("13_hicwx")]
-position = Vector2(-63.091106, -4.076992)
+[node name="Stone02_064" parent="FenceFront" unique_id=1435330202 instance=ExtResource("13_hicwx")]
+position = Vector2(-58, -2.4299927)
 scale = Vector2(0.2510582, 0.2510582)
-metadata/_edit_group_ = true
 
-[node name="BambooH64_065" type="Node2D" parent="FenceFront" unique_id=887911815 instance=ExtResource("2_b724v")]
+[node name="Stone02_065" parent="FenceFront" unique_id=1108516291 instance=ExtResource("13_hicwx")]
+position = Vector2(-52, -2.4299927)
+scale = Vector2(0.2510582, 0.2510582)
+
+[node name="BambooH64_065" parent="FenceFront" unique_id=887911815 instance=ExtResource("2_b724v")]
 position = Vector2(6.9504757, -4.005005)
 scale = Vector2(0.513869, 0.513869)
-metadata/_edit_group_ = true
 
-[node name="BambooH64_066" type="Node2D" parent="FenceFront" unique_id=956729800 instance=ExtResource("2_b724v")]
+[node name="BambooH64_066" parent="FenceFront" unique_id=956729800 instance=ExtResource("2_b724v")]
 position = Vector2(39.83809, -4.005005)
 scale = Vector2(0.513869, 0.513869)
-metadata/_edit_group_ = true
 
-[node name="BambooH64_067" type="Node2D" parent="FenceFront" unique_id=1874400713 instance=ExtResource("2_b724v")]
+[node name="BambooH64_067" parent="FenceFront" unique_id=1874400713 instance=ExtResource("2_b724v")]
 position = Vector2(72.72571, -4.005005)
 scale = Vector2(0.513869, 0.513869)
-metadata/_edit_group_ = true
 
-[node name="BambooH32_068" type="Node2D" parent="FenceFront" unique_id=206421060 instance=ExtResource("14_b724v")]
+[node name="BambooH32_068" parent="FenceFront" unique_id=206421060 instance=ExtResource("14_b724v")]
 position = Vector2(97.39142, -4.005005)
 scale = Vector2(0.513869, 0.513869)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_069" type="Node2D" parent="FenceFront" unique_id=1063399995 instance=ExtResource("3_y77de")]
+[node name="BambooPost_069" parent="FenceFront" unique_id=1063399995 instance=ExtResource("3_y77de")]
 position = Vector2(-9.493332, -4.005005)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_070" type="Node2D" parent="FenceFront" unique_id=871749144 instance=ExtResource("3_y77de")]
+[node name="BambooPost_070" parent="FenceFront" unique_id=871749144 instance=ExtResource("3_y77de")]
 position = Vector2(23.394283, -4.005005)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_071" type="Node2D" parent="FenceFront" unique_id=1485874920 instance=ExtResource("3_y77de")]
+[node name="BambooPost_071" parent="FenceFront" unique_id=1485874920 instance=ExtResource("3_y77de")]
 position = Vector2(56.2819, -4.005005)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="BambooPost_072" type="Node2D" parent="FenceFront" unique_id=1294998519 instance=ExtResource("3_y77de")]
+[node name="BambooPost_072" parent="FenceFront" unique_id=1294998519 instance=ExtResource("3_y77de")]
 position = Vector2(89.16951, -4.005005)
 scale = Vector2(0.5500694, 0.5500694)
-metadata/_edit_group_ = true
 
-[node name="Stone06_073" type="Node2D" parent="FenceFront" unique_id=719343443 instance=ExtResource("7_pciiy")]
-position = Vector2(0.82871056, -4.499419)
+[node name="Stone06_073" parent="FenceFront" unique_id=719343443 instance=ExtResource("7_pciiy")]
+position = Vector2(-12.999999, -2.429993)
 scale = Vector2(0.3913061, 0.3913061)
-metadata/_edit_group_ = true
 
-[node name="Stone04_074" type="Node2D" parent="FenceFront" unique_id=1577890618 instance=ExtResource("12_r02ak")]
-position = Vector2(13.072241, -4.0680637)
+[node name="Stone04_074" parent="FenceFront" unique_id=1577890618 instance=ExtResource("12_r02ak")]
+position = Vector2(18, -2.429993)
 scale = Vector2(0.41976473, 0.41976473)
-metadata/_edit_group_ = true
 
-[node name="Stone05_075" type="Node2D" parent="FenceFront" unique_id=467851857 instance=ExtResource("14_0l1ci")]
-position = Vector2(33.716324, -4.395216)
+[node name="Stone05_075" parent="FenceFront" unique_id=467851857 instance=ExtResource("14_0l1ci")]
+position = Vector2(26.999998, -2.4299927)
 scale = Vector2(0.32516986, 0.32516986)
-metadata/_edit_group_ = true
 
-[node name="Stone03_076" type="Node2D" parent="FenceFront" unique_id=1458951082 instance=ExtResource("9_dnhvu")]
-position = Vector2(45.959854, -4.3035603)
+[node name="Stone03_076" parent="FenceFront" unique_id=1458951082 instance=ExtResource("9_dnhvu")]
+position = Vector2(51, -3.4299927)
 scale = Vector2(0.29224128, 0.29224128)
-metadata/_edit_group_ = true
 
-[node name="Stone05_077" type="Node2D" parent="FenceFront" unique_id=348950213 instance=ExtResource("14_0l1ci")]
-position = Vector2(66.60394, -3.6468048)
+[node name="Stone05_077" parent="FenceFront" unique_id=348950213 instance=ExtResource("14_0l1ci")]
+position = Vector2(62, -2.4299927)
 scale = Vector2(0.3251698, 0.3251698)
-metadata/_edit_group_ = true
 
-[node name="Stone07_078" type="Node2D" parent="FenceFront" unique_id=27960434 instance=ExtResource("6_pm26b")]
-position = Vector2(78.847466, -4.0307245)
+[node name="Stone07_078" parent="FenceFront" unique_id=27960434 instance=ExtResource("6_pm26b")]
+position = Vector2(84, -3.4299927)
 scale = Vector2(0.3078274, 0.3078274)
-metadata/_edit_group_ = true
 
-[node name="Stone05_079" type="Node2D" parent="FenceFront" unique_id=1056324997 instance=ExtResource("14_0l1ci")]
-position = Vector2(97.39142, -3.733985)
+[node name="Stone05_079" parent="FenceFront" unique_id=1056324997 instance=ExtResource("14_0l1ci")]
+position = Vector2(92.00001, -3.4299927)
 scale = Vector2(0.20685223, 0.20685223)
-metadata/_edit_group_ = true
 
 [node name="Entry" type="Marker2D" parent="." unique_id=1156160914]
 position = Vector2(-32.039993, 0.10501099)
 
 [node name="CookingCanopy" type="Node2D" parent="." unique_id=283405540]
 y_sort_enabled = true
-position = Vector2(-66, -101)
+position = Vector2(-67, -104)
 metadata/_edit_group_ = true
+
+[node name="MeatRack" type="Sprite2D" parent="CookingCanopy" unique_id=2066220350]
+position = Vector2(47.490395, -17.501846)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("15_y77de")
+centered = false
+offset = Vector2(-134.6168, -131.6701)
+region_enabled = true
+region_rect = Rect2(85, 143, 100, 127)
+script = ExtResource("3_co158")
+art_key = "buildings/kitchen/rack_2"
+art_offset = Vector2(-219.6168, -274.6701)
+metadata/_edit_lock_ = true
 
 [node name="Cook" type="Sprite2D" parent="CookingCanopy" unique_id=125907943]
 position = Vector2(47.490395, -17.501846)
@@ -508,7 +510,7 @@ position = Vector2(38.910797, -12.902771)
 script = ExtResource("9_fr8oj")
 
 [node name="Serving" type="Node2D" parent="." unique_id=1878234674]
-position = Vector2(-79, -26)
+position = Vector2(-82, -36)
 metadata/_edit_group_ = true
 
 [node name="Art" type="Sprite2D" parent="Serving" unique_id=881347996]
@@ -554,7 +556,7 @@ position = Vector2(-3.5600052, -16.02002)
 position = Vector2(3.5600052, -16.02002)
 
 [node name="RoastFire" type="Node2D" parent="." unique_id=1548500745]
-position = Vector2(-27, -67)
+position = Vector2(-31, -71)
 metadata/_edit_group_ = true
 
 [node name="Base" type="Sprite2D" parent="RoastFire" unique_id=123816361]
@@ -765,3 +767,43 @@ position = Vector2(18.393326, -12.849365)
 position = Vector2(0, -18.022491)
 script = ExtResource("11_hnyw8")
 half_size = Vector2(11.866667, 17.355)
+
+[node name="Stone02_065" parent="." unique_id=966154678 instance=ExtResource("13_hicwx")]
+position = Vector2(-76, -9)
+scale = Vector2(0.2510582, 0.2510582)
+
+[node name="Stone06_073" parent="." unique_id=2059440964 instance=ExtResource("7_pciiy")]
+position = Vector2(106.99999, -9)
+scale = Vector2(0.3913061, 0.3913061)
+
+[node name="Stone05_079" parent="." unique_id=14470315 instance=ExtResource("14_0l1ci")]
+position = Vector2(-6, -9)
+scale = Vector2(0.20685223, 0.20685223)
+
+[node name="Stone03_025" parent="." unique_id=1957294036 instance=ExtResource("9_dnhvu")]
+position = Vector2(109.00001, -152.99998)
+scale = Vector2(0.32156813, 0.32156813)
+
+[node name="Stone05_063" parent="." unique_id=1730394480 instance=ExtResource("14_0l1ci")]
+position = Vector2(-80, -7)
+scale = Vector2(0.3410876, 0.3410876)
+
+[node name="Stone05_080" parent="." unique_id=1606630280 instance=ExtResource("14_0l1ci")]
+position = Vector2(22, -9)
+scale = Vector2(0.20685223, 0.20685223)
+
+[node name="Stone05_081" parent="." unique_id=694489921 instance=ExtResource("14_0l1ci")]
+position = Vector2(56, -9)
+scale = Vector2(0.20685223, 0.20685223)
+
+[node name="Stone05_082" parent="." unique_id=2141024108 instance=ExtResource("14_0l1ci")]
+position = Vector2(103, -11)
+scale = Vector2(0.20685223, 0.20685223)
+
+[node name="Stone05_083" parent="." unique_id=310387868 instance=ExtResource("14_0l1ci")]
+position = Vector2(0, -153)
+scale = Vector2(0.20685223, 0.20685223)
+
+[node name="Stone05_084" parent="." unique_id=61470838 instance=ExtResource("14_0l1ci")]
+position = Vector2(69, -152)
+scale = Vector2(0.20685223, 0.20685223)

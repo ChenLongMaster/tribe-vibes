@@ -113,8 +113,8 @@ func refresh() -> void:
 	serving.add_child(_meals)
 	for index: int in 6:
 		var meal: Sprite2D = Sprite2D.new()
-		ArtLibrary.setup_sprite(meal, ResourceDefs.icon(ResourceDefs.MEAL))
-		meal.scale *= 0.22
+		ArtLibrary.setup_sprite(meal, meal_art(index))
+		meal.scale *= 0.28 if building.level == 1 else 0.22
 		meal.position = (serving.get_node("Meal" + str(index)) as Node2D).position
 		_meals.add_child(meal)
 	_refresh_meals(building)
@@ -127,6 +127,13 @@ func refresh() -> void:
 		var person: Villager = Commands.get_villager(person_id)
 		if person != null and person.task is TaskCook:
 			(person.task as TaskCook).refresh_layout()
+
+func meal_art(index: int) -> String:
+	if building.level != 1:
+		return ResourceDefs.icon(ResourceDefs.MEAL)
+	# Biến thể chỉ để nhìn; không dùng RNG mô phỏng hoặc thêm loại món vào save.
+	var variant: int = posmod(building.origin_cell.x * 7 + building.origin_cell.y * 11 + index * 3, 5)
+	return "props/meal_smoked_meat" if variant < 3 else "props/meal_roast_bird"
 
 func _refresh_meals(_owner: Building) -> void:
 	if _meals == null:
@@ -146,7 +153,7 @@ func _collect_sprites(node: Node) -> void:
 func sync_shadow(sprite: Sprite2D) -> void:
 	if _visual == null:
 		return
-	var roof: Sprite2D = _visual.get_node("CookingCanopy/Roof") as Sprite2D
+	var roof: Sprite2D = _visual.get_node("CookingCanopy/Cook" if building.level == 1 else "CookingCanopy/Roof") as Sprite2D
 	sprite.texture = roof.texture
 	sprite.offset = roof.get("art_offset")
 	sprite.centered = false

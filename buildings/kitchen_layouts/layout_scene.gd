@@ -2,6 +2,10 @@
 extends Node2D
 ## Scene là nguồn bố cục; root/rào giữ footprint, chỉ chỉnh các nhóm nội thất.
 
+const EXPORT_SIZE: Vector2i = Vector2i(576, 552)
+const EXPORT_ORIGIN: Vector2 = Vector2(288, 504)
+const EXPORT_FRAME: Rect2 = Rect2(-144, -252, 288, 276)
+
 @export_range(1, 3) var level: int = 1
 @export var show_guides: bool = true
 @export var show_people: bool = false
@@ -15,7 +19,7 @@ func _draw() -> void:
 	if not Engine.is_editor_hint() or not show_guides:
 		return
 	draw_rect(Rect2(-128, -180, 256, 192), Color(0.3, 0.7, 0.3, 0.06))
-	draw_rect(Rect2(-128, -252, 256, 276), Color(0.6, 0.6, 0.6, 0.4), false, 1.0)
+	draw_rect(EXPORT_FRAME, Color(0.6, 0.6, 0.6, 0.4), false, 1.0)
 	for x: int in range(-128, 129, 64):
 		draw_line(Vector2(x, -180), Vector2(x, 12), Color(0.3, 0.7, 0.3, 0.4))
 	for y: int in range(-180, 13, 64):
@@ -27,7 +31,7 @@ func _export_art() -> void:
 		return
 	# Xuất bản đang sửa (kể cả chưa lưu), để menu/bóng đặt khớp bố cục cuối.
 	var viewport: SubViewport = SubViewport.new()
-	viewport.size = Vector2i(512, 552)
+	viewport.size = EXPORT_SIZE
 	viewport.transparent_bg = true
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(viewport)
@@ -36,7 +40,7 @@ func _export_art() -> void:
 	var copy: Node2D = packed.instantiate() as Node2D
 	copy.set("show_guides", false)
 	copy.set("show_people", false)
-	copy.position = Vector2(256, 504)
+	copy.position = EXPORT_ORIGIN
 	copy.scale = Vector2(2, 2)
 	viewport.add_child(copy)
 	await RenderingServer.frame_post_draw
@@ -52,7 +56,7 @@ func _fits_frame(node: Node) -> bool:
 		var sprite: Sprite2D = node as Sprite2D
 		var rect: Rect2 = sprite.get_rect()
 		var transform_to_root: Transform2D = global_transform.affine_inverse() * sprite.global_transform
-		var frame: Rect2 = Rect2(-128, -252, 256, 276).grow(0.1)
+		var frame: Rect2 = EXPORT_FRAME.grow(0.1)
 		for corner: Vector2 in [rect.position, Vector2(rect.end.x, rect.position.y), rect.end, Vector2(rect.position.x, rect.end.y)]:
 			if not frame.has_point(transform_to_root * corner):
 				return false

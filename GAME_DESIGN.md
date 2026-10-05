@@ -413,6 +413,16 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 - **Phân cấp:** khác rõ ngay từ dáng/cỡ và độ hoàn thiện, rồi mới tới chi tiết nhỏ. Cấp thấp đơn sơ, cũ và sờn; cấp giữa lành lặn, chắc và gọn hơn; cấp cao đầy đặn và trang trí hơn, vẫn cùng họ vật liệu/dáng của công trình. Tăng cấp không mặc định biến lều thành nhà hay chỉ thêm một biểu tượng rất nhỏ.
 - **Phong cách nét/màu:** tự vẽ SVG trong `assets/placeholder/`, viền nâu đậm `#4E342E` 6 px ở file 2× (= 3 px hiển thị), màu ấm, tròn mềm và chi tiết vừa đủ. Cỏ/cây trang trí giữ màu chìm/viền xanh theo quy tắc riêng. Không vẽ chữ trong asset.
 
+### Chi tiết bếp ba cấp (2026-10-05) — hiện hành
+
+- Bếp cấp1 có hai nhóm kéo/scale độc lập: `MeatRack` ở root cho sào treo thịt, `CookingCanopy` cho thớt và điểm đứng đầu bếp. Hai SVG riêng, giữ hình/vị trí ban đầu; dời thớt thì đầu bếp theo thớt, dời sào không kéo thớt theo.
+- Giá quay phân cấp: cấp1 chim cút, cấp2 gà, cấp3 **heo rừng nguyên con**. Giữ vị trí giá/chỗ đứng đầu bếp và nhịp quay; hình đại diện của cùng món chín, không thêm công thức/chi phí/sản lượng hoặc điều kiện săn heo.
+- Cấp1 bỏ mái: giàn tre treo thịt gác bếp, thớt đá có thịt/dao đá; đầu bếp dùng động tác thái. Quầy đổi thành chiếu bày món có viền riêng; món chín có hình thịt gác bếp hoặc chim quay trên lá chuối. Chiếu khách dùng lá chuối thay chén, giá quay có chim cút nhỏ.
+- Cấp2 giữ mái lá cũ và bố cục đã chỉnh, thêm giàn thịt nhìn thấy một phần dưới mái. Mỗi chén bàn ăn có một đôi đũa với góc/độ mở lệch nhẹ.
+- Cấp3 gian nấu có mái lá xếp hàng, diềm gỗ/giằng/vách đan và mặt trời nhỏ gợi nét Việt; mỗi bàn có ống đũa tre, không xếp đôi đũa từng chén. Giàn thịt/ống đũa tách thành Sprite để chỉnh riêng trong Godot.
+- Giữ nguyên các mảnh hàng rào người dùng căn chỉnh, Position/Scale nhóm nội thất, cổng, footprint4×3 và 4/6/8 khách, 1/2/3 đầu bếp. Chỉ điểm đứng cấp1 được canh lại theo thớt mới. Thịt/chim là biến thể hình của cùng MEAL, không thêm công thức/sản lượng/nguyên liệu/save field. Biến thể theo bếp/ô món không dùng RNG mô phỏng.
+- PNG menu/bóng đặt nới phần trong suốt ngang:576×552, neo(288,504), tỉ lệ(0.5,21/23) giữ nguyên. Các lớp SVG và tọa độ scene vẫn theo512×552/neo256,504; không phóng to hình hay đổi footprint.
+
 ### Rào bếp ghép bằng mảnh dùng chung (2026-10-05) — đã áp dụng
 
 - Ba scene bếp đã dùng các instance từ buildings/parts thay lớp rào nguyên khối: cấp1 chỉ đá, cấp2 đá + tre mảnh, cấp3 đá + gỗ có giằng. Viên đá xen kẽ dáng/cỡ và lệch nhẹ; chân cọc nằm trong khe đá. Ghép nhiều đoạn nhỏ, rào thấp để không che quá nhiều dân/nội thất; hai trục sân và cổng giữ như cũ. Không đổi phần gian nấu/quầy/giá quay/bàn/ghế/marker người dùng đã chỉnh.
@@ -427,8 +437,8 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 ### Bố cục bếp chỉnh trực tiếp trong Godot (2026-10-05) — hiện hành
 
 - Ba scene `buildings/kitchen_layouts/kitchen_1.tscn` đến `kitchen_3.tscn` là nguồn bố cục game. Kéo/scale các nhóm CookingCanopy, Serving, RoastFire và Dining0… trong editor; hình đi cùng marker chỗ nấu/lấy món/ngồi/mặt ghế và vùng tránh. Dân giữ nguyên cỡ; cảnh báo/bóng mái/món trên quầy/giá quay và chiều sâu theo transform nhóm. Lưu scene, chạy lại ván để nạp; tải save hiện có cũng dùng bố cục mới.
-- Root/footprint4×3/cổng/tên marker/số ghế và thợ giữ cố định; chỉnh Position và Scale dương nhóm nội thất hoặc instance rào, không xoay/mirror. Đường bao rào giữ trong footprint và chừa cổng hiện tại. Editor có lưới/vùng tránh/dân mẫu; tất cả ẩn trong game. Nút Export menu / placement PNG trên root xuất hình trong suốt đúng khung512×552/neo256,504 vào assets/art, đồng bộ menu/bóng đặt/móng. Nếu vượt khung xám thì từ chối xuất, giữ hình cũ. Không phải plugin/addon; generator SVG không ghi đè scene/PNG chỉnh tay. Hướng dẫn chi tiết ở README cùng thư mục scene.
-- Bố cục mặc định chuyển từ bộ đã duyệt, giữ mái cũ và vị trí hiện hành. Quay gà vẫn cùng luật nấu,4/6/8 khách và1/2/3 thợ; không đổi save hoặc cân bằng. Các số raw ở những mục trước chỉ mô tả bố cục gốc, không còn là nơi chỉnh vị trí game.
+- Root/footprint4×3/cổng/tên marker/số ghế và thợ giữ cố định; chỉnh Position và Scale dương nhóm nội thất hoặc instance rào, không xoay/mirror. Đường bao rào giữ trong footprint và chừa cổng hiện tại. Editor có lưới/vùng tránh/dân mẫu; tất cả ẩn trong game. Nút Export menu / placement PNG trên root xuất hình trong suốt đúng khung576×552/neo288,504 vào assets/art, đồng bộ menu/bóng đặt/móng. Nếu vượt khung xám thì từ chối xuất, giữ hình cũ. Không phải plugin/addon; generator SVG không ghi đè scene/PNG chỉnh tay. Hướng dẫn chi tiết ở README cùng thư mục scene.
+- Bố cục mặc định chuyển từ bộ đã duyệt, vị trí hiện hành; nét gian nấu theo mục chi tiết bếp ba cấp ở trên. Quay chim vẫn cùng luật nấu,4/6/8 khách và1/2/3 thợ; không đổi save hoặc cân bằng. Các số raw ở những mục trước chỉ mô tả bố cục gốc, không còn là nơi chỉnh vị trí game.
 
 ### Dời giá quay và phân chỗ nấu (2026-10-05) — bố cục gốc của scene
 

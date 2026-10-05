@@ -40,6 +40,8 @@ func has_raw() -> bool:
 func take() -> float:
 	if has_meal() and _building.take_stock(ResourceDefs.MEAL):
 		taken_icon = ResourceDefs.icon(ResourceDefs.MEAL)
+		if _building.kitchen != null:
+			taken_icon = _building.kitchen.meal_art(_building.stock_of(ResourceDefs.MEAL))
 		taken_fun = Balance.FUN_COOKED_MEAL
 		return Balance.KITCHEN_MEAL_HUNGER
 	if not has_raw():

@@ -42,7 +42,7 @@ Cấp thấp nhỏ/đơn sơ/cũ hơn; cấp giữa chắc và gọn hơn; cấp
 
 Giữ họ vật liệu và chức năng của từng công trình. Không tự đổi số ghế, sức chứa, footprint hoặc luật chỉ để làm hình lớn hơn. Có thể sân nhìn nhỏ hơn ở cấp thấp để tránh quá trống, nhưng diện tích đặt vẫn theo dữ liệu game.
 
-Ngoại lệ hiện hành: **mái gian nấu bếp giữ mẫu cũ đã duyệt**; thử kiến trúc mái khác đang hoãn. Không khôi phục bản thử bị người dùng bỏ qua.
+Gian nấu bếp hiện hành: cấp1 **không mái**, giàn thịt gác bếp và thớt đá; cấp2 giữ mái lá cũ, có giàn thịt khuất một phần; cấp3 mái lá xếp hàng, diềm gỗ/giằng/vách đan và mặt trời nhỏ. Không khôi phục các bản thử mái trước đã hoãn.
 
 ### 1.6 Bố cục tự nhiên, có khoảng trống sử dụng
 
@@ -83,7 +83,13 @@ Scene ráp mảnh là bản nguồn để thiết kế. Nếu đo hiệu năng t
 
 Vị trí/cỡ hiện hành của bếp nằm trong scene người dùng đã chỉnh, không lấy các số bố cục lịch sử để sinh đè lên chúng. Quầy/gian nấu giữ khe đất ở chân với rào; mái có thể phủ rào. Giá quay và hai hàng bàn phải chừa khoảng trống hoạt động.
 
+**Chi tiết bếp cập nhật 2026-10-05:** cấp1 thớt đá có thịt/dao đá, đầu bếp thái thịt; chiếu bày món có viền đan khác chiếu khách, bày thịt gác bếp hoặc chim quay; khách dùng lá chuối thay chén, giá quay có chim cút nhỏ. Cấp2 thêm giàn thịt và đôi đũa lệch nhẹ cạnh mỗi chén bàn ăn. Cấp3 mỗi bàn ăn có ống đũa tre, không thêm đôi đũa riêng từng chén. Giàn thịt/ống đũa là Sprite riêng chỉnh được trong nhóm. Hình món cấp1 thay đổi theo vị trí bếp/ô bày mà không dùng RNG mô phỏng; vẫn cùng kho MEAL, công thức/sản lượng/nhu cầu và save hiện hành. Giữ nguyên mọi mảnh hàng rào đã được người dùng căn chỉnh.
+
 Các công trình khác áp dụng nguyên tắc chung khi được giao thiết kế; chưa mặc định đã được chuyển thành bộ scene ráp mảnh tương tự bếp.
+
+**Con quay theo cấp (2026-10-05):** cấp1 chim cút nhỏ, cấp2 gà, cấp3 heo rừng nguyên con có mõm/ngà nhỏ, chân gập và đuôi cong. Cùng giá quay/animation/chỗ đứng đầu bếp hiện hành; đây là hình đại diện, không thêm công thức hoặc yêu cầu săn heo mới.
+
+**Chỉnh sào/thớt cấp1 độc lập:** root `MeatRack` là nhóm sào treo thịt riêng; `CookingCanopy` giữ thớt đá và marker đầu bếp/cảnh báo. Kéo/scale nhóm nào chỉ đổi phần đó; không gộp sào vào nhóm thớt. Giữ tên CookingCanopy cho hợp đồng tương tác hiện hành. Cấp2 vẫn giữ giàn thịt trong gian có mái.
 
 ## 3. Nguồn dữ liệu và nơi sửa
 

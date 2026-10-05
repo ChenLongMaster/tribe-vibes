@@ -5,10 +5,11 @@ Mở project trong Godot, mở `kitchen_1.tscn`, `kitchen_2.tscn` hoặc `kitche
 ## Kéo và đổi cỡ
 
 1. Chọn **nhóm cha trong cây Scene** bên trái:
-   - `CookingCanopy`: gian nấu, mái/cọc/nồi/dụng cụ, chỗ đứng nấu và cảnh báo.
-   - `Serving`: quầy món, các bát trên quầy, điểm dân tới lấy món và vùng tránh.
+   - **Cấp1:** chọn `MeatRack` ở ngay dưới root để kéo/scale sào treo thịt; chọn `CookingCanopy` để kéo/scale thớt đá và điểm đứng đầu bếp. Hai nhóm độc lập, không kéo theo nhau. Hình sào và thớt vốn là hai SVG riêng; không cần vẽ lại khi chỉ đổi chỗ. Sprite `Art`/`Cook` bên trong khoá chọn; chỉnh nhóm cha.
+   - **Cấp2–3:** `CookingCanopy` là gian nấu, mái/cọc/nồi/dụng cụ, chỗ đứng nấu và cảnh báo. Cấp2 có Sprite `MeatRack` dưới mái.
+   - `Serving`: chiếu món cấp1 hoặc quầy cấp2–3, điểm dân tới lấy món và vùng tránh. Món dự trữ được game thêm lúc chạy, không phải bát tĩnh trong scene cấp1.
    - `RoastFire`: giá quay, gà/lửa/khói, chỗ đứng người quay và vùng tránh.
-   - `Dining0`, `Dining1`…: từng bộ chiếu/bàn/ghế, hai chỗ ngồi, mặt ghế và vùng tránh.
+   - `Dining0`, `Dining1`…: từng bộ chiếu/bàn/ghế, hai chỗ ngồi, mặt ghế và vùng tránh. Cấp3 có `ChopstickHolder` riêng trên từng bàn; cấp2 đôi đũa thuộc hình bàn.
    - Mở `FenceBack` / `FenceFront`, chọn `Stone…`, `Bamboo…`, `Wood…` để kéo từng viên đá, cọc hoặc thanh rào. Đây là các instance của bộ mảnh dùng chung; Ctrl+D nhân bản mảnh.
 2. Kéo nhóm bằng công cụ Move; hoặc sửa **Transform > Position** trong Inspector. Đổi **Transform > Scale** để tăng/giảm kích thước. Ví dụ `(1.1, 1.1)` lớn hơn 10%; `(0.9, 0.9)` nhỏ hơn 10%. Nên dùng scale dương và đổi đều hai chiều, khởi đầu khoảng 0.8–1.2.
 
@@ -20,7 +21,7 @@ Hình và điểm tương tác nằm chung nhóm nên cùng dịch/scale. Ngư�
 
 ## Đồng bộ menu và bóng đặt công trình
 
-Sau khi chỉnh xong và lưu scene, chọn root, bấm **Export menu / placement PNG** trong Inspector. Nút xuất hình nguyên bếp vào `assets/art/buildings/kitchen_1.png` (hoặc cấp 2/3), nền trong suốt, đúng khung 512×552 và neo cũ. Godot cần một lúc để import PNG mới; chạy lại game để nạp hình mới. Lặp lại với mỗi cấp bạn sửa.
+Sau khi chỉnh xong và lưu scene, chọn root, bấm **Export menu / placement PNG** trong Inspector. Nút xuất hình nguyên bếp vào `assets/art/buildings/kitchen_1.png` (hoặc cấp 2/3), nền trong suốt, khung **576×552**, neo **(288,504)** = tỉ lệ (0.5,21/23). Phần đệm trong suốt ngang được nới để chứa đầy đủ đá người dùng đã chỉnh; không scale sân, đổi footprint hoặc dời vật. Các lớp SVG vẫn 512×552 và neo (256,504). Godot cần một lúc để import PNG mới; chạy lại game để nạp hình mới. Lặp lại với mỗi cấp bạn sửa.
 
 Game sống đọc scene trực tiếp. Menu/bóng khi đặt/móng đang xây đọc PNG được xuất; nếu chưa bấm Export thì chúng vẫn là hình của lần xuất trước. Script sinh SVG tạm không ghi đè scene hoặc PNG này.
 
