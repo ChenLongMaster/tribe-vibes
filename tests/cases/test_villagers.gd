@@ -16,6 +16,23 @@ const IN_PLACE_KINDS: Array[StringName] = [&"fidget", &"sit", &"scratch", &"chat
 const IDLE_TOLERANCE_CELLS: float = 1.5
 
 
+func test_chat_waits_for_partner_to_return() -> void:
+	GameState.new_game(preload("res://modes/normal_mode.tres"))
+	var world: World = WORLD_SCENE.instantiate()
+	host.add_child(world)
+	world.build(42)
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = 99
+	var cell: Vector2i = world.finder.find_free_cell_near(world.map_data.campfire_cell, 2.0, 3.0)
+	var first: Villager = world.spawn_villager(VillagerFactory.create(rng, VillagerData.Gender.MALE, "vi"), cell)
+	var second: Villager = world.spawn_villager(VillagerFactory.create(rng, VillagerData.Gender.FEMALE, "vi"), cell)
+	check(world.finder.find_chat_partner(first) == second, "Người ở điểm neo được rủ tán gẫu")
+	second.position += Vector2(32, 32)
+	check(world.finder.find_chat_partner(first) == null, "Người vừa xong việc xa điểm neo phải về trước, không bị chặn bằng chat")
+	world.queue_free()
+	await host.get_tree().process_frame
+
+
 func test_factory_makes_valid_villagers() -> void:
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 123

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="552" viewBox="0 0 512 552">
+<g transform="translate(0,48)"><g transform="scale(1.3333333333333333,1.5)"><g transform="translate(192,192) scale(1.0) translate(-192,-192)"><g transform="translate(282,169) scale(1)">  <path d="M-13 -8 Q-3 -15 9 -10 Q18 -7 17 1 Q15 11 4 11 Q-10 12 -16 4 Q-19 -2 -13 -8 Z" fill="#CF8A44" stroke="#4E342E" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-12 -8 Q0 -13 10 -7 Q16 -5 13 -1 Q1 -6 -12 -2 Z" fill="#EAB368"/>
+  <path d="M-2 -2 Q8 -8 10 1 Q8 8 -1 4 Q-5 1 -2 -2 Z" fill="#B87639" stroke="#4E342E" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-10 5 Q-21 3 -20 9 Q-17 15 -9 10 Z" fill="#DB9C51" stroke="#4E342E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-20 9 L-25 10" stroke="#E5D3A4" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <ellipse cx="-26" cy="10" rx="2" ry="2" fill="#F0DFB4"/>
+  <ellipse cx="-7" cy="-4" rx="1" ry="1.5" fill="#A86A36"/>
+  <ellipse cx="7" cy="-5" rx="1" ry="1.5" fill="#A86A36"/>
+  <ellipse cx="13" cy="2" rx="1" ry="1.5" fill="#A86A36"/>
+</g></g></g></g></svg>

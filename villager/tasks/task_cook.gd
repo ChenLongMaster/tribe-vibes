@@ -31,6 +31,7 @@ func start() -> void:
 		if not _station.kitchen.reserve(villager, true):
 			fail()
 			return
+		hold_job_item()
 		if villager.interior == _station:
 			if not _station.kitchen.move_inside(villager, _station.kitchen.cooking_spot(villager)):
 				fail()
@@ -44,7 +45,9 @@ func start() -> void:
 
 
 func hold_job_item() -> void:
-	if _station.kitchen != null:
+	if _uses_roast():
+		villager.rig.set_held_item("")
+	elif _station.kitchen != null:
 		villager.rig.set_held_item("props/cooking_spoon", true)
 	else:
 		super.hold_job_item()
@@ -71,10 +74,12 @@ func tick(delta: float) -> Status:
 					_resume_cooking = false
 					step = Step.COOK
 					villager.rig.play(VillagerRig.ANIM_COOK)
+					_apply_station_animation()
 					villager.state = Villager.State.WORKING
 		Step.WAIT:
 			if _try_take_raw():
 				begin_work(float(_station.prop("cook_seconds", job.def()["seconds"])))
+				_apply_station_animation()
 				step = Step.COOK
 				villager.notify_task_changed()
 				return Status.RUNNING
@@ -96,6 +101,14 @@ func tick(delta: float) -> Status:
 			return Status.DONE
 	return Status.RUNNING
 
+func _uses_roast() -> bool:
+	return _station.kitchen != null and _station.level >= 2 and _station.kitchen.cooks.get(villager.id, -1) == 1
+
+func _apply_station_animation() -> void:
+	_work_anim = VillagerRig.ANIM_ROAST if _uses_roast() else VillagerRig.ANIM_COOK
+	hold_job_item()
+	villager.rig.play(_work_anim)
+
 
 func _begin_wait() -> void:
 	if _station.kitchen != null:
@@ -110,6 +123,7 @@ func refresh_layout() -> void:
 	if villager.interior != _station:
 		return
 	_resume_cooking = _raw != &""
+	hold_job_item()
 	if not _station.kitchen.move_inside(villager, _station.kitchen.cooking_spot(villager)):
 		fail()
 	step = Step.ENTER

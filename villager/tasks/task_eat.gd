@@ -31,7 +31,7 @@ func start() -> void:
 			fail()
 			return
 	if _kitchen != null and villager.interior == _kitchen.building:
-		if not _kitchen.move_inside(villager, Vector2(108, 275)):
+		if not _kitchen.move_inside(villager, KitchenLayout.fetch_point(_kitchen.building.level)):
 			fail()
 		step = Step.ENTER
 		return
@@ -59,7 +59,7 @@ func tick(delta: float) -> Status:
 			if not _source.is_available(villager):
 				return Status.FAILED
 			if _kitchen != null:
-				if not _kitchen.move_inside(villager, Vector2(108, 275)):
+				if not _kitchen.move_inside(villager, KitchenLayout.fetch_point(_kitchen.building.level)):
 					return Status.FAILED
 				step = Step.ENTER
 			else:
@@ -96,6 +96,7 @@ func tick(delta: float) -> Status:
 			villager.emote("icons/happy")
 			if _kitchen != null:
 				villager.rig.seated_eating = false
+				villager.rig.eating_seat_lift = 0.0
 				villager.rig.set_held_item("")
 				if not villager.move_to_cell(_kitchen.entry_cell()):
 					return Status.FAILED
@@ -110,7 +111,7 @@ func tick(delta: float) -> Status:
 
 func _begin_fetch() -> void:
 	villager.clear_bubble()
-	villager.face_towards(_kitchen.point(Vector2(58, 257)) if _kitchen != null else _source.target.position)
+	villager.face_towards(_kitchen.point(KitchenLayout.serving_center(_kitchen.building.level)) if _kitchen != null else _source.target.position)
 	villager.rig.play(_source.fetch_anim())
 	villager.state = Villager.State.WORKING
 	timer = _source.fetch_seconds(villager)
@@ -122,11 +123,12 @@ func refresh_layout() -> void:
 		return
 	if step == Step.EAT or step == Step.SEAT:
 		villager.rig.seated_eating = false
+		villager.rig.eating_seat_lift = 0.0
 		if not _kitchen.move_inside(villager, _kitchen.seat(villager)):
 			fail()
 		step = Step.SEAT
 	elif step == Step.ENTER or step == Step.FETCH:
-		if not _kitchen.move_inside(villager, Vector2(108, 275)):
+		if not _kitchen.move_inside(villager, KitchenLayout.fetch_point(_kitchen.building.level)):
 			fail()
 		step = Step.ENTER
 	elif step == Step.EXIT:
@@ -135,6 +137,12 @@ func refresh_layout() -> void:
 
 
 func _begin_eat() -> void:
+	villager.rig.eating_seat_lift = 0.0
+	if _kitchen != null and _kitchen.building.level > 1:
+		var surface: Vector2 = KitchenLayout.seat_surface_raw(_kitchen.building.level, _kitchen.seats[villager.id])
+		var height: float = _kitchen.point(_kitchen.seat(villager)).y - _kitchen.point(surface).y
+		# Tính theo cỡ thật cả người lớn/trẻ con; hông ngồi bệt ở Y=-5 trong rig.
+		villager.rig.eating_seat_lift = maxf(0.0, height / villager.rig.global_scale.y - 5.0)
 	villager.rig.seated_eating = _kitchen != null
 	if _kitchen != null:
 		villager.rig.set_facing(1.0 if _kitchen.seats[villager.id] % 2 == 0 else -1.0)
@@ -146,6 +154,7 @@ func _begin_eat() -> void:
 
 func stop() -> void:
 	villager.rig.seated_eating = false
+	villager.rig.eating_seat_lift = 0.0
 	if step == Step.GO:
 		villager.clear_bubble()
 	if _source != null:

@@ -23,6 +23,8 @@ const MATERIAL_CARRY_ART: Dictionary[StringName, String] = {
 var _site: Building
 var _resource: StringName = &""
 var _amount: int = 0
+## Phần đã hứa gồm cả lúc chưa lấy đồ; tách khỏi _holding để ngắt việc luôn trả đúng.
+var _pledged_amount: int = 0
 ## Đã lấy ra khỏi kho, đang trên tay (chưa đổ vào công trường).
 var _holding: bool = false
 var _stand: Vector2i = World.INVALID_CELL
@@ -66,6 +68,7 @@ func tick(delta: float) -> Status:
 			villager.rig.set_carry_item("")
 			villager.rig.squash(0.18)
 			_site.deliver_material(_resource, _amount)
+			_pledged_amount = 0
 			_holding = false
 			timer = DROP_SECONDS_SITE
 			step = Step.DROP
@@ -107,8 +110,8 @@ func stop() -> void:
 	if _holding:
 		# Bị ngắt giữa đường: cất vật liệu lại kho chung, bỏ phần đã hứa mang tới.
 		GameState.add_resource(_resource, _amount)
-		_site.unpledge(_resource, _amount)
 		_holding = false
+	_release_pledge(_pledged_amount)
 	if not _stand_key.is_empty():
 		world().reservations.release(_stand_key, villager)
 
@@ -161,12 +164,13 @@ func _go_fetch(resource_id: StringName, amount: int) -> void:
 	_storage = world().finder.find_storage_for(resource_id, villager)
 	# Hứa trước để thợ khác không khuân trùng phần này.
 	_site.pledge(resource_id, amount)
+	_pledged_amount = amount
 	_holding = false
 	var stand: Vector2i = World.INVALID_CELL
 	if _storage != null:
 		stand = world().finder.find_building_stand_cell(_storage, villager)
 	if stand == World.INVALID_CELL or not villager.move_to_cell(stand):
-		_site.unpledge(resource_id, amount)
+		_release_pledge(_pledged_amount)
 		fail()
 		return
 	villager.state = Villager.State.MOVING
@@ -177,10 +181,10 @@ func _take_material() -> void:
 	var taken: int = mini(_amount, GameState.get_amount(_resource))
 	if taken <= 0 or not GameState.take_resource(_resource, taken):
 		# Người khác vừa lấy hết: trả lời hứa, lượt sau tính lại.
-		_site.unpledge(_resource, _amount)
+		_release_pledge(_pledged_amount)
 		_wait_at_site(_resource)
 		return
-	_site.unpledge(_resource, _amount - taken)
+	_release_pledge(_amount - taken)
 	_amount = taken
 	_holding = true
 	villager.rig.play(VillagerRig.ANIM_IDLE)
@@ -192,12 +196,21 @@ func _take_material() -> void:
 	if not _move_to_site():
 		# Không tới được công trường: cất lại kho.
 		GameState.add_resource(_resource, _amount)
-		_site.unpledge(_resource, _amount)
+		_release_pledge(_pledged_amount)
 		_holding = false
 		villager.rig.set_carry_item("")
 		fail()
 		return
 	step = Step.GO_SITE
+
+
+## Trả một lần cả khi đường đi thất bại hoặc task bị stop() ngay sau đó.
+func _release_pledge(amount: int) -> void:
+	var released: int = mini(amount, _pledged_amount)
+	if released <= 0:
+		return
+	_site.unpledge(_resource, released)
+	_pledged_amount -= released
 
 
 func _go_build() -> void:

@@ -468,11 +468,21 @@ func _yard_rect(building: Building) -> Rect2:
 
 func _add_yard(building: Building) -> void:
 	if building.building_id == BuildingDefs.KITCHEN:
-		# Sân/vòng đá đã nằm trong art, giữ đúng cỡ nhỏ–vừa–lớn đã duyệt.
+		# Sân bếp dùng đất map; chỉ rào/đá nằm trong art, không thêm vòng đá thứ hai.
+		var tier: int = building.level if building.is_built() else 3
+		var first: Vector2 = (building.position + KitchenLayout.local_point(Vector2(0, 64), tier)) / Balance.TILE_SIZE
+		var last: Vector2 = (building.position + KitchenLayout.local_point(Vector2(384, 320), tier)) / Balance.TILE_SIZE
+		var center: Vector2 = (first + last) * 0.5
+		var half_size: Vector2 = (last - first) * 0.5
+		for y: int in range(floori(first.y) - 1, ceili(last.y) + 2):
+			for x: int in range(floori(first.x) - 1, ceili(last.x) + 2):
+				var cell: Vector2i = Vector2i(x, y)
+				var edge: Vector2 = (Vector2(cell) + Vector2.ONE * 0.5 - center).abs() - half_size
+				var value: float = clampf(0.8 - maxf(edge.x, edge.y) * Balance.KITCHEN_YARD_FALLOFF, 0.0, 1.0)
+				_ground_mask.set_yard(cell, maxf(_ground_mask.yard_at(cell), value))
 		_decor_layer.hide_cells(building.footprint_cells())
 		return
 	var cells: Array[Vector2i] = building.footprint_cells()
-	var covered: Array[Vector2i] = []
 	var origin: Vector2i = building.origin_cell
 	var size: Vector2i = BuildingDefs.footprint(building.building_id)
 	for y: int in range(-1, size.y + 1):
@@ -480,10 +490,9 @@ func _add_yard(building: Building) -> void:
 			var cell: Vector2i = origin + Vector2i(x, y)
 			var inside: bool = cells.has(cell)
 			var corner: bool = (x == -1 or x == size.x) and (y == -1 or y == size.y)
-			var value: float = 1.0 if inside else (0.45 if corner else 0.68)
+			var value: float = 1.0 if inside else (Balance.YARD_CORNER_STRENGTH if corner else Balance.YARD_EDGE_STRENGTH)
 			_ground_mask.set_yard(cell, maxf(_ground_mask.yard_at(cell), value))
-			covered.append(cell)
-	_decor_layer.hide_cells(covered)
+	_decor_layer.hide_cells(cells)
 	if not _yard_rings.has(building):
 		var ring: YardRing = YardRing.new()
 		ring.setup(_yard_rect(building), building.uid * 7919)
@@ -548,12 +557,14 @@ func _spawn_animals(seed_value: int) -> void:
 # Đá vỡ hết thì ô đó thành lối đi (củi, đá cuội vốn không chặn gì).
 func _on_resource_cleared(node: ResourceNode) -> void:
 	if not node.is_loose():
-		grid.set_blocked(node.cell, false)
+		for at: Vector2i in node.footprint_cells():
+			grid.set_blocked(at, false)
 
 
 func _block_if_solid(node: ResourceNode) -> void:
 	if not node.is_loose():
-		grid.set_blocked(node.cell, true)
+		for at: Vector2i in node.footprint_cells():
+			grid.set_blocked(at, true)
 
 
 func _add_sprite(parent: Node2D, key: String, pos: Vector2) -> Sprite2D:

@@ -412,7 +412,12 @@ func move_to_cell(cell: Vector2i, final_point: Vector2 = Vector2.INF) -> bool:
 
 
 func path_origin() -> Vector2i:
-	return interior.kitchen.entry_cell() if interior != null else world.cell_of(self)
+	if interior != null:
+		return interior.kitchen.entry_cell()
+	var at: Vector2i = world.cell_of(self)
+	if task is TaskSleep and world.grid.is_blocked(at):
+		return (task as TaskSleep).entry_cell()
+	return at
 
 
 func follow_path(points: PackedVector2Array) -> void:

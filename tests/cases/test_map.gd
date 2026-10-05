@@ -26,7 +26,7 @@ func test_enough_resources() -> void:
 		var spots: int = data.objects_of_kind(MapData.KIND_FISH_SPOT).size()
 		var water: int = data.water.count(1)
 		check(trees >= 60, "Seed %d: ít cây quá (%d)" % [seed_value, trees])
-		check(rocks >= 10, "Seed %d: ít đá quá (%d)" % [seed_value, rocks])
+		check(rocks >= 5 and rocks <= 24, "Seed %d: số mỏ lớn ngoài khoảng5–24 (%d)" % [seed_value, rocks])
 		check(bushes >= 8, "Seed %d: ít bụi quả quá (%d)" % [seed_value, bushes])
 		check(spots >= 3, "Seed %d: ít chỗ câu cá quá (%d)" % [seed_value, spots])
 		check(water >= 25, "Seed %d: hồ nhỏ quá (%d ô)" % [seed_value, water])
@@ -40,7 +40,10 @@ func test_everything_reachable_from_cave() -> void:
 		var reached: PackedByteArray = grid.flood_fill(data.cave_entrance_cell)
 		var stuck: int = 0
 		for object: Dictionary in data.objects:
-			if not grid.has_reachable_neighbor(object["cell"], reached):
+			var reachable: bool = false
+			for at: Vector2i in MapData.resource_cells(object["kind"], object["cell"], int(object.get("variant", 0))):
+				reachable = reachable or grid.has_reachable_neighbor(at, reached)
+			if not reachable:
 				stuck += 1
 		check(stuck == 0, "Seed %d: %d vật thể không đi tới được" % [seed_value, stuck])
 		check(grid.has_reachable_neighbor(data.campfire_cell, reached), "Seed %d: không tới được lửa trại" % seed_value)
@@ -107,7 +110,7 @@ func test_rts_layout() -> void:
 		var center: Vector2 = Vector2(data.village_center)
 		# Gần làng đủ mỗi thứ một cụm nhỏ (bụi quả giờ là bụi to, 2–3 bụi một vạt).
 		var wanted: Dictionary[StringName, int] = {
-			MapData.KIND_TREE: 3, MapData.KIND_ROCK: 3, MapData.KIND_BUSH: Balance.BERRY_GROVE_MIN,
+			MapData.KIND_TREE: 3, MapData.KIND_ROCK: 1, MapData.KIND_BUSH: Balance.BERRY_GROVE_MIN,
 			MapData.KIND_PEBBLES: 1, MapData.KIND_TWIGS: 1,
 		}
 		for kind: StringName in wanted:

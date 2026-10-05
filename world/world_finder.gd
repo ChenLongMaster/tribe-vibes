@@ -163,6 +163,8 @@ func find_storage_for(resource_id: StringName, villager: Villager) -> Building:
 ## Ô trống sát mép một công trình (mọi cỡ) mà thổ dân đi tới được, gần thổ dân nhất.
 ## `free_only` = bỏ qua ô người khác đã giữ chỗ đứng (nhiều thợ xây quanh một công trình).
 func find_building_stand_cell(building: Building, villager: Villager, free_only: bool = false) -> Vector2i:
+	if building.tent_entrance != null and building.is_built() and not free_only:
+		return _closest_reachable([building.tent_entrance.entry_cell()], villager)
 	if building.kitchen != null and building.is_built() and not free_only:
 		return _closest_reachable([building.kitchen.entry_cell()], villager)
 	var footprint: Array[Vector2i] = building.footprint_cells()
@@ -195,6 +197,8 @@ func _can_reach_target(node: Node2D, villager: Villager) -> bool:
 		return _world.grid.has_path(villager.path_origin(), (node as Animal).current_cell())
 	if node is ResourceNode and (node as ResourceNode).is_loose():
 		return _world.grid.has_path(villager.path_origin(), (node as ResourceNode).cell)
+	if node is ResourceNode:
+		return find_resource_stand(node as ResourceNode, villager) != World.INVALID_CELL
 	return find_stand_cell(Job.target_cell(node), villager) != World.INVALID_CELL
 
 
@@ -225,6 +229,9 @@ func find_chat_partner(villager: Villager) -> Villager:
 		if other == villager or not other.data.is_adult():
 			continue
 		if other.task != null and not CHATTABLE_KINDS.has(other.task.kind):
+			continue
+		# Hết lượt hái hoa/ăn vẫn phải về điểm neo trước khi được rủ tán gẫu.
+		if _world.cell_of(other) != other.anchor_cell:
 			continue
 		if not is_in_idle_area(villager, _world.cell_of(other)):
 			continue
@@ -306,3 +313,20 @@ func _find_ground_spot(villager: Villager) -> Vector2i:
 		if _world.grid.has_path(from_cell, cell):
 			return cell
 	return World.INVALID_CELL
+
+
+func find_resource_stand(node: ResourceNode, person: Villager, avoid: Array[Vector2i] = []) -> Vector2i:
+	if node.footprint_cells().size() == 1:
+		return find_stand_cell(node.cell, person, true, avoid)
+	var footprint: Array[Vector2i] = node.footprint_cells()
+	var options: Array[Vector2i] = []
+	var penalty: Dictionary[Vector2i, float] = {}
+	for at: Vector2i in footprint:
+		for offset: Vector2i in WorldGrid.NEIGHBORS_8:
+			var candidate: Vector2i = at + offset
+			if footprint.has(candidate) or options.has(candidate) or _world.grid.is_blocked(candidate):
+				continue
+			options.append(candidate)
+			if avoid.has(candidate):
+				penalty[candidate] = SHARED_STAND_PENALTY_PX
+	return _closest_reachable(options, person, penalty)

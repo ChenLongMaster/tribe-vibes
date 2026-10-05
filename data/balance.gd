@@ -52,18 +52,18 @@ const RIDGE_SCREE_SPAN_MIN: float = 0.55
 const RIDGE_SCREE_SPAN_MAX: float = 0.85
 const RIDGE_SCREE_NEAR: float = 0.85 # khả năng có đá ở ô sát vách
 const RIDGE_SCREE_FAR: float = 0.4 # ô cách vách 2
-const RIDGE_BOULDERS_MAX: int = 16
+const RIDGE_BOULDERS_MAX: int = 3
 ## Bãi đá lẻ (ngoài chân vách).
 const ROCK_START: float = 0.2
-const ROCK_FIELD_COUNT: int = 4
-const ROCK_FIELD_MIN: int = 4
-const ROCK_FIELD_MAX: int = 7
-const STARTER_ROCKS: int = 6 # bãi đá nhỏ gần làng
+const ROCK_FIELD_COUNT: int = 1
+const ROCK_FIELD_MIN: int = 1
+const ROCK_FIELD_MAX: int = 2
+const STARTER_ROCKS: int = 1 # một mỏ lớn gần làng
 const ROCK_BIG_CHANCE: float = 0.4
 ## Bụi quả mọc thành vạt: một vạt gần làng, một vạt ở đồng cỏ, còn lại rải quanh map.
 const BERRY_GROVES: int = 6
-const BERRY_GROVE_MIN: int = 2 # bụi to
-const BERRY_GROVE_MAX: int = 3
+const BERRY_GROVE_MIN: int = 4 # cụm2×2
+const BERRY_GROVE_MAX: int = 6
 const BERRY_GROVE_SPACING: float = 10.0 # ô giữa hai vạt
 const BUSH_RING_MIN: float = 5.0 # vạt gần làng cách giữa làng chừng này ô
 const BUSH_RING_MAX: float = 9.0
@@ -89,7 +89,10 @@ const OVERHEAD_SCALE: float = 1.3
 const SIGN_SCALE: float = 1.35
 const MIN_PICK_RADIUS: float = 24.0 # px — vùng chạm thổ dân vẫn tối thiểu ~48 px cho điện thoại
 ## Sân đất quanh mỗi công trình rộng thêm chừng này ô mỗi phía; sân làng quanh hang + lửa trại.
-const YARD_MARGIN_CELLS: float = 0.75
+const YARD_MARGIN_CELLS: float = 0.35
+const YARD_EDGE_STRENGTH: float = 0.28
+const YARD_CORNER_STRENGTH: float = 0.16
+const KITCHEN_YARD_FALLOFF: float = 1.8
 const VILLAGE_YARD_RADIUS: float = 3.4
 ## Đường mòn: mỗi lần thổ dân bước vào một ô thì ô đó mòn thêm; bỏ không thì cỏ mọc lại dần.
 const WEAR_PER_STEP: float = 0.05
@@ -124,6 +127,8 @@ const LOOSE_PICK_BATCH: int = 3 # nhặt đủ chừng này bó củi / viên s�
 const GATHER_PICK_BATCH: int = 3 # hái chừng này lượt (đầy giỏ) rồi mới khuân về
 ## Mỗi chỗ tài nguyên là một "mỏ" có lượng (thanh máu) — nhiều người làm chung, hết dần.
 ## Hình đổi theo lượng còn lại: > 50% / 20–50% / < 20% (RESOURCE_STAGE_*).
+const ROCK_CLUSTER_STONE: int = 96 # một mỏ lớn thay sáu tảng cũ
+const BAMBOO_SHORE_DISTANCE: int = 4 # chỉ ven hồ, chừa sát mép cho đường câu cá
 const ROCK_STONE: int = 16 # đá tảng: chừng này đá (đập 4 lượt × 4)
 const BUSH_FOOD: int = 30 # bụi quả to: chừng này thức ăn
 const PEBBLE_PATCH_STONE: int = 20 # bãi sỏi
@@ -134,7 +139,11 @@ const ROCK_WORKERS: int = 2
 const RESOURCE_STAGE_HALF: float = 0.5 # còn ≤ chừng này phần thì đổi sang hình "vừa"
 const RESOURCE_STAGE_LOW: float = 0.2 # còn ≤ chừng này phần thì đổi sang hình "ít"
 ## Lúc mở ván mỗi mỏ có lượng ngẫu nhiên (phần của đầy) — map trông không đều tăm tắp.
-const BAMBOO_CHANCE: float = 0.28 # phần cây lá rộng được thay bằng bụi tre, không đổi loại tài nguyên
+const BAMBOO_GROVES: int = 5
+const BAMBOO_GROVE_SPACING: float = 8.0
+const BAMBOO_DENSITY: float = 0.65
+const FOREST_SPECIES_GAP: int = 2
+const ROCK_CLUSTER_GAP: float = 4.0 # chừa lối đi/sỏi giữa hai mỏ
 const START_AMOUNT_MIN: float = 0.5
 const ROCK_START_AMOUNT_MIN: float = 0.3
 ## Bụi quả hái trụi thì chừng này ngày sau mới ra quả lại đầy (như mùa quả, không mô phỏng mùa).
@@ -145,8 +154,8 @@ const TREE_GROW_SECONDS: float = 2.0 * DAY_LENGTH_SECONDS
 const YOUNG_TREE_CHANCE: float = 0.12
 const YOUNG_TREE_SCALE: float = 0.4 # cây mới nhú to chừng này phần cây trưởng thành
 ## Bãi sỏi, đống củi lúc mở ván (cạnh bãi đá / dưới tán rừng; mỗi cụm gần làng có sẵn một ít).
-const PEBBLE_PATCHES: int = 22
-const PEBBLE_PATCH_SPACING: float = 3.0 # ô giữa hai bãi
+const PEBBLE_PATCHES: int = 64
+const PEBBLE_PATCH_SPACING: float = 1.0 # ô giữa hai bãi
 const TWIG_PILES: int = 20
 const TWIG_PILE_SPACING: float = 4.0
 const STARTER_PILES: int = 2 # bãi sỏi / đống củi gần làng
@@ -160,7 +169,7 @@ const TWIG_PILE_MAX: int = 30
 const CLIFF_SLIDE_SECONDS: float = 45.0
 const CLIFF_SLIDE_BOULDER_CHANCE: float = 0.4
 const CLIFF_SLIDE_PEBBLES: int = 8
-const PEBBLE_PATCH_MAX: int = 30
+const PEBBLE_PATCH_MAX: int = 80
 ## Gốc cây mọc lại thành cây — chỉ khi số cây còn ít hơn lúc đầu (không mọc tràn map).
 const TREE_REGROW_CHECK_SECONDS: float = 45.0 # mỗi chừng này giây thử cho một gốc mọc lại
 const STUMP_MIN_SECONDS: float = DAY_LENGTH_SECONDS # gốc phải để ít nhất chừng này mới mọc lại

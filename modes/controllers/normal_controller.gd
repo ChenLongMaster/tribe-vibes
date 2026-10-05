@@ -27,7 +27,7 @@ extends PlayerController
 const LONG_PRESS_NAME_SECONDS: float = 2.0
 const SPEED_ACTIONS: Dictionary[StringName, int] = {&"speed_1": 1, &"speed_2": 2, &"speed_3": 3}
 ## Icon con trỏ khi rê lên mặt đất / chỗ không đi được.
-const CURSOR_MOVE: String = "ui/move_marker"
+const CURSOR_MOVE: String = "icons/move_feet"
 const CURSOR_BLOCKED: String = "icons/cross"
 
 ## Những thổ dân đang chọn (thứ tự chọn).
@@ -136,8 +136,10 @@ func select_building(building: Building) -> void:
 		select(null)
 		select_object(null)
 	selected_building = building
+	if _feedback != null:
+		_feedback.set_selected_object(building)
 	if building != null:
-		building.wiggle()
+		building.selection_pulse()
 	EventBus.building_selected.emit(building)
 
 
@@ -234,6 +236,10 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if OS.is_debug_build() and event.is_action_pressed(&"debug_toggle_dev"):
+		Commands.toggle_dev_mode()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed(&"toggle_pause"):
 		Commands.toggle_pause()
 		get_viewport().set_input_as_handled()

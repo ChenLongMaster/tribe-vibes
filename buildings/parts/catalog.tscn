@@ -1,0 +1,105 @@
+[gd_scene load_steps=21 format=3]
+
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_01.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_02.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_03.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_04.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_05.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_06.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_07.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_08.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://buildings/parts/bamboo_post.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://buildings/parts/bamboo_post_tied.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://buildings/parts/bamboo_h_32.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://buildings/parts/bamboo_h_64.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://buildings/parts/bamboo_v_32.tscn" id="13"]
+[ext_resource type="PackedScene" path="res://buildings/parts/bamboo_v_64.tscn" id="14"]
+[ext_resource type="PackedScene" path="res://buildings/parts/wood_post.tscn" id="15"]
+[ext_resource type="PackedScene" path="res://buildings/parts/wood_post_tied.tscn" id="16"]
+[ext_resource type="PackedScene" path="res://buildings/parts/wood_h_32.tscn" id="17"]
+[ext_resource type="PackedScene" path="res://buildings/parts/wood_h_64.tscn" id="18"]
+[ext_resource type="PackedScene" path="res://buildings/parts/wood_v_32.tscn" id="19"]
+[ext_resource type="PackedScene" path="res://buildings/parts/wood_v_64.tscn" id="20"]
+
+[node name="PartsCatalog" type="Node2D"]
+y_sort_enabled = true
+
+[node name="stone_01_0" parent="." instance=ExtResource("1")]
+position = Vector2(55, 75)
+scale = Vector2(1, 1)
+
+[node name="stone_02_1" parent="." instance=ExtResource("2")]
+position = Vector2(123, 75)
+scale = Vector2(1, 1)
+
+[node name="stone_03_2" parent="." instance=ExtResource("3")]
+position = Vector2(191, 75)
+scale = Vector2(1, 1)
+
+[node name="stone_04_3" parent="." instance=ExtResource("4")]
+position = Vector2(259, 75)
+scale = Vector2(1, 1)
+
+[node name="stone_05_4" parent="." instance=ExtResource("5")]
+position = Vector2(327, 75)
+scale = Vector2(1, 1)
+
+[node name="stone_06_5" parent="." instance=ExtResource("6")]
+position = Vector2(395, 75)
+scale = Vector2(1, 1)
+
+[node name="stone_07_6" parent="." instance=ExtResource("7")]
+position = Vector2(463, 75)
+scale = Vector2(1, 1)
+
+[node name="stone_08_7" parent="." instance=ExtResource("8")]
+position = Vector2(531, 75)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_8" parent="." instance=ExtResource("9")]
+position = Vector2(55, 185)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_tied_9" parent="." instance=ExtResource("10")]
+position = Vector2(125, 185)
+scale = Vector2(1, 1)
+
+[node name="bamboo_h_32_10" parent="." instance=ExtResource("11")]
+position = Vector2(210, 185)
+scale = Vector2(1, 1)
+
+[node name="bamboo_h_64_11" parent="." instance=ExtResource("12")]
+position = Vector2(330, 185)
+scale = Vector2(1, 1)
+
+[node name="bamboo_v_32_12" parent="." instance=ExtResource("13")]
+position = Vector2(440, 185)
+scale = Vector2(1, 1)
+
+[node name="bamboo_v_64_13" parent="." instance=ExtResource("14")]
+position = Vector2(520, 185)
+scale = Vector2(1, 1)
+
+[node name="wood_post_14" parent="." instance=ExtResource("15")]
+position = Vector2(55, 320)
+scale = Vector2(1, 1)
+
+[node name="wood_post_tied_15" parent="." instance=ExtResource("16")]
+position = Vector2(125, 320)
+scale = Vector2(1, 1)
+
+[node name="wood_h_32_16" parent="." instance=ExtResource("17")]
+position = Vector2(210, 320)
+scale = Vector2(1, 1)
+
+[node name="wood_h_64_17" parent="." instance=ExtResource("18")]
+position = Vector2(330, 320)
+scale = Vector2(1, 1)
+
+[node name="wood_v_32_18" parent="." instance=ExtResource("19")]
+position = Vector2(440, 320)
+scale = Vector2(1, 1)
+
+[node name="wood_v_64_19" parent="." instance=ExtResource("20")]
+position = Vector2(520, 320)
+scale = Vector2(1, 1)

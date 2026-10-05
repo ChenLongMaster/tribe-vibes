@@ -6,6 +6,9 @@ enum Difficulty { EASY, NORMAL }
 
 ## Tham số dòng lệnh để ép seed khi test: `godot --path . -- --seed=42`
 const SEED_ARG_PREFIX: String = "--seed="
+const DEV_ARG: String = "--dev"
+## Giá trị hữu hạn cho các phép so sánh số nguyên; HUD hiển thị ∞ thay số này.
+const DEV_RESOURCE_AMOUNT: int = 1 << 30
 
 ## Chế độ đang chơi (luật chơi đọc từ đây, xem modes/game_mode_config.gd).
 var mode: GameModeConfig
@@ -27,6 +30,30 @@ var _next_villager_id: int = 1
 var _speed_before_pause: int = 1
 ## Đồng hồ ngày chỉ chạy khi đang có ván chơi (test dựng World lẻ thì không đếm).
 var _clock_running: bool = false
+## Cờ của phiên chạy, không lưu vào save và không ghi đè lượng thật trong kho.
+var _dev_mode: bool = false
+
+
+func _ready() -> void:
+	set_dev_mode(OS.get_cmdline_user_args().has(DEV_ARG))
+
+
+func is_dev_mode() -> bool:
+	return OS.is_debug_build() and _dev_mode
+
+
+func set_dev_mode(enabled: bool) -> void:
+	enabled = enabled and OS.is_debug_build()
+	if _dev_mode == enabled:
+		return
+	_dev_mode = enabled
+	EventBus.dev_mode_changed.emit(enabled)
+	for resource_id: StringName in ResourceDefs.ORDER:
+		EventBus.resource_changed.emit(resource_id, get_amount(resource_id))
+
+
+func _is_unlimited(resource_id: StringName) -> bool:
+	return is_dev_mode() and ResourceDefs.DEFS.has(resource_id)
 
 
 func new_game(game_mode: GameModeConfig, chosen_difficulty: Difficulty = Difficulty.EASY) -> void:
@@ -56,6 +83,8 @@ func _process(delta: float) -> void:
 
 
 func get_amount(resource_id: StringName) -> int:
+	if _is_unlimited(resource_id):
+		return DEV_RESOURCE_AMOUNT
 	return _resources.get(resource_id, 0)
 
 
@@ -68,7 +97,8 @@ func add_resource(resource_id: StringName, amount: int, item: StringName = &"") 
 	if item != &"":
 		var items: Dictionary = _items.get_or_add(resource_id, {})
 		items[item] = int(items.get(item, 0)) + amount
-	_set_amount(resource_id, get_amount(resource_id) + amount)
+	# Nhặt đồ vẫn cất vào kho thật; không cộng vào lượng ảo của DEV.
+	_set_amount(resource_id, int(_resources.get(resource_id, 0)) + amount)
 	return amount
 
 
@@ -82,7 +112,7 @@ func room(resource_id: StringName) -> int:
 	var cap: int = capacity(resource_id)
 	if cap < 0:
 		return 1 << 30
-	return maxi(0, cap - get_amount(resource_id))
+	return maxi(0, cap - int(_resources.get(resource_id, 0)))
 
 
 func set_capacity(resource_id: StringName, cap: int) -> void:
@@ -94,6 +124,8 @@ func set_capacity(resource_id: StringName, cap: int) -> void:
 
 ## Lấy `amount` ra khỏi kho nếu đủ. Trả về false (và không lấy gì) nếu không đủ.
 func take_resource(resource_id: StringName, amount: int = 1) -> bool:
+	if amount > 0 and _is_unlimited(resource_id):
+		return true
 	if amount <= 0 or get_amount(resource_id) < amount:
 		return false
 	for i: int in amount:
@@ -105,6 +137,8 @@ func take_resource(resource_id: StringName, amount: int = 1) -> bool:
 ## Lấy MỘT phần ra khỏi kho, trả về món vừa lấy (vd &"fish"); không nhớ món thì trả về
 ## chính `resource_id`. Kho trống thì trả về &"".
 func take_one(resource_id: StringName) -> StringName:
+	if _is_unlimited(resource_id):
+		return ResourceDefs.ITEM_BERRIES if resource_id == ResourceDefs.FOOD else resource_id
 	if get_amount(resource_id) < 1:
 		return &""
 	var item: StringName = _take_item(resource_id)
@@ -119,7 +153,7 @@ func item_amount(resource_id: StringName, item: StringName) -> int:
 
 func _set_amount(resource_id: StringName, total: int) -> void:
 	_resources[resource_id] = maxi(total, 0)
-	EventBus.resource_changed.emit(resource_id, _resources[resource_id])
+	EventBus.resource_changed.emit(resource_id, get_amount(resource_id))
 
 
 # Bớt một phần của món đang có nhiều nhất (ăn cho đều, kho đỡ lệch). &"" nếu không nhớ món.

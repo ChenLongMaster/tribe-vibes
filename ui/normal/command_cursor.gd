@@ -1,7 +1,7 @@
 class_name CommandCursor
 extends Control
 ## Icon nhỏ nhún nhún cạnh con trỏ chuột, cho biết click phải sẽ làm gì với những người đang
-## chọn (bụi quả → đồ ăn, cây → rìu, đá → cuốc, móng → búa, mặt đất → cờ…). Controller quyết
+## chọn (bụi quả → đồ ăn, cây → rìu, đá → cuốc, móng → búa, mặt đất → dấu chân…). Controller quyết
 ## định icon (EventBus.command_cursor_changed), ở đây chỉ vẽ. Cảm ứng không có con trỏ nên ẩn.
 
 const ICON_SIZE: float = 30.0

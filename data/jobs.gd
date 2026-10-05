@@ -146,7 +146,7 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 	BUILD: {
 		"skill": SkillDefs.BUILD,
 		"target": TARGET_CONSTRUCTION,
-		"held": "icons/skill_build",
+		"held": "props/build_hammer",
 		"anim": VillagerRig.ANIM_HAMMER,
 		"impact": IMPACT_WOOD,
 		"swing": VillagerRig.HAMMER_PERIOD,

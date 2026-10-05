@@ -24,6 +24,7 @@ var _data: MapData
 var _occupied: PackedByteArray = PackedByteArray()
 ## Ô vách đá (tra nhanh khi giữ khoảng cách giữa các dãy).
 var _cliff_set: Dictionary[Vector2i, bool] = {}
+var _tree_species: Dictionary[Vector2i, int] = {}
 
 
 func generate(seed_value: int) -> MapData:
@@ -42,6 +43,7 @@ func generate(seed_value: int) -> MapData:
 	_carve_lake()
 	_place_cliff_ridges()
 	_place_forests()
+	_place_bamboo_groves()
 	_place_lone_copses()
 	_place_rock_fields()
 	_place_berry_groves()
@@ -62,6 +64,7 @@ func _choose_layout() -> void:
 	# Cannibal đi qua đồng cỏ trống trải nên người chơi dễ thấy chúng tới.
 	_data.raid_side = MapData.Edge.SOUTH if _data.lake_side == MapData.Edge.NORTH else MapData.Edge.NORTH
 	_cliff_set.clear()
+	_tree_species.clear()
 	var center_x: int = floori(_data.size.x / 2.0)
 	var meadow_width: int = Balance.MEADOW_HALF_WIDTH * 2
 	var meadow_height: int = Balance.MEADOW_DEPTH - 1
@@ -252,7 +255,7 @@ func _ridge_cell_ok(cell: Vector2i, own: Array[Vector2i]) -> bool:
 # Trong cánh rừng cây dày ở lõi, thưa ở bìa; nhiễu tạo khoảng trống và lối đi.
 func _place_forests() -> void:
 	var near: Vector2i = _cell_toward(_data.forest_side, _rng.randf_range(8.0, 11.0))
-	_grow_forest(near, Balance.STARTER_GROVE_RADIUS)
+	_grow_forest(near, Balance.STARTER_GROVE_RADIUS, 0)
 	var made: int = 0
 	var attempts: int = 0
 	while made < Balance.FOREST_CLUSTERS and attempts < Balance.FOREST_CLUSTERS * 30:
@@ -265,14 +268,14 @@ func _place_forests() -> void:
 			continue
 		if Vector2(center).distance_to(Vector2(_data.village_center)) < Balance.FOREST_VILLAGE_CLEARANCE:
 			continue
-		_grow_forest(center, _rng.randf_range(Balance.FOREST_RADIUS_MIN, Balance.FOREST_RADIUS_MAX))
+		_grow_forest(center, _rng.randf_range(Balance.FOREST_RADIUS_MIN, Balance.FOREST_RADIUS_MAX), made % 2)
 		made += 1
 
 
 # Cánh rừng ghép từ một khối chính + vài khối phụ lệch ra (hình méo như rừng thật), bìa rừng
 # gợn theo nhiễu, cây thưa dần ra bìa và vài cây lẻ mọc lấn ra ngoài. Loại cây theo từng mảng
-# (nhiễu thấp tần) chứ không xen kẽ ngẫu nhiên từng cây.
-func _grow_forest(center: Vector2i, radius: float) -> void:
+# riêng cho cả cánh, không xen kẽ ngẫu nhiên từng cây.
+func _grow_forest(center: Vector2i, radius: float, species: int) -> void:
 	var blobs: Array[Vector3] = [Vector3(center.x, center.y, radius)]
 	for i: int in _rng.randi_range(0, Balance.FOREST_BLOBS_MAX):
 		var offset: Vector2 = Vector2.RIGHT.rotated(_rng.randf() * TAU) * radius * _rng.randf_range(0.5, 0.95)
@@ -282,7 +285,6 @@ func _grow_forest(center: Vector2i, radius: float) -> void:
 		for x: int in range(center.x - reach, center.x + reach + 1):
 			var cell: Vector2i = Vector2i(x, y)
 			var roll: float = _rng.randf()
-			var variant_roll: float = _rng.randf()
 			if not _data.in_bounds(cell) or not _can_place_nature(cell):
 				continue
 			var t: float = 99.0
@@ -296,7 +298,7 @@ func _grow_forest(center: Vector2i, radius: float) -> void:
 			elif t < 1.6:
 				density = Balance.FOREST_STRAY_CHANCE * (1.6 - t) / 0.6
 			if roll < density:
-				_add_tree(cell, variant_roll, t)
+				_add_tree(cell, species, t)
 
 
 # Lùm 1–3 cây lẻ rải trên bãi cỏ (ngoài thực tế cây không chỉ mọc trong rừng).
@@ -308,24 +310,26 @@ func _place_lone_copses() -> void:
 		var center: Vector2i = _random_cell(3)
 		if not _can_place_nature(center) or Vector2(center).distance_to(Vector2(_data.village_center)) < Balance.BUSH_RING_MAX:
 			continue
-		_add_tree(center, _rng.randf(), 1.0)
+		var species: int = 0 if _rng.randf() < 0.7 else 1
+		_add_tree(center, species, 1.0)
 		for i: int in _rng.randi_range(0, 2):
 			var cell: Vector2i = center + WorldGrid.NEIGHBORS_8[_rng.randi_range(0, WorldGrid.NEIGHBORS_8.size() - 1)] \
 					* _rng.randi_range(1, 2)
 			if _data.in_bounds(cell) and _can_place_nature(cell):
-				_add_tree(cell, _rng.randf(), 1.0)
+				_add_tree(cell, species, 1.0)
 		made += 1
 
 
-# `t`: 0 ở lõi rừng, 1 ở bìa. Lõi rừng nhiều cây lá kim hơn; ngoài ra loại cây theo mảng nhiễu.
-func _add_tree(cell: Vector2i, variant_roll: float, t: float) -> void:
-	var species: float = _noise.get_noise_2d(cell.x * 0.8 + 900.0, cell.y * 0.8) * 0.9
-	var conifer_chance: float = 0.25 + clampf(1.0 - t, 0.0, 1.0) * 0.35 + species
-	var variant: int = 1 if variant_roll < conifer_chance else 0
-	# Tre dùng chung loại cây/gỗ; chỉ thêm ngoại hình trong phần rừng lá rộng.
-	var broadleaf_start: float = clampf(conifer_chance, 0.0, 1.0)
-	if variant == 0 and variant_roll < broadleaf_start + (1.0 - broadleaf_start) * Balance.BAMBOO_CHANCE:
-		variant = 2
+# Mỗi cánh/lùm một loại; chừa khoảng giữa hai loại và dành dải ven hồ cho tre.
+func _add_tree(cell: Vector2i, variant: int, t: float) -> void:
+	if variant != 2 and _near_water(cell, Balance.BAMBOO_SHORE_DISTANCE):
+		return
+	for y: int in range(-Balance.FOREST_SPECIES_GAP, Balance.FOREST_SPECIES_GAP + 1):
+		for x: int in range(-Balance.FOREST_SPECIES_GAP, Balance.FOREST_SPECIES_GAP + 1):
+			var nearby: Vector2i = cell + Vector2i(x, y)
+			if _tree_species.has(nearby) and _tree_species[nearby] != variant:
+				return
+	_tree_species[cell] = variant
 	# Cây non hay mọc ở bìa rừng (rừng đang lan ra).
 	var extra: Dictionary = {}
 	if _rng.randf() < Balance.YOUNG_TREE_CHANCE * (0.4 + clampf(t, 0.0, 1.5)):
@@ -356,20 +360,29 @@ func _place_rock_fields() -> void:
 # hình bãi méo), đá to nằm giữa, đá nhỏ ở rìa.
 func _place_boulders_around(center: Vector2i, count: int, radius: float) -> void:
 	var cells: Array[Vector2i] = []
-	var scores: Dictionary[Vector2i, float] = {}
-	var reach: int = ceili(radius)
+	var reach: int = ceili(radius) + 1
 	for y: int in range(-reach, reach + 1):
 		for x: int in range(-reach, reach + 1):
-			var cell: Vector2i = center + Vector2i(x, y)
-			if Vector2(x, y).length() <= radius and _data.in_bounds(cell) and _can_place_nature(cell) \
-					and not _behind_cliff(cell):
-				cells.append(cell)
-				scores[cell] = Vector2(x, y).length() + _rng.randf() * 1.3
-	cells.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return scores[a] < scores[b])
-	for i: int in mini(count, cells.size()):
-		var big_chance: float = Balance.ROCK_BIG_CHANCE * (1.4 if i < count / 2.0 else 0.6)
-		_add_object(MapData.KIND_ROCK, cells[i], 0 if _rng.randf() < big_chance else 1, _jitter(Balance.ROCK_JITTER),
-				_start_amount(Balance.ROCK_STONE, Balance.ROCK_START_AMOUNT_MIN, true))
+			cells.append(center + Vector2i(x, y))
+	cells.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return Vector2(a - center).length_squared() < Vector2(b - center).length_squared())
+	var placed: int = 0
+	for at: Vector2i in cells:
+		if _place_rock_cluster(at):
+			placed += 1
+			if placed >= count:
+				return
+
+func _place_rock_cluster(origin: Vector2i) -> bool:
+	for at: Vector2i in MapData.resource_cells(MapData.KIND_ROCK, origin, 2):
+		if not _data.in_bounds(at) or not _can_place_nature(at) or _behind_cliff(at):
+			return false
+	# Không ghép mỏ kề sát mỏ thành tường; dành vành ngoài cho dân và sỏi.
+	for object: Dictionary in _data.objects:
+		if object["kind"] == MapData.KIND_ROCK and Vector2(Vector2i(object["cell"]) - origin).length() < Balance.ROCK_CLUSTER_GAP:
+			return false
+	_add_object(MapData.KIND_ROCK, origin, 2, Vector2.ZERO, {"amount": Balance.ROCK_CLUSTER_STONE})
+	return true
 
 
 # Bãi đá tảng LIỀN dọc chân một dãy vách — chỉ ở PHÍA TRƯỚC (nam, dưới mặt đứng), như đá lở
@@ -405,11 +418,9 @@ func _place_ridge_scree(ridge: Array[Vector2i]) -> void:
 			return
 		if _rng.randf() >= chances[cell]:
 			continue
-		var near_cliff: bool = _cliff_set.has(cell + Vector2i.UP)
-		var big_chance: float = Balance.ROCK_BIG_CHANCE * (1.5 if near_cliff else 0.6)
-		_add_object(MapData.KIND_ROCK, cell, 0 if _rng.randf() < big_chance else 1, _jitter(Balance.ROCK_JITTER),
-				_start_amount(Balance.ROCK_STONE, Balance.ROCK_START_AMOUNT_MIN, true))
-		placed += 1
+		if _place_rock_cluster(cell):
+			placed += 1
+
 
 
 ## Ô nằm ngay sau lưng (phía bắc) một dãy vách: đá tảng / đá cuội không nằm ở đây.
@@ -462,22 +473,40 @@ func _place_berry_groves() -> void:
 
 
 func _place_bushes_around(center: Vector2i, count: int, in_meadow: bool) -> void:
+	var shape: Vector2i = Vector2i(2, 2) if count < 6 else Vector2i(3, 2)
+	var grid: WorldGrid = _data.make_grid()
+	var before: PackedByteArray = grid.flood_fill(_data.cave_entrance_cell)
 	var options: Array[Vector2i] = []
-	for y: int in range(-3, 4):
-		for x: int in range(-3, 4):
-			var cell: Vector2i = center + Vector2i(x, y)
-			if not _data.in_bounds(cell) or _occupied[_data.index(cell)] == 1 or _data.is_water(cell):
-				continue
-			if not in_meadow and _data.meadow_rect.has_point(cell):
-				continue
-			if Vector2(cell).distance_to(Vector2(_data.village_center)) < Balance.BUSH_RING_MIN:
-				continue
-			options.append(cell)
-	_shuffle(options)
-	var chosen: Array[Vector2i] = []
-	_pick_spaced(options, count, Balance.BUSH_MIN_SPACING, chosen)
-	for cell: Vector2i in chosen:
-		_add_object(MapData.KIND_BUSH, cell, 0, _jitter(Balance.ROCK_JITTER), _start_amount(Balance.BUSH_FOOD, Balance.START_AMOUNT_MIN, true))
+	for y: int in range(-4, 5):
+		for x: int in range(-4, 5):
+			options.append(center + Vector2i(x, y))
+	options.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return Vector2(a - center).length_squared() < Vector2(b - center).length_squared())
+	for origin: Vector2i in options:
+		var cells: Array[Vector2i] = []
+		var valid: bool = true
+		for y: int in shape.y:
+			for x: int in shape.x:
+				var at: Vector2i = origin + Vector2i(x, y)
+				if not _data.in_bounds(at) or _occupied[_data.index(at)] == 1 or _data.is_water(at) or (not in_meadow and _data.meadow_rect.has_point(at)) or Vector2(at - _data.village_center).length() < Balance.BUSH_RING_MIN:
+					valid = false
+				cells.append(at)
+		if not valid:
+			continue
+		var extra: Dictionary[Vector2i, bool] = {}
+		for at: Vector2i in cells:
+			extra[at] = true
+		var reached: PackedByteArray = grid.flood_fill(_data.cave_entrance_cell, extra)
+		# Không bịt đường khiến bước lọc sau phải bỏ lẻ một bụi khỏi hình chữ nhật.
+		if before.count(1) - reached.count(1) != cells.size():
+			continue
+		for at: Vector2i in cells:
+			valid = valid and grid.has_reachable_neighbor(at, reached)
+		if not valid:
+			continue
+		for at: Vector2i in cells:
+			_add_object(MapData.KIND_BUSH, at, 0, _jitter(Vector2(3, 2)), {"amount": Balance.BUSH_FOOD, "grove": origin, "grove_size": shape})
+		return
 
 
 # --- Tiện ích vị trí ---
@@ -530,10 +559,14 @@ func _remove_unreachable_objects() -> void:
 	var kept: Array[Dictionary] = []
 	for object: Dictionary in _data.objects:
 		var cell: Vector2i = object["cell"]
-		if grid.has_reachable_neighbor(cell, reached):
+		var accessible: bool = false
+		for at: Vector2i in MapData.resource_cells(object["kind"], cell, int(object.get("variant", 0))):
+			accessible = accessible or grid.has_reachable_neighbor(at, reached)
+		if accessible:
 			kept.append(object)
 		else:
-			_occupied[_data.index(cell)] = 0
+			for at: Vector2i in MapData.resource_cells(object["kind"], cell, int(object.get("variant", 0))):
+				_occupied[_data.index(at)] = 0
 	_data.objects = kept
 
 
@@ -560,7 +593,13 @@ func _place_pile_kind(kind: StringName, sources: Dictionary[Vector2i, bool], cou
 	var candidates: Array[Vector2i] = []
 	var scores: Dictionary[Vector2i, float] = {}
 	for source: Vector2i in sources:
-		for offset: Vector2i in WorldGrid.NEIGHBORS_8:
+		var offsets: Array[Vector2i] = WorldGrid.NEIGHBORS_8.duplicate()
+		if cliff_bonus:
+			for y: int in range(-2, 3):
+				for x: int in range(-2, 3):
+					if absi(x) == 2 or absi(y) == 2:
+						offsets.append(Vector2i(x, y))
+		for offset: Vector2i in offsets:
 			var cell: Vector2i = source + offset
 			if scores.has(cell) or not _data.in_bounds(cell) or _occupied[_data.index(cell)] == 1 					or _data.meadow_rect.has_point(cell) or not grid.is_reached(cell, reached) or _behind_cliff(cell):
 				continue
@@ -585,7 +624,8 @@ func _cells_of_kind(kind: StringName) -> Dictionary[Vector2i, bool]:
 	var cells: Dictionary[Vector2i, bool] = {}
 	for object: Dictionary in _data.objects:
 		if object["kind"] == kind:
-			cells[object["cell"]] = true
+			for at: Vector2i in MapData.resource_cells(object["kind"], object["cell"], int(object.get("variant", 0))):
+				cells[at] = true
 	return cells
 
 
@@ -779,7 +819,8 @@ func _add_object(kind: StringName, cell: Vector2i, variant: int, jitter: Vector2
 	var object: Dictionary = {"kind": kind, "cell": cell, "variant": variant, "jitter": jitter}
 	object.merge(extra)
 	_data.objects.append(object)
-	_occupied[_data.index(cell)] = 1
+	for at: Vector2i in MapData.resource_cells(kind, cell, variant):
+		_occupied[_data.index(at)] = 1
 
 
 ## Chỉ sỏi/củi khác lượng; bụi quả/đá đầy, giữ lượt RNG để bố cục cùng seed ổn định.
@@ -802,3 +843,28 @@ func _shuffle(cells: Array[Vector2i]) -> void:
 		var temp: Vector2i = cells[i]
 		cells[i] = cells[j]
 		cells[j] = temp
+
+
+func _near_water(at: Vector2i, radius: int) -> bool:
+	for y: int in range(-radius, radius + 1):
+		for x: int in range(-radius, radius + 1):
+			if _data.is_water(at + Vector2i(x, y)):
+				return true
+	return false
+
+func _place_bamboo_groves() -> void:
+	var shore: Array[Vector2i] = []
+	for y: int in _data.size.y:
+		for x: int in _data.size.x:
+			var at: Vector2i = Vector2i(x, y)
+			if _can_place_nature(at) and _near_water(at, 3) and not _near_water(at, 1):
+				shore.append(at)
+	_shuffle(shore)
+	var centers: Array[Vector2i] = []
+	_pick_spaced(shore, Balance.BAMBOO_GROVES, Balance.BAMBOO_GROVE_SPACING, centers)
+	for center: Vector2i in centers:
+		for y: int in range(-2, 3):
+			for x: int in range(-2, 3):
+				var at: Vector2i = center + Vector2i(x, y)
+				if _data.in_bounds(at) and _can_place_nature(at) and _near_water(at, Balance.BAMBOO_SHORE_DISTANCE) and not _near_water(at, 1) and _rng.randf() < Balance.BAMBOO_DENSITY:
+					_add_tree(at, 2, 0.8)

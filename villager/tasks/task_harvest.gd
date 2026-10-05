@@ -106,7 +106,7 @@ func _go_to(node: ResourceNode) -> bool:
 		node.claim_stand(villager, side)
 		var offset: Vector2 = Vector2(side) * Vector2(LOOSE_STAND_OFFSET, LOOSE_STAND_OFFSET * 0.5)
 		return villager.move_to_cell(node.cell, node.position + offset + Vector2(0, 2))
-	var stand: Vector2i = world().finder.find_stand_cell(node.cell, villager, true, taken)
+	var stand: Vector2i = world().finder.find_resource_stand(node, villager, taken)
 	if stand == World.INVALID_CELL:
 		return false
 	node.claim_stand(villager, stand)

@@ -513,7 +513,20 @@ func test_controller_tap_assigns_and_moves() -> void:
 	check(villager.job != null and villager.job.skill == SkillDefs.CHOP, "Đang chọn mà chạm cây → giao chặt cây")
 	check(controller.selected == null, "Ra lệnh xong thì bỏ chọn")
 
-	var ground: Vector2i = world.finder.find_free_cell_near(world.map_data.campfire_cell, 2.0, 3.0)
+	# Ô đi được vẫn có thể nằm dưới hình cây/sỏi hoặc chính người đang chọn.
+	var ground: Vector2i = World.INVALID_CELL
+	for y: int in range(-4, 5):
+		for x: int in range(-4, 5):
+			var candidate: Vector2i = world.map_data.campfire_cell + Vector2i(x, y)
+			var point: Vector2 = WorldGrid.cell_to_world(candidate)
+			if not world.grid.is_blocked(candidate) and world.pick_job_target(point) == null and world.pick_villager(point) == null:
+				if world.grid.has_path(villager.path_origin(), candidate):
+					ground = candidate
+					break
+		if ground != World.INVALID_CELL:
+			break
+	check(ground != World.INVALID_CELL, "Có mặt đất trống để thử lệnh di chuyển")
+	check_eq(controller.command_icon(null, WorldGrid.cell_to_world(ground)), "icons/move_feet", "Con trỏ di chuyển là dấu chân")
 	controller._on_tapped(_to_screen(villager.position + Villager.PICK_CENTER))
 	controller._on_tapped(_to_screen(WorldGrid.cell_to_world(ground)))
 	check(villager.job == null, "Chạm mặt đất trống → bỏ việc")

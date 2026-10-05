@@ -15,7 +15,7 @@ class_name SaveGame
 ## Tăng khi cách sinh map đổi (map dựng lại từ seed phải ra đúng map cũ) hoặc cấu trúc save đổi.
 ## v3: map 96×72, tài nguyên theo cụm, dãy vách đá.
 ## v8: bếp3×2; không dựng save2×2 cũ đè vào công trình bên cạnh.
-const VERSION: int = 8
+const VERSION: int = 9
 
 
 ## Ván lưu này còn dựng lại được không (cùng phiên bản cách sinh map).
@@ -73,14 +73,16 @@ static func _restore_nodes(world: World, saved: Array) -> void:
 # Áp trạng thái rồi sửa lại ô bị chặn (đá đã vỡ thì mở, đá mới lăn ra thì chặn).
 static func _apply_node(world: World, node: ResourceNode, dict: Dictionary) -> void:
 	var was_blocking: bool = not node.is_loose() and not node.is_cleared
-	var old_cell: Vector2i = node.cell
+	var old_cells: Array[Vector2i] = node.footprint_cells()
 	node.apply_dict(dict)
 	if node.is_loose() or node.kind == MapData.KIND_FISH_SPOT:
 		return
-	if was_blocking and (node.is_cleared or old_cell != node.cell):
-		world.grid.set_blocked(old_cell, false)
+	if was_blocking:
+		for at: Vector2i in old_cells:
+			world.grid.set_blocked(at, false)
 	if not node.is_cleared:
-		world.grid.set_blocked(node.cell, true)
+		for at: Vector2i in node.footprint_cells():
+			world.grid.set_blocked(at, true)
 
 
 static func _restore_buildings(world: World, saved: Array) -> void:

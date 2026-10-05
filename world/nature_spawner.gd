@@ -103,10 +103,10 @@ func spawn_boulder() -> bool:
 	for attempt: int in PLACE_ATTEMPTS:
 		var foot: Vector2i = _cliff_feet[_rng.randi_range(0, _cliff_feet.size() - 1)]
 		var cell: Vector2i = foot + Vector2i(_rng.randi_range(-1, 1), _rng.randi_range(1, 2))
-		if _cliff_cells.has(cell) or _behind_cliff(cell) or not _can_block(cell):
+		if _cliff_cells.has(cell) or _behind_cliff(cell) or not _can_block_cluster(cell):
 			continue
-		var variant: int = 0 if _rng.randf() < Balance.ROCK_BIG_CHANCE else 1
-		var start: int = Balance.ROCK_STONE
+		var variant: int = 2
+		var start: int = Balance.ROCK_CLUSTER_STONE
 		var node: ResourceNode = _world.place_resource(MapData.KIND_ROCK, cell, variant, _jitter(), true, start)
 		node.pop(0.2)
 		EventBus.work_impact.emit(node.position, JobDefs.IMPACT_STONE)
@@ -208,3 +208,15 @@ func _jitter() -> Vector2:
 
 func _next_delay(average: float) -> float:
 	return average * _rng.randf_range(0.6, 1.4)
+
+
+func _can_block_cluster(origin: Vector2i) -> bool:
+	var extra: Dictionary[Vector2i, bool] = {}
+	for at: Vector2i in MapData.resource_cells(MapData.KIND_ROCK, origin, 2):
+		if _behind_cliff(at) or not _can_block(at):
+			return false
+		extra[at] = true
+	var start: Vector2i = _world.map_data.cave_entrance_cell
+	var before: PackedByteArray = _world.grid.flood_fill(start)
+	var after: PackedByteArray = _world.grid.flood_fill(start, extra)
+	return before.count(1) - after.count(1) == extra.size()

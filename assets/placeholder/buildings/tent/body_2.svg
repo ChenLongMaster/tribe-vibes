@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="300" viewBox="0 0 256 300">
+<g xmlns="http://www.w3.org/2000/svg" transform="translate(128 276) scale(0.89) translate(-128 -276)">  <ellipse cx="128" cy="270" rx="109" ry="18" fill="#3E2723" opacity="0.18" />
+  <ellipse cx="28" cy="249" rx="9" ry="5" fill="#C4BDAA" stroke="#4E342E" stroke-width="2" />
+  <ellipse cx="65" cy="278" rx="9" ry="5" fill="#C4BDAA" stroke="#4E342E" stroke-width="2" />
+  <ellipse cx="219" cy="266" rx="9" ry="5" fill="#C4BDAA" stroke="#4E342E" stroke-width="2" />
+  <ellipse cx="235" cy="229" rx="9" ry="5" fill="#C4BDAA" stroke="#4E342E" stroke-width="2" />
+  <path d="M109 77 L100 50" stroke="#4E342E" stroke-width="7" stroke-linecap="round" fill="none" />
+  <path d="M110 74 L118 43" stroke="#4E342E" stroke-width="7" stroke-linecap="round" fill="none" />
+  <path d="M108 75 L101 52" stroke="#C6A46B" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M111 73 L117 45" stroke="#C6A46B" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M110 69 C82 111 43 161 18 240 Q16 257 42 267 C107 309 212 290 238 253 Q244 245 235 227 C213 161 154 106 110 69 Z" fill="#DDC099" stroke="#4E342E" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M110 69 C151 117 189 181 238 253 C211 282 183 288 145 290 C139 208 128 132 110 69 Z" fill="#C9AA82" />
+  <path d="M85 123 C63 166 43 207 35 243" fill="none" stroke="#EDDBC0" stroke-width="7" stroke-linecap="round" />
+  <path d="M123 126 C136 164 144 209 145 285" fill="none" stroke="#967452" stroke-width="3" stroke-linecap="round" />
+  <path d="M125.0 145 L136.0 142" stroke="#775A3F" stroke-width="2" stroke-linecap="round" fill="none" />
+  <path d="M127.6 167 L138.6 164" stroke="#775A3F" stroke-width="2" stroke-linecap="round" fill="none" />
+  <path d="M130.3 189 L141.3 186" stroke="#775A3F" stroke-width="2" stroke-linecap="round" fill="none" />
+  <path d="M132.9 211 L143.9 208" stroke="#775A3F" stroke-width="2" stroke-linecap="round" fill="none" />
+  <path d="M135.6 233 L146.6 230" stroke="#775A3F" stroke-width="2" stroke-linecap="round" fill="none" />
+  <path d="M138.2 255 L149.2 252" stroke="#775A3F" stroke-width="2" stroke-linecap="round" fill="none" />
+  <path d="M53 261 Q91 278 131 281" fill="none" stroke="#AF8B65" stroke-width="3" stroke-linecap="round" />
+  <path d="M158 279 L157 238 Q159 215 181 207 Q203 201 208 229 L218 261 Q194 275 158 279 Z" fill="#4E342E" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M181 202 Q149 213 145 266 L159 277 Q166 250 167 233 Q167 215 181 202 Z" fill="#E9D2AE" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M181 202 Q215 211 223 256 L211 266 Q209 239 200 222 Q193 211 181 202 Z" fill="#B28D65" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M149 253 L164 248" stroke="#6D5737" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M206 244 L219 239" stroke="#6D5737" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M159 280 Q184 280 216 263" fill="none" stroke="#DEBF8F" stroke-width="6" stroke-linecap="round" />
+  <path d="M110 66 Q92 99 68 128 L83 122 L90 137 L101 130 L110 142 L123 132 L139 146 L146 132 L163 139 Q138 95 110 66 Z" fill="#AAB779" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M110 75 Q93.5 104 77 124" fill="none" stroke="#E7CD87" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M110 75 Q99.5 104 89 129" fill="none" stroke="#E7CD87" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M110 75 Q105.5 104 101 133" fill="none" stroke="#E7CD87" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M110 75 Q111.0 104 112 134" fill="none" stroke="#E7CD87" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M110 75 Q117.0 104 124 126" fill="none" stroke="#E7CD87" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M110 75 Q124.0 104 138 137" fill="none" stroke="#E7CD87" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M110 75 Q130.0 104 150 130" fill="none" stroke="#E7CD87" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M91 110 Q112 121 133 112" fill="none" stroke="#8E7246" stroke-width="4" stroke-linecap="round" />
+  <path d="M112 115 L110 132" stroke="#8E7246" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M112 115 L121 131" stroke="#8E7246" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M24 256 L49 222" stroke="#CBB58A" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M24 268 L24 253" stroke="#70583F" stroke-width="5" stroke-linecap="round" fill="none" />
+  <path d="M232 262 L215 230" stroke="#CBB58A" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M232 274 L232 259" stroke="#70583F" stroke-width="5" stroke-linecap="round" fill="none" />
+</g></svg>

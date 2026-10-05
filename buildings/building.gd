@@ -25,6 +25,9 @@ const FLICKER_AMOUNT: float = 0.04
 const HIT_EXTRA_HEIGHT: float = 40.0
 const STOCK_ITEM_SCALE: float = 0.8
 const REVEAL_SHADER: Shader = preload("res://fx/build_reveal.gdshader")
+const SELECTION_FLASH_AMOUNT: float = 0.14
+const SELECTION_FLASH_RISE: float = 0.06
+const SELECTION_FLASH_FADE: float = 0.14
 const POP_SECONDS: float = 0.45
 const WARNING_KEY: String = "icons/warning"
 const WARNING_BOB: float = 3.0
@@ -67,8 +70,11 @@ var builders: Array[Villager] = []
 ## Người đang ngủ trong lều.
 var sleepers: Array[Villager] = []
 
+var tent_entrance: TentEntrance
 var kitchen: KitchenInterior
 
+var _selection_tween: Tween
+var _selection_colors: Dictionary[Sprite2D, Color] = {}
 var _time: float = 0.0
 var _frames: Array[Texture2D] = []
 var _frame_fps: float = DEFAULT_FRAME_FPS
@@ -103,6 +109,9 @@ func setup(id: StringName, cell: Vector2i, start_level: int = 1) -> void:
 
 
 func _ready() -> void:
+	if building_id == BuildingDefs.TENT:
+		y_sort_enabled = true
+		tent_entrance = TentEntrance.new(self)
 	if building_id == BuildingDefs.KITCHEN:
 		y_sort_enabled = true
 		kitchen = KitchenInterior.new(self)
@@ -409,7 +418,34 @@ func remove_sleeper(villager: Villager) -> void:
 		changed.emit(self)
 
 
-## Lều rung nhẹ (có người chui vào/ra).
+## Phản hồi khi chọn công trình.
+func selection_pulse() -> void:
+	# Chỉ sáng một nhịp theo thời gian thật; không nhấc, xoay hoặc đổi cỡ nhà.
+	if _selection_tween != null and _selection_tween.is_valid():
+		_selection_tween.kill()
+	_set_selection_light(0.0)
+	_selection_colors.clear()
+	for child: Node in get_children():
+		if child is Sprite2D and child != _warning and child != _ghost:
+			_selection_colors[child as Sprite2D] = (child as Sprite2D).self_modulate
+	if kitchen != null:
+		for picture: Sprite2D in kitchen.selection_sprites():
+			_selection_colors[picture] = picture.self_modulate
+	_selection_tween = create_tween().set_ignore_time_scale(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_selection_tween.tween_method(_set_selection_light, 0.0, SELECTION_FLASH_AMOUNT, SELECTION_FLASH_RISE)
+	_selection_tween.tween_method(_set_selection_light, SELECTION_FLASH_AMOUNT, 0.0, SELECTION_FLASH_FADE)
+	_selection_tween.finished.connect(func() -> void: _selection_colors.clear())
+
+
+func _set_selection_light(amount: float) -> void:
+	for sprite: Sprite2D in _selection_colors:
+		if is_instance_valid(sprite):
+			var original: Color = _selection_colors[sprite]
+			sprite.self_modulate = Color(original.r * (1.0 + amount), original.g * (1.0 + amount), original.b * (1.0 + amount), sprite.self_modulate.a)
+
+
+
+## Lều rung nhẹ khi dân chui vào/ra; tách khỏi phản hồi chọn công trình.
 func wiggle() -> void:
 	var tween: Tween = _sprite.create_tween()
 	tween.tween_property(_sprite, "rotation", 0.04, 0.08)
@@ -531,15 +567,21 @@ func _refresh_visual() -> void:
 	_sprite.visible = level >= 1
 	if _sprite.visible:
 		ArtLibrary.setup_sprite(_sprite, BuildingDefs.art(building_id, level))
+	if tent_entrance != null:
+		_sprite.self_modulate.a = 0.0
+		tent_entrance.refresh()
+		if level >= 1:
+			ArtLibrary.setup_sprite(_sprite, "buildings/tent/body_" + str(level))
+		_overlay.z_index = 2
 	if kitchen != null:
 		_sprite.self_modulate.a = 0.0
 		kitchen.refresh()
 		if level >= 1:
 			# Chỉ mái đổ bóng cao; sân đất không đổ bóng như một bức tường.
-			ArtLibrary.setup_sprite(_sprite, "buildings/kitchen/roof_" + str(level))
+			kitchen.sync_shadow(_sprite)
 		_warning.z_index = 2
 		_overlay.z_index = 2
-		_warning.position.x = KitchenLayout.local_point(Vector2(88, 113), maxi(level, 1)).x
+		_warning.position.x = KitchenLayout.scene_point("CookingCanopy/Warning", maxi(level, 1)).x
 	# Móng: hình công trình mờ mờ, mọc dần từ dưới lên theo tiến độ xây.
 	_ghost.visible = building and level == 0
 	if _ghost.visible:
@@ -554,7 +596,7 @@ func _refresh_visual() -> void:
 # Cảnh báo nằm trên mái (không lơ lửng phía trên — dễ lẫn sang công trình đứng sau).
 func _warning_y() -> float:
 	if kitchen != null:
-		return KitchenLayout.local_point(Vector2(88, 113), maxi(level, 1)).y
+		return KitchenLayout.scene_point("CookingCanopy/Warning", maxi(level, 1)).y
 	return -_art_height() * WARNING_HEIGHT
 
 
@@ -562,6 +604,8 @@ func _art_height() -> float:
 	var sprite: Sprite2D = _sprite if _sprite != null and _sprite.visible else _ghost
 	if sprite == null or sprite.texture == null:
 		return Vector2(BuildingDefs.footprint(building_id)).y * Balance.TILE_SIZE
+	if kitchen != null and level >= 1:
+		return -sprite.position.y - sprite.offset.y * sprite.scale.y
 	return -sprite.offset.y * sprite.scale.y
 
 

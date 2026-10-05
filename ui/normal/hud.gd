@@ -30,6 +30,7 @@ var _speed_buttons: Array[Button] = []
 var _speed_styles: Array[StyleBoxFlat] = []
 var _save_button: Button
 var _load_button: Button
+var _dev_button: Button
 var _load_armed: float = 0.0
 var _build_button: Button
 var _build_menu: BuildMenu
@@ -48,6 +49,7 @@ func _ready() -> void:
 	EventBus.storage_capacity_changed.connect(_on_capacity_changed)
 	EventBus.game_speed_changed.connect(_on_speed_changed)
 	EventBus.day_changed.connect(_on_day_changed)
+	EventBus.dev_mode_changed.connect(_on_dev_mode_changed)
 	EventBus.placement_state_changed.connect(_on_placement_state_changed)
 	EventBus.villager_selected.connect(func(_villager: Node) -> void: _build_menu.visible = false)
 	EventBus.building_selected.connect(func(_building: Node) -> void: _build_menu.visible = false)
@@ -115,6 +117,13 @@ func _build() -> void:
 	files.size_flags_horizontal = Control.SIZE_SHRINK_END
 	files.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stack.add_child(files)
+	if OS.is_debug_build():
+		_dev_button = Button.new()
+		_dev_button.name = "DevButton"
+		_dev_button.toggle_mode = true
+		_dev_button.focus_mode = Control.FOCUS_NONE
+		_dev_button.pressed.connect(Commands.toggle_dev_mode)
+		files.add_child(_dev_button)
 	_save_button = _make_icon_button("icons/save")
 	_save_button.pressed.connect(func() -> void: Commands.save_game())
 	files.add_child(_save_button)
@@ -250,6 +259,10 @@ func _make_icon_button(icon_key: String) -> Button:
 
 
 func _refresh_all() -> void:
+	if _dev_button != null:
+		_dev_button.text = Loc.t("UI_DEV_ON" if GameState.is_dev_mode() else "UI_DEV_OFF")
+		_dev_button.tooltip_text = Loc.t("UI_DEV_TOOLTIP")
+		_dev_button.set_pressed_no_signal(GameState.is_dev_mode())
 	for resource_id: StringName in ResourceDefs.ORDER:
 		_resource_cells[resource_id].tooltip_text = Loc.t(ResourceDefs.name_key(resource_id))
 		_refresh_resource(resource_id)
@@ -267,25 +280,28 @@ func _refresh_all() -> void:
 func _refresh_resource(resource_id: StringName) -> void:
 	var amount: int = GameState.get_amount(resource_id)
 	var capacity: int = GameState.capacity(resource_id)
-	_amount_labels[resource_id].text = Loc.number(amount)
+	var dev: bool = GameState.is_dev_mode()
+	_amount_labels[resource_id].text = Loc.t("UI_DEV_RESOURCE_AMOUNT") if dev else Loc.number(amount)
 	var capacity_label: Label = _capacity_labels[resource_id]
-	capacity_label.visible = capacity >= 0
+	capacity_label.visible = capacity >= 0 and not dev
 	capacity_label.text = Loc.t("UI_CAPACITY", {"capacity": Loc.number(capacity)})
 	# Đầy kho thì chữ đỏ — nhắc người chơi xây thêm Kho / Bếp.
-	var full: bool = capacity >= 0 and amount >= capacity
+	var full: bool = not dev and capacity >= 0 and amount >= capacity
 	if full:
 		_amount_labels[resource_id].add_theme_color_override("font_color", FULL_COLOR)
 	else:
 		_amount_labels[resource_id].remove_theme_color_override("font_color")
 	_resource_cells[resource_id].tooltip_text = Loc.t("UI_RES_FULL_TOOLTIP" if full else ResourceDefs.name_key(resource_id),
 			{"resource_key": ResourceDefs.name_key(resource_id)})
+	if dev:
+		_resource_cells[resource_id].tooltip_text = Loc.t("UI_DEV_RESOURCE_TOOLTIP", {"resource_key": ResourceDefs.name_key(resource_id)})
 
 
 func _on_resource_changed(resource_id: StringName, amount: int) -> void:
 	if not _amount_labels.has(resource_id):
 		return
 	var label: Label = _amount_labels[resource_id]
-	var grew: bool = amount > label.text.replace(".", "").replace(",", "").to_int()
+	var grew: bool = not GameState.is_dev_mode() and label.text != Loc.t("UI_DEV_RESOURCE_AMOUNT") and amount > label.text.replace(".", "").replace(",", "").to_int()
 	_refresh_resource(resource_id)
 	if grew:
 		# Số nảy lên một chút khi có đồ mới vào kho.
@@ -297,6 +313,10 @@ func _on_resource_changed(resource_id: StringName, amount: int) -> void:
 func _on_capacity_changed(resource_id: StringName, _capacity: int) -> void:
 	if _amount_labels.has(resource_id):
 		_refresh_resource(resource_id)
+
+
+func _on_dev_mode_changed(_enabled: bool) -> void:
+	_refresh_all()
 
 
 func _on_speed_changed(speed: int) -> void:

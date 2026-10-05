@@ -109,7 +109,7 @@ const DEFS: Dictionary[StringName, Dictionary] = {
 	KITCHEN: {
 		"name_key": "BUILDING_KITCHEN_NAME",
 		"desc_key": "BUILDING_KITCHEN_DESC",
-		"footprint": Vector2i(3, 2),
+		"footprint": Vector2i(4, 3),
 		"buildable": true,
 		"production": true,
 		"staff_job": &"cook",

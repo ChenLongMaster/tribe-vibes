@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="384" height="336" viewBox="0 0 384 336">
-<g transform="translate(192,192) scale(0.76) translate(-192,-192)"><g transform="translate(12,20) scale(0.52)"><g transform="translate(210,0) scale(-1,1)">
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="552" viewBox="0 0 512 552">
+<g transform="translate(0,48)"><g transform="scale(1.3333333333333333,1.5)"><g transform="translate(192,192) scale(0.76) translate(-192,-192)"><g transform="translate(34,-24) scale(0.6)"><defs><clipPath id="roof_front_1"><rect x="-200" y="125" width="800" height="500"/></clipPath><clipPath id="roof_back_1"><rect x="-200" y="-200" width="800" height="325"/></clipPath></defs><g clip-path="url(#roof_front_1)"><g transform="translate(210,0) scale(-1,1)">
   <!-- Phác khu bếp3×3; layer để thử người trong khu, chưa phải asset game -->
   <path d="M20 143 L133 179 L204 109 L199 122 L143 195 L132 198 L121 190 L111 192 L99 183 L88 185 L78 176 L66 178 L56 168 L43 169 L32 160 L20 161 Z" fill="#858953" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <path d="M19 143 Q45 118 66 77 Q99 84 126 94 L202 109 Q181 137 155 165 L134 185 L122 180 L111 184 L99 175 L88 176 L77 168 L65 170 L55 161 L43 162 L31 151 Z" fill="#AAA267" stroke="#4E342E" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
@@ -27,4 +27,32 @@
   <path d="M93 150 L102 158" stroke="#DCCA91" stroke-width="2" stroke-linecap="round" fill="none"/>
   <path d="M127 163 L136 171" stroke="#DCCA91" stroke-width="2" stroke-linecap="round" fill="none"/>
   <path d="M52 115 l17 5 l-12 20 l-16 -5 Z" fill="#A2945C" stroke="#4E342E" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-</g></g></g></svg>
+</g></g><g transform="matrix(1 0 0.4 1.35 -50 -43.75)"><g clip-path="url(#roof_back_1)"><g transform="translate(210,0) scale(-1,1)">
+  <!-- Phác khu bếp3×3; layer để thử người trong khu, chưa phải asset game -->
+  <path d="M20 143 L133 179 L204 109 L199 122 L143 195 L132 198 L121 190 L111 192 L99 183 L88 185 L78 176 L66 178 L56 168 L43 169 L32 160 L20 161 Z" fill="#858953" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M19 143 Q45 118 66 77 Q99 84 126 94 L202 109 Q181 137 155 165 L134 185 L122 180 L111 184 L99 175 L88 176 L77 168 L65 170 L55 161 L43 162 L31 151 Z" fill="#AAA267" stroke="#4E342E" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M66 80 Q104 87 127 98 L197 110 L185 123 L54 96 Z" fill="#BDB67B"/>
+  <path d="M73.33333333333333 86.61111111111111 L28.11111111111111 137.16666666666666" stroke="#90945A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M70.33333333333333 92.61111111111111 L25.11111111111111 132.16666666666666" stroke="#D6C783" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M88.0 89.83333333333333 L40.33333333333333 141.5" stroke="#90945A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M85.0 95.83333333333333 L37.33333333333333 136.5" stroke="#D6C783" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M102.66666666666667 93.05555555555556 L52.55555555555556 145.83333333333334" stroke="#90945A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M99.66666666666667 99.05555555555556 L49.55555555555556 140.83333333333334" stroke="#D6C783" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M117.33333333333334 96.27777777777777 L64.77777777777777 150.16666666666666" stroke="#90945A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M114.33333333333334 102.27777777777777 L61.77777777777777 145.16666666666666" stroke="#D6C783" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M132.0 99.5 L77.0 154.5" stroke="#90945A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M129.0 105.5 L74.0 149.5" stroke="#D6C783" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M146.66666666666669 102.72222222222223 L89.22222222222223 158.83333333333334" stroke="#90945A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M143.66666666666669 108.72222222222223 L86.22222222222223 153.83333333333334" stroke="#D6C783" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M161.33333333333331 105.94444444444444 L101.44444444444444 163.16666666666666" stroke="#90945A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M158.33333333333331 111.94444444444444 L98.44444444444444 158.16666666666666" stroke="#D6C783" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M176.0 109.16666666666667 L113.66666666666667 167.5" stroke="#90945A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M173.0 115.16666666666667 L110.66666666666667 162.5" stroke="#D6C783" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M190.66666666666666 112.38888888888889 L125.88888888888889 171.83333333333334" stroke="#90945A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M187.66666666666666 118.38888888888889 L122.88888888888889 166.83333333333334" stroke="#D6C783" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M31 132 Q73 143 147 174" fill="none" stroke="#7F8450" stroke-width="3"/>
+  <path d="M50 136 L59 144" stroke="#DCCA91" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M93 150 L102 158" stroke="#DCCA91" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M127 163 L136 171" stroke="#DCCA91" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M52 115 l17 5 l-12 20 l-16 -5 Z" fill="#A2945C" stroke="#4E342E" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</g></g></g></g></g></g></g></svg>

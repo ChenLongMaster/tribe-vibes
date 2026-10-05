@@ -190,29 +190,60 @@ def rock(size,stage):
 
 
 def pebbles(stage):
-    rng=random.Random(7)
+    # Mép không có vòng elip: các hạt/viên rải tới rìa để nhiều bãi kề nhau hòa vào nhau.
+    rng=random.Random(19)
+    count={'100':54,'50':30,'20':14}[stage]
+    b=[]
+    for i in range(58):
+        x=rng.uniform(8,248);y=rng.uniform(32,137)
+        if ((x-128)/120)**2+((y-85)/53)**2 > 1.12: continue
+        b.append(oval(round(x,2),round(y,2),rng.uniform(1,2.6),1,'#918C76'))
     spots=[]
-    while len(spots)<18:
-        u=rng.uniform(-55,55);v=rng.uniform(-32,32)
-        if (u/55)**2+(v/32)**2>1:continue
-        if all((u-a)**2+(v-b)**2>145 for a,b,_ in spots):spots.append((u,v,rng.uniform(6,10)))
-    spots.sort(key=lambda p:p[0]**2+p[1]**2)
-    keep={'100':18,'50':9,'20':4}[stage]
-    scale={'100':1,'50':.72,'20':.45}[stage]
-    b=[oval(80,63,65*scale,24*scale,'#A1887F').replace('/>', ' opacity="0.35"/>')]
-    for i in range(18):
-        x,y=ground(rng.uniform(-53,53),rng.uniform(-25,25),0,(80,61))
-        b.append(oval(x,y,1.4,1,'#8C8774'))
-    for u,v,r in sorted(spots[:keep],key=lambda p:ground(p[0],p[1])[1]):
-        x,y=ground(u,v,0,(80,60))
-        b.append(f'<g transform="translate({x} {y})">')
-        b += [art_path(f'M{-r} -2 Q{-r-2} 4 {-r*.3} {r*.6} Q{r} {r*.9} {r} 1 L{r*.8} {-r*.4} Z','#969888',2.3),
-              art_path(f'M{-r} -2 L{-r*.4} {-r*.8} Q{r*.3} {-r} {r*.8} {-r*.4} L{r} 0 L0 {r*.25} Z','#C4C3AF',1.5),
-              art_path(f'M{-r*.45} {-r*.5} L{r*.2} {-r*.65} L{r*.45} {-r*.3} L{-r*.1} {-r*.12} Z','#DFDCC6',0),'</g>']
-    write(f'pebbles_{stage}',b,160,96,'Bãi sỏi 3/4: đá cuội mặt trên xiên/hông thấp, rải theo trục đất trước-phải')
+    while len(spots)<count:
+        x=rng.uniform(10,246);y=rng.uniform(25,127);r=rng.uniform(3,9)
+        if ((x-128)/116)**2+((y-79)/50)**2 > 1.0: continue
+        spots.append((x,y,r))
+    for x,y,r in sorted(spots,key=lambda p:p[1]):
+        b.append(f'<g transform="translate({x:.2f} {y:.2f})">')
+        b += [art_path(f'M{-r} -2 Q{-r-1} 4 {-r*.3} {r*.6} Q{r} {r*.9} {r} 1 L{r*.8} {-r*.4} Z','#969888',2),
+              art_path(f'M{-r} -2 L{-r*.4} {-r*.8} Q{r*.3} {-r} {r*.8} {-r*.4} L{r} 0 L0 {r*.25} Z','#C4C3AF',1.2),'</g>']
+    write(f'pebbles_{stage}',b,256,144,'Sỏi rải mép tự do, nhiều bãi kề nhau hòa thành một bãi lớn; neo128,108')
+
+
+def rock_cluster(stage):
+    # Một khối đá liền, nhiều đỉnh và mặt vỡ. Không dùng texture của ảnh tham khảo.
+    b=[]
+    factor={'100':1.0,'50':.82,'30':.64}[stage]
+    b.append(f'<g transform="translate(128,200) scale({factor}) translate(-128,-200)">')
+    b.append(art_path('M10 159 Q11 128 17 121 Q28 114 39 111 Q38 87 44 71 Q59 51 69 53 Q82 55 89 69 Q94 40 103 31 Q122 21 134 23 Q150 29 157 59 L173 77 Q186 66 198 69 Q215 80 220 106 L221 128 Q239 134 241 144 Q252 163 247 177 Q236 192 219 195 L174 204 L131 202 Q106 211 83 207 Q48 203 36 190 Q17 182 10 159 Z','#94988A',6/factor))
+    # Khối xa cao và mặt bên tối gợi cùng hướng trước-phải với lều.
+    b += [art_path('M44 71 Q60 50 69 53 Q80 54 88 70 L92 113 L61 129 Q37 128 38 112 Z','#B8BBA6',3),
+          art_path('M103 31 Q122 21 134 23 Q152 31 157 59 L147 99 L116 118 Q95 104 91 82 Z','#CAC8B0',4),
+          art_path('M134 26 L154 60 L147 99 L132 110 L130 57 Z','#8D9384',0),
+          art_path('M171 80 Q188 67 198 69 Q216 78 219 106 L216 140 L181 154 Q158 145 156 124 Z','#AFB4A1',3),
+          art_path('M196 74 L215 108 L214 139 L200 145 L190 112 Z','#818B7C',0),
+          art_path('M18 124 L51 112 L82 138 L80 178 L46 186 L12 162 Z','#BBC0AB',3),
+          art_path('M62 122 L107 101 L139 124 L149 159 L133 194 L83 203 L56 171 Z','#B3B5A1',4),
+          art_path('M107 104 L137 126 L146 159 L133 192 L113 192 L117 141 Z','#8C9584',0),
+          art_path('M151 148 L189 133 L223 141 L243 165 L219 190 L172 201 L144 185 Z','#B8BBA5',4),
+          art_path('M153 148 L189 136 L218 145 L230 163 L193 174 L164 164 Z','#D5D2B7',2),
+          art_path('M63 126 L102 108 L128 126 L109 142 L79 152 Z','#D7D3B8',2),
+          art_path('M108 34 L129 29 L140 45 L128 64 L109 72 L99 61 Z','#E0DAC0',0)]
+    for d in ('M72 69 L64 91 L74 103','M125 46 L119 70 L125 86','M186 87 L179 103 L187 118','M101 145 L90 164 L95 184','M203 174 L195 188'):
+        b.append(art_path(d,'none',2,'#737F70'))
+    if stage!='100':
+        b.append(art_path('M83 127 L90 149 L79 166 L92 181','none',4,'#677666'))
+    b.append('</g>')
+    rng=random.Random(53)
+    for i in range(13):
+        x=rng.uniform(13,243);y=rng.uniform(185,217)
+        b.append(oval(round(x,1),round(y,1),rng.uniform(2,6),rng.uniform(1.5,3.2),'#B6B6A0',1.5))
+    write(f'rock_cluster_{stage}',b,256,224,'Mỏ đá liền2×2, mức100/50/30; mặt trên rộng, hông thấp, neo128,200')
 
 
 def main():
+    for stage in ("100", "50", "30"):
+        rock_cluster(stage)
     tree()
     bamboo()
     stumps()

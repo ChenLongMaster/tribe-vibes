@@ -11,6 +11,7 @@ const CLOSE_BUTTON_SIZE: float = 36.0
 
 var _members: Array[Villager] = []
 var _title: Label
+var _hint: Label
 var _grid: GridContainer
 var _refresh_timer: float = 0.0
 ## Chỉ dựng lại nút khi có gì đổi — dựng lại nút đang bấm dở thì cú bấm bị mất.
@@ -22,7 +23,7 @@ func _ready() -> void:
 	_build()
 	visible = false
 	EventBus.villagers_selected.connect(_on_villagers_selected)
-	Loc.language_changed.connect(func(_code: String) -> void: _rebuild())
+	Loc.language_changed.connect(_on_language_changed)
 
 
 func _process(delta: float) -> void:
@@ -32,6 +33,11 @@ func _process(delta: float) -> void:
 	if _refresh_timer <= 0.0:
 		_refresh_timer = REFRESH_SECONDS
 		_rebuild()
+
+
+func _on_language_changed(_code: String) -> void:
+	_hint.text = Loc.t("UI_GROUP_HINT")
+	_rebuild()
 
 
 func _on_villagers_selected(villagers: Array) -> void:
@@ -112,10 +118,9 @@ func _build() -> void:
 	_grid.add_theme_constant_override("h_separation", 4)
 	_grid.add_theme_constant_override("v_separation", 4)
 	column.add_child(_grid)
-	var hint: Label = Label.new()
-	hint.theme_type_variation = &"SmallLabel"
-	hint.text = Loc.t("UI_GROUP_HINT")
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.custom_minimum_size.x = 300.0
-	column.add_child(hint)
-	Loc.language_changed.connect(func(_code: String) -> void: hint.text = Loc.t("UI_GROUP_HINT"))
+	_hint = Label.new()
+	_hint.theme_type_variation = &"SmallLabel"
+	_hint.text = Loc.t("UI_GROUP_HINT")
+	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_hint.custom_minimum_size.x = 300.0
+	column.add_child(_hint)

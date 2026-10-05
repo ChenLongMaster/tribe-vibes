@@ -28,8 +28,8 @@ func can_place(building_id: StringName, origin: Vector2i) -> bool:
 			return false
 	if bool(BuildingDefs.get_def(building_id).get("walkable", false)):
 		return true
-	if building_id == BuildingDefs.KITCHEN:
-		var entry: Vector2i = KitchenLayout.entry_cell(origin)
+	if building_id in [BuildingDefs.KITCHEN, BuildingDefs.TENT]:
+		var entry: Vector2i = KitchenLayout.entry_cell(origin) if building_id == BuildingDefs.KITCHEN else origin + Vector2i(1, 2)
 		var extra: Dictionary[Vector2i, bool] = {}
 		for cell: Vector2i in cells:
 			extra[cell] = true
@@ -71,6 +71,8 @@ func _keeps_paths(cells: Array[Vector2i]) -> bool:
 	if not _any_neighbor_reached(cells, reached):
 		return false
 	for building: Building in _world.buildings:
+		if building.tent_entrance != null and not _world.grid.is_reached(building.tent_entrance.entry_cell(), reached):
+			return false
 		if building.building_id == BuildingDefs.KITCHEN and not _world.grid.is_reached(KitchenLayout.entry_cell(building.origin_cell), reached):
 			return false
 		if building.is_walkable():

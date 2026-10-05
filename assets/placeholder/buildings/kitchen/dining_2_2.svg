@@ -1,14 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="384" height="336" viewBox="0 0 384 336">
-<g transform="translate(192,192) scale(0.89) translate(-192,-192)"><g transform="translate(211,234) scale(0.6)">  <rect x="-18" y="17" width="36" height="36" rx="5" fill="#8E9787" stroke="#4E342E" stroke-width="3"/>
-  <path d="M-30 -31 L29 -31 L33 35 L27 48 L-27 48 L-33 36 Z" fill="#949D8A" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-  <path d="M-26 -40 Q0 -43 25 -39 L32 34 Q0 41 -32 35 Z" fill="#C3C6AE" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-  <path d="M20 -30 l-6 8 l4 9" fill="none" stroke="#A2AA95" stroke-width="2"/>
-  <path d="M-8 -17 Q-6 -8 0 -7 Q6 -9 8 -17 Z" fill="#AA7650" stroke="#4E342E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-  <ellipse cx="0" cy="-17" rx="8" ry="5" fill="#D5A16A" stroke="#4E342E" stroke-width="2"/>
-  <ellipse cx="0" cy="-17" rx="6" ry="3" fill="#EAC079"/>
-  <ellipse cx="-2" cy="-18" rx="1.5" ry="1" fill="#9CB35E"/>
-  <path d="M-8 19 Q-6 28 0 29 Q6 27 8 19 Z" fill="#AA7650" stroke="#4E342E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-  <ellipse cx="0" cy="19" rx="8" ry="5" fill="#D5A16A" stroke="#4E342E" stroke-width="2"/>
-  <ellipse cx="0" cy="19" rx="6" ry="3" fill="#EAC079"/>
-  <ellipse cx="-2" cy="18" rx="1.5" ry="1" fill="#9CB35E"/>
-</g></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="552" viewBox="0 0 512 552">
+<g transform="translate(0,48)"><g transform="scale(1.3333333333333333,1.5)"><g transform="translate(192,192) scale(0.89) translate(-192,-192)"><g transform="translate(239,234) scale(0.6)"><ellipse cx="7" cy="40" rx="33" ry="14" fill="#4E342E" opacity="0.16"/>
+<g transform="translate(0,46)"><ellipse cx="2.4" cy="3" rx="19.6" ry="4" fill="#4E342E" opacity="0.16"/>
+  <path d="M-20 -4.6000000000000005 Q-20.6 -14.26 -12.4 -16.099999999999998 Q-7.0 -21.619999999999997 0.4 -18.86 Q9.6 -21.619999999999997 14.6 -15.180000000000001 Q21.0 -9.200000000000001 19.0 -0.92 Q17.8 4.14 9.0 3.68 L-11.0 3.22 Q-18.6 2.53 -20 -4.6000000000000005 Z" fill="#90998D" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-17.8 -8.28 Q-17.2 -14.950000000000001 -11.799999999999999 -14.972999999999999 Q-5.6000000000000005 -20.24 0.6 -17.728399999999997 Q8.6 -19.55 13.200000000000001 -14.269200000000001 Q17.0 -11.27 17.2 -6.8999999999999995 Q4.6000000000000005 -2.76 -9.399999999999999 -4.83 Z" fill="#C6C8B5"/>
+  <path d="M4.6000000000000005 -2.99 Q13.4 -4.37 17.6 -7.13 L18.6 -1.61 Q16.8 2.07 9.0 2.3000000000000003 L4.8 2.07 Z" fill="#7F897F"/>
+  <path d="M-9.0 -16.099999999999998 Q-2.4 -19.09 2.6 -17.02" fill="none" stroke="#E0DDC8" stroke-width="1.8" stroke-linecap="round"/>
+</g>  <path d="M-25 -31 L23 -31 L32 25 L28 43 L-27 42 L-32 27 Z" fill="#8E988B" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M12 26 L31 23 L28 39 L10 40 Z" fill="#778276"/>
+  <path d="M-23 -35 Q0 -40 22 -34 L31 24 Q2 33 -31 26 Z" fill="#C9CBB7" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-19 -30 L16 -31 L22 -17 L-21 -21 Z" fill="#DDDDC7"/>
+  <path d="M19 -28 l-6 8 l4 9" fill="none" stroke="#A2AA95" stroke-width="2"/>
+  <path d="M-8 -13 Q-6 -4 0 -3 Q6 -5 8 -13 Z" fill="#AA7650" stroke="#4E342E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="0" cy="-13" rx="8" ry="5" fill="#D5A16A" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="0" cy="-13" rx="6" ry="3" fill="#EAC079"/>
+  <ellipse cx="-2" cy="-14" rx="1.5" ry="1" fill="#9CB35E"/>
+  <path d="M-8 13 Q-6 22 0 23 Q6 21 8 13 Z" fill="#AA7650" stroke="#4E342E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="0" cy="13" rx="8" ry="5" fill="#D5A16A" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="0" cy="13" rx="6" ry="3" fill="#EAC079"/>
+  <ellipse cx="-2" cy="12" rx="1.5" ry="1" fill="#9CB35E"/>
+</g></g></g></g></svg>

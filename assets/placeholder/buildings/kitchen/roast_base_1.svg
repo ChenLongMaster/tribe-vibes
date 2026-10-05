@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="552" viewBox="0 0 512 552">
+<g transform="translate(0,48)"><g transform="scale(1.3333333333333333,1.5)"><g transform="translate(192,192) scale(0.76) translate(-192,-192)"><g transform="translate(158,210) scale(1)"><ellipse cx="3" cy="14" rx="31" ry="10" fill="#4E342E" opacity="0.16"/>
+  <ellipse cx="0" cy="6" rx="22" ry="10" fill="#655044" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="-14" cy="3" rx="5" ry="3" fill="#755041" stroke="#4E342E" stroke-width="1.5"/>
+  <ellipse cx="-15" cy="2" rx="2.5" ry="1.2" fill="#F0A34C"/>
+  <ellipse cx="-5" cy="8" rx="5" ry="3" fill="#755041" stroke="#4E342E" stroke-width="1.5"/>
+  <ellipse cx="-6" cy="7" rx="2.5" ry="1.2" fill="#DE7845"/>
+  <ellipse cx="7" cy="3" rx="5" ry="3" fill="#755041" stroke="#4E342E" stroke-width="1.5"/>
+  <ellipse cx="6" cy="2" rx="2.5" ry="1.2" fill="#F0A34C"/>
+  <ellipse cx="16" cy="8" rx="5" ry="3" fill="#755041" stroke="#4E342E" stroke-width="1.5"/>
+  <ellipse cx="15" cy="7" rx="2.5" ry="1.2" fill="#DE7845"/>
+  <ellipse cx="0" cy="0" rx="5" ry="3" fill="#755041" stroke="#4E342E" stroke-width="1.5"/>
+  <ellipse cx="-1" cy="-1" rx="2.5" ry="1.2" fill="#F0A34C"/>
+  <path d="M-25 12 L-25 -21" stroke="#4E342E" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M-26 11 L-26 -20" stroke="#B39962" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M-25 -21 L-30 -27" stroke="#B39962" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M-25 -21 L-21 -27" stroke="#B39962" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M25 16 L25 -15" stroke="#4E342E" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M24 15 L24 -14" stroke="#B39962" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M25 -15 L20 -21" stroke="#B39962" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M25 -15 L29 -21" stroke="#B39962" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M-31 -21 L31 -15" stroke="#4E342E" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M-30 -22 L31 -16" stroke="#C3A06B" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+</g></g></g></g></svg>

@@ -11,6 +11,8 @@ signal world_ready(world: Node)
 signal grid_changed(cell: Vector2i)
 ## Số lượng một loại tài nguyên trong kho thay đổi.
 signal resource_changed(resource_id: StringName, amount: int)
+## Chế độ dev của phiên debug bật/tắt; UI cập nhật chỉ báo và tài nguyên ảo.
+signal dev_mode_changed(enabled: bool)
 ## Một thổ dân vừa xuất hiện trong thế giới.
 signal villager_spawned(villager: Node)
 ## Thổ dân được chọn (null = bỏ chọn) — bảng thông tin nghe signal này.

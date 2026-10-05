@@ -3,6 +3,7 @@
 # Quy ước (khớp ASSET_SPEC.md + data/art_specs.gd): vẽ 2×; rộng = số ô ngang × 128; mép dưới
 # hình = mép dưới diện tích công trình; điểm neo cách mép dưới 24 px (= Building.FOOT_INSET ×2).
 import kitchen_art
+import xml.etree.ElementTree as ET
 import math
 import os
 
@@ -71,11 +72,9 @@ def tent(level):
     tip_y = (76, 69, 61)[level-1]
     skin = ("#B69A76", "#DDC099", "#E4C8A1")[level-1]
     front = ("#A88B69", "#C9AA82", "#D2B489")[level-1]
-    ground = rect(5,47,246,249,"#C8A27A",24,0)
-    ground += rect(12,54,232,235,"#B99A72",19,0)
     b = ""
-    # Nền elip sâu đọc thành chân lều nằm trên đất, không phải đường mép trước.
-    b += ellipse(128,247,112,43,"#AA8E69",0)
+    # Chỉ bóng tiếp xúc sát chân; đất sân do map vẽ để nối liền các công trình.
+    b += shadow(128,270,109,18)
     for x,y in ((28,249),(65,278),(219,266),(235,229)):
         b += ellipse(x,y,9 if level>1 else 6,5,"#C4BDAA",2)
     # Hai đầu tre ngắn/dây mây thay chùm cọc dài hoặc biểu tượng văn hoá khác.
@@ -163,8 +162,24 @@ def tent(level):
         b += line(x,y+3,x,y-12,"#70583F",5)
     # Thu nhỏ quanh cùng chân/neo, sân và diện tích gameplay vẫn 2×2.
     size = (0.76, 0.89, 1.0)[level-1]
-    b = ground + f'<g transform="translate(128 276) scale({size}) translate(-128 -276)">{b}</g>'
+    b = f'<g transform="translate(128 276) scale({size}) translate(-128 -276)">{b}</g>'
     return svg(256,300,b,f"Lều da/cỏ cấp {level}: cỡ {size}, cửa phải, cũ rách → lành → hoa văn Lạc Việt")
+
+
+def tent_layers(level):
+    root = ET.fromstring(tent(level))
+    ET.register_namespace('', 'http://www.w3.org/2000/svg')
+    # Giữ key lớp sân để thay art cũ được, nhưng không đóng đất nền trong hình.
+    floor = ''
+    body = ET.tostring(root.find('{http://www.w3.org/2000/svg}g'), encoding='unicode')
+    door = path("M181 202 Q149 213 145 266 L159 277 Q166 250 167 233 Q167 215 181 202 Z","#E9D2AE",3)
+    door += path("M181 202 Q215 211 223 256 L211 266 Q209 239 200 222 Q193 211 181 202 Z","#B28D65",3)
+    door += line(149,253,164,248,"#6D5737",3)+line(206,244,219,239,"#6D5737",3)
+    door += path("M159 280 Q184 280 216 263","none",0,' stroke="#DEBF8F" stroke-width="6" stroke-linecap="round"')
+    size=(.76,.89,1)[level-1]
+    door=f'<g transform="translate(128 276) scale({size}) translate(-128 -276)">{door}</g>'
+    for name, shape in (('floor',floor),('body',body),('door',door)):
+        write(f'buildings/tent/{name}_{level}',svg(256,300,shape))
 
 
 # --- Bếp (2×2: 256 × 320) ---
@@ -308,9 +323,10 @@ def dance_floor(level):
     w, h = 384, 400
     b = ""
     floor = ["#D7B48A", "#BCAAA4", "#B0BEC5"][level - 1]
-    b += ellipse(192, 270, 176, 112, floor)
+    if level > 1:
+        # Sàn gỗ/đá là vật thể, khác với đất trơ của map ở cấp1.
+        b += ellipse(192, 270, 176, 112, floor)
     if level == 1:
-        b += ellipse(192, 270, 130, 80, "#C8A27A", 0)
         b += stones([(28, 270, 14), (60, 196, 13), (124, 166, 12), (260, 166, 12), (324, 196, 13), (356, 270, 14),
                      (324, 344, 13), (260, 372, 12), (124, 372, 12), (60, 344, 13)])
     elif level == 2:
@@ -348,13 +364,12 @@ def dance_floor(level):
 
 def foundation(cols, rows):
     w,h=cols*128,rows*128
-    # Toàn nền giữ footprint vuông; bố cục thi công nằm xiên bên trong.
-    b=rect(4,4,w-8,h-8,'#C8A27A',20,0)+rect(11,11,w-22,h-22,'#D4B28A',16,0)
-    b+=path(f'M17 {h-19} Q{w*.5} {h-4} {w-17} {h-19}','none',0,' stroke="#B08B66" stroke-width="4" stroke-linecap="round"')
-    corners=[(.43*w,.23*h),(.87*w,.43*h),(.59*w,.85*h),(.13*w,.64*h)]
-    back,side,front,left=corners
+    # Cọc/dây/vật liệu đặt trực tiếp trên đất map; khung vẫn khớp footprint.
+    b=''
+    # Khung móng chính diện theo lưới, hai hàng cọc ngang; chỉ thấy mặt trên cọc.
+    corners=[(24,48),(w-24,48),(w-24,h-16),(24,h-16)]
     # Dây ở đầu cọc: các đoạn xa ở sau, các cọc gần che lên dây.
-    b+=path('M'+' L'.join(f'{x:.1f} {y-22:.1f}' for x,y in corners)+' Z','none',0,' stroke="#D6BD86" stroke-width="3" stroke-linejoin="round"')
+    b+=path('M'+' L'.join(f'{x:.1f} {y-13:.1f}' for x,y in corners)+' Z','none',0,' stroke="#D6BD86" stroke-width="3" stroke-linejoin="round"')
     for i in range(5):
         x=w*(.24+i*.11);y=h*(.26+(i%3)*.17)
         b+=line(x,y,x+23,y+10,'#B08B66',3)+line(x+7,y+11,x+23,y+18,'#B08B66',2)
@@ -371,7 +386,7 @@ def foundation(cols, rows):
         b+=line(x+3,y-19,x+3,y-1,'#77583E',2)
         b+=ellipse(round(x,1),round(y-23,1),7,4,'#D7B88A',3)
         b+=line(x-6,y-14,x+6,y-10,'#CFB47B',2)
-    return svg(w,h,b,f'Móng{cols}×{rows}: nền phủ ô vuông, cọc/dây/vật liệu bên trong 3/4 trước-phải')
+    return svg(w,h,b,f'Móng{cols}×{rows}: nền trong suốt, bốn cọc hình chữ nhật chính diện từ trên')
 
 
 
@@ -436,6 +451,7 @@ def main():
     kitchen_art.generate(write)
     for level in (1, 2, 3):
         write(f"buildings/tent_{level}", tent(level))
+        tent_layers(level)
         write(f"buildings/kitchen_{level}", kitchen(level))
         write(f"buildings/storage_{level}", storage(level))
         write(f"buildings/forge_{level}", forge(level))
@@ -443,6 +459,8 @@ def main():
     write("buildings/foundation_2x2", foundation(2, 2))
     write("buildings/foundation_3x2", foundation(3, 2))
     write("buildings/foundation_3x3", foundation(3, 3))
+    write("buildings/foundation_4x3", foundation(4, 3))
+    write("props/build_hammer", svg(64,96,rect(27,24,10,65,"#AA8455",4,4)+rect(6,9,52,26,"#96988B",8,5)+path("M11 12 L51 12 L45 21 L12 21 Z","#D0CCB7",0)+line(23,36,40,36,"#CAB184",4)))
     write("villager/hard_hat", hard_hat())
     icons()
 

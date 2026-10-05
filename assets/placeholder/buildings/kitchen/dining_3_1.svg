@@ -1,5 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="384" height="336" viewBox="0 0 384 336">
-<g transform="translate(192,192) scale(1.0) translate(-192,-192)"><g transform="translate(310,141) scale(0.6)">  <path d="M-22 -28 L-22 -7" stroke="#4E342E" stroke-width="7" stroke-linecap="round" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="552" viewBox="0 0 512 552">
+<g transform="translate(0,48)"><g transform="scale(1.3333333333333333,1.5)"><g transform="translate(192,192) scale(1.0) translate(-192,-192)"><g transform="translate(326,115) scale(0.6)"><ellipse cx="7" cy="40" rx="33" ry="14" fill="#4E342E" opacity="0.16"/>
+  <path d="M-22 -28 L-22 -7" stroke="#4E342E" stroke-width="7" stroke-linecap="round" fill="none"/>
   <path d="M-23 -27 L-23 -9" stroke="#A58050" stroke-width="3" stroke-linecap="round" fill="none"/>
   <path d="M-22 34 L-22 55" stroke="#4E342E" stroke-width="7" stroke-linecap="round" fill="none"/>
   <path d="M-23 35 L-23 53" stroke="#A58050" stroke-width="3" stroke-linecap="round" fill="none"/>
@@ -7,17 +8,18 @@
   <path d="M21 -27 L21 -9" stroke="#A58050" stroke-width="3" stroke-linecap="round" fill="none"/>
   <path d="M22 34 L22 55" stroke="#4E342E" stroke-width="7" stroke-linecap="round" fill="none"/>
   <path d="M21 35 L21 53" stroke="#A58050" stroke-width="3" stroke-linecap="round" fill="none"/>
-  <path d="M-30 30 L30 30 L29 47 L-29 47 Z" fill="#81633F" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-  <path d="M-26 -39 Q0 -41 26 -39 L30 39 Q0 42 -30 39 Z" fill="#C29E65" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-  <path d="M-9 -36 L-9 38" stroke="#9D7A47" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-  <path d="M9 -36 L9 38" stroke="#9D7A47" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-  <path d="M-24 36 L24 36" stroke="#DABD81" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-  <path d="M-8 -17 Q-6 -8 0 -7 Q6 -9 8 -17 Z" fill="#AA7650" stroke="#4E342E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-  <ellipse cx="0" cy="-17" rx="8" ry="5" fill="#D5A16A" stroke="#4E342E" stroke-width="2"/>
-  <ellipse cx="0" cy="-17" rx="6" ry="3" fill="#EAC079"/>
-  <ellipse cx="-2" cy="-18" rx="1.5" ry="1" fill="#9CB35E"/>
-  <path d="M-8 19 Q-6 28 0 29 Q6 27 8 19 Z" fill="#AA7650" stroke="#4E342E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-  <ellipse cx="0" cy="19" rx="8" ry="5" fill="#D5A16A" stroke="#4E342E" stroke-width="2"/>
-  <ellipse cx="0" cy="19" rx="6" ry="3" fill="#EAC079"/>
-  <ellipse cx="-2" cy="18" rx="1.5" ry="1" fill="#9CB35E"/>
-</g></g></svg>
+  <path d="M-30 27 L30 27 L29 43 L-29 43 Z" fill="#81633F" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M23 -35 L29 29 L29 42 L23 -24 Z" fill="#987649" stroke="#4E342E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-24 -35 Q0 -37 24 -35 L30 29 Q0 32 -30 29 Z" fill="#CEAE75" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-7.2 -32 L-9 27" stroke="#9D7A47" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M7.2 -32 L9 27" stroke="#9D7A47" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M-25 26 L25 26" stroke="#E5CB94" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M-8 -13 Q-6 -4 0 -3 Q6 -5 8 -13 Z" fill="#AA7650" stroke="#4E342E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="0" cy="-13" rx="8" ry="5" fill="#D5A16A" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="0" cy="-13" rx="6" ry="3" fill="#EAC079"/>
+  <ellipse cx="-2" cy="-14" rx="1.5" ry="1" fill="#9CB35E"/>
+  <path d="M-8 13 Q-6 22 0 23 Q6 21 8 13 Z" fill="#AA7650" stroke="#4E342E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="0" cy="13" rx="8" ry="5" fill="#D5A16A" stroke="#4E342E" stroke-width="2"/>
+  <ellipse cx="0" cy="13" rx="6" ry="3" fill="#EAC079"/>
+  <ellipse cx="-2" cy="12" rx="1.5" ry="1" fill="#9CB35E"/>
+</g></g></g></g></svg>

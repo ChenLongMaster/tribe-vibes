@@ -33,6 +33,7 @@
 
 - Làm **từng đợt** theo mục 12. Xong một đợt thì **dừng lại**, báo cáo, chờ mình chạy thử và đồng ý rồi mới làm đợt tiếp.
 - **Không tự `git commit` / `git push`.** Mình tự commit.
+- Trước khi vẽ/sửa hình công trình, ráp scene, bố trí nội thất/điểm tương tác hoặc tối ưu render công trình, **bắt buộc đọc [BUILDING_DESIGN.md](BUILDING_DESIGN.md)**. Đây là spec chi tiết hướng đã duyệt; đối chiếu hợp đồng asset trong ASSET_SPEC và giữ luật/footprint/sức chứa ở mục9.3.
 - Báo cáo cuối mỗi đợt gồm:
   1. Đã làm gì (ngắn gọn).
   2. Cách chơi thử để kiểm tra (bấm gì, chờ gì, sẽ thấy gì).
@@ -165,12 +166,21 @@ Simulation Core     → world, villager, AI, nhu cầu, kỹ năng, tài nguyên
 
 ---
 
+### 3.3 Chế độ DEV khi thử game (2026-10-04)
+
+- Chỉ hoạt động trong **bản debug** (chạy từ editor hoặc Godot Standard), mặc định **tắt**. Bấm **F8** hoặc nút **DEV** cạnh Lưu/Tải trên HUD để bật/tắt trong ván, kể cả khi tạm dừng. Chạy `godot --path . -- --dev` để bật từ lúc khởi động; có thể kết hợp `--seed=42`.
+- Khi bật, **gỗ, đá và thức ăn thô vô hạn**, thanh tài nguyên hiện **∞** thay số/sức chứa. Dân vẫn ra kho lấy vật liệu, khuân, xây/nâng cấp và nấu theo animation/thời gian thật; không tự hoàn tất công trình. Đồ nghề, món chín, chỗ ngủ, số ghế và nhu cầu vẫn theo luật thường.
+- Đây là cờ của **phiên chạy**, độc lập với Normal/God và không lưu trong save. Không bơm số lớn vào kho thật; tắt thì thấy lại lượng thật. Thu hoạch vẫn cất vào kho thật theo sức chứa. Công trình/món chín/vật liệu hoàn trả tạo ra khi DEV bật vẫn là kết quả của ván và được lưu bình thường. Tải ván trong cùng phiên giữ lựa chọn DEV; khởi động lại mặc định tắt nếu không có `--dev`. Bản release không hiện nút và bỏ qua F8/`--dev`.
+- Lệnh bật/tắt đi qua `Commands`; `GameState` cung cấp lượng ảo cho ba tài nguyên chung và phát signal qua `EventBus`. HUD chỉ đọc trạng thái, mọi chữ qua `Loc`/CSV. Không đổi định dạng save hoặc các con số cân bằng chế độ Normal.
+
+---
+
 ## 4. Cấu trúc project
 
 ```
 res://
 ├─ project.godot
-├─ GAME_DESIGN.md / CLAUDE.md / AGENTS.md / DEVLOG.md / ASSET_SPEC.md
+├─ GAME_DESIGN.md / CLAUDE.md / AGENTS.md / DEVLOG.md / ASSET_SPEC.md / BUILDING_DESIGN.md
 ├─ autoload/
 │  ├─ game_state.gd      # tài nguyên, dân số, ngày giờ, tốc độ game, độ khó, chế độ đang chơi
 │  ├─ event_bus.gd       # signal toàn cục (villager_born, raid_started, resource_changed…)
@@ -357,6 +367,8 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 
 ### 6.2 Phản hồi và "juice"
 
+- **Chọn công trình (2026-10-05):** móng và nhà hoàn chỉnh dùng bốn góc chữ L vàng kem trên đất, đúng footprint chữ nhật; không vòng elip, không tô nền, không phập phồng. Click chọn sáng nhẹ một nhịp0.2s trên hình/cọc/dây rồi về màu ban đầu, dấu góc giữ khi còn chọn. Không nhấc/xoay/phóng to công trình; hiệu ứng chạy theo thời gian thật kể cả tạm dừng. Các lớp lều/bếp cùng sáng, dân bên trong và icon cảnh báo không bị làm sáng. Rê/giao việc vào công trình cũng dùng dấu góc; tài nguyên giữ phản hồi cũ.
+
 - **Bỏ icon việc thường trực trên đầu (2026-10-04)** để màn hình thoáng hơn, nhất là khi nhiều người ngồi ăn. Động tác, đồ cầm/khuân và bảng thông tin/bảng nhóm cho biết việc đang làm. Giữ bong bóng nghĩ/nói, tấm biển, cảnh báo chỉ số thấp, Zzz, tim và sao khi ngất.
 - **Thổ dân không nói chữ.** Mọi "lời nói" đều là hình (icon SVG, không dùng emoji font), theo 3 kiểu:
   - **Bong bóng nói** (khung tròn, 1–2 icon): cảm xúc tức thời — vui ♪, giận 💢, yêu ❤, sợ ❗, lên cấp (icon kỹ năng), tán gẫu.
@@ -389,6 +401,8 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 
 ## 7. Hình tạm (placeholder) & quy cách asset
 
+**Thiết kế công trình:** đọc [BUILDING_DESIGN.md](BUILDING_DESIGN.md) trước khi triển khai. File đó tổng hợp nguyên tắc hiện hành: công trình có dân sử dụng, scene ráp mảnh dùng chung, góc nhìn/khối, vật liệu Việt nhẹ, phân cấp, bố cục tự nhiên và kế hoạch tối ưu. Các đoạn lịch sử dưới đây giữ để tra cứu; không lấy bản thử đã hoãn hoặc số bố cục cũ ghi đè scene người dùng chỉnh. ASSET_SPEC giữ tên/khung/neo; mục9.3 giữ luật.
+
 ### Hướng nghệ thuật đã chốt (2026-10-04)
 
 - **Cảm giác chính:** tiền sử thô mộc, thủ công, hơi ngố nhưng đáng yêu, gần tinh thần Prehistoric Tribes. Hình mềm, bo tròn, vật liệu có nếp/gồ ghề/sờn và nút buộc; nhìn rõ dáng và chức năng khi thu nhỏ. Lấy cảm hứng góc nhìn, tỉ lệ và không khí, không chép hình/texture/logo của game gốc.
@@ -399,6 +413,97 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 - **Phân cấp:** khác rõ ngay từ dáng/cỡ và độ hoàn thiện, rồi mới tới chi tiết nhỏ. Cấp thấp đơn sơ, cũ và sờn; cấp giữa lành lặn, chắc và gọn hơn; cấp cao đầy đặn và trang trí hơn, vẫn cùng họ vật liệu/dáng của công trình. Tăng cấp không mặc định biến lều thành nhà hay chỉ thêm một biểu tượng rất nhỏ.
 - **Phong cách nét/màu:** tự vẽ SVG trong `assets/placeholder/`, viền nâu đậm `#4E342E` 6 px ở file 2× (= 3 px hiển thị), màu ấm, tròn mềm và chi tiết vừa đủ. Cỏ/cây trang trí giữ màu chìm/viền xanh theo quy tắc riêng. Không vẽ chữ trong asset.
 
+### Rào bếp ghép bằng mảnh dùng chung (2026-10-05) — đã áp dụng
+
+- Ba scene bếp đã dùng các instance từ buildings/parts thay lớp rào nguyên khối: cấp1 chỉ đá, cấp2 đá + tre mảnh, cấp3 đá + gỗ có giằng. Viên đá xen kẽ dáng/cỡ và lệch nhẹ; chân cọc nằm trong khe đá. Ghép nhiều đoạn nhỏ, rào thấp để không che quá nhiều dân/nội thất; hai trục sân và cổng giữ như cũ. Không đổi phần gian nấu/quầy/giá quay/bàn/ghế/marker người dùng đã chỉnh.
+- FenceBack/FenceFront mở khoá chọn nhóm; các mảnh bên trong là instance chỉnh Position/Scale riêng. Art nguyên khối đã bỏ khỏi scene, file SVG cũ vẫn để tương thích. Người dùng mở từng scene bếp, bung nhóm rào và chọn mảnh để kéo/nhân bản/xoá; Ctrl+S rồi Export menu / placement PNG. PNG của cả ba cấp đã xuất lại; generator không ghi đè scene ráp tay. Giữ footprint/lối vào/đường đi/số ghế và thợ.
+
+### Bộ mảnh đá / rào dùng chung (2026-10-05) — thư viện ráp tay
+
+- `buildings/parts/` có 20 scene mảnh độc lập: 8 viên đá chân rào, cọc tre/gỗ thường và buộc mây, thanh ngang/dọc dài 32/64 px mỗi vật liệu. Hình 2× trong `assets/placeholder/props/modular/`, viền nâu, mặt trên sáng/hông thấp, nền trong suốt. Thanh dọc được vẽ theo chiều sâu, không xoay ảnh ngang. Cọc riêng cho đoạn rào chung cọc ở góc, đá nằm trong khe chân cọc. Nối nhiều đoạn thay kéo giãn thanh; scale đá nhẹ để đa dạng.
+- Kéo `.tscn` từ FileSystem vào một nhóm Node2D của bất kỳ scene 2D nào; Ctrl+D nhân bản, Position/Scale chỉnh riêng từng instance. JoinA/JoinB của thanh đánh dấu hai chân cọc; gốc mảnh ở chân/đầu gần. Có catalog và ví dụ rào ráp sẵn, hướng dẫn ở README cùng thư mục. Đây là bộ trang trí, không tự tạo va chạm, mỏ tài nguyên hay công trình.
+- Bếp đã được ráp lại rào theo yêu cầu, phần nội thất người dùng đã chỉnh giữ nguyên. Với scene còn rào nguyên khối: ẩn Art cũ trong FenceBack/FenceFront, thêm mảnh làm con các nhóm đó, giữ Y-sort/footprint/cổng/lối đi và xuất lại PNG. Sửa hình được, đổi cổng hoặc chắn đường cần chỉnh cơ chế đi lại riêng. Script gen_modular_art.py chỉ tái sinh SVG, không sinh lại scene ráp tay.
+
+### Bố cục bếp chỉnh trực tiếp trong Godot (2026-10-05) — hiện hành
+
+- Ba scene `buildings/kitchen_layouts/kitchen_1.tscn` đến `kitchen_3.tscn` là nguồn bố cục game. Kéo/scale các nhóm CookingCanopy, Serving, RoastFire và Dining0… trong editor; hình đi cùng marker chỗ nấu/lấy món/ngồi/mặt ghế và vùng tránh. Dân giữ nguyên cỡ; cảnh báo/bóng mái/món trên quầy/giá quay và chiều sâu theo transform nhóm. Lưu scene, chạy lại ván để nạp; tải save hiện có cũng dùng bố cục mới.
+- Root/footprint4×3/cổng/tên marker/số ghế và thợ giữ cố định; chỉnh Position và Scale dương nhóm nội thất hoặc instance rào, không xoay/mirror. Đường bao rào giữ trong footprint và chừa cổng hiện tại. Editor có lưới/vùng tránh/dân mẫu; tất cả ẩn trong game. Nút Export menu / placement PNG trên root xuất hình trong suốt đúng khung512×552/neo256,504 vào assets/art, đồng bộ menu/bóng đặt/móng. Nếu vượt khung xám thì từ chối xuất, giữ hình cũ. Không phải plugin/addon; generator SVG không ghi đè scene/PNG chỉnh tay. Hướng dẫn chi tiết ở README cùng thư mục scene.
+- Bố cục mặc định chuyển từ bộ đã duyệt, giữ mái cũ và vị trí hiện hành. Quay gà vẫn cùng luật nấu,4/6/8 khách và1/2/3 thợ; không đổi save hoặc cân bằng. Các số raw ở những mục trước chỉ mô tả bố cục gốc, không còn là nơi chỉnh vị trí game.
+
+### Dời giá quay và phân chỗ nấu (2026-10-05) — bố cục gốc của scene
+
+- Giữ mái cũ; bản thử ba kiến trúc dưới đây hoãn, chưa áp dụng. Giá quay theo sơ đồ người dùng: tâm raw(158,210)/(154,210)/(282,187). Cấp3 hai bộ bàn/ghế phía trên nhích lên26px raw, tâmY115 thay141; hai bộ phía dưới giữ nguyên. Quầy, mái/cọc/rào và footprint giữ nguyên.
+- Đầu bếp thứ nhất nấu tại nồi dưới mái; từ hai người trở lên, người giữ slot1 đứng bên phải giá quay, quay xiên bằng tay; cấp3 người thứ ba vẫn ở khu nấu. Quay gà là một tư thế của cùng việc nấu, dùng thức ăn thô/thời gian/sản lượng/kho món hiện có. Khi chỉ còn một đầu bếp, người đó trở về nồi chính và giữ nguyên phần đang nấu dở. Vật cản/đường nội thất theo vị trí mới.
+
+### Phác ba kiến trúc gian nấu khác nhau (2026-10-05) — hoãn
+
+- Thử cấp1 mái một dốc võng/sờn/vá thô; cấp2 hai tầng cỏ chồng nhau, phên tre chắn gió và giằng; cấp3 mái có nóc/hai mặt mái sáng-tối, mái phụ ngắn tựa khung xa và mặt trời cách điệu. Mục đích nhận ra cấp bằng kiến trúc thay vì chỉ tăng cỡ. Giữ góc chếch trước-phải, chân cọc/vị trí sân/quầy/ghế đã duyệt; mái không lấn khu ăn.
+- Bản thử nằm ở `build/art-review/2026-10-05/canopy-tiers/`, dùng cảnh game và TaskEat/TaskCook thật để kiểm tra che khuất. Chưa thay art game chính hay luật chơi; hình hiện hành vẫn là bộ trước đợt này. Chờ người dùng duyệt rồi mới áp dụng generator chính.
+
+### Bếp than quay gà trong sân (2026-10-05)
+
+- Thêm giá quay gà nhỏ giữa quầy món và khu ăn, tâm raw(128,238), lửa thấp và khói mỏng. Cấp1 dùng chạc cây/xiên tre; cấp2 thêm giá gỗ buộc mây/vòng đá; cấp3 giá chắc hơn, tay quay, khay hứng và bát rau gia vị. Góc nhìn cao, màu ấm, nền trong suốt, bóng sát chân; giữ vị trí các nội thất đã duyệt.
+- Gà quay chậm một vòng mỗi8 giây game, lửa nhấp nhẹ; đây là trang trí sống, không sinh món hay thêm việc/chi phí nhiên liệu. Dân tránh vùng bếp than khi đi lấy món/tới ghế. Giữ footprint4×3, khung512×552/neo256,504, số khách/thợ và luật nấu/ăn hiện hành.
+
+### Quầy thức ăn sát rào trái (2026-10-05) — ưu tiên mới nhất
+
+- Quầy thức ăn giữ dáng dọc nhưng đặt sát rào trái, không canh tâm gian nấu: SERVING_CENTERS raw(54,238) cho cả ba cấp thayX97/105/113, giữY238. Chân quầy chừa khoảng6–8px raw với đá cạnh trái; mặt bàn vẫn gần rào tự nhiên. Điểm lấy món mỗi cấp raw(85,250), vật cản/món trên quầy/hướng lấy món theo tâm mới. Gian nấu, rào/đá, khu ăn và khung/neo giữ nguyên. Đây là đính chính vị trí quầy, ưu tiên hơn dòng “quầy cùng trục tâm gian nấu” của đợt trước.
+
+### Bếp sát góc trái, quầy cùng trục và đá chân rào (2026-10-05) — ưu tiên mới nhất
+
+- Gian nấu cả ba cấp sát góc trên-trái, gốc raw(34,−24)/(33,−43)/(32,−60), giữ cỡ60/69/77% và hướng trước-phải. Chân cọc gần nhất cách đá/rào một khe nhỏ, mái được phủ qua rào; điểm đứng đầu bếp/icon cảnh báo/lớp sort đồng bộ. Quầy dọc cùng trục tâm gian nấu: SERVING_CENTERS raw(97,238)/(105,238)/(113,238), giữY238; FETCH_POINT mỗi cấp = tâm quầy+(31,12), vật cản và món bày trên quầy cùng dịch. Bàn/ghế/khu ăn giữ nguyên. Đá bếp méo/bo vai, đỉnh bè, không nhọn; cấp2–3 thêm2–4 viên mỗi khoang rào với cỡ lệch nhau để gần lấp đầy, chừa khe chân cọc. Chỉ thay hình đá trong bếp, không đổi mỏ đá/map.
+- Nới khoảng trong suốt trên ảnh bếp48px2× để mái không bị cắt: mọi composite/lớp bếp512×552, neo(256,504)=(0.5,21/23), hiển thị0.5; hình cũ trong khung được cộng(0,48). KitchenLayout thêm FRAME_PADDING(0,48) trong đổi toạ độ và trừ ở đổi ngược, ArtSpecs đồng bộ. Sân4×3/lưới64px và điểm neo trên map giữ nguyên; không thay kích thước móng.
+- Các vị trí/khung ở mục này thay các số của đợt trước bên dưới. Giữ4/6/8 khách, ghế gỗ đã duyệt, luật ăn/nấu/save.
+
+### Sân gọn và chỉnh vị trí bếp theo hai trục (2026-10-05) — chuẩn mới nhất
+
+- Thu vùng đất dọn cỏ quanh công trình, vẫn mép hữu cơ/nền map chung. Vòng đá chung cách footprint0.35ô thay0.75ô; sức sân ô mép0.28/góc0.16 thay0.68/0.45, chỉ giấu cỏ trang trí trong footprint thay cả một vòng ô ngoài. Sân bếp giảm lan ra ngoài bằng falloff1.8 thay0.65, giữ đất bên trong rào. Sân làng quanh hang/lửa trại và lối mòn vẫn theo luật cũ; chỗ nhiều sân/đường nối nhau có thể thành mảng đất chung.
+- Cấp1 giữ nguyên gian nấu đã duyệt. Cấp2–3 căn theo chân cọc trước (mốc rawY312) để phần tăng cỡ vươn lên sau thay vì nở xuống: CANOPY_ORIGINS raw(50,8)/(50,-20)/(50,-43), X50/cỡ60/69/77% giữ nguyên. Mốc chân trước rawY195.2/195.28/197.24 gần nhau; chỗ nấu, nhóm hình và cảnh báo cùng theo gốc từng cấp. Cấp2 khách ngồi trên khúc gỗ còn vỏ/vòng tuổi; cấp3 trên ghế gỗ có mặt ghế/chân/giằng/tựa phía ngoài bàn. Giữ chiếu cấp1 và4/6/8 khách. Chỗ đứng chân khách cấp2–3 tại tâm bàn+(±31,24), mặt ngồi tạiY12−5×0.85 (gỗ)/12−9×0.85 (ghế); tư thế ăn nâng hông khớp mặt ngồi theo cỡ thật của người, chân hướng tới bàn, chuyển tư thế0.25s. Rời ghế/đổi lệnh/nâng cấp trả độ nâng về0 trước khi đi.
+- Gian nấu là nhóm Node2D CookingCanopy riêng gồm mái/cọc/nồi/dụng cụ/hơi nước; sân, rào, quầy và bàn ăn độc lập. Gốc chung raw(50,8) của đợt tách nhóm được thay bằng gốc từng cấp ở dòng trên. Không cố giấu đá phía sau: mái được chồng lên đá tự nhiên, chân cọc vẫn có khoảng đất. Sort từng lớp, chỗ đứng đầu bếp và cảnh báo đồng bộ gốc mới; nhịp sáng khi chọn bao gồm cả nhóm con. Đây vẫn là một công trình bếp, không thêm loại công trình hay thao tác di chuyển riêng. Quầy giữ tâm(76,238), điểm lấy món(107,250); bàn/ghế giữ nguyên.
+- Các số ở mục này ưu tiên hơn vị trí đợt trước; giữ footprint/khung/neo/số khách/thợ, luật chơi và save format. QA `build/art-review/2026-10-05/compact-yards/` có trước/sau và cảnh người thật.
+
+### Quầy dọc và khoảng thoáng bếp (2026-10-04) — bố cục hiện hành
+
+- Quầy để thức ăn quay dọc, thấy mặt trên/mép/chân cùng góc với bàn ăn; không xoay bát hoặc chân bàn nằm ngang. Cả ba cấp giữ nguyên hai chiếu/ba bàn đá tam giác/bốn bàn gỗ và4/6/8 khách,1/2/3 thợ.
+- Khoảng thoáng đo từ **chân cọc/chân bàn tới đá**, không bắt toàn bộ mái cách đá. Mái được vươn gần/che đá để tự nhiên; nửa sau mái nới về sau-trái (mốc rawY125, hệ số chiều sâu1.35, lệchX0.4 theo chiều sâu), giữ nửa trước và đầu cọc trước khớp nhau.
+- Chân gian nấu dịch vào trong sân: CANOPY_ORIGIN raw(50,34) thay(26,14), giữ cỡ60/69/77% và hướng trước-phải. Quầy ở raw(88,238) thay(58,257), rộng/hẹp và dài theo chiều dọc; chừa đất trống với rào. Cột bàn trái dịch nhẹ sang phải: cấp1 X258, cấp2 X239 (bàn phải X319), cấp3 X234/326; Y141/234 và bàn giữa cấp2 Y188 giữ nguyên. Các số này ưu tiên hơn mô tả vị trí ở đợt trước.
+- KitchenLayout đồng bộ tâm bàn/ghế/đầu bếp, vật cản quầy và điểm lấy món(119,250). Món chín hiển thị hai cột × ba hàng trên quầy dọc. Giữ đường vào/cổng, footprint4×3, khung512×504/neo256,456, giá/sức chứa/thời gian/luật đói; tải ván hiện tại thấy hình mới, không đổi save format.
+- Ảnh trước/sau và cảnh đủ khách/thợ ở `build/art-review/2026-10-04/kitchen-spacing/`.
+
+### Khối bếp, đá xếp và chân rào (2026-10-04)
+
+- **Cảm giác chiều sâu không đòi mọi vật xoay45° cùng hướng.** Giữ sân chữ nhật chính diện từ trên, mái nấu chếch trước-phải, chiếu/bàn dọc và khách ngồi hai bên như bố cục đã duyệt. Các vật dùng cùng cách co theo chiều sâu, thấy mặt trên rộng/hông thấp, mép dày/chân và che khuất; không xoay camera hoặc lưới.
+- **Vòng đá bếp là đá có khối xếp tự nhiên:** mặt trên sáng, hông thấp tối; nhiều dáng/cỡ/độ cao, có viên thấp dài hoặc hai viên lớn/nhỏ kê cạnh nhau. Giữ tuyến chữ nhật và cửa vào nhưng không xâu các viên sỏi elip đều nhau. Đá vẫn chỉ là art của công trình, không tạo mỏ đá riêng.
+- **Cọc rào đứng trong khe giữa đá:** cấp1 đá; cấp2 thêm tre mảnh; cấp3 gỗ chắc, giằng và dây buộc. Chân cọc xuống đất, đá kê hai bên dưới hàng rào, không cắm vào giữa mặt đá. Tách màu/mặt trên của tre/gỗ và bóng tiếp xúc để đọc vật liệu/độ cao.
+- **Nội thất:** chiếu có mặt trên thu ngắn, đầu xa hẹp hơn đầu gần, mép đan/tua/góc cuộn; bàn đá/gỗ rõ mặt trên, hông/mép/chân và bóng sát đất; ghế đá có khối, ghế gỗ có mặt ngồi/chân. Giữ tọa độ bàn/ghế/quầy/đầu bếp, số4/6/8 khách và khung512×504/neo256,456/footprint4×3; không đổi đường đi hay luật nấu. Nền vẫn trong suốt và dùng đất chung của map.
+- Ảnh trước/sau và cảnh QA ở `build/art-review/2026-10-04/kitchen-depth/`; sửa chỉ art bếp trong generator và các SVG tương ứng.
+
+### Móng chữ nhật và gian nấu lớn hơn (2026-10-04)
+
+- **Móng mọi cỡ là bốn cọc theo hình chữ nhật chính diện từ trên xuống.** Hai hàng cọc nằm ngang, hai cạnh bên thẳng dọc, dây nối đúng cọc; không dùng hình thoi/tứ giác xiên ngang. Cọc có thân đứng và mặt trên elip. Nền vẫn trong suốt, khung/pivot/footprint không đổi.
+- **Gian nấu bếp dịch phải và lớn hơn khoảng15%**: hệ số phần nấu60/69/77% thay52/60/67% trong bố cục raw2×. Điểm gốc gian nấu(26,14) thay(12,20); giữ mái chếch phải. Nồi/cọc/mái/đồ nghề cùng đổi cỡ và vị trí, đầu bếp/chỗ đứng/cảnh báo trên mái đồng bộ. Giữ sân4×3, kiểu/số chiếu-bàn-quầy và4/6/8 khách. Bàn cấp2–3 dịch nhẹ sang phải, ghế sát bàn hơn để mái lớn không che người; giữ bố cục tam giác/2×2. Hai thợ bổ sung đứng lệch trái theo hàng chéo để không chồng người ăn/quầy.
+- Chuẩn hình mới: `build/art-review/2026-10-04/foundation-kitchen-adjust/`; các tỷ lệ/khung móng xiên ngang trong lịch sử cũ đã bị thay thế.
+
+### Công trình hòa vào địa hình (2026-10-04)
+
+- **Mọi công trình có nền ảnh trong suốt.** Không vẽ mảng đất kín quanh lều, bếp, móng hay sân đất: dù vuông bo góc hay hình hữu cơ, mảng màu riêng vẫn làm công trình giống ảnh dán lên map. Đất trơ/sân dùng chung GroundMask của thế giới, cùng màu/nhiễu/mép chuyển sang cỏ và nối liền sân lân cận. Chỉ giữ bóng tiếp xúc nhẹ sát chân vật.
+- Chiếu, sàn gỗ, đá lát, vòng đá, hàng rào, cọc/dây móng là vật thể thật nên được vẽ trong asset. Bếp vẫn có sân chữ nhật theo rào và cỡ76/89/100%, nhưng đất do map vẽ; móng chỉ có cọc/dây/vật liệu trên đất map. Sân nhảy cấp1 dùng đất chung, cấp2–3 giữ sàn gỗ/đá thật. Không đổi footprint, khung/neo hoặc tương tác đi vào công trình.
+- Ảnh kiểm tra trước/sau tại `build/art-review/2026-10-04/ground-blend/`; đây là chuẩn hiện hành thay mọi hướng dẫn cũ về nền đất kín trong SVG.
+
+### Cập nhật theo ảnh chơi thật — lều/bếp/map (2026-10-04)
+
+Quyết định hiện hành dưới đây thay các kích thước và phân bố cũ trong lịch sử phác.
+
+- **Lều là công trình có cửa hoạt động:** vẫn2D/footprint2×2, không đổi camera. Hình sân/thân/da mép cửa tách lớp theo chiều sâu. Dân đi tới cửa trước-phải, bước lại gần rồi cúi/thu người chui qua mép da mới ẩn trong lều; thức dậy hiện từ trong cửa, bước ra rồi vươn vai. Khi ngủ lều bayZzz. Dừng task trả chỗ, khôi phục cỡ/độ hiện và đưa dân về ô cửa đi được. Không vẽ đất sân trong art; nền trong suốt để đất map nối liền tự nhiên. Không dựng mô hình3D; cảm giác vật thể đến từ khối, che khuất và tương tác.
+- **Bếp tăng thành4 ô ngang ×3 ô sâu (12 ô)**, thay3×2 cũ. Giữ bố cục đã duyệt: sân chính diện, khu nấu trên-trái chếch phải, quầy dưới-trái, chiếu/bàn dọc, người ngồi trái–phải. Giữ4/6/8 khách,1/2/3 đầu bếp, chi phí/tốc độ/kho món cũ. Khung512×504 ở2×, neo(256,456)=(0.5,19/21); sân512×384 từy96→480. Móng foundation_4x3. Cổng, điểm đứng, đường nội thất, cảnh báo, bóng và lớp vẽ cùng đổi cỡ. Sân vẫn76/89/100% theo cấp.
+- **Búa xây:** dùng props/build_hammer với neo tại cán, đầu búa vung ở phía ngoài tay theo animation, không cầm icon kỹ năng tại tâm hình. **Cursor di chuyển là dấu chân** (người dùng đã chọn), giữ cursor các việc khác.
+- **Rừng mỗi loại một cánh/lùm:** cây lá rộng và thông không xen kẽ sát nhau; có khoảng bìa giữa hai loại. **Tre chỉ mọc thành cụm ven hồ**, trong dải tối đa4 ô, chừa dải sát nước cho đường đi/câu cá. Giữ loại gỗ/chặt/mọc lại cũ.
+- **Dâu gom cụm2×2 hoặc3×2 (4/6 bụi)**, mỗi bụi là mỏ30 thức ăn/3 người như trước. Cả cụm mới sinh đầy100%; giữ quả đỏ nhỏ, mọng, riêng lẻ và tán mềm đã duyệt. Chỉ đặt nguyên cụm khi mọi bụi có lối hái, không tạo cụm khuyết vì lọc ô kẹt.
+- **Mỏ đá lớn liền2×2:** một mục tiêu chung gồm nhiều đỉnh/mặt đá gắn nhau,96 đá/2 người, thay sáu tảng16 đá về lượng. Hình100/50/30: còn>50%,30–50%,≤30%; hết mở lại cả bốn ô. Ít mỏ hơn, phần lớn ở chân vách; gần làng vẫn có một mỏ để bắt đầu. Giữ cuốc bắt buộc và cơ chế nhặt sỏi khi chưa có cuốc.
+- **Sỏi thành bãi:** tăng cụm sỏi sát mỏ đá/chân vách, cho các cụm kề nhau, hình hạt/viên rải tới mép hữu cơ không vòng nền riêng và đổi hướng bố cục theo ô. Mỗi cụm vẫn20 đá/2 người, không chặn đường, sinh khác lượng. Đá lở đặt mỏ2×2 phải kiểm tra cả diện tích và không bịt đường.
+- **Ván mới dùng save format9** vì footprint bếp/mỏ và thứ tự sinh map đã đổi. Save format8 trở xuống không tải; không tự xoá file save cũ. Muốn xem phân bố mới phải mở ván mới.
+- Ảnh/scene QA: **build/art-review/2026-10-04/world-feedback/**, trước là ảnh người dùng `user-before.png`; sau `after/`, chi tiết `details/`, bếp đủ khách/thợ `live/`. Các bản thử v6/v7 giữ làm chuẩn kiểu dáng, nhưng kích thước/phân bố và tương tác mới theo mục này.
+
 ### Trạng thái hình đang dùng trong game (chốt 2026-10-04)
 
 Đây là trạng thái hiện hành, ưu tiên hơn các ghi chú thử/phác bên dưới. “Bản thử” trong nhật ký cũ không có nghĩa hình chỉ nằm trong ảnh xem trước.
@@ -407,11 +512,11 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 |---|---|---|
 | Lều ngủ | Cả ba cấp, footprint2×2 | Da thú thuôn nhọn phủ cỏ/rơm, cửa trước-phải; nhỏ/cũ → lớn hơn/lành → lớn nhất/trang trí Lạc Việt. |
 | Nhân vật | Bộ01 và khung ghép đang dùng | Chibi hơi nhìn từ trên; biểu cảm rõ. Các bộ đầu/tóc/thân khác chưa vẽ lại. |
-| Móng | foundation_2x2/3x2/3x3 | Nền đúng footprint, cọc thấp/vật liệu có chiều sâu; dùng khi xây trong game. |
+| Móng | foundation_2x2/3x2/3x3/4x3 | Nền đúng footprint, cọc thấp/vật liệu có chiều sâu; dùng khi xây trong game. |
 | Cây | tree_01, tree_03, tree_stump, bamboo_stump | Cây lá rộng và bụi tre/gốc theo góc xiên3/4 v6; tre là biến thể cây cho gỗ. Giữ cây thông tree_02 cũ. |
 | Bụi quả | bush_100/50/20/empty | Bụi dâu tây v7: tán mềm v5, quả riêng lẻ đỏ tươi, tròn mọng; quả thu65%, số quả18/9/4 rồi trụi. Giữ dáng bụi đã duyệt, không dùng bụi phân tầng v6. |
-| Đá/củi/sỏi | rock_big/small, twigs, pebbles, mỗi loại ba mức | Giữ kiểu dáng đã duyệt, góc xiên3/4 v6 đồng bộ lều. |
-| Bếp | Ba cấp và nội thất có dân nấu/ăn | Mẫu v7, footprint3×2, chiếu/bàn dọc, khu nấu chếch phải;4/6/8 khách. Chi tiết ở mục dưới. |
+| Đá/củi/sỏi | rock_cluster_100/50/30, twigs_100/50/20, pebbles_100/50/20 | Mỏ đá liền2×2 và sỏi mép hữu cơ theo cập nhật chơi thật; củi giữ góc v6. |
+| Bếp | Ba cấp và nội thất có dân nấu/ăn | Bố cục v7 mở rộng4×3, chiếu/bàn dọc, khu nấu chếch phải;4/6/8 khách. Chi tiết ở mục dưới. |
 | Phản hồi trên đầu dân | Đã bỏ icon việc thường trực | Việc hiện trong bảng thông tin/bảng nhóm; giữ cảnh báo nhu cầu, bong bóng và biển theo mục6.2. |
 
 - Hình tài nguyên nằm trong **assets/placeholder/env/** và được ResourceNode/ArtLibrary dùng trực tiếp; không chỉ là mockup trong build. Sinh mới bụi quả/đá tảng đầy100%, chỉ sỏi/củi khác lượng ban đầu. Hái/khai thác đổi hình theo lượng thật; không ghi đè lượng còn lại của save.
@@ -428,7 +533,9 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 - Khung **256×300**, hiển thị ×0.5, neo **(128,276)** = (0.5,0.92), sân/footprint **2×2** ở mọi cấp. Thân/phụ kiện hiện thu quanh cùng chân ở **76% / 89% / 100%**; đây là số art có thể tinh chỉnh, không đổi luật diện tích/chỗ ngủ.
 - Chuẩn nhìn: `build/art-review/2026-10-04/tents-v7/after/footprint.png` (cấp 1→3 trái→phải), `levels.png`, `village_zoom_1.png`. Các bản vẽ lều trước là lịch sử thử, không dùng làm chuẩn mới.
 
-### Phạm vi áp dụng khi vẽ tiếp
+### Lịch sử phác và áp dụng trước lần sửa ảnh chơi thật
+
+Các đoạn dưới lưu quyết định từng lần thử; kích thước bếp3×2, phân bố tre xen rừng và các tảng đá nhỏ đã được mục cập nhật chơi thật phía trên thay thế. Không dùng số cũ khi vẽ tiếp.
 
 - **Bếp đã áp dụng vào game (2026-10-04):** dùng mẫu v7 được người dùng duyệt, cả ba cấp footprint **3×2**, khung **384×336 ở2×**, neo **(192,296)** = **(0.5,37/42)**. Sân76/89/100%, mái nấu chếch phải, bàn/chiếu dọc; cấp1 hai chiếu/4 khách, cấp2 ba bàn đá tam giác/6 khách, cấp3 bốn bàn gỗ/8 khách. Dân đi qua cổng trước-trái, lấy món ở quầy dưới-trái rồi tới ghế trái/phải; đầu bếp vào khu nấu, cầm muôi khuấy. Ghế/vị trí nấu giữ riêng từng người, trả khi task dừng; nâng cấp đổi điểm nội thất mà vẫn tiếp tục lượt đang làm. Mái/cọc/rào/bàn tách lớp theo độ sâu. Bếp đầy ghế thì tìm nguồn ăn khác theo ưu tiên hiện có, chưa có hàng chờ riêng. Chi phí, tốc độ nấu,1/2/3 đầu bếp và kho món6/10/16 giữ nguyên. Móng dùng foundation_3x2; luật đặt giữ cổng thông, AStar ngoài map không đi xuyên rào/bàn. Panel bếp hiển thị số chỗ ăn đã giữ. Save format8 cho footprint mới; format7 cũ không tải, file cũ không bị xoá bởi thay đổi này. Art dùng generator chính/tools/kitchen_art.py, không phụ thuộc thư mục build. Ảnh game/QA: `build/art-review/2026-10-04/kitchen-live-v1/after/`. Những ghi chú phác v1–v7 dưới đây là lịch sử, đã được mục này thay thế về trạng thái triển khai.
 
@@ -464,7 +571,7 @@ Diễn ra **ngay tại điểm neo** (không đi dạo). Chọn ngẫu nhiên, c
 - Môi trường: cây lá rộng, cây lá kim và bụi tre (cùng tài nguyên gỗ), gốc cây/gốc tre, đá tảng (2 cỡ), (vách đá vẽ bằng code — mục 9.1), **đống củi**, **bãi sỏi**, bụi quả to (mỗi mỏ 3 hình theo lượng: 100 / 50 / 20%; bụi quả thêm hình trụi), ô nước, hang đá xuất phát, lửa trại.
 - **Cây cỏ trang trí** (phủ kín map, không chạm được): hoa, khóm cỏ, cỏ cao, dương xỉ, bụi lá (không quả), lau sậy, nấm. Vẽ **màu xanh chìm, viền xanh đậm** (không viền nâu đậm như mỏ tài nguyên, không quả, không đá) để mắt phân biệt ngay đâu là đồ trang trí, đâu là thứ giao việc được. Sân đất, đường mòn và vòng đá quanh sân vẽ bằng code.
 - Đồ cầm tay & đồ khuân: giỏ (rỗng / đầy quả), xô (rỗng / đầy sỏi), cần câu, khúc gỗ, bó củi, tấm biển (mặt để trống). Rìu, cuốc, giáo dùng chung hình với icon kỹ năng.
-- Công trình: lều ngủ, bếp, kho, lò rèn, sân nhảy. Mỗi cái **3 cấp** (hình riêng mỗi cấp); **móng** dùng chung theo diện tích (2×2, 3×2, 3×3) — lúc đang xây, game vẽ hình cấp 1 mờ mờ mọc dần lên trên móng; nâng cấp thì vẫn hình cấp cũ + giàn giáo vẽ bằng code. Hình **hư hại** để Đợt 5. Hình phủ đúng **diện tích** của công trình (mục 9.3).
+- Công trình: lều ngủ, bếp, kho, lò rèn, sân nhảy. Mỗi cái **3 cấp** (hình riêng mỗi cấp); **móng** dùng chung theo diện tích (2×2, 3×2, 3×3, 4×3) — lúc đang xây, game vẽ hình cấp 1 mờ mờ mọc dần lên trên móng; nâng cấp thì vẫn hình cấp cũ + giàn giáo vẽ bằng code. Hình **hư hại** để Đợt 5. Hình phủ đúng **diện tích** của công trình (mục 9.3).
 - Thú: lợn rừng, hươu nhỏ. Kẻ thù: cannibal (mặt nạ xương, sơn chiến), kèm biến thể màu.
 - **Không cần vẽ bóng đổ** cho từng vật: game tự tạo bóng theo mặt trời từ chính hình của vật (mục 6.2). Bóng elip nhỏ dưới chân trong hình tạm vẫn giữ làm "bóng tiếp đất".
 - Icon:
@@ -494,7 +601,7 @@ Chuột theo kiểu **Age of Empires** (trái chọn, phải ra lệnh); cảm �
 | `cancel` | Esc (click phải lúc đang đặt nhà / không chọn ai) | Nút ✕ trên màn hình |
 | Tạm dừng / tốc độ | Space, phím 1–3 | Nút trên HUD |
 
-- **Con trỏ đổi hình:** đang chọn thổ dân mà rê chuột lên mục tiêu thì cạnh con trỏ hiện icon nhún nhún cho biết click phải sẽ làm gì: bụi quả / chỗ câu cá → đồ ăn, cây → rìu, đá → cuốc, thú → giáo, đống củi → bó củi, bãi sỏi → xô, móng → búa, bếp → nồi, lò rèn → búa rèn, lều → Zzz, sân nhảy → mặt cười, mặt đất → lá cờ, chỗ không đi được → ✕.
+- **Con trỏ đổi hình:** đang chọn thổ dân mà rê chuột lên mục tiêu thì cạnh con trỏ hiện icon nhún nhún cho biết click phải sẽ làm gì: bụi quả / chỗ câu cá → đồ ăn, cây → rìu, đá → cuốc, thú → giáo, đống củi → bó củi, bãi sỏi → xô, móng → búa, bếp → nồi, lò rèn → búa rèn, lều → Zzz, sân nhảy → mặt cười, mặt đất → dấu chân, chỗ không đi được → ✕.
 - **Ra lệnh cho cả nhóm:** click phải vào cây / đá / bụi… → mỗi người nhận một cái tương tự gần đó (không xúm vào một cây); vào công trình → cùng vào (thừa người thì người thừa cắm biển); vào mặt đất → cả nhóm đi tới, **mỗi người một ô** quanh điểm đó. Bảng nhóm (góc dưới-trái) liệt kê người đang chọn, bấm tên để xem riêng.
 - Giao thổ dân cho một công trình: click phải / chạm / kéo vào **móng** → đi xây; vào **công trình sản xuất** đã xong → làm người phụ trách (đầu bếp, thợ rèn…); vào **sân nhảy** → đi chơi; vào **lều** → đi ngủ. Vào **mặt đất trống** → đi tới đó và đứng chờ ở đó.
 - Chạm vào một **vật thể** (khi không chọn thổ dân): cây, gốc cây, đá tảng, bụi quả, đống củi, bãi sỏi, chỗ câu cá, con thú → **bảng thông tin**: hình, tên, mô tả ngắn, mỗi lượt làm ra gì (bao nhiêu, mấy giây), **thanh lượng còn lại** "còn X/Y" (xanh / vàng / đỏ theo lượng; chỗ câu cá: không cạn), cây non còn bao lâu mới chặt được, cần đồ nghề gì (làng đang có mấy cái / chưa có thì xây Lò rèn) hay làm bằng tay, đang mọc lại (bụi hết quả: còn bao lâu; gốc cây), ai đang làm ở đó, và gợi ý "chọn thổ dân rồi chạm vào đây để giao việc …". Vật đang xem có vòng vàng dưới chân. Chạm lại lần nữa / ✕ / chạm chỗ trống thì đóng.
@@ -519,8 +626,8 @@ Chuột theo kiểu **Age of Empires** (trái chọn, phải ra lệnh); cảm �
   - Hang đá xuất phát và lửa trại ở giữa. **Quanh làng có sẵn một cụm nhỏ mỗi loại**: một lùm cây, một bãi đá tảng nhỏ, một vạt bụi quả — đủ để bắt đầu; cụm lớn, giàu hơn nằm xa.
   - **Tài nguyên dồn thành cụm** (không rải đều): rừng thành **từng cánh rừng** đặc ở lõi, thưa ở bìa, có khoảng trống và lối đi — phần lớn dồn về một phía, vài cánh lẻ chỗ khác.
   - Phía đối diện là các **dãy vách đá**: địa hình dài 8–16 ô, dày 1–2 ô, **chạy ngang là chính** (chân vách trôi lên / xuống dần), **không đi qua được, không khai thác được**. Mỗi dãy **vẽ thành một bức vách liền** (không ghép từng khối): mặt trên lởm chởm có rêu, mặt đứng cao quay về phía người nhìn có vân nứt dọc, đá vụn dưới chân, có bóng đổ theo mặt trời; ai đi phía sau vách thì bị vách che. Dưới chân mỗi dãy có **một bãi đá tảng liền** chạy dọc một đoạn vách, **chỉ ở phía trước (chân vách)**, không có ở phía sau: hàng sát chân dày và nhiều đá to, ra xa thưa dần và đá nhỏ, hai đầu bãi thưa dần; không lấn sát dãy khác (giữ lối đi). Vách đá thỉnh thoảng **lở**: lăn ra một tảng đá (khi đá tảng ít hơn lúc đầu) hoặc một ít sỏi (dồn vào bãi sỏi gần đó, chưa có thì thành bãi mới) ở chân vách phía trước. Các dãy cách nhau đủ xa nên luôn có lối đi. Thêm vài bãi đá tảng lẻ gom chặt (đá to giữa, đá nhỏ rìa).
-  - Bụi quả là **bụi to** sum suê, mọc thành **vạt** 2–3 bụi sát nhau (một vạt gần làng, một vạt ở đồng cỏ, còn lại rải quanh map).
-  - Cánh rừng **méo tự nhiên** (ghép vài khối, bìa gợn), loại cây mọc theo **mảng** (mảng thông, mảng cây lá tròn), vài cây lẻ lấn ra ngoài bìa; thêm khoảng 14 **lùm 1–3 cây lẻ** trên bãi cỏ. Cây và đá tảng lệch nhẹ khỏi tâm ô cho đỡ thẳng hàng như lưới.
+  - Bụi quả là **bụi to** sum suê, mọc thành **cụm chữ nhật2×2 hoặc3×2**,4/6 bụi sát nhau (một vạt gần làng, một vạt ở đồng cỏ, còn lại rải quanh map).
+  - Cánh rừng **méo tự nhiên** (ghép vài khối, bìa gợn), mỗi cánh/lùm một loại (thông hoặc cây lá rộng), tre chỉ thành cụm ven hồ, vài cây lẻ lấn ra ngoài bìa; thêm khoảng 14 **lùm 1–3 cây lẻ** trên bãi cỏ. Cây và đá tảng lệch nhẹ khỏi tâm ô cho đỡ thẳng hàng như lưới.
   - **Đống củi** nằm dưới tán rừng rậm, **bãi sỏi** nằm cạnh các bãi đá tảng (chân vách nhiều nhất); lùm cây và bãi đá gần làng có sẵn vài đống / bãi để ván mới tay trắng vẫn có đồ nhặt gần nhà. Mỗi đống / bãi là một mỏ (mục 9.2), đi qua được.
   - Lúc sinh mới, **bụi quả luôn đầy 100%** (đủ sức chứa, dùng hình đầy quả), gồm cả lúc tạo map. **Chỉ bãi sỏi và đống củi** được có lượng khởi đầu khác nhau (50–100%); các mỏ khác không dùng lượng khởi đầu ngẫu nhiên để tạo hình thưa/đầy. Sau khai thác, lượng và hình vẫn giảm như bình thường; bụi quả trụi mọc lại thì đầy 100%. Khoảng 1/8 số cây là **cây non** (nhiều ở bìa rừng).
   - Một hồ lớn có nhiều chỗ câu cá.
@@ -542,7 +649,7 @@ Chuột theo kiểu **Age of Empires** (trái chọn, phải ra lệnh); cảm �
 | **Đá** | Xô sỏi = 1 đá mỗi viên | Nhặt tay ở **bãi sỏi** bỏ vào xô. Vách đá lở thêm sỏi ở chân vách (có giới hạn số bãi) | Không |
 | | Đá | Đập **đá tảng** (to hay nhỏ đều vậy). Đá tảng lăn ra dần từ **vách đá lớn** (phần của map, không khai thác được), chỉ khi số đá tảng ít hơn lúc đầu | **Cuốc** |
 
-- **Mỗi chỗ tài nguyên là một mỏ** có lượng còn lại ("thanh máu" — chỉ hiện trong bảng thông tin khi click vào, map không vẽ thanh nào cho đỡ rối) và **nhiều người làm chung**: bụi quả to 30 thức ăn (3 người), bãi sỏi 20 đá (2 người), đống củi 15 gỗ (2 người), đá tảng 16 đá (2 người), cây 3 khúc gỗ (1 người). Hình **nhỏ dần** theo lượng còn lại: > 50% / 20–50% / < 20%. Hết thì: sỏi, củi, đá tảng biến mất; bụi quả thành bụi trụi; cây thành gốc.
+- **Mỗi chỗ tài nguyên là một mỏ** có lượng còn lại ("thanh máu" — chỉ hiện trong bảng thông tin khi click vào, map không vẽ thanh nào cho đỡ rối) và **nhiều người làm chung**: bụi quả to 30 thức ăn (3 người), bãi sỏi 20 đá (2 người), đống củi 15 gỗ (2 người), mỏ đá lớn2×2 chứa96 đá (2 người), cây 3 khúc gỗ (1 người). Hình **nhỏ dần** theo lượng còn lại: mỏ đá lớn dùng100/50/30 (>50% /30–50% /≤30%); bụi/sỏi/củi vẫn100/50/20 (>50% /20–50% /<20%). Hết thì: sỏi, củi, đá tảng biến mất; bụi quả thành bụi trụi; cây thành gốc.
 - Thức ăn thô **ăn được luôn** (no căng) — không ai chết đói cạnh kho đầy chỉ vì chưa có đầu bếp. Kho nhớ có bao nhiêu phần là quả/cá/thịt; lấy ra ăn thì cầm đúng món trên tay.
 - **Đồ riêng của công trình** (không nằm trên thanh tài nguyên chung):
   - **Món chín** của **Bếp**: đầu bếp lấy thức ăn thô trong kho nấu thành món chín, cất ngay ở bếp, tối đa theo cấp bếp (bày quanh bếp cho thấy còn bao nhiêu). Dân đói đến chỗ có món chín trước (vui hơn), hết thì ăn thức ăn thô ở Bếp / hang đá. Trước khi có Bếp, lửa trại là "bếp tạm" (chứa tối đa 4 món chín, nấu chậm, một người nấu).
@@ -551,6 +658,8 @@ Chuột theo kiểu **Age of Empires** (trái chọn, phải ra lệnh); cảm �
 - **Kho chung có sức chứa** (cộng dồn mọi chỗ cất, khuân về chỗ gần nhất): hang đá chứa ít (30 gỗ, 30 đá, 15 thức ăn — đủ cho người mới khỏi bị kẹt), mỗi Kho cộng thêm gỗ/đá, mỗi Bếp cộng thêm thức ăn theo cấp. Thanh tài nguyên hiện "đang có /sức chứa", đầy thì chữ đỏ (tooltip nhắc xây Kho/Bếp). Kho đầy thì thổ dân khuân về được phần nào hay phần đó, rồi cắm biển vẽ cái kho gạch chéo và thôi việc. Xây/rèn lấy vật liệu ra thì lại có chỗ.
 
 ### 9.3 Công trình MVP
+
+Hướng hình ảnh, bộ phận dùng chung, bố trí dân tương tác và quy trình chỉnh scene nằm trong **[BUILDING_DESIGN.md](BUILDING_DESIGN.md)**; phải đọc khi thiết kế/sửa công trình. Các luật và thông số gameplay dưới đây vẫn là nguồn thiết kế chung.
 
 **Quy tắc chung:**
 1. Mỗi công trình chiếm **diện tích riêng** trên lưới (2×2, 3×3, 3×4…), không đè lên nhau, không đè lên cây/đá/nước.
@@ -567,7 +676,7 @@ Chuột theo kiểu **Age of Empires** (trái chọn, phải ra lệnh); cảm �
 | Hang đá (có sẵn) | 3×2 | — | Kho tạm ban đầu: 30 gỗ, 30 đá, 15 thức ăn thô |
 | Lửa trại (có sẵn) | 1×1 | — | Bếp tạm ban đầu: nấu chậm (1 người), chỉ chứa 4 món chín, chỗ tụ tập buổi tối |
 | Lều ngủ | 2×2 | 20 gỗ → 40 gỗ 15 đá → 60 gỗ 40 đá | Chỗ ngủ 2 / 3 / 4. Hồi thể lực ×1.5 / ×2 / ×2.5 so với ngủ đất. Cần lều còn chỗ thì cặp đôi mới có em bé (giới hạn dân số cố định 50) |
-| Bếp | **3×2** | 25 gỗ 10 đá → 40 gỗ 25 đá → 60 gỗ 50 đá | Đầu bếp 1 / 2 / 3. Chỗ ăn2 / 3 / 4, mỗi chỗ2 người ngồi trái–phải →4 / 6 / 8 người ăn đồng thời. Cất thêm30 / 60 / 120 thức ăn thô; món chín cất tại bếp6 / 10 / 16, độc lập số ghế. Bố cục/nội thất đã áp dụng theo mục7; có đặt ghế và đường đi trong sân. |
+| Bếp | **4×3** | 25 gỗ 10 đá → 40 gỗ 25 đá → 60 gỗ 50 đá | Đầu bếp 1 / 2 / 3. Chỗ ăn2 / 3 / 4, mỗi chỗ2 người ngồi trái–phải →4 / 6 / 8 người ăn đồng thời. Cất thêm30 / 60 / 120 thức ăn thô; món chín cất tại bếp6 / 10 / 16, độc lập số ghế. Bố cục/nội thất đã áp dụng theo mục7; có đặt ghế và đường đi trong sân. |
 | Kho | 3×3 | 30 gỗ 10 đá → 60 gỗ 30 đá → 120 gỗ 60 đá | Cất thêm 100 / 200 / 400 gỗ và đá |
 | Lò rèn | 3×2 | 15 gỗ 10 đá → 40 gỗ 30 đá → 70 gỗ 60 đá | Thợ rèn 1 / 2 / 3. Rèn rìu, cuốc, giáo theo số lượng người chơi đặt (mục 9.4), cất tại lò: mỗi món 2 / 4 / 6 |
 | Sân nhảy | 3×3 | 20 gỗ 10 đá → 40 gỗ 25 đá → 60 gỗ 45 đá | Đi lên được (không chặn đường). Chơi cùng lúc 4 / 6 / 8 người. Đợt 4: nhảy disco, hồi giải trí nhanh |
@@ -754,7 +863,7 @@ Mỗi đợt kết thúc bằng một bản **chơi được**, và có tiêu ch
 | Cấp kỹ năng | 1–5; mỗi cấp nhanh hơn ~10%; kinh nghiệm cần tăng dần; việc thích nhận kinh nghiệm ×2 (việc khác ×1) |
 | Chặt cây (cần rìu) | 10 giây → 1 khúc gỗ = 10 gỗ; mỗi cây 3 khúc |
 | Nhặt củi (tay) | 1.5 giây mỗi bó (1 gỗ), đủ 3 bó mới khuân về. Đống củi 15 gỗ, 2 người; mở ván 20 đống (2 đống gần làng); cây trưởng thành rụng 3 gỗ ~10 giây một lần, tối đa 30 đống |
-| Đập đá tảng (cần cuốc) | 8 giây → 4 đá; mỗi tảng 16 đá, 2 người cùng đập |
+| Đập đá tảng (cần cuốc) | 8 giây → 4 đá; mỗi mỏ lớn96 đá, 2 người cùng đập |
 | Chưa có cuốc | Giao đập đá tảng → nhặt sỏi ở bãi sỏi trong 3 ô quanh tảng đá (`TOOL_FALLBACK_RADIUS_CELLS`) |
 | Nhặt sỏi (tay) | 1.5 giây mỗi viên (1 đá), đủ 3 viên mới khuân về. Bãi sỏi 20 đá, 2 người; mở ván 22 bãi (2 bãi gần làng); tối đa 30 bãi |
 | Vách đá lở / cây mọc lại | Vách đá lở ~45 giây một lần: 40% ra một tảng đá (khi đá tảng ít hơn lúc đầu), còn lại 8 sỏi. Gốc mọc lại thành cây non ~45 giây thử một lần (khi cây ít hơn lúc đầu); cây non lớn hẳn sau 2 ngày |

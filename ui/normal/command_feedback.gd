@@ -20,6 +20,10 @@ const OUTLINE_COLOR: Color = Color("#4E342E")
 const BOX_FILL: Color = Color(1.0, 0.97, 0.75, 0.18)
 const BOX_LINE: Color = Color("#FFF8E1")
 const DRAG_LIFT: Vector2 = Vector2(0, -30)
+const BUILDING_CORNER_COLOR: Color = Color("#FFF1B0")
+const BUILDING_CORNER_LENGTH: float = 18.0
+const BUILDING_CORNER_WIDTH: float = 2.5
+const BUILDING_CORNER_INSET: float = 6.0
 const RING_KEY: String = "ui/target_ring"
 const MARKER_KEY: String = "ui/move_marker"
 const RING_PULSE_SPEED: float = 5.0
@@ -172,6 +176,9 @@ func _draw_dots(points: PackedVector2Array, color: Color) -> void:
 func _draw_ring(target: Node2D) -> void:
 	if not target.visible:
 		return
+	if target is Building:
+		_draw_building_corners(target as Building)
+		return
 	var factor: float = RING_SCALE_DEFAULT
 	if target is ResourceNode:
 		var kind: StringName = (target as ResourceNode).kind
@@ -179,8 +186,15 @@ func _draw_ring(target: Node2D) -> void:
 			factor = RING_SCALE_TREE
 		elif kind == MapData.KIND_FISH_SPOT:
 			factor = RING_SCALE_FISH
-	elif target is Building:
-		factor = float(BuildingDefs.footprint((target as Building).building_id).x)
 	factor *= 1.0 + RING_PULSE * sin(_time * RING_PULSE_SPEED)
 	var size: Vector2 = _ring_texture.get_size() * ArtLibrary.ART_SCALE * factor
 	draw_texture_rect(_ring_texture, Rect2(target.position - size * 0.5, size), false)
+
+
+func _draw_building_corners(building: Building) -> void:
+	# Theo diện tích trên đất, không theo tâm sprite ở mép trước công trình.
+	var area: Rect2 = Rect2(to_local(Vector2(building.origin_cell) * Balance.TILE_SIZE), Vector2(BuildingDefs.footprint(building.building_id)) * Balance.TILE_SIZE).grow(-BUILDING_CORNER_INSET)
+	for side: Vector2 in [Vector2.ZERO, Vector2(1, 0), Vector2.ONE, Vector2(0, 1)]:
+		var corner: Vector2 = area.position + area.size * side
+		var direction: Vector2 = Vector2.ONE - side * 2.0
+		draw_polyline(PackedVector2Array([corner + Vector2(direction.x * BUILDING_CORNER_LENGTH, 0), corner, corner + Vector2(0, direction.y * BUILDING_CORNER_LENGTH)]), BUILDING_CORNER_COLOR, BUILDING_CORNER_WIDTH, true)

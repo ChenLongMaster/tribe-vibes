@@ -78,9 +78,11 @@ func test_prehistoric_look() -> void:
 			origin = candidate
 			break
 	check(origin != World.INVALID_CELL, "Có chỗ đặt lều trên bãi cỏ")
+	var outside: Vector2i = origin + Vector2i(-1, 0)
+	var outside_was_hidden: bool = world.is_decor_hidden(outside)
 	var tent: Building = world.placer.place(BuildingDefs.TENT, origin)
 	check(world.is_decor_hidden(origin), "Cây cỏ trong sân bị giấu")
-	check(world.is_decor_hidden(origin + Vector2i(-1, 0)), "Sân rộng hơn chân lều một vòng")
+	check(world.is_decor_hidden(outside) == outside_was_hidden, "Sân gọn không giấu thêm cây cỏ ngoài footprint")
 
 	# Giẫm qua lại một ô thì mòn dần; lưu / tải giữ nguyên đường mòn.
 	var path_cell: Vector2i = origin + Vector2i(4, 4)

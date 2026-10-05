@@ -87,6 +87,12 @@ shadow_color = Color(0.243, 0.153, 0.137, 0.25)
 shadow_size = 4
 shadow_offset = Vector2(0, 3)
 
+[sub_resource type="FontVariation" id="FontVariation_title"]
+base_font = ExtResource("1_font")
+variation_opentype = {
+2003265652: 900
+}
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tooltip"]
 content_margin_left = 10.0
 content_margin_top = 5.0
@@ -105,12 +111,6 @@ corner_radius_bottom_left = 10
 shadow_color = Color(0.243, 0.153, 0.137, 0.25)
 shadow_size = 3
 shadow_offset = Vector2(0, 2)
-
-[sub_resource type="FontVariation" id="FontVariation_title"]
-base_font = ExtResource("1_font")
-variation_opentype = {
-2003265652: 900
-}
 
 [sub_resource type="FontVariation" id="FontVariation_body"]
 base_font = ExtResource("1_font")
@@ -135,13 +135,13 @@ Label/colors/font_color = Color(0.306, 0.204, 0.18, 1)
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_panel")
 SmallLabel/base_type = &"Label"
 SmallLabel/font_sizes/font_size = 16
-TooltipLabel/colors/font_color = Color(0.306, 0.204, 0.18, 1)
-TooltipLabel/colors/font_shadow_color = Color(0, 0, 0, 0)
-TooltipLabel/font_sizes/font_size = 16
-TooltipPanel/styles/panel = SubResource("StyleBoxFlat_tooltip")
 TitleLabel/base_type = &"Label"
 TitleLabel/colors/font_color = Color(1, 0.718, 0.302, 1)
 TitleLabel/colors/font_outline_color = Color(0.306, 0.204, 0.18, 1)
 TitleLabel/constants/outline_size = 10
 TitleLabel/font_sizes/font_size = 40
 TitleLabel/fonts/font = SubResource("FontVariation_title")
+TooltipLabel/colors/font_color = Color(0.306, 0.204, 0.18, 1)
+TooltipLabel/colors/font_shadow_color = Color(0, 0, 0, 0)
+TooltipLabel/font_sizes/font_size = 16
+TooltipPanel/styles/panel = SubResource("StyleBoxFlat_tooltip")

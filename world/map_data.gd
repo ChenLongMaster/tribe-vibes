@@ -104,7 +104,7 @@ func blocked_cells() -> Array[Vector2i]:
 	for object: Dictionary in objects:
 		# Bãi sỏi, đống củi nằm trên đất — đi qua được.
 		if not LOOSE_KINDS.has(object["kind"]):
-			cells.append(object["cell"])
+			cells.append_array(resource_cells(object["kind"], object["cell"], int(object.get("variant", 0))))
 	for building: Dictionary in buildings:
 		cells.append_array(BuildingDefs.footprint_cells(building["id"], building["cell"]))
 	cells.append_array(cliffs)
@@ -125,3 +125,11 @@ func fingerprint() -> String:
 		size, water, ground_variant, objects, buildings, decor, patches,
 		cave_cell, campfire_cell, forest_side, lake_side, raid_side, meadow_rect, cliffs, trails,
 	])
+
+
+## Mỏ đá lớn là một mục tiêu, chặn cả2×2; loại cũ giữ một ô để các scene nhỏ còn dùng.
+static func resource_cells(kind: StringName, origin: Vector2i, variant: int = 0) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = [origin]
+	if kind == KIND_ROCK and variant == 2:
+		cells.append_array([origin + Vector2i.RIGHT, origin + Vector2i.DOWN, origin + Vector2i.ONE])
+	return cells

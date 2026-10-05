@@ -1,0 +1,517 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://buildings/kitchen_layouts/layout_scene.gd" id="1_c1xor"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_03.tscn" id="2_qklcc"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_08.tscn" id="3_n7klj"]
+[ext_resource type="Script" path="res://buildings/kitchen_layouts/art_piece.gd" id="3_syiy1"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_01.tscn" id="4_36wty"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/cook_1.svg" id="5_4r1m5"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_02.tscn" id="5_faiwm"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/roof_1.svg" id="6_oggyd"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_07.tscn" id="6_syih6"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_05.tscn" id="7_irls7"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/steam_1.svg" id="7_qklcc"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/pole_1.svg" id="8_n7klj"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_06.tscn" id="8_xy37i"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_04.tscn" id="9_3dvdq"]
+[ext_resource type="Script" path="res://buildings/kitchen_layouts/person_hint.gd" id="9_36wty"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/serving_1.svg" id="10_faiwm"]
+[ext_resource type="Script" path="res://buildings/kitchen_layouts/avoid_area.gd" id="11_syih6"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/roast_base_1.svg" id="12_irls7"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/roast_fire_1.svg" id="13_xy37i"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/roast_chicken_1.svg" id="14_3dvdq"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/seating_1_0.svg" id="15_ujfhk"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/dining_1_0.svg" id="16_iwcdn"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/seating_1_1.svg" id="17_y53to"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/buildings/kitchen/dining_1_1.svg" id="18_rrtmi"]
+
+[node name="KitchenLayout" type="Node2D" unique_id=515134752]
+y_sort_enabled = true
+script = ExtResource("1_c1xor")
+
+[node name="FenceBack" type="Node2D" parent="." unique_id=641787709]
+y_sort_enabled = true
+position = Vector2(0, -142.14)
+
+[node name="Stone03_001" type="Node2D" parent="FenceBack" unique_id=299923693 instance=ExtResource("2_qklcc")]
+position = Vector2(-83.28047, -0.62086487)
+scale = Vector2(0.30664256, 0.30664256)
+metadata/_edit_group_ = true
+
+[node name="Stone08_002" type="Node2D" parent="FenceBack" unique_id=339870892 instance=ExtResource("3_n7klj")]
+position = Vector2(-70.46809, -1.6272583)
+scale = Vector2(0.45707098, 0.45707098)
+metadata/_edit_group_ = true
+
+[node name="Stone08_003" type="Node2D" parent="FenceBack" unique_id=1969484288 instance=ExtResource("3_n7klj")]
+position = Vector2(-57.65571, -1.6612854)
+scale = Vector2(0.45707098, 0.45707098)
+metadata/_edit_group_ = true
+
+[node name="Stone01_004" type="Node2D" parent="FenceBack" unique_id=178424584 instance=ExtResource("4_36wty")]
+position = Vector2(-44.843327, -1.4860992)
+scale = Vector2(0.33184606, 0.33184606)
+metadata/_edit_group_ = true
+
+[node name="Stone01_005" type="Node2D" parent="FenceBack" unique_id=312728788 instance=ExtResource("4_36wty")]
+position = Vector2(-32.030945, -1.2879944)
+scale = Vector2(0.33184606, 0.33184606)
+metadata/_edit_group_ = true
+
+[node name="Stone02_006" type="Node2D" parent="FenceBack" unique_id=1537393742 instance=ExtResource("5_faiwm")]
+position = Vector2(-19.218567, -1.5320282)
+scale = Vector2(0.38452002, 0.38452002)
+metadata/_edit_group_ = true
+
+[node name="Stone07_007" type="Node2D" parent="FenceBack" unique_id=1751750217 instance=ExtResource("6_syih6")]
+position = Vector2(-6.4061813, -1.4674835)
+scale = Vector2(0.32299682, 0.32299682)
+metadata/_edit_group_ = true
+
+[node name="Stone01_008" type="Node2D" parent="FenceBack" unique_id=925201414 instance=ExtResource("4_36wty")]
+position = Vector2(6.4061966, -0.96543884)
+scale = Vector2(0.33184606, 0.33184606)
+metadata/_edit_group_ = true
+
+[node name="Stone05_009" type="Node2D" parent="FenceBack" unique_id=932534255 instance=ExtResource("7_irls7")]
+position = Vector2(19.218582, -0.649765)
+scale = Vector2(0.34119383, 0.34119383)
+metadata/_edit_group_ = true
+
+[node name="Stone02_010" type="Node2D" parent="FenceBack" unique_id=733943342 instance=ExtResource("5_faiwm")]
+position = Vector2(32.03096, -1.5441284)
+scale = Vector2(0.38452002, 0.38452002)
+metadata/_edit_group_ = true
+
+[node name="Stone06_011" type="Node2D" parent="FenceBack" unique_id=797436626 instance=ExtResource("8_xy37i")]
+position = Vector2(44.843338, -1.5358276)
+scale = Vector2(0.4105892, 0.4105892)
+metadata/_edit_group_ = true
+
+[node name="Stone06_012" type="Node2D" parent="FenceBack" unique_id=66448563 instance=ExtResource("8_xy37i")]
+position = Vector2(57.655716, -1.6411133)
+scale = Vector2(0.4105892, 0.4105892)
+metadata/_edit_group_ = true
+
+[node name="Stone06_013" type="Node2D" parent="FenceBack" unique_id=1468098860 instance=ExtResource("8_xy37i")]
+position = Vector2(70.46811, -1.7138977)
+scale = Vector2(0.4105892, 0.4105892)
+metadata/_edit_group_ = true
+
+[node name="Stone01_014" type="Node2D" parent="FenceBack" unique_id=737507545 instance=ExtResource("4_36wty")]
+position = Vector2(83.28049, -0.67477417)
+scale = Vector2(0.33184606, 0.33184606)
+metadata/_edit_group_ = true
+
+[node name="Stone01_015" type="Node2D" parent="FenceBack" unique_id=1341862596 instance=ExtResource("4_36wty")]
+position = Vector2(-89.902725, 6.0811157)
+scale = Vector2(0.34910202, 0.34910202)
+metadata/_edit_group_ = true
+
+[node name="Stone04_016" type="Node2D" parent="FenceBack" unique_id=567120011 instance=ExtResource("9_3dvdq")]
+position = Vector2(-89.91064, 19.523338)
+scale = Vector2(0.46335357, 0.46335357)
+metadata/_edit_group_ = true
+
+[node name="Stone06_017" type="Node2D" parent="FenceBack" unique_id=1995379365 instance=ExtResource("8_xy37i")]
+position = Vector2(-90.26654, 32.96556)
+scale = Vector2(0.43193978, 0.43193978)
+metadata/_edit_group_ = true
+
+[node name="Stone03_018" type="Node2D" parent="FenceBack" unique_id=630212169 instance=ExtResource("2_qklcc")]
+position = Vector2(-89.792946, 46.407784)
+scale = Vector2(0.32258794, 0.32258794)
+metadata/_edit_group_ = true
+
+[node name="Stone03_019" type="Node2D" parent="FenceBack" unique_id=1615144274 instance=ExtResource("2_qklcc")]
+position = Vector2(-89.86098, 59.850006)
+scale = Vector2(0.32258794, 0.32258794)
+metadata/_edit_group_ = true
+
+[node name="Stone08_020" type="Node2D" parent="FenceBack" unique_id=1826823537 instance=ExtResource("3_n7klj")]
+position = Vector2(-90.362976, 73.29223)
+scale = Vector2(0.48083863, 0.48083863)
+metadata/_edit_group_ = true
+
+[node name="Stone06_021" type="Node2D" parent="FenceBack" unique_id=417425801 instance=ExtResource("8_xy37i")]
+position = Vector2(-90.39307, 86.73445)
+scale = Vector2(0.43193978, 0.43193978)
+metadata/_edit_group_ = true
+
+[node name="Stone05_022" type="Node2D" parent="FenceBack" unique_id=1067513571 instance=ExtResource("7_irls7")]
+position = Vector2(-90.57977, 100.176674)
+scale = Vector2(0.35893586, 0.35893586)
+metadata/_edit_group_ = true
+
+[node name="Stone03_023" type="Node2D" parent="FenceBack" unique_id=851864457 instance=ExtResource("2_qklcc")]
+position = Vector2(-89.9811, 113.6189)
+scale = Vector2(0.32258794, 0.32258794)
+metadata/_edit_group_ = true
+
+[node name="Stone08_024" type="Node2D" parent="FenceBack" unique_id=1916858861 instance=ExtResource("3_n7klj")]
+position = Vector2(90.3603, 6.0811157)
+scale = Vector2(0.48083863, 0.48083863)
+metadata/_edit_group_ = true
+
+[node name="Stone03_025" type="Node2D" parent="FenceBack" unique_id=229120998 instance=ExtResource("2_qklcc")]
+position = Vector2(90.18304, 19.523338)
+scale = Vector2(0.32258794, 0.32258794)
+metadata/_edit_group_ = true
+
+[node name="Stone07_026" type="Node2D" parent="FenceBack" unique_id=1107144352 instance=ExtResource("6_syih6")]
+position = Vector2(89.800705, 32.96556)
+scale = Vector2(0.33979264, 0.33979264)
+metadata/_edit_group_ = true
+
+[node name="Stone05_027" type="Node2D" parent="FenceBack" unique_id=398906304 instance=ExtResource("7_irls7")]
+position = Vector2(90.200584, 46.407784)
+scale = Vector2(0.35893586, 0.35893586)
+metadata/_edit_group_ = true
+
+[node name="Stone06_028" type="Node2D" parent="FenceBack" unique_id=35401693 instance=ExtResource("8_xy37i")]
+position = Vector2(90.41271, 59.850006)
+scale = Vector2(0.43193978, 0.43193978)
+metadata/_edit_group_ = true
+
+[node name="Stone01_029" type="Node2D" parent="FenceBack" unique_id=885156706 instance=ExtResource("4_36wty")]
+position = Vector2(90.224304, 73.29223)
+scale = Vector2(0.34910202, 0.34910202)
+metadata/_edit_group_ = true
+
+[node name="Stone07_030" type="Node2D" parent="FenceBack" unique_id=34367426 instance=ExtResource("6_syih6")]
+position = Vector2(90.18328, 86.73445)
+scale = Vector2(0.33979264, 0.33979264)
+metadata/_edit_group_ = true
+
+[node name="Stone08_031" type="Node2D" parent="FenceBack" unique_id=1060421774 instance=ExtResource("3_n7klj")]
+position = Vector2(90.49432, 100.176674)
+scale = Vector2(0.48083863, 0.48083863)
+metadata/_edit_group_ = true
+
+[node name="Stone03_032" type="Node2D" parent="FenceBack" unique_id=1204373786 instance=ExtResource("2_qklcc")]
+position = Vector2(90.32499, 113.6189)
+scale = Vector2(0.32258794, 0.32258794)
+metadata/_edit_group_ = true
+
+[node name="FenceFront" type="Node2D" parent="." unique_id=1955963944]
+y_sort_enabled = true
+position = Vector2(0, -17.880005)
+
+[node name="Stone08_033" type="Node2D" parent="FenceFront" unique_id=105857461 instance=ExtResource("3_n7klj")]
+position = Vector2(-82.5911, -3.8932838)
+scale = Vector2(0.50909853, 0.50909853)
+metadata/_edit_group_ = true
+
+[node name="Stone04_034" type="Node2D" parent="FenceFront" unique_id=108893315 instance=ExtResource("9_3dvdq")]
+position = Vector2(-68.399994, -3.7640285)
+scale = Vector2(0.49058586, 0.49058586)
+metadata/_edit_group_ = true
+
+[node name="Stone06_035" type="Node2D" parent="FenceFront" unique_id=1410275666 instance=ExtResource("8_xy37i")]
+position = Vector2(-54.20888, -2.9819794)
+scale = Vector2(0.45732582, 0.45732582)
+metadata/_edit_group_ = true
+
+[node name="Stone04_036" type="Node2D" parent="FenceFront" unique_id=744115352 instance=ExtResource("9_3dvdq")]
+position = Vector2(-0.65714216, -3.6405811)
+scale = Vector2(0.47996542, 0.47996542)
+metadata/_edit_group_ = true
+
+[node name="Stone08_037" type="Node2D" parent="FenceFront" unique_id=1954437179 instance=ExtResource("3_n7klj")]
+position = Vector2(13.241907, -3.479332)
+scale = Vector2(0.49807733, 0.49807733)
+metadata/_edit_group_ = true
+
+[node name="Stone01_038" type="Node2D" parent="FenceFront" unique_id=709212667 instance=ExtResource("4_36wty")]
+position = Vector2(27.140957, -3.7136974)
+scale = Vector2(0.36161777, 0.36161777)
+metadata/_edit_group_ = true
+
+[node name="Stone07_039" type="Node2D" parent="FenceFront" unique_id=98810733 instance=ExtResource("6_syih6")]
+position = Vector2(41.040005, -3.2505798)
+scale = Vector2(0.35197464, 0.35197464)
+metadata/_edit_group_ = true
+
+[node name="Stone07_040" type="Node2D" parent="FenceFront" unique_id=618303008 instance=ExtResource("6_syih6")]
+position = Vector2(54.939053, -3.4112186)
+scale = Vector2(0.35197464, 0.35197464)
+metadata/_edit_group_ = true
+
+[node name="Stone06_041" type="Node2D" parent="FenceFront" unique_id=1335636317 instance=ExtResource("8_xy37i")]
+position = Vector2(68.838104, -3.1000595)
+scale = Vector2(0.4474254, 0.4474254)
+metadata/_edit_group_ = true
+
+[node name="Stone07_042" type="Node2D" parent="FenceFront" unique_id=538952811 instance=ExtResource("6_syih6")]
+position = Vector2(82.73715, -3.225624)
+scale = Vector2(0.35197464, 0.35197464)
+metadata/_edit_group_ = true
+
+[node name="Entry" type="Marker2D" parent="." unique_id=1916520880]
+position = Vector2(-27.36, -12.179993)
+
+[node name="CookingCanopy" type="Node2D" parent="." unique_id=1877074926]
+y_sort_enabled = true
+position = Vector2(-58.77333, -100.415985)
+metadata/_edit_group_ = true
+
+[node name="Cook" type="Sprite2D" parent="CookingCanopy" unique_id=51052818]
+position = Vector2(35.264008, -12.996002)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("5_4r1m5")
+centered = false
+offset = Vector2(-108.98135, -130.17603)
+region_enabled = true
+region_rect = Rect2(100, 147, 112, 134)
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/cook_1"
+art_offset = Vector2(-208.98135, -277.17603)
+metadata/_edit_lock_ = true
+
+[node name="Roof" type="Sprite2D" parent="CookingCanopy" unique_id=2058900987]
+position = Vector2(14.186668, -0.5700073)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("6_oggyd")
+centered = false
+offset = Vector2(-72.826675, -174.02802)
+region_enabled = true
+region_rect = Rect2(94, 128, 120, 99)
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/roof_1"
+art_offset = Vector2(-166.82668, -302.028)
+metadata/_edit_lock_ = true
+
+[node name="Steam" type="Sprite2D" parent="CookingCanopy" unique_id=1205006230]
+position = Vector2(14.186668, 0)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("7_qklcc")
+centered = false
+offset = Vector2(-19.826675, -91.16803)
+region_enabled = true
+region_rect = Rect2(147, 212, 14, 17)
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/steam_1"
+art_offset = Vector2(-166.82668, -303.16803)
+metadata/_edit_lock_ = true
+
+[node name="Pole" type="Sprite2D" parent="CookingCanopy" unique_id=180362893]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("8_n7klj")
+centered = false
+offset = Vector2(-4.4533386, -86.16803)
+region_enabled = true
+region_rect = Rect2(134, 217, 9, 90)
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/pole_1"
+art_offset = Vector2(-138.45334, -303.16803)
+metadata/_edit_lock_ = true
+
+[node name="Warning" type="Marker2D" parent="CookingCanopy" unique_id=15720148]
+position = Vector2(9.120003, -66.26251)
+
+[node name="Cook0" type="Marker2D" parent="CookingCanopy" unique_id=720340294]
+position = Vector2(29.488007, -8.094009)
+script = ExtResource("9_36wty")
+
+[node name="Serving" type="Node2D" parent="." unique_id=424525465]
+position = Vector2(-65, -33)
+metadata/_edit_group_ = true
+
+[node name="Art" type="Sprite2D" parent="Serving" unique_id=158779508]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("10_faiwm")
+centered = false
+offset = Vector2(-18.160004, -62.639984)
+region_enabled = true
+region_rect = Rect2(98, 360, 39, 64)
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/serving_1"
+art_offset = Vector2(-116.16, -422.63998)
+metadata/_edit_lock_ = true
+
+[node name="Center" type="Marker2D" parent="Serving" unique_id=636897443]
+position = Vector2(0, -17.09999)
+
+[node name="Fetch" type="Marker2D" parent="Serving" unique_id=1303905158]
+position = Vector2(15.706665, -10.2599945)
+script = ExtResource("9_36wty")
+
+[node name="Avoid" type="Node2D" parent="Serving" unique_id=519363339]
+position = Vector2(0, -16.529984)
+script = ExtResource("11_syih6")
+half_size = Vector2(9.626667, 14.82)
+
+[node name="Meal0" type="Marker2D" parent="Serving" unique_id=1347367430]
+position = Vector2(-3.040001, -25.079987)
+
+[node name="Meal1" type="Marker2D" parent="Serving" unique_id=1811394777]
+position = Vector2(3.040001, -25.079987)
+
+[node name="Meal2" type="Marker2D" parent="Serving" unique_id=1078815083]
+position = Vector2(-3.040001, -19.37999)
+
+[node name="Meal3" type="Marker2D" parent="Serving" unique_id=39472884]
+position = Vector2(3.040001, -19.37999)
+
+[node name="Meal4" type="Marker2D" parent="Serving" unique_id=167357749]
+position = Vector2(-3.040001, -13.679993)
+
+[node name="Meal5" type="Marker2D" parent="Serving" unique_id=1281121382]
+position = Vector2(3.040001, -13.679993)
+
+[node name="RoastFire" type="Node2D" parent="." unique_id=377470868]
+position = Vector2(-25, -66)
+metadata/_edit_group_ = true
+
+[node name="Base" type="Sprite2D" parent="RoastFire" unique_id=1333138500]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("12_irls7")
+centered = false
+offset = Vector2(-33.546677, -50.76001)
+region_enabled = true
+region_rect = Rect2(188, 324, 68, 60)
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/roast_base_1"
+art_offset = Vector2(-221.54668, -374.76)
+metadata/_edit_lock_ = true
+
+[node name="Fire" type="Sprite2D" parent="RoastFire" unique_id=1577964730]
+position = Vector2(0, -7.4100037)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("13_xy37i")
+centered = false
+offset = Vector2(-10.546677, -15.940002)
+region_enabled = true
+region_rect = Rect2(211, 344, 21, 29)
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/roast_fire_1"
+art_offset = Vector2(-221.54668, -359.94)
+metadata/_edit_lock_ = true
+
+[node name="Chicken" type="Sprite2D" parent="RoastFire" unique_id=1425803641]
+position = Vector2(0, -19.380005)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("14_3dvdq")
+centered = false
+offset = Vector2(-28.546677, -16)
+region_enabled = true
+region_rect = Rect2(193, 320, 48, 32)
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/roast_chicken_1"
+art_offset = Vector2(-221.54668, -336)
+metadata/_edit_lock_ = true
+
+[node name="Smoke" type="Marker2D" parent="RoastFire" unique_id=456566452]
+position = Vector2(0, -23.37001)
+
+[node name="Center" type="Marker2D" parent="RoastFire" unique_id=1516031649]
+position = Vector2(0, -9.12001)
+
+[node name="Avoid" type="Node2D" parent="RoastFire" unique_id=783181763]
+position = Vector2(0, -9.12001)
+script = ExtResource("11_syih6")
+half_size = Vector2(18.24, 11.4)
+
+[node name="Dining0" type="Node2D" parent="." unique_id=227294439]
+y_sort_enabled = true
+position = Vector2(43, -98)
+metadata/_edit_group_ = true
+
+[node name="Seats" type="Sprite2D" parent="Dining0" unique_id=1333735360]
+visible = false
+position = Vector2(-33.440002, -38.759995)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("15_ujfhk")
+centered = false
+offset = Vector2(-256, -231.12)
+region_enabled = true
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/seating_1_0"
+art_offset = Vector2(-256, -231.12)
+metadata/_edit_lock_ = true
+
+[node name="Table" type="Sprite2D" parent="Dining0" unique_id=1118427552]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("16_iwcdn")
+centered = false
+offset = Vector2(-24.880005, -61.639984)
+region_enabled = true
+region_rect = Rect2(298, 247, 52, 65)
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/dining_1_0"
+art_offset = Vector2(-322.88, -308.63998)
+metadata/_edit_lock_ = true
+
+[node name="Center" type="Marker2D" parent="Dining0" unique_id=1811501934]
+position = Vector2(0, -15.389984)
+
+[node name="Seat0" type="Marker2D" parent="Dining0" unique_id=913073915]
+position = Vector2(-25.839996, 3.9900055)
+script = ExtResource("9_36wty")
+
+[node name="Surface0" type="Marker2D" parent="Dining0" unique_id=2108852948]
+position = Vector2(-25.839996, -12.910492)
+
+[node name="Seat1" type="Marker2D" parent="Dining0" unique_id=379009802]
+position = Vector2(25.839996, 3.9900055)
+script = ExtResource("9_36wty")
+
+[node name="Surface1" type="Marker2D" parent="Dining0" unique_id=127333306]
+position = Vector2(25.839996, -12.910492)
+
+[node name="Avoid" type="Node2D" parent="Dining0" unique_id=941268457]
+position = Vector2(0, -15.389984)
+script = ExtResource("11_syih6")
+half_size = Vector2(12.16, 19.38)
+
+[node name="Dining1" type="Node2D" parent="." unique_id=729007958]
+y_sort_enabled = true
+position = Vector2(33.440002, -44.67)
+metadata/_edit_group_ = true
+
+[node name="Seats" type="Sprite2D" parent="Dining1" unique_id=1641492546]
+visible = false
+position = Vector2(-33.440002, -91.770004)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("17_y53to")
+centered = false
+offset = Vector2(-256, -231.12)
+region_enabled = true
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/seating_1_1"
+art_offset = Vector2(-256, -231.12)
+metadata/_edit_lock_ = true
+
+[node name="Table" type="Sprite2D" parent="Dining1" unique_id=1566414762]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("18_rrtmi")
+centered = false
+offset = Vector2(-24.880005, -61.660004)
+region_enabled = true
+region_rect = Rect2(298, 353, 52, 65)
+script = ExtResource("3_syiy1")
+art_key = "buildings/kitchen/dining_1_1"
+art_offset = Vector2(-322.88, -414.66)
+metadata/_edit_lock_ = true
+
+[node name="Center" type="Marker2D" parent="Dining1" unique_id=212200596]
+position = Vector2(0, -15.389999)
+
+[node name="Seat0" type="Marker2D" parent="Dining1" unique_id=2145092075]
+position = Vector2(-25.839996, 3.9899902)
+script = ExtResource("9_36wty")
+
+[node name="Surface0" type="Marker2D" parent="Dining1" unique_id=1291734644]
+position = Vector2(-25.839996, -12.910492)
+
+[node name="Seat1" type="Marker2D" parent="Dining1" unique_id=622308731]
+position = Vector2(25.839996, 3.9899902)
+script = ExtResource("9_36wty")
+
+[node name="Surface1" type="Marker2D" parent="Dining1" unique_id=1348566578]
+position = Vector2(25.839996, -12.910492)
+
+[node name="Avoid" type="Node2D" parent="Dining1" unique_id=696012723]
+position = Vector2(0, -15.389999)
+script = ExtResource("11_syih6")
+half_size = Vector2(12.16, 19.38)

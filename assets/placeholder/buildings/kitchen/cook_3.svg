@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="384" height="336" viewBox="0 0 384 336">
-<g transform="translate(192,192) scale(1.0) translate(-192,-192)"><g transform="translate(12,20) scale(0.67)"><g transform="translate(210,0) scale(-1,1)">  <path d="M70 89 L70 213" stroke="#4E342E" stroke-width="14" stroke-linecap="round" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="552" viewBox="0 0 512 552">
+<g transform="translate(0,48)"><g transform="scale(1.3333333333333333,1.5)"><g transform="translate(192,192) scale(1.0) translate(-192,-192)"><g transform="translate(32,-60) scale(0.77)"><g transform="translate(210,0) scale(-1,1)">  <path d="M70 89 L70 213" stroke="#4E342E" stroke-width="14" stroke-linecap="round" fill="none"/>
   <path d="M69 91 L69 211" stroke="#AB8455" stroke-width="5" stroke-linecap="round" fill="none"/>
   <ellipse cx="70" cy="104" rx="3" ry="2" fill="#D7BD82"/>
   <ellipse cx="70" cy="128" rx="3" ry="2" fill="#D7BD82"/>
@@ -68,4 +68,4 @@
   <path d="M164 278 L164 293" stroke="#D0B077" stroke-width="1" stroke-linecap="round" fill="none"/>
   <path d="M169 278 L169 293" stroke="#D0B077" stroke-width="1" stroke-linecap="round" fill="none"/>
   <path d="M174 278 L174 293" stroke="#D0B077" stroke-width="1" stroke-linecap="round" fill="none"/>
-</g></g></g></svg>
+</g></g></g></g></g></svg>

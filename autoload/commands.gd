@@ -227,6 +227,11 @@ func set_game_speed(speed: int) -> void:
 	GameState.set_speed(speed)
 
 
+## Vô hạn ba tài nguyên chung khi debug; không thay lượng thật hoặc cờ trong save.
+func toggle_dev_mode() -> void:
+	GameState.set_dev_mode(not GameState.is_dev_mode())
+
+
 ## Tạm dừng ↔ chạy lại tốc độ trước đó (phím Space).
 func toggle_pause() -> void:
 	GameState.toggle_pause()

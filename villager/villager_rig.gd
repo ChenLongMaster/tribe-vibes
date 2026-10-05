@@ -25,6 +25,7 @@ const ANIM_CHOP: StringName = &"chop"
 const ANIM_MINE: StringName = &"mine"
 const ANIM_FISH: StringName = &"fish"
 const ANIM_COOK: StringName = &"cook"
+const ANIM_ROAST: StringName = &"roast"
 const ANIM_ATTACK: StringName = &"attack"
 const ANIM_STRIKE: StringName = &"strike"
 const ANIM_POUT: StringName = &"pout"
@@ -101,7 +102,10 @@ const WALK_PHASE_PER_PIXEL: float = 0.11
 var facing: float = 1.0
 ## Tốc độ di chuyển hiện tại (px/giây) — chân bước nhanh chậm theo.
 var move_speed: float = 0.0
+var entrance_crouch: float = 0.0
 var seated_eating: bool = false
+## Độ nâng tư thế trong khung rig để hông chạm mặt ghế; 0 = ngồi bệt.
+var eating_seat_lift: float = 0.0
 var anim: StringName = ANIM_IDLE
 
 var _anim_time: float = 0.0
@@ -341,6 +345,7 @@ func _process(delta: float) -> void:
 	_reset_pose()
 	_animate(_anim_time)
 	_pose.scale = _pose_scale * Vector2(1.0 + _squash, 1.0 - _squash)
+	_pose.scale *= Vector2.ONE.lerp(Vector2(0.68, 0.60), entrance_crouch)
 	_face.texture = _faces.get(_current_face(), _face.texture)
 	_place_held_item()
 	_place_sign()
@@ -411,9 +416,16 @@ func _animate(t: float) -> void:
 			_head.rotation = 0.1
 		ANIM_EAT:
 			if seated_eating:
-				_pose.position.y = 7.0
-				_leg_front.rotation = -1.35
-				_leg_back.rotation = -1.25
+				var settle: float = smoothstep(0.0, 0.25, t)
+				if eating_seat_lift > 0.0:
+					_pose.position.y = lerpf(0.0, 7.0 - eating_seat_lift, settle)
+					_leg_front.rotation = lerpf(0.0, -1.10, settle)
+					_leg_back.rotation = lerpf(0.0, -0.95, settle)
+					_arm_back.rotation = -0.65 * settle
+				else:
+					_pose.position.y = 7.0
+					_leg_front.rotation = -1.35
+					_leg_back.rotation = -1.25
 			_arm_front.rotation = -2.3 + 0.25 * sin(t * 9.0)
 			_head.scale.y = 1.0 + 0.035 * sin(t * 18.0)
 			_breathe(breathe)
@@ -524,6 +536,12 @@ func _animate(t: float) -> void:
 			_arm_back.rotation = -0.9 - 0.2 * tug
 			_pose.rotation = -0.05 * tug
 			_breathe(breathe)
+		ANIM_ROAST:
+			# Tay trước quay xiên, tay sau đỡ; không vung muôi vào ngọn lửa.
+			_arm_front.rotation = -1.05 + 0.22 * sin(t * 3.0)
+			_arm_back.rotation = -0.7 + 0.1 * cos(t * 3.0)
+			_pose.rotation = 0.08
+			_head.rotation = 0.1
 		ANIM_COOK:
 			# Khuấy nồi: tay quay vòng, người hơi cúi, đầu ngó xuống.
 			_arm_front.rotation = -1.0 + 0.35 * sin(t * 7.0)
@@ -602,7 +620,10 @@ func _place_held_item() -> void:
 	if _held_item.visible:
 		_held_item.position = SHOULDER_FRONT + Vector2(0, HAND_DISTANCE).rotated(_arm_front.rotation)
 		if _held_is_tool:
-			_held_item.rotation = _arm_front.rotation + (-0.2 if _held_key == "props/cooking_spoon" else TOOL_TILT)
+			var tilt: float = -0.2 if _held_key == "props/cooking_spoon" else TOOL_TILT
+			if _held_key == "props/build_hammer":
+				tilt = PI # neo ở cán, đầu búa vung theo phía ngoài bàn tay
+			_held_item.rotation = _arm_front.rotation + tilt
 
 
 func _set_part(sprite: Sprite2D, key: String, color: Color) -> void:

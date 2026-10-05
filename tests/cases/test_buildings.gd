@@ -9,6 +9,34 @@ const SIM_TIME_SCALE: float = 20.0
 const TEST_SAVE_PATH: String = "user://test_save.json"
 const OBJECT_PANEL: GDScript = preload("res://ui/common/object_panel.gd")
 
+func test_kitchen_scene_transforms_follow_furniture() -> void:
+	# Chỉnh group như thao tác trong editor: cả hình, marker và vùng tránh cùng đi.
+	var level: int = 3
+	var saved: Dictionary = KitchenLayout.scene_data(level)
+	var scene: Node2D = KitchenLayout.SCENES[level - 1].instantiate() as Node2D
+	var dining: Node2D = scene.get_node("Dining0") as Node2D
+	var serving: Node2D = scene.get_node("Serving") as Node2D
+	var roast: Node2D = scene.get_node("RoastFire") as Node2D
+	var canopy: Node2D = scene.get_node("CookingCanopy") as Node2D
+	for group: Node2D in [dining, serving, roast, canopy]:
+		group.position += Vector2(7, -4)
+		group.scale = Vector2(1.15, 0.9)
+	KitchenLayout._cache[level] = KitchenLayout.read_layout(scene)
+	var seat: Marker2D = dining.get_node("Seat0") as Marker2D
+	var surface: Marker2D = dining.get_node("Surface0") as Marker2D
+	check(KitchenLayout.local_point(KitchenLayout.seat_raw(level, 0), level).distance_to(dining.transform * seat.position) < 0.001, "Kéo/scale bàn: điểm ngồi theo cùng transform")
+	check(KitchenLayout.local_point(KitchenLayout.seat_surface_raw(level, 0), level).distance_to(dining.transform * surface.position) < 0.001, "Mặt ghế theo kích thước mới")
+	check(KitchenLayout.scene_point("Serving/Fetch", level).distance_to(serving.transform * (serving.get_node("Fetch") as Node2D).position) < 0.001, "Điểm lấy món theo quầy")
+	check(KitchenLayout.local_point(KitchenLayout.cook_raw(level, 1), level).distance_to(roast.transform * (roast.get_node("Cook1") as Node2D).position) < 0.001, "Đầu bếp theo giá quay")
+	check(KitchenLayout.scene_point("CookingCanopy/Warning", level).distance_to(canopy.transform * (canopy.get_node("Warning") as Node2D).position) < 0.001, "Cảnh báo theo mái")
+	var before: Array = saved["blocks"]
+	var after: Array = KitchenLayout.scene_data(level)["blocks"]
+	check((after[0] as Rect2).size.distance_to((before[0] as Rect2).size * Vector2(1.15, 0.9)) < 0.001, "Vùng tránh quầy được scale cùng hình")
+	for slot: int in KitchenLayout.seat_count(level):
+		check(not KitchenLayout.route(KitchenLayout.fetch_point(level), KitchenLayout.seat_raw(level, slot), level).is_empty(), "Bố cục mới vẫn có đường đến từng ghế")
+	KitchenLayout._cache[level] = saved
+	scene.free()
+
 
 func test_kitchen_seat_capacity_routes_and_gate() -> void:
 	var world: World = await _make_world(42)
@@ -17,14 +45,14 @@ func test_kitchen_seat_capacity_routes_and_gate() -> void:
 		person.set_process(false)
 	for tier: int in range(1, 4):
 		var kitchen: Building = _add_built(world, BuildingDefs.KITCHEN, tier)
-		check_eq(kitchen.footprint_cells().size(), 6, "Bếp luôn chiếm sáu ô")
+		check_eq(kitchen.footprint_cells().size(), 12, "Bếp luôn chiếm12 ô (4×3)")
 		kitchen.add_stock(ResourceDefs.MEAL, 1)
 		var capacity: int = KitchenLayout.seat_count(tier)
 		for index: int in capacity:
 			check(kitchen.kitchen.reserve(people[index]), "Đặt ghế riêng")
 			check(kitchen.kitchen.reserve(people[index]), "Đặt lại không chiếm thêm ghế")
 			var destination: Vector2 = kitchen.kitchen.seat(people[index])
-			check(not KitchenLayout.route(Vector2(108, 275), destination, tier).is_empty(), "Từ quầy tới được mỗi ghế, tránh bàn")
+			check(not KitchenLayout.route(KitchenLayout.fetch_point(tier), destination, tier).is_empty(), "Từ quầy tới được mỗi ghế, tránh bàn")
 		check_eq(kitchen.kitchen.seats.size(), capacity, "4/6/8 chỗ theo cấp")
 		check(not StoredFoodSource.new(kitchen).is_available(people[capacity]), "Bếp đầy ghế không nhận thêm khách")
 		kitchen.kitchen.release(people[0])
@@ -45,6 +73,7 @@ func test_kitchen_dining_interrupt_and_exit() -> void:
 	person.start_task(TaskEat.new(StoredFoodSource.new(kitchen)))
 	await _simulate(20.0, func(_elapsed: float) -> bool: return person.state == Villager.State.EATING)
 	check(person.state == Villager.State.EATING and person.rig.seated_eating, "Đi vào sân, lấy món rồi ngồi ăn")
+	check(person.rig.eating_seat_lift > 0.0, "Ngồi trên mặt ghế cấp3 thay vì ngồi bệt")
 	check(person.interior == kitchen, "Người thật đứng trong sân bếp")
 	check_eq(kitchen.stock_of(ResourceDefs.MEAL), 3, "Lấy đúng một món ở quầy")
 	var destination: Vector2i = world.finder.find_free_cell_near(kitchen.kitchen.entry_cell(), 2.0, 4.0)
@@ -54,6 +83,7 @@ func test_kitchen_dining_interrupt_and_exit() -> void:
 	await _simulate(20.0, func(_elapsed: float) -> bool: return world.cell_of(person) == destination and not person.is_moving())
 	check(person.interior == null and world.cell_of(person) == destination, "Ra đúng cổng trước khi đi theo lệnh")
 	check(not person.rig.seated_eating, "Bỏ tư thế ngồi khi đi")
+	check_eq(person.rig.eating_seat_lift, 0.0, "Lệnh mới trả rig về độ cao đi bộ")
 	check(kitchen.kitchen.seats.is_empty(), "Ăn xong trả ghế trước khi theo lệnh mới")
 	await _free_world(world)
 
@@ -113,7 +143,7 @@ func test_kitchen_upgrade_with_guests_and_interruption() -> void:
 	var restored: World = await _make_world(42)
 	SaveGame.restore(restored, saved)
 	var loaded: Building = restored.get_building(kitchen_uid)
-	check(loaded != null and loaded.level == 2 and loaded.footprint_cells().size() == 6, "Lưu/tải giữ bếp3×2 và cấp")
+	check(loaded != null and loaded.level == 2 and loaded.footprint_cells().size() == 12, "Lưu/tải giữ bếp4×3 và cấp")
 	check(loaded.kitchen.seats.is_empty(), "Ghế tạm được trả khi dựng lại ván")
 	await _free_world(restored)
 
@@ -193,6 +223,108 @@ func test_builders_haul_then_build() -> void:
 	check(builders[0].job == null, "Xây xong, không còn móng nào thì thôi việc")
 	check(not builders[0].rig.has_hard_hat(), "Thôi xây thì bỏ mũ")
 	check(not builders[0].rig.has_sign(), "Xây xong thì không giơ biển")
+	await _free_world(world)
+
+
+func test_dev_mode_build_upgrade_and_cook_without_resources() -> void:
+	GameState.set_dev_mode(false)
+	var world: World = await _make_world(42)
+	var builder: Villager = _spawn(world, 1)[0]
+	builder.data.traits.clear()
+	GameState.take_resource(ResourceDefs.FOOD, GameState.get_amount(ResourceDefs.FOOD))
+	check_eq(GameState.get_amount(ResourceDefs.WOOD), 0, "Kho thật chưa có gỗ")
+	check_eq(GameState.get_amount(ResourceDefs.STONE), 0, "Kho thật chưa có đá")
+	var tent: Building = Commands.get_building(Commands.place_building(BuildingDefs.TENT, _free_origin(world, BuildingDefs.TENT)))
+	Commands.toggle_dev_mode()
+	check(Commands.assign_job(builder.id, tent), "DEV vẫn giao thợ xây qua lệnh thật")
+	var state: Dictionary = {"hauled": false}
+	await _simulate(150.0, func(_elapsed: float) -> bool:
+		if builder.rig.is_carrying():
+			state["hauled"] = true
+		return tent.is_built())
+	check(state["hauled"] and tent.is_built(), "Kho trống vẫn khuân rồi xây, không tự hoàn tất móng")
+	_fill_needs(builder)
+	check(Commands.upgrade_building(tent.uid), "DEV nâng cấp được")
+	Commands.assign_job(builder.id, tent)
+	await _simulate(200.0, func(_elapsed: float) -> bool: return tent.level == 2 and not tent.is_constructing())
+	check_eq(tent.level, 2, "Xây nâng cấp xong khi không có gỗ/đá thật")
+	var kitchen: Building = _add_built(world, BuildingDefs.KITCHEN, 1)
+	_fill_needs(builder)
+	Commands.assign_job(builder.id, kitchen)
+	await _simulate(90.0, func(_elapsed: float) -> bool: return kitchen.stock_of(ResourceDefs.MEAL) > 0)
+	check(kitchen.stock_of(ResourceDefs.MEAL) > 0, "Đầu bếp thật nấu được khi thức ăn thô thật trống")
+	GameState.set_dev_mode(false)
+	check_eq(GameState.get_amount(ResourceDefs.WOOD), 0, "Kho gỗ thật không được bơm số vô hạn")
+	check_eq(GameState.get_amount(ResourceDefs.STONE), 0, "Kho đá thật không được bơm số vô hạn")
+	await _free_world(world)
+
+
+func test_builder_material_pledge_interruption() -> void:
+	GameState.set_dev_mode(false)
+	var world: World = await _make_world(42)
+	var builder: Villager = _spawn(world, 1)[0]
+	builder.set_process(false)
+	var kitchen: Building = _add_built(world, BuildingDefs.KITCHEN, 2)
+	# Một thợ khác vẫn giữ chuyến riêng: dừng task này không được trả nhầm chuyến đó.
+	var other_amount: int = 3
+	for phase: int in [TaskBuild.Step.GO_STORAGE, TaskBuild.Step.TAKE, TaskBuild.Step.GO_SITE, TaskBuild.Step.DROP]:
+		GameState.add_resource(ResourceDefs.WOOD, 30)
+		kitchen.start_construction(3)
+		kitchen.pledge(ResourceDefs.WOOD, other_amount)
+		var before: int = GameState.get_amount(ResourceDefs.WOOD)
+		var task: TaskBuild = TaskBuild.new(Job.new(JobDefs.BUILD, kitchen), kitchen)
+		builder.start_task(task)
+		check_eq(task.step, TaskBuild.Step.GO_STORAGE, "Bắt đầu đi lấy vật liệu")
+		if phase != TaskBuild.Step.GO_STORAGE:
+			builder.stop_moving()
+			task.tick(0.0)
+		if phase == TaskBuild.Step.GO_SITE or phase == TaskBuild.Step.DROP:
+			task.tick(TaskBuild.TAKE_SECONDS)
+		if phase == TaskBuild.Step.DROP:
+			builder.stop_moving()
+			task.tick(0.0)
+		check_eq(task.step, phase, "Đến đúng giai đoạn cần ngắt")
+		builder.start_task(null)
+		check_eq(int(kitchen.pledged.get(ResourceDefs.WOOD, 0)), other_amount, "Ngắt bước%d trả đúng chuyến của mình, không để lời hứa ma" % phase)
+		check_eq(GameState.get_amount(ResourceDefs.WOOD), before - kitchen.delivered(ResourceDefs.WOOD), "Chỉ vật liệu đã đổ vào công trường mới bị tiêu hao")
+	await _free_world(world)
+
+
+func test_dev_kitchen_all_levels_after_builder_interruption() -> void:
+	GameState.set_dev_mode(false)
+	var world: World = await _make_world(42)
+	var builders: Array[Villager] = _spawn(world, 2)
+	for builder: Villager in builders:
+		builder.data.traits.clear()
+	GameState.set_dev_mode(true)
+	var kitchen: Building = Commands.get_building(Commands.place_building(BuildingDefs.KITCHEN, _free_origin(world, BuildingDefs.KITCHEN)))
+	for tier: int in range(1, 4):
+		if tier > 1:
+			check(Commands.upgrade_building(kitchen.uid), "Bắt đầu nâng lên cấp%d" % tier)
+		for builder: Villager in builders:
+			_fill_needs(builder)
+			check(Commands.assign_job(builder.id, kitchen), "Giao thợ xây bếp")
+		if tier >= 2:
+			await _simulate(20.0, func(_elapsed: float) -> bool: return builders[0].task is TaskBuild and builders[0].task.step == TaskBuild.Step.GO_STORAGE)
+			check(builders[0].task is TaskBuild and builders[0].task.step == TaskBuild.Step.GO_STORAGE, "Ngắt lúc đã hứa nhưng chưa lấy vật liệu")
+			if tier == 2:
+				kitchen.add_stock(ResourceDefs.MEAL, 1)
+				builders[0].status.hunger = 40.0
+				await _simulate(5.0, func(_elapsed: float) -> bool: return builders[0].task is TaskEat)
+				check(builders[0].task is TaskEat, "Đói tự ngắt chuyến để đi ăn, vẫn nhớ việc xây")
+			else:
+				var destination: Vector2i = world.cell_of(builders[0])
+				check(Commands.move_villager(builders[0].id, destination), "Lệnh đi chỗ khác ngắt chuyến lấy đồ")
+				check(Commands.assign_job(builders[0].id, kitchen), "Giao lại việc xây sau khi ngắt")
+		await _simulate(300.0, func(_elapsed: float) -> bool:
+			for builder: Villager in builders:
+				_fill_needs(builder)
+			return kitchen.level == tier and not kitchen.is_constructing())
+		check_eq(kitchen.level, tier, "Khuân và xây thật hoàn tất cấp%d" % tier)
+		check(not kitchen.is_constructing(), "Không mắc kẹt chờ vật liệu")
+	GameState.set_dev_mode(false)
+	check_eq(GameState.get_amount(ResourceDefs.WOOD), 0, "DEV không bơm gỗ vào kho thật")
+	check_eq(GameState.get_amount(ResourceDefs.STONE), 0, "DEV không bơm đá vào kho thật")
 	await _free_world(world)
 
 
@@ -625,3 +757,34 @@ func _simulate(seconds: float, until: Callable = Callable()) -> void:
 		if until.is_valid() and until.call(elapsed):
 			break
 	Engine.time_scale = 1.0
+
+
+func test_tent_door_animation_and_interruption() -> void:
+	var world: World = await _make_world(42)
+	var person: Villager = _spawn(world, 1)[0]
+	person.data.traits.clear()
+	person.status.hunger = 100.0
+	person.status.fun = 100.0
+	person.status.energy = 20.0
+	var tent: Building = _add_built(world, BuildingDefs.TENT, 1)
+	person.position = WorldGrid.cell_to_world(tent.tent_entrance.entry_cell())
+	var spot: SleepSpot = world.finder.find_tent_bed(person, tent)
+	check(spot != null, "Cửa lều có đường và giữ được chỗ ngủ")
+	person.start_task(TaskSleep.new(spot))
+	await _simulate(20.0, func(_elapsed: float) -> bool: return person.task is TaskSleep and person.task.step == TaskSleep.Step.ENTER)
+	check(person.visible and person.inside == null, "Tới cửa vẫn nhìn thấy dân trước khi chui vào")
+	person.start_task(TaskReturn.new(true))
+	check(person.visible and person.modulate.a == 1.0 and person.rig.entrance_crouch == 0.0, "Ngắt đoạn chui khôi phục hình/cỡ")
+	check(not world.grid.is_blocked(world.cell_of(person)), "Ngắt đoạn chui đưa dân ra cửa, không kẹt footprint")
+	check(tent.sleepers.is_empty(), "Không để lại người ngủ ma")
+	spot = world.finder.find_tent_bed(person, tent)
+	person.start_task(TaskSleep.new(spot))
+	await _simulate(20.0, func(_elapsed: float) -> bool: return person.inside == tent)
+	check(person.inside == tent and not person.visible, "Chui xong mới ẩn và nằm trong lều")
+	person.status.energy = 100.0
+	await _simulate(20.0, func(_elapsed: float) -> bool: return person.task is TaskSleep and person.task.step == TaskSleep.Step.EXIT)
+	check(person.visible and person.inside == null, "Thức dậy chui ra cửa, chưa nhảy về chỗ đứng")
+	await _simulate(20.0, func(_elapsed: float) -> bool: return not (person.task is TaskSleep))
+	check(person.visible and person.modulate.a == 1.0 and not world.grid.is_blocked(world.cell_of(person)), "Ra lều xong hiện đủ và đứng trên ô đi được")
+	check(tent.sleepers.is_empty(), "Thức dậy trả chỗ ngủ")
+	await _free_world(world)

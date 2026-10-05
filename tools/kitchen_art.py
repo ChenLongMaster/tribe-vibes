@@ -1,4 +1,6 @@
-# Hình bếp đã duyệt: 3×2 ô, mái chéo phải, bàn dọc; tất cả toạ độ ở 2×.
+# Bếp4×3 ô, mái chếch phải, bàn dọc; bố cục raw2× trước khi kéo khung512×504.
+import random
+
 LINE = "#4E342E"
 SW = 6
 
@@ -22,63 +24,169 @@ def ellipse(cx, cy, rx, ry, fill, sw=SW):
 def line(x1, y1, x2, y2, color, width):
     return f'  <path d="M{x1} {y1} L{x2} {y2}" stroke="{color}" stroke-width="{width}" stroke-linecap="round" fill="none"/>\n'
 
-def stone(x, y, index):
-    width = (12, 14, 11, 13)[index % 4]
-    rise = (14, 12, 15)[index % 3]
-    return path(f'M{x - width} {y - 3} Q{x - width - 2} {y - 10} {x - width + 5} {y - rise} L{x + width - 5} {y - rise - 1} Q{x + width + 3} {y - 9} {x + width} {y - 1} Q{x} {y + 5} {x - width} {y - 3} Z', ('#989E8A', '#A5AA96', '#929B8C')[index % 3], 3) + ellipse(x - 2, y - rise + 5, width * 0.6, 3, '#C7C7AF', 0)
+def contact_shadow(x, y, rx, ry):
+    return f'<ellipse cx="{x}" cy="{y}" rx="{rx}" ry="{ry}" fill="{LINE}" opacity="0.16"/>\n'
+
+
+def stone(x, y, index, width=20, rise=25):
+    # Vai bo, đỉnh bè và méo nhẹ; không có đỉnh tam giác như đá dựng.
+    w, h = width, min(rise, width * 1.15)
+    left = (.70, .82, .74, .66, .78)[index % 5]
+    right = (.66, .73, .81, .75, .69)[index % 5]
+    crown = (.82, .76, .86, .80, .74)[index % 5]
+    body = contact_shadow(w * .12, 3, w * .98, 4)
+    body += path(f'M{-w} {-h*.20} Q{-w*1.03} {-h*.62} {-w*.62} {-h*left} Q{-w*.35} {-h*.94} {w*.02} {-h*crown} Q{w*.48} {-h*.94} {w*.73} {-h*right} Q{w*1.05} {-h*.40} {w*.95} {-h*.04} Q{w*.89} {h*.18} {w*.45} {h*.16} L{-w*.55} {h*.14} Q{-w*.93} {h*.11} {-w} {-h*.20} Z', ('#90998D', '#A0A696', '#949B90')[index % 3], 3)
+    body += path(f'M{-w*.89} {-h*.36} Q{-w*.86} {-h*.65} {-w*.59} {-h*left*.93} Q{-w*.28} {-h*.88} {w*.03} {-h*crown*.94} Q{w*.43} {-h*.85} {w*.66} {-h*right*.94} Q{w*.85} {-h*.49} {w*.86} {-h*.30} Q{w*.23} {-h*.12} {-w*.47} {-h*.21} Z', ('#C6C8B5', '#D2D0BB', '#B9C0AF')[index % 3], 0)
+    body += path(f'M{w*.23} {-h*.13} Q{w*.67} {-h*.19} {w*.88} {-h*.31} L{w*.93} {-h*.07} Q{w*.84} {h*.09} {w*.45} {h*.10} L{w*.24} {h*.09} Z', '#7F897F', 0)
+    body += path(f'M{-w*.45} {-h*.70} Q{-w*.12} {-h*.83} {w*.13} {-h*.74}', 'none', 0, ' stroke="#E0DDC8" stroke-width="1.8" stroke-linecap="round"')
+    return f'<g transform="translate({x},{y})">' + body + '</g>'
+
+
+def fence_layout(x1, y1, x2, y2, level):
+    # Cọc chia từng khoang; đá nằm GIỮA cọc, không lấy cùng tâm như bản cũ.
+    rng = random.Random(int(x1 * 739 + y1 * 337 + x2 * 73 + y2 * 41 + level * 991))
+    horizontal = y1 == y2
+    length = abs(x2 - x1) + abs(y2 - y1)
+    pitch = 34 if level == 1 else (52 if level == 2 else 59)
+    count = max(1, round(length / pitch))
+    gap = length / count
+    posts = [(x1 + (x2 - x1) * i / count, y1 + (y2 - y1) * i / count) for i in range(count + 1)]
+    stones = []
+    if level > 1:
+        # Đá lấp từng khoang, chừa khe ở cọc và nối gần nhau thay một viên lẻ.
+        margin = 5.5 if level == 2 else 8.0
+        for bay in range(count):
+            usable = gap - margin * 2
+            pieces = max(2, round(usable / (20 if horizontal else 14)))
+            weights = [rng.uniform(.70, 1.45) for _ in range(pieces)]
+            cursor = bay * gap + margin
+            for part, weight in enumerate(weights):
+                step = usable * weight / sum(weights)
+                along = cursor + step * .5
+                cursor += step
+                index = bay * 7 + part * 3 + int(x1 + y1)
+                if horizontal:
+                    x = min(x1, x2) + along
+                    y = y1 + rng.uniform(4, 7)
+                    width = step * .5 - .8
+                    rise = rng.uniform(17, 25)
+                else:
+                    width = rng.uniform(13, 15)
+                    rise = min(step * 1.03, width * 1.15)
+                    x = x1 + (3 if x1 < 192 else -3) + rng.uniform(-.5, .5)
+                    y = min(y1, y2) + along + rise * .36
+                stones.append((x, y, index, width, rise))
+        return posts, stones
+    for i in range(count):
+        t = (i + .5) / count
+        x, y = x1 + (x2 - x1) * t, y1 + (y2 - y1) * t
+        if horizontal:
+            margin = 0 if level == 1 else (5 if level == 2 else 8)
+            limit = gap * .64 if level == 1 else gap / 2 - margin
+            width = min(gap * rng.uniform(.34, .61), limit, 24)
+            jitter = rng.uniform(-4, 4) if level == 1 else rng.uniform(-2, 2)
+            x += jitter
+            width = min(width, limit - abs(jitter))
+            y += rng.uniform(3, 7)
+            rise = rng.uniform(16, 32)
+            # Khoang rộng hoặc vài khoang chọn sẵn có đá lớn/nhỏ kê cạnh nhau.
+            if gap > 72 or (i % 3 == 1 and gap > 45):
+                offset = min(13, gap * .18)
+                half = min(14, limit - offset - abs(jitter))
+                stones.append((x - offset, y - 1, i * 5 + int(x1 + y1), half, rise))
+                stones.append((x + offset, y + 2, i * 5 + 3 + int(x1 + y1), half * .82, rise * .67))
+                continue
+        else:
+            # Hai cạnh bên vẫn nằm trong khung, chừa chân cọc ở hai đầu khoang.
+            x += (3 if x1 < 192 else -3) + rng.uniform(-1, 1)
+            y += gap * .24
+            width = rng.uniform(12, 15)
+            rise = min(rng.uniform(24, 34), gap * .60)
+        stones.append((x, y, i * 3 + int(x1 + y1), width, rise))
+    return posts, stones
+
 
 def fence(x1, y1, x2, y2, level):
-    length = abs(x2 - x1) + abs(y2 - y1)
-    count = max(1, int(length / 25))
+    posts, stones = fence_layout(x1, y1, x2, y2, level)
     b = ''
-    for i in range(count + 1):
-        t = i / count
-        b += stone(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t + 4, i)
-    if level == 1:
-        return b
-    wood = level == 3
-    height = 28 if wood else 24
-    for offset in (height - 6, 11):
-        b += line(x1, y1 - offset, x2, y2 - offset, '#4E342E', 10 if wood else 5)
-        b += line(x1, y1 - offset - 1, x2, y2 - offset - 1, '#A98153' if wood else '#B9A16A', 5 if wood else 2)
-    for i in range(count + 1):
-        t = i / count
-        x = x1 + (x2 - x1) * t
-        y = y1 + (y2 - y1) * t
-        top = y - height + (0 if wood else (i % 3 - 1) * 3)
-        b += line(x, top, x, y, '#4E342E', 13 if wood else 5)
-        b += line(x - 1, top + 1, x - 1, y - 2, '#A98153' if wood else '#C9B77D', 8 if wood else 2)
-        b += ellipse(x, top, 5 if wood else 2, 2, '#D0B180', 1)
-        b += line(x - 4 if wood else x - 2, y - 15, x + 4 if wood else x + 2, y - 15, '#DCC18B', 2)
+    if level > 1:
+        wood = level == 3
+        height = 36 if wood else 29
+        for offset in (height - 7, 12):
+            b += line(x1, y1 - offset, x2, y2 - offset, LINE, 9 if wood else 5)
+            b += line(x1, y1 - offset - 1, x2, y2 - offset - 1, '#B49466' if wood else '#C8B27A', 4 if wood else 2)
+        for i, (x, y) in enumerate(posts):
+            top = y - height + ((i % 3 - 1) * (1 if wood else 2))
+            b += contact_shadow(x + 2, y + 2, 7 if wood else 4, 3)
+            b += line(x, top, x, y, LINE, 10 if wood else 5)
+            b += line(x - 1, top + 1, x - 1, y - 2, '#AC8559' if wood else '#C9B77D', 6 if wood else 2)
+            b += ellipse(x, top, 3.5 if wood else 2, 2, '#DDC296', 1)
+            b += line(x - 4 if wood else x - 2, y - 14, x + 4 if wood else x + 2, y - 16, '#E0C590', 2)
+            if wood:
+                b += line(x + 1, top + 7, x + 1, y - 6, '#795437', 1)
+            else:
+                for joint in (9, 21):
+                    b += line(x - 2, y - joint, x + 2, y - joint, '#9A8454', 1)
         if wood:
-            b += line(x + 2, top + 7, x + 2, y - 8, '#795437', 1.5)
-    if wood and y1 == y2:
-        for x in range(int(x1) + 10, int(x2) - 45, 65):
-            b += line(x, y1 - 9, x + 44, y1 - 30, '#4E342E', 5) + line(x, y1 - 10, x + 44, y1 - 31, '#B79766', 2)
+            for (ax, ay), (bx, by) in zip(posts, posts[1:]):
+                b += line(ax + 3, ay - 12, bx - 3, by - height + 7, LINE, 5)
+                b += line(ax + 3, ay - 13, bx - 3, by - height + 8, '#B79766', 2)
+    # Đá che nhẹ phần sát đất của cọc; thân cọc đi xuống khe chứ không xuyên mặt đá.
+    for x, y, index, width, rise in stones:
+        b += stone(x, y, index, width, rise)
     return b
 
 def bowl(x, y):
     return path(f'M{x - 8} {y} Q{x - 6} {y + 9} {x} {y + 10} Q{x + 6} {y + 8} {x + 8} {y} Z', '#AA7650', 2) + ellipse(x, y, 8, 5, '#D5A16A', 2) + ellipse(x, y, 6, 3, '#EAC079', 0) + ellipse(x - 2, y - 1, 1.5, 1, '#9CB35E', 0)
 
-def stool(x, y, wood):
-    return path(f'M{x - 11} {y - 9} L{x + 11} {y - 9} L{x + 10} {y + 5} Q{x} {y + 10} {x - 10} {y + 4} Z', '#98764F' if wood else '#8F9683', 2) + ellipse(x, y - 9, 11, 6, '#D1B080' if wood else '#C0C3AC', 2)
+def log_seat():
+    # Khúc gỗ nằm dọc: mặt vỏ cong rộng, hai đầu cắt có vòng tuổi.
+    b = contact_shadow(3, 16, 15, 6)
+    b += path('M-13 -13 Q0 -19 13 -13 L13 15 Q0 23 -13 15 Z', '#92633D', 2.5)
+    b += path('M-12 -13 Q0 -20 12 -13 L12 11 Q0 17 -12 11 Z', '#B18451', 2)
+    for dx in (-8, -2, 6):
+        b += path(f'M{dx} -9 q-3 7 0 13 l-1 7', 'none', 0, ' stroke="#765137" stroke-width="1.5"')
+    b += ellipse(0, 14, 13, 7, '#DCB47B', 2) + ellipse(0, 14, 8, 4, 'none', 1)
+    b += ellipse(1, 14, 3, 1.6, '#A27A4B', 0)
+    b += line(-10, -10, -10, 7, '#CBA366', 1.5)
+    return b
+
+
+def wooden_chair(facing):
+    # Tựa phía ngoài bàn; mặt ghế rộng, chân đứng thẳng theo chiều cao.
+    b = contact_shadow(3, 15, 15, 6)
+    for dx in (-9, 9):
+        b += line(dx, -8, dx, 15, LINE, 4) + line(dx - 1, -7, dx - 1, 14, '#A58050', 1.5)
+    b += line(-9, 9, 9, 9, '#8F6C46', 3)
+    for dx in (-13, -5):
+        b += line(dx, -29, dx, 13, LINE, 4) + line(dx - 1, -28, dx - 1, 12, '#B08A56', 1.5)
+    b += path('M-16 -31 L-2 -31 L-2 -16 L-16 -16 Z', '#B9905B', 2)
+    b += line(-12, -29, -12, -18, '#DFC08A', 1.5) + line(-7, -29, -7, -18, '#8E693D', 1)
+    b += path('M-14 -11 L12 -11 L14 0 L-12 1 Z', '#936C43', 2)
+    b += path('M-14 -13 Q0 -17 12 -13 L14 -5 Q0 -1 -12 -4 Z', '#D5B57E', 2)
+    b += line(-9, -11, 9, -11, '#A58050', 1.5)
+    return f'<g transform="scale({facing},1)">' + b + '</g>'
+
 
 def serving_table(x, y, wood):
-    b = ''
+    # Quầy dọc: đổi hình mặt/chân thay xoay cả bát và trục đứng của chân bàn.
+    b = contact_shadow(x + 5, y + 33, 24, 11)
     if wood:
-        for dx in (-37, 37):
-            for dy in (-8, 25):
-                b += line(x + dx, y + dy - 13, x + dx, y + dy + 12, '#4E342E', 7) + line(x + dx - 1, y + dy - 12, x + dx - 1, y + dy + 10, '#A58050', 3)
-        b += rect(x - 47, y - 10, 94, 36, '#81633F', 4, 3)
-        b += path(f'M{x - 43} {y - 18} Q{x} {y - 20} {x + 43} {y - 18} L{x + 47} {y + 17} Q{x} {y + 20} {x - 47} {y + 17} Z', '#C29E65', 4)
-        for dy in (-6, 6):
-            b += line(x - 43, y + dy, x + 43, y + dy, '#9D7A47', 1.5)
+        for dx in (-16, 16):
+            for dy in (-19, 25):
+                b += line(x + dx, y + dy, x + dx, y + dy + 15, LINE, 6)
+                b += line(x + dx - 1, y + dy + 1, x + dx - 1, y + dy + 13, '#A58050', 2)
+        b += path(f'M{x-22} {y+24} L{x+22} {y+24} L{x+21} {y+35} L{x-21} {y+35} Z', '#81633F', 3)
+        b += path(f'M{x+17} {y-31} L{x+22} {y+24} L{x+21} {y+35} L{x+17} {y-20} Z', '#987649', 2)
+        b += path(f'M{x-18} {y-32} Q{x} {y-35} {x+18} {y-32} L{x+23} {y+24} Q{x} {y+28} {x-23} {y+24} Z', '#C29E65', 4)
+        for dx in (-7, 7):
+            b += line(x + dx * .8, y - 29, x + dx, y + 22, '#9D7A47', 1.5)
     else:
-        b += rect(x - 29, y + 2, 58, 30, '#8E9787', 5, 3)
-        b += path(f'M{x - 47} {y - 13} L{x + 44} {y - 13} L{x + 49} {y + 12} L{x + 43} {y + 24} L{x - 43} {y + 24} L{x - 49} {y + 14} Z', '#949D8A', 3)
-        b += path(f'M{x - 43} {y - 20} Q{x} {y - 23} {x + 41} {y - 19} L{x + 48} {y + 10} Q{x} {y + 15} {x - 48} {y + 10} Z', '#C3C6AE', 4)
-        b += path(f'M{x + 29} {y - 14} l-8 7 l5 5', 'none', 0, ' stroke="#A2AA95" stroke-width="2"')
-    return b + bowl(x + 10, y - 3)
+        b += stone(x, y + 39, 0, 15, 28)
+        b += path(f'M{x-19} {y-29} L{x+18} {y-29} L{x+24} {y+22} L{x+20} {y+35} L{x-20} {y+35} L{x-24} {y+23} Z', '#949D8A', 3)
+        b += path(f'M{x-17} {y-33} Q{x} {y-36} {x+16} {y-32} L{x+23} {y+21} Q{x} {y+28} {x-23} {y+23} Z', '#C3C6AE', 4)
+        b += path(f'M{x+12} {y-26} l-5 7 l3 6', 'none', 0, ' stroke="#A2AA95" stroke-width="2"')
+    return b
 
 back = '  <path d="M70 89 L70 213" stroke="#4E342E" stroke-width="10" stroke-linecap="round" fill="none"/>\n  <path d="M69 91 L69 211" stroke="#AE925A" stroke-width="5" stroke-linecap="round" fill="none"/>\n  <ellipse cx="70" cy="104" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="70" cy="128" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="70" cy="152" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="70" cy="176" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="70" cy="200" rx="3" ry="2" fill="#D7BD82"/>\n  <path d="M198 125 L198 245" stroke="#4E342E" stroke-width="10" stroke-linecap="round" fill="none"/>\n  <path d="M197 127 L197 243" stroke="#AE925A" stroke-width="5" stroke-linecap="round" fill="none"/>\n  <ellipse cx="198" cy="140" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="198" cy="164" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="198" cy="188" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="198" cy="212" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="198" cy="236" rx="3" ry="2" fill="#D7BD82"/>\n  <path d="M24 154 L24 274" stroke="#4E342E" stroke-width="10" stroke-linecap="round" fill="none"/>\n  <path d="M23 156 L23 272" stroke="#AE925A" stroke-width="5" stroke-linecap="round" fill="none"/>\n  <ellipse cx="24" cy="169" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="24" cy="193" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="24" cy="217" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="24" cy="241" rx="3" ry="2" fill="#D7BD82"/>\n  <ellipse cx="24" cy="265" rx="3" ry="2" fill="#D7BD82"/>\n  <path d="M48 173 L105 197 L96 205 L40 181 Z" fill="#9C7C4D" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>\n  <path d="M48 165 Q43 147 50 140 L62 140 Q70 155 64 165 Z" fill="#B98254" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>\n  <ellipse cx="56" cy="140" rx="6" ry="3" fill="#74513B" stroke="#4E342E" stroke-width="2"/>\n  <path d="M74 176 Q69 158 76 151 L88 151 Q96 166 90 176 Z" fill="#B98254" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>\n  <ellipse cx="82" cy="151" rx="6" ry="3" fill="#74513B" stroke="#4E342E" stroke-width="2"/>\n<g transform="translate(-18,0)">  <path d="M91 230 L111 210 L143 215 L163 232 L164 253 L141 269 L105 260 L88 245 Z" fill="#9D9F8B" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>\n  <path d="M92 229 L112 212 L142 217 L160 232 L133 245 L105 239 Z" fill="#CDC8AD" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>\n  <path d="M124 248 L150 239 L152 254 L131 262 Z" fill="#684B34" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>\n  <path d="M141 259 C135.96 255.4 137.4 248.2 141 243.16 C142.44 248.2 146.76 251.08 145.32 256.84 Z" fill="#FF8A65" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>\n  <path d="M141 257.56 C138.84 255.4 139.56 251.8 141.36 248.92 C142.44 252.52 143.88 253.96 143.16 256.84 Z" fill="#FFD54F"/>\n  <path d="M97 215 Q97 242 119 246 Q146 251 153 225 L154 216 Z" fill="#8A5944" stroke="#4E342E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>\n  <path d="M140 224 L153 219 Q150 243 136 245 Z" fill="#684331"/>\n  <ellipse cx="126" cy="214" rx="29" ry="14" fill="#AF7954" stroke="#4E342E" stroke-width="4"/>\n  <ellipse cx="126" cy="214" rx="22" ry="9" fill="#E7B574"/>\n  <ellipse cx="120" cy="211" rx="10" ry="3" fill="#F0CA8A"/>\n  <path d="M98 217 Q88 208 86 219 Q86 231 100 230 M151 219 Q165 217 160 229 L149 235" fill="none" stroke="#4E342E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>\n  <path d="M125 214 L76 255" stroke="#6C5136" stroke-width="5" stroke-linecap="round" fill="none"/>\n  <path d="M126 213 L77 254" stroke="#C5A270" stroke-width="2" stroke-linecap="round" fill="none"/>\n</g>'
 
@@ -90,49 +198,66 @@ pole = '  <path d="M140 192 L140 312" stroke="#4E342E" stroke-width="10" stroke-
 
 SCALES = {1: 0.76, 2: 0.89, 3: 1.0}
 
-CENTERS = {1: [(254, 141), (254, 234)], 2: [(211, 141), (319, 188), (211, 234)], 3: [(201, 141), (310, 141), (201, 234), (310, 234)]}
+CENTERS = {1: [(258, 141), (258, 234)], 2: [(239, 141), (319, 188), (239, 234)], 3: [(234, 115), (326, 115), (234, 234), (326, 234)]}
 
-SEAT_OFFSET = {1: 51, 2: 38, 3: 38}
+SEAT_OFFSET = {1: 51, 2: 31, 3: 31}
 
-CANOPY_SCALES = {1: 0.52, 2: 0.6, 3: 0.67}
+CANOPY_SCALES = {1: 0.60, 2: 0.69, 3: 0.77}
+CANOPY_ORIGINS = {1: (34, -24), 2: (33, -43), 3: (32, -60)}
+SERVING_CENTERS = {1: (54, 238), 2: (54, 238), 3: (54, 238)}
 
 def shrink(body, level):
     s = SCALES[level]
     return f'<g transform="translate(192,192) scale({s}) translate(-192,-192)">' + body + '</g>'
 
 def canopy(body, level):
-    return f'<g transform="translate(12,20) scale({CANOPY_SCALES[level]})"><g transform="translate(210,0) scale(-1,1)">' + body + '</g></g>'
+    return f'<g transform="translate({CANOPY_ORIGINS[level][0]},{CANOPY_ORIGINS[level][1]}) scale({CANOPY_SCALES[level]})"><g transform="translate(210,0) scale(-1,1)">' + body + '</g></g>'
+
+def canopy_roof(body, level):
+    # Chỉ nới nửa sau mái; mép trước và các đầu cọc trước vẫn khớp như cũ.
+    mirrored = '<g transform="translate(210,0) scale(-1,1)">' + body + '</g>'
+    clips = f'<defs><clipPath id="roof_front_{level}"><rect x="-200" y="125" width="800" height="500"/></clipPath><clipPath id="roof_back_{level}"><rect x="-200" y="-200" width="800" height="325"/></clipPath></defs>'
+    front = f'<g clip-path="url(#roof_front_{level})">' + mirrored + '</g>'
+    rear = f'<g transform="matrix(1 0 0.4 1.35 -50 -43.75)"><g clip-path="url(#roof_back_{level})">' + mirrored + '</g></g>'
+    return f'<g transform="translate({CANOPY_ORIGINS[level][0]},{CANOPY_ORIGINS[level][1]}) scale({CANOPY_SCALES[level]})">' + clips + front + rear + '</g>'
 
 def dining(body, x, y, factor):
     return f'<g transform="translate({x},{y}) scale({factor})">' + body + '</g>'
 
 def mat(x, y):
-    b = rect(x - 29, y - 43, 58, 86, '#C2A36C', 4, 3) + rect(x - 25, y - 39, 50, 78, '#D7BC82', 3, 0)
-    for dy in range(-35, 39, 6):
-        b += line(x - 23, y + dy, x + 23, y + dy, '#B89A63', 1.2)
-    for dx in range(-20, 23, 7):
-        b += line(x + dx, y - 37, x + dx, y + 37, '#E5CE99', 1)
-    for dx in range(-24, 29, 6):
-        b += line(x + dx, y + 43, x + dx, y + 47, '#AC8B55', 2) + line(x + dx, y - 43, x + dx, y - 47, '#AC8B55', 2)
-    return b + bowl(x, y - 18) + bowl(x, y + 18)
+    b = contact_shadow(x + 4, y + 5, 30, 33)
+    b += path(f'M{x-25} {y-32} Q{x} {y-35} {x+25} {y-32} L{x+30} {y+33} Q{x} {y+37} {x-30} {y+33} Z', '#AA8954', 3)
+    b += path(f'M{x-24} {y-33} Q{x} {y-36} {x+24} {y-33} L{x+29} {y+29} Q{x+4} {y+33} {x-29} {y+29} Z', '#D8BC7D', 2)
+    for dy in range(-28, 29, 5):
+        width = 22 + (dy + 28) / 56 * 4
+        b += line(x - width, y + dy, x + width, y + dy, '#B99A60', 1)
+    for dx in range(-18, 19, 6):
+        b += line(x + dx, y - 29, x + dx * 1.2, y + 27, '#EBD49C', 1)
+    for dx in range(-24, 25, 6):
+        b += line(x + dx, y + 33, x + dx + 1, y + 38, '#AA8954', 1.5)
+    b += path(f'M{x-29} {y+25} Q{x-18} {y+23} {x-17} {y+29} L{x-29} {y+29} Z', '#E4CA91', 1)
+    return b + bowl(x, y - 13) + bowl(x, y + 13)
 
 def table(x, y, wood):
-    b = ''
+    b = contact_shadow(x + 7, y + 40, 33, 14)
     if wood:
         for dx in (-22, 22):
             for dy in (-24, 38):
                 b += line(x + dx, y + dy - 4, x + dx, y + dy + 17, '#4E342E', 7) + line(x + dx - 1, y + dy - 3, x + dx - 1, y + dy + 15, '#A58050', 3)
-        b += path(f'M{x - 30} {y + 30} L{x + 30} {y + 30} L{x + 29} {y + 47} L{x - 29} {y + 47} Z', '#81633F', 3)
-        b += path(f'M{x - 26} {y - 39} Q{x} {y - 41} {x + 26} {y - 39} L{x + 30} {y + 39} Q{x} {y + 42} {x - 30} {y + 39} Z', '#C29E65', 4)
+        b += path(f'M{x - 30} {y + 27} L{x + 30} {y + 27} L{x + 29} {y + 43} L{x - 29} {y + 43} Z', '#81633F', 3)
+        b += path(f'M{x + 23} {y-35} L{x+29} {y+29} L{x+29} {y+42} L{x+23} {y-24} Z', '#987649', 2)
+        b += path(f'M{x - 24} {y - 35} Q{x} {y - 37} {x + 24} {y - 35} L{x + 30} {y + 29} Q{x} {y + 32} {x - 30} {y + 29} Z', '#CEAE75', 4)
         for dx in (-9, 9):
-            b += line(x + dx, y - 36, x + dx, y + 38, '#9D7A47', 1.5)
-        b += line(x - 24, y + 36, x + 24, y + 36, '#DABD81', 1.5)
+            b += line(x + dx * .8, y - 32, x + dx, y + 27, '#9D7A47', 1.5)
+        b += line(x - 25, y + 26, x + 25, y + 26, '#E5CB94', 1.5)
     else:
-        b += rect(x - 18, y + 17, 36, 36, '#8E9787', 5, 3)
-        b += path(f'M{x - 30} {y - 31} L{x + 29} {y - 31} L{x + 33} {y + 35} L{x + 27} {y + 48} L{x - 27} {y + 48} L{x - 33} {y + 36} Z', '#949D8A', 3)
-        b += path(f'M{x - 26} {y - 40} Q{x} {y - 43} {x + 25} {y - 39} L{x + 32} {y + 34} Q{x} {y + 41} {x - 32} {y + 35} Z', '#C3C6AE', 4)
-        b += path(f'M{x + 20} {y - 30} l-6 8 l4 9', 'none', 0, ' stroke="#A2AA95" stroke-width="2"')
-    return b + bowl(x, y - 17) + bowl(x, y + 19)
+        b += stone(x, y + 46, 0, 20, 28)
+        b += path(f'M{x - 25} {y - 31} L{x + 23} {y - 31} L{x + 32} {y + 25} L{x + 28} {y + 43} L{x - 27} {y + 42} L{x - 32} {y + 27} Z', '#8E988B', 3)
+        b += path(f'M{x + 12} {y + 26} L{x+31} {y+23} L{x+28} {y+39} L{x+10} {y+40} Z', '#778276', 0)
+        b += path(f'M{x - 23} {y - 35} Q{x} {y - 40} {x + 22} {y - 34} L{x + 31} {y + 24} Q{x+2} {y + 33} {x - 31} {y + 26} Z', '#C9CBB7', 4)
+        b += path(f'M{x - 19} {y - 30} L{x + 16} {y - 31} L{x+22} {y-17} L{x-21} {y-21} Z', '#DDDDC7', 0)
+        b += path(f'M{x + 19} {y - 28} l-6 8 l4 9', 'none', 0, ' stroke="#A2AA95" stroke-width="2"')
+    return b + bowl(x, y - 13) + bowl(x, y + 13)
 
 def pot(x, y, size=1):
     b = path('M-15 0 Q-14 19 0 21 Q14 19 15 0 Z', '#97613F', 3)
@@ -197,18 +322,61 @@ def upgraded_cooking(level):
             top += line(179 + dx * 0.7, 112 + dy * 0.7, 179 + dx, 112 + dy, '#7A603D', 1.5)
     return (cook, top, front_pole)
 
+ROAST_CENTERS = {1: (158, 210), 2: (154, 210), 3: (282, 187)}
+
+
+def roast_parts(level):
+    # Bếp than thấp; giá tre/gỗ chếch nhẹ như gian nấu, không thêm một nền đất riêng.
+    base = contact_shadow(3, 14, 31, 10)
+    if level > 1:
+        for i, (x, y) in enumerate([(-24, -2), (-13, -8), (5, -8), (23, -2)]):
+            base += stone(x, y, i, 8, 8)
+    base += ellipse(0, 6, 22, 10, '#655044', 2)
+    for i, (x, y) in enumerate([(-14, 3), (-5, 8), (7, 3), (16, 8), (0, 0)]):
+        base += ellipse(x, y, 5, 3, '#755041', 1.5)
+        base += ellipse(x - 1, y - 1, 2.5, 1.2, '#DE7845' if i % 2 else '#F0A34C', 0)
+    if level > 1:
+        for i, (x, y) in enumerate([(-26, 9), (-18, 16), (-3, 19), (12, 18), (26, 11)]):
+            base += stone(x, y, i + 3, 8, 9)
+    wood = '#B39962' if level == 1 else '#AB8050'
+    for x, top, ground in [(-25, -21, 12), (25, -15, 16)]:
+        base += line(x, ground, x, top, LINE, 5 if level < 3 else 7)
+        base += line(x - 1, ground - 1, x - 1, top + 1, wood, 2 if level < 3 else 3)
+        if level == 1:
+            base += line(x, top, x - 5, top - 6, wood, 3) + line(x, top, x + 4, top - 6, wood, 3)
+        else:
+            base += line(x - 5, top + 3, x + 5, top + 1, '#D8BF87', 2)
+            base += line(x - 5, ground - 2, x, top + 10, wood, 3)
+    base += line(-31, -21, 31, -15, LINE, 4) + line(-30, -22, 31, -16, '#C3A06B', 1.5)
+    if level == 3:
+        base += line(30, -15, 35, -11, wood, 3) + line(35, -11, 35, -5, LINE, 4)
+        base += ellipse(35, -4, 3, 2, '#D4B179', 1.5)
+        base += path('M-15 18 Q0 15 15 19 L12 26 Q0 29 -13 25 Z', '#9C6D47', 2)
+        base += ellipse(0, 21, 10, 2.5, '#D6A15B', 0)
+        base += ellipse(32, 20, 7, 4, '#B98A59', 2) + ellipse(31, 19, 5, 2, '#869A52', 0)
+        base += line(28, 19, 34, 17, '#C1CE81', 1)
+    # Mảnh gà riêng có trục ngay giữa thân để lăn quanh xiên, không xoay chân giá.
+    chicken = path('M-13 -8 Q-3 -15 9 -10 Q18 -7 17 1 Q15 11 4 11 Q-10 12 -16 4 Q-19 -2 -13 -8 Z', '#CF8A44', 2.5)
+    chicken += path('M-12 -8 Q0 -13 10 -7 Q16 -5 13 -1 Q1 -6 -12 -2 Z', '#EAB368', 0)
+    chicken += path('M-2 -2 Q8 -8 10 1 Q8 8 -1 4 Q-5 1 -2 -2 Z', '#B87639', 1.5)
+    chicken += path('M-10 5 Q-21 3 -20 9 Q-17 15 -9 10 Z', '#DB9C51', 2)
+    chicken += line(-20, 9, -25, 10, '#E5D3A4', 2.5) + ellipse(-26, 10, 2, 2, '#F0DFB4', 0)
+    for x, y in [(-7, -4), (7, -5), (13, 2)]:
+        chicken += ellipse(x, y, 1, 1.5, '#A86A36', 0)
+    fire = path('M-8 8 Q-12 0 -6 -7 Q-6 -1 -2 -3 Q2 -6 2 -13 Q12 -1 8 7 Q2 14 -8 8 Z', '#EE9644', 1.5)
+    fire += path('M-4 7 Q-5 2 -1 -3 Q0 1 3 0 Q7 6 2 9 Z', '#FFD56D', 0)
+    x, y = ROAST_CENTERS[level]
+    return dining(base, x, y, 1), dining(chicken, x, y - 18, 1), dining(fire, x, y + 3, 1)
+
+
 def layers(level):
     result = {}
     def put(name, body):
         result[name] = body
-    ground = rect(4, 65, 376, 254, '#C8A27A', 20, 0) + rect(11, 72, 362, 240, '#CBA979', 17, 0)
-    ground += ellipse(78, 178, 58, 28, '#B99B70', 0)
-    ground += ellipse(139, 303, 24, 12, '#D2B588', 0)
-    for x, y in [(140, 219), (161, 256), (286, 193), (279, 281)]:
-        ground += line(x, y, x + 7, y, '#B99569', 1.5)
-    put('floor_' + str(level), shrink(ground, level))
+    # Giữ lớp trống cho hợp đồng asset; sân dùng đất chung của map, không nền riêng.
+    put('floor_' + str(level), '')
     rear = fence(14, 88, 370, 88, level) + fence(14, 88, 14, 302, level) + fence(370, 88, 370, 302, level)
-    front = fence(14, 302, 100, 302, level) + fence(176, 302, 370, 302, level) + ellipse(138, 311, 33, 5, '#DDC198', 0)
+    front = fence(14, 302, 100, 302, level) + fence(176, 302, 370, 302, level)
     if level == 3:
         rear += ellipse(273, 55, 9, 7, '#C19B61', 2)
         for dx, dy in [(0, -11), (0, 11), (-12, 0), (12, 0)]:
@@ -217,37 +385,48 @@ def layers(level):
     put('fence_front_' + str(level), shrink(front, level))
     cook, top, front_pole = upgraded_cooking(level)
     put('cook_' + str(level), shrink(canopy(cook, level), level))
-    put('roof_' + str(level), shrink(canopy(top, level), level))
+    put('roof_' + str(level), shrink(canopy_roof(top, level), level))
     put('pole_' + str(level), shrink(canopy(front_pole, level), level))
     put('steam_' + str(level), shrink(canopy(steam, level), level))
-    serving = serving_table(0, 0, level != 2) + bowl(-23, -4) + bowl(25, -5)
-    serving += ellipse(0, 5, 9, 4, '#A47748', 2) + ellipse(-1, 4, 6, 2, '#91AA56', 0)
-    put('serving_' + str(level), shrink(dining(serving, 58, 257, 0.7), level))
+    serving = serving_table(0, 0, level != 2) + bowl(0, -20) + bowl(-6, -3) + bowl(7, 11)
+    serving += ellipse(0, 22, 9, 4, '#A47748', 2) + ellipse(-1, 21, 6, 2, '#91AA56', 0)
+    put('serving_' + str(level), shrink(dining(serving, *SERVING_CENTERS[level], 0.7), level))
+    roast_base, roast_chicken, roast_fire = roast_parts(level)
+    put('roast_base_' + str(level), shrink(roast_base, level))
+    put('roast_chicken_' + str(level), shrink(roast_chicken, level))
+    put('roast_fire_' + str(level), shrink(roast_fire, level))
     seats = ''
     for index, (x, y) in enumerate(CENTERS[level]):
+        pair = ''
         offset = SEAT_OFFSET[level]
         if level == 1:
             surface = dining(mat(0, 0), x, y, 0.76)
         else:
             surface = dining(table(0, 0, level == 3), x, y, 0.6)
-            for sx in (x - offset, x + offset):
-                seats += dining(stool(0, 0, level == 3), sx, y + 12, 0.72)
+            for side, sx in enumerate((x - offset, x + offset)):
+                seat = log_seat() if level == 2 else wooden_chair(1 if side == 0 else -1)
+                pair += dining(seat, sx, y + 12, 0.85)
+            seats += pair
+        put(f'seating_{level}_{index}', shrink(pair, level))
         put(f'dining_{level}_{index}', shrink(surface, level))
     put('seats_' + str(level), shrink(seats, level))
     return result
 
 
+def enlarge(body):
+    return '<g transform="translate(0,48)"><g transform="scale(1.3333333333333333,1.5)">' + body + '</g></g>'
+
 def composite(level):
     parts = layers(level)
-    names = [f"floor_{level}", f"fence_back_{level}", f"cook_{level}", f"roof_{level}", f"steam_{level}", f"pole_{level}", f"serving_{level}", f"seats_{level}"]
+    names = [f"floor_{level}", f"fence_back_{level}", f"cook_{level}", f"roof_{level}", f"steam_{level}", f"pole_{level}", f"serving_{level}", f"roast_base_{level}", f"roast_fire_{level}", f"roast_chicken_{level}", f"seats_{level}"]
     names += [f"dining_{level}_{i}" for i in range(len(CENTERS[level]))]
     names += [f"fence_front_{level}"]
-    return svg(384, 336, "".join(parts[n] for n in names), "Bếp3×2, neo192,296; mái nghiêng phải, bàn dọc")
+    return svg(512, 552, enlarge("".join(parts[n] for n in names)), "Bếp4×3, neo256,504; mái nghiêng phải, bàn dọc")
 
 def generate(write):
     # Muôi thật để đầu bếp khuấy, icon nồi chỉ dùng trên đầu/bảng thông tin.
     write("props/cooking_spoon", svg(20, 80, line(10, 6, 10, 62, LINE, 7) + line(9, 6, 9, 61, "#C3A375", 3) + ellipse(10, 68, 7, 9, "#AD8954", 3)))
     for level in (1,2,3):
         for name, body in layers(level).items():
-            write("buildings/kitchen/" + name, svg(384,336,body))
+            write("buildings/kitchen/" + name, svg(512,552,enlarge(body)))
 

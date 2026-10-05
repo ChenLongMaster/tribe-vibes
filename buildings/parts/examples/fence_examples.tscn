@@ -1,0 +1,337 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_01.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_02.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_03.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_04.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_05.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_06.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_07.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://buildings/parts/stone_08.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://buildings/parts/bamboo_h_64.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://buildings/parts/bamboo_h_32.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://buildings/parts/bamboo_v_64.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://buildings/parts/bamboo_post.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://buildings/parts/wood_h_64.tscn" id="13"]
+[ext_resource type="PackedScene" path="res://buildings/parts/wood_h_32.tscn" id="14"]
+[ext_resource type="PackedScene" path="res://buildings/parts/wood_v_64.tscn" id="15"]
+[ext_resource type="PackedScene" path="res://buildings/parts/wood_post.tscn" id="16"]
+
+[node name="FenceExamples" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Fence1" type="Node2D" parent="."]
+position = Vector2(45, 80)
+y_sort_enabled = true
+
+[node name="stone_01_1" parent="Fence1" instance=ExtResource("1")]
+position = Vector2(19, 0)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_02_2" parent="Fence1" instance=ExtResource("2")]
+position = Vector2(44, 0)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_03_3" parent="Fence1" instance=ExtResource("3")]
+position = Vector2(83, 0)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_04_4" parent="Fence1" instance=ExtResource("4")]
+position = Vector2(109, 0)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_05_5" parent="Fence1" instance=ExtResource("5")]
+position = Vector2(16, 128)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_06_6" parent="Fence1" instance=ExtResource("6")]
+position = Vector2(112, 128)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_07_7" parent="Fence1" instance=ExtResource("7")]
+position = Vector2(0, 18)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_08_8" parent="Fence1" instance=ExtResource("8")]
+position = Vector2(0, 43)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_01_9" parent="Fence1" instance=ExtResource("1")]
+position = Vector2(0, 83)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_02_10" parent="Fence1" instance=ExtResource("2")]
+position = Vector2(0, 109)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_03_11" parent="Fence1" instance=ExtResource("3")]
+position = Vector2(128, 18)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_04_12" parent="Fence1" instance=ExtResource("4")]
+position = Vector2(128, 43)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_05_13" parent="Fence1" instance=ExtResource("5")]
+position = Vector2(128, 83)
+scale = Vector2(0.58, 0.58)
+
+[node name="stone_06_14" parent="Fence1" instance=ExtResource("6")]
+position = Vector2(128, 109)
+scale = Vector2(0.58, 0.58)
+
+[node name="Fence2" type="Node2D" parent="."]
+position = Vector2(255, 80)
+y_sort_enabled = true
+
+[node name="bamboo_h_64_16" parent="Fence2" instance=ExtResource("9")]
+position = Vector2(32, 0)
+scale = Vector2(1, 1)
+
+[node name="bamboo_h_64_17" parent="Fence2" instance=ExtResource("9")]
+position = Vector2(96, 0)
+scale = Vector2(1, 1)
+
+[node name="bamboo_h_32_18" parent="Fence2" instance=ExtResource("10")]
+position = Vector2(16, 128)
+scale = Vector2(1, 1)
+
+[node name="bamboo_h_32_19" parent="Fence2" instance=ExtResource("10")]
+position = Vector2(112, 128)
+scale = Vector2(1, 1)
+
+[node name="bamboo_v_64_20" parent="Fence2" instance=ExtResource("11")]
+position = Vector2(0, 64)
+scale = Vector2(1, 1)
+
+[node name="bamboo_v_64_21" parent="Fence2" instance=ExtResource("11")]
+position = Vector2(0, 128)
+scale = Vector2(1, 1)
+
+[node name="bamboo_v_64_22" parent="Fence2" instance=ExtResource("11")]
+position = Vector2(128, 64)
+scale = Vector2(1, 1)
+
+[node name="bamboo_v_64_23" parent="Fence2" instance=ExtResource("11")]
+position = Vector2(128, 128)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_24" parent="Fence2" instance=ExtResource("12")]
+position = Vector2(0, 0)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_25" parent="Fence2" instance=ExtResource("12")]
+position = Vector2(64, 0)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_26" parent="Fence2" instance=ExtResource("12")]
+position = Vector2(128, 0)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_27" parent="Fence2" instance=ExtResource("12")]
+position = Vector2(0, 64)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_28" parent="Fence2" instance=ExtResource("12")]
+position = Vector2(128, 64)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_29" parent="Fence2" instance=ExtResource("12")]
+position = Vector2(0, 128)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_30" parent="Fence2" instance=ExtResource("12")]
+position = Vector2(32, 128)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_31" parent="Fence2" instance=ExtResource("12")]
+position = Vector2(96, 128)
+scale = Vector2(1, 1)
+
+[node name="bamboo_post_32" parent="Fence2" instance=ExtResource("12")]
+position = Vector2(128, 128)
+scale = Vector2(1, 1)
+
+[node name="stone_01_33" parent="Fence2" instance=ExtResource("1")]
+position = Vector2(19, 0)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_02_34" parent="Fence2" instance=ExtResource("2")]
+position = Vector2(44, 0)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_03_35" parent="Fence2" instance=ExtResource("3")]
+position = Vector2(83, 0)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_04_36" parent="Fence2" instance=ExtResource("4")]
+position = Vector2(109, 0)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_05_37" parent="Fence2" instance=ExtResource("5")]
+position = Vector2(16, 128)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_06_38" parent="Fence2" instance=ExtResource("6")]
+position = Vector2(112, 128)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_07_39" parent="Fence2" instance=ExtResource("7")]
+position = Vector2(0, 18)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_08_40" parent="Fence2" instance=ExtResource("8")]
+position = Vector2(0, 43)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_01_41" parent="Fence2" instance=ExtResource("1")]
+position = Vector2(0, 83)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_02_42" parent="Fence2" instance=ExtResource("2")]
+position = Vector2(0, 109)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_03_43" parent="Fence2" instance=ExtResource("3")]
+position = Vector2(128, 18)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_04_44" parent="Fence2" instance=ExtResource("4")]
+position = Vector2(128, 43)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_05_45" parent="Fence2" instance=ExtResource("5")]
+position = Vector2(128, 83)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_06_46" parent="Fence2" instance=ExtResource("6")]
+position = Vector2(128, 109)
+scale = Vector2(0.52, 0.52)
+
+[node name="Fence3" type="Node2D" parent="."]
+position = Vector2(465, 80)
+y_sort_enabled = true
+
+[node name="wood_h_64_48" parent="Fence3" instance=ExtResource("13")]
+position = Vector2(32, 0)
+scale = Vector2(1, 1)
+
+[node name="wood_h_64_49" parent="Fence3" instance=ExtResource("13")]
+position = Vector2(96, 0)
+scale = Vector2(1, 1)
+
+[node name="wood_h_32_50" parent="Fence3" instance=ExtResource("14")]
+position = Vector2(16, 128)
+scale = Vector2(1, 1)
+
+[node name="wood_h_32_51" parent="Fence3" instance=ExtResource("14")]
+position = Vector2(112, 128)
+scale = Vector2(1, 1)
+
+[node name="wood_v_64_52" parent="Fence3" instance=ExtResource("15")]
+position = Vector2(0, 64)
+scale = Vector2(1, 1)
+
+[node name="wood_v_64_53" parent="Fence3" instance=ExtResource("15")]
+position = Vector2(0, 128)
+scale = Vector2(1, 1)
+
+[node name="wood_v_64_54" parent="Fence3" instance=ExtResource("15")]
+position = Vector2(128, 64)
+scale = Vector2(1, 1)
+
+[node name="wood_v_64_55" parent="Fence3" instance=ExtResource("15")]
+position = Vector2(128, 128)
+scale = Vector2(1, 1)
+
+[node name="wood_post_56" parent="Fence3" instance=ExtResource("16")]
+position = Vector2(0, 0)
+scale = Vector2(1, 1)
+
+[node name="wood_post_57" parent="Fence3" instance=ExtResource("16")]
+position = Vector2(64, 0)
+scale = Vector2(1, 1)
+
+[node name="wood_post_58" parent="Fence3" instance=ExtResource("16")]
+position = Vector2(128, 0)
+scale = Vector2(1, 1)
+
+[node name="wood_post_59" parent="Fence3" instance=ExtResource("16")]
+position = Vector2(0, 64)
+scale = Vector2(1, 1)
+
+[node name="wood_post_60" parent="Fence3" instance=ExtResource("16")]
+position = Vector2(128, 64)
+scale = Vector2(1, 1)
+
+[node name="wood_post_61" parent="Fence3" instance=ExtResource("16")]
+position = Vector2(0, 128)
+scale = Vector2(1, 1)
+
+[node name="wood_post_62" parent="Fence3" instance=ExtResource("16")]
+position = Vector2(32, 128)
+scale = Vector2(1, 1)
+
+[node name="wood_post_63" parent="Fence3" instance=ExtResource("16")]
+position = Vector2(96, 128)
+scale = Vector2(1, 1)
+
+[node name="wood_post_64" parent="Fence3" instance=ExtResource("16")]
+position = Vector2(128, 128)
+scale = Vector2(1, 1)
+
+[node name="stone_01_65" parent="Fence3" instance=ExtResource("1")]
+position = Vector2(19, 0)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_02_66" parent="Fence3" instance=ExtResource("2")]
+position = Vector2(44, 0)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_03_67" parent="Fence3" instance=ExtResource("3")]
+position = Vector2(83, 0)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_04_68" parent="Fence3" instance=ExtResource("4")]
+position = Vector2(109, 0)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_05_69" parent="Fence3" instance=ExtResource("5")]
+position = Vector2(16, 128)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_06_70" parent="Fence3" instance=ExtResource("6")]
+position = Vector2(112, 128)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_07_71" parent="Fence3" instance=ExtResource("7")]
+position = Vector2(0, 18)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_08_72" parent="Fence3" instance=ExtResource("8")]
+position = Vector2(0, 43)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_01_73" parent="Fence3" instance=ExtResource("1")]
+position = Vector2(0, 83)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_02_74" parent="Fence3" instance=ExtResource("2")]
+position = Vector2(0, 109)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_03_75" parent="Fence3" instance=ExtResource("3")]
+position = Vector2(128, 18)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_04_76" parent="Fence3" instance=ExtResource("4")]
+position = Vector2(128, 43)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_05_77" parent="Fence3" instance=ExtResource("5")]
+position = Vector2(128, 83)
+scale = Vector2(0.52, 0.52)
+
+[node name="stone_06_78" parent="Fence3" instance=ExtResource("6")]
+position = Vector2(128, 109)
+scale = Vector2(0.52, 0.52)

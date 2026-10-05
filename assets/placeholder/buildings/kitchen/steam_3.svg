@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="384" height="336" viewBox="0 0 384 336">
-<g transform="translate(192,192) scale(1.0) translate(-192,-192)"><g transform="translate(12,20) scale(0.67)"><g transform="translate(210,0) scale(-1,1)"><g transform="translate(-18,0)">
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="552" viewBox="0 0 512 552">
+<g transform="translate(0,48)"><g transform="scale(1.3333333333333333,1.5)"><g transform="translate(192,192) scale(1.0) translate(-192,-192)"><g transform="translate(32,-60) scale(0.77)"><g transform="translate(210,0) scale(-1,1)"><g transform="translate(-18,0)">
   <!-- Phác khu bếp3×3; layer để thử người trong khu, chưa phải asset game -->
   <path d="M126 195 q-5 -8 1 -14 M139 202 q5 -8 0 -14" fill="none" stroke="#FFF3D7" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
-</g></g></g></g></svg>
+</g></g></g></g></g></g></svg>

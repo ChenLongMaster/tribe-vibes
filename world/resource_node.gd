@@ -27,7 +27,7 @@ const HIT_RECTS: Dictionary[StringName, Rect2] = {
 	MapData.KIND_BUSH: Rect2(-48, -76, 96, 86),
 	MapData.KIND_FISH_SPOT: Rect2(-32, -32, 64, 64),
 	MapData.KIND_TWIGS: Rect2(-40, -34, 80, 46),
-	MapData.KIND_PEBBLES: Rect2(-40, -34, 80, 46),
+	MapData.KIND_PEBBLES: Rect2(-64, -52, 128, 74),
 }
 const POP_SECONDS: float = 0.3
 const SHAKE_ANGLE: float = 0.06
@@ -61,7 +61,7 @@ func setup(object_kind: StringName, object_cell: Vector2i, object_variant: int, 
 	variant = object_variant
 	capacity = _capacity()
 	amount = capacity if start_amount < 0 else clampi(start_amount, 0, capacity)
-	position = WorldGrid.cell_to_world(cell) + FOOT_OFFSET + jitter
+	position = WorldGrid.cell_to_world(cell) + FOOT_OFFSET + footprint_offset() + jitter
 	# Chỗ câu cá nằm giữa ô nước nên neo ở tâm, không cần lệch.
 	if kind == MapData.KIND_FISH_SPOT:
 		position = WorldGrid.cell_to_world(cell)
@@ -230,7 +230,7 @@ func stands_taken_by_others(villager: Object) -> Array[Vector2i]:
 
 ## Để lưu game: trạng thái lúc chơi của node này.
 func to_dict() -> Dictionary:
-	var jitter: Vector2 = position - WorldGrid.cell_to_world(cell) - FOOT_OFFSET
+	var jitter: Vector2 = position - WorldGrid.cell_to_world(cell) - FOOT_OFFSET - footprint_offset()
 	return {
 		"kind": String(kind), "cell": [cell.x, cell.y], "variant": variant, "jitter": [jitter.x, jitter.y],
 		"amount": amount, "growth": growth, "cleared": is_cleared, "stump_age": stump_age, "regrow": _regrow_left,
@@ -273,6 +273,8 @@ func hit_test(world_point: Vector2) -> bool:
 	if is_cleared:
 		return false
 	var rect: Rect2 = HIT_RECTS.get(kind, Rect2(-32, -32, 64, 64))
+	if kind == MapData.KIND_ROCK and variant == 2:
+		rect = Rect2(-68, -106, 136, 124)
 	return rect.has_point(world_point - position)
 
 
@@ -317,6 +319,8 @@ func _process(delta: float) -> void:
 
 
 func _refresh_visual() -> void:
+	if kind == MapData.KIND_PEBBLES:
+		_sprite.flip_h = (cell.x * 31 + cell.y * 17) % 2 == 0
 	ArtLibrary.setup_sprite(_sprite, _art_key())
 	_apply_growth()
 
@@ -351,6 +355,8 @@ func _art_key() -> String:
 				return "env/bamboo_stump" if variant == 2 else "env/tree_stump"
 			return "env/tree_%02d" % (variant + 1)
 		MapData.KIND_ROCK:
+			if variant == 2:
+				return "env/rock_cluster_" + ("100" if fraction() > 0.5 else ("50" if fraction() > 0.3 else "30"))
 			return "env/rock_%s_%s" % ["big" if variant == 0 else "small", stage_suffix()]
 		MapData.KIND_BUSH:
 			return "env/bush_empty" if is_depleted() else "env/bush_" + stage_suffix()
@@ -368,7 +374,7 @@ func _capacity() -> int:
 		MapData.KIND_TREE:
 			return Balance.TREE_USES
 		MapData.KIND_ROCK:
-			return Balance.ROCK_STONE
+			return Balance.ROCK_CLUSTER_STONE if variant == 2 else Balance.ROCK_STONE
 		MapData.KIND_BUSH:
 			return Balance.BUSH_FOOD
 		MapData.KIND_TWIGS:
@@ -377,3 +383,10 @@ func _capacity() -> int:
 			return Balance.PEBBLE_PATCH_STONE
 	# Chỗ câu cá không bao giờ cạn.
 	return 1
+
+
+func footprint_cells() -> Array[Vector2i]:
+	return MapData.resource_cells(kind, cell, variant)
+
+func footprint_offset() -> Vector2:
+	return Vector2(32, 64) if kind == MapData.KIND_ROCK and variant == 2 else Vector2.ZERO

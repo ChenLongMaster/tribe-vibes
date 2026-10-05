@@ -12,7 +12,7 @@ func test_initial_resources_and_bamboo() -> void:
 			if kind == MapData.KIND_BUSH:
 				check_eq(int(object.get("amount", Balance.BUSH_FOOD)), Balance.BUSH_FOOD, "Bụi mới sinh đầy")
 			elif kind == MapData.KIND_ROCK:
-				check_eq(int(object.get("amount", Balance.ROCK_STONE)), Balance.ROCK_STONE, "Đá tảng mới sinh đầy")
+				check_eq(int(object.get("amount", Balance.ROCK_CLUSTER_STONE)), Balance.ROCK_CLUSTER_STONE, "Đá tảng mới sinh đầy")
 			elif kind == MapData.KIND_TWIGS:
 				twig_amounts[int(object["amount"])] = true
 			elif kind == MapData.KIND_PEBBLES:

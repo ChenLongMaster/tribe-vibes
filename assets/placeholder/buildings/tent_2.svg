@@ -1,8 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="300" viewBox="0 0 256 300">
   <!-- Lều da/cỏ cấp 2: cỡ 0.89, cửa phải, cũ rách → lành → hoa văn Lạc Việt -->
-  <rect x="5" y="47" width="246" height="249" rx="24" fill="#C8A27A"/>
-  <rect x="12" y="54" width="232" height="235" rx="19" fill="#B99A72"/>
-<g transform="translate(128 276) scale(0.89) translate(-128 -276)">  <ellipse cx="128" cy="247" rx="112" ry="43" fill="#AA8E69"/>
+<g transform="translate(128 276) scale(0.89) translate(-128 -276)">  <ellipse cx="128" cy="270" rx="109" ry="18" fill="#3E2723" opacity="0.18"/>
   <ellipse cx="28" cy="249" rx="9" ry="5" fill="#C4BDAA" stroke="#4E342E" stroke-width="2"/>
   <ellipse cx="65" cy="278" rx="9" ry="5" fill="#C4BDAA" stroke="#4E342E" stroke-width="2"/>
   <ellipse cx="219" cy="266" rx="9" ry="5" fill="#C4BDAA" stroke="#4E342E" stroke-width="2"/>
